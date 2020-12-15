@@ -1,0 +1,126 @@
+import org.gradle.internal.os.OperatingSystem
+import proguard.gradle.ProGuardTask
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.3.0'
+        classpath 'com.guardsquare:proguard-gradle:7.0.1'
+    }
+}
+plugins {
+    id 'application'
+    id 'java'
+}
+
+application {
+    mainClassName = "org.sandboxpowered.silica.client.main.Main"
+    if (OperatingSystem.current().isMacOsX()) {
+        // Need this to make sure the OS starts our app on thread 0
+        applicationDefaultJvmArgs += "-XStartOnFirstThread"
+    }
+}
+
+project.ext.lwjglVersion = "3.2.4-SNAPSHOT"
+project.ext.jomlVersion = "1.9.25"
+
+switch (OperatingSystem.current()) {
+    case OperatingSystem.LINUX:
+        def osArch = System.getProperty("os.arch")
+        project.ext.lwjglNatives = osArch.startsWith("arm") || osArch.startsWith("aarch64") ? "natives-linux-arm64" : "natives-linux"
+        break
+    case OperatingSystem.MAC_OS:
+        project.ext.lwjglNatives = "natives-macos"
+        break
+    case OperatingSystem.WINDOWS:
+        project.ext.lwjglNatives = "natives-windows"
+        break
+}
+
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_14
+
+group 'org.sandboxpowered'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation 'com.github.JnCrMx:discord-game-sdk4j:8cafb76013'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
+
+    implementation 'com.google.guava:guava:29.0-jre'
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation "org.joml:joml:1.9.25"
+
+    implementation 'org.apache.logging.log4j:log4j-api:2.13.3'
+    implementation 'org.apache.logging.log4j:log4j-core:2.13.3'
+    implementation 'net.sf.jopt-simple:jopt-simple:5.0.4'
+    implementation 'com.electronwill.night-config:core:3.6.3'
+    implementation 'com.electronwill.night-config:json:3.6.3'
+    implementation 'com.electronwill.night-config:toml:3.6.3'
+
+    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+
+    implementation "org.lwjgl:lwjgl"
+    implementation "org.lwjgl:lwjgl-assimp"
+    implementation "org.lwjgl:lwjgl-bgfx"
+    implementation "org.lwjgl:lwjgl-glfw"
+    implementation "org.lwjgl:lwjgl-nfd"
+    implementation "org.lwjgl:lwjgl-openal"
+    implementation "org.lwjgl:lwjgl-opengl"
+    implementation "org.lwjgl:lwjgl-openvr"
+    implementation "org.lwjgl:lwjgl-opus"
+    implementation "org.lwjgl:lwjgl-shaderc"
+    implementation "org.lwjgl:lwjgl-stb"
+    implementation "org.lwjgl:lwjgl-tinyexr"
+    implementation "org.lwjgl:lwjgl-vma"
+    implementation "org.lwjgl:lwjgl-vulkan"
+    runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-bgfx::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-nfd::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-openvr::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-opus::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-shaderc::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-tinyexr::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-vma::$lwjglNatives"
+    if (lwjglNatives == "natives-macos") runtimeOnly "org.lwjgl:lwjgl-vulkan::$lwjglNatives"
+    implementation "org.joml:joml:${jomlVersion}"
+}
+
+task optimizeJar(type: ProGuardTask, dependsOn: jar) {
+    configuration "proguard.cfg"
+
+    libraryjars configurations.compileClasspath.files
+
+    //add jre files
+    if (JavaVersion.current() >= JavaVersion.VERSION_1_9) {
+        doFirst {
+            println("using java 9+ module for proguard")
+        }
+        libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod", filter: "(!**.jar,!module-info.class)"
+    } else {
+        doFirst {
+            println("java 8 detected, using rt.jar for proguard")
+        }
+        libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
+    }
+
+    injars tasks.jar.archiveFile
+    outjars "${project.buildDir}/libs/${project.archivesBaseName}-${project.version}-obfuscated.jar"
+
+    printmapping "${project.buildDir}/libs/${project.archivesBaseName}-${project.version}-obfuscated.proguard"
+}
+
+build.finalizedBy optimizeJar
