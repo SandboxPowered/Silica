@@ -1,6 +1,8 @@
 package org.sandboxpowered.silica.client.util;
 import de.jcm.discordgamesdk.Core;
 import de.jcm.discordgamesdk.CreateParams;
+import de.jcm.discordgamesdk.Result;
+import de.jcm.discordgamesdk.activity.Activity;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 import org.sandboxpowered.silica.client.Silica;
@@ -10,6 +12,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 public class DiscordUtil {
@@ -37,7 +41,7 @@ public class DiscordUtil {
         ZipEntry entry;
         while ((entry = zin.getNextEntry()) != null) {
             if (entry.getName().equals(zipPath)) {
-                File tempDir = new File("./caches");
+                File tempDir = new File("./cache");
                 if (!tempDir.mkdirs())
                     throw new IOException("Cannot create temporary directory");
 
@@ -87,8 +91,30 @@ public class DiscordUtil {
         Core.init(discordLibrary);
         try (CreateParams params = new CreateParams()) {
             params.setClientID(765951222082437152L);
-            params.setFlags(CreateParams.getDefaultFlags()|2);
+            params.setFlags(CreateParams.getDefaultFlags() | 2);
             core = new Core(params);
         }
+    }
+
+    public static void runCallbacks() {
+        if (core != null)
+            core.runCallbacks();
+    }
+
+    public static void updateActivity(Activity activity, Consumer<Result> resultConsumer) {
+        if (core != null)
+            core.activityManager().updateActivity(activity, resultConsumer);
+        resultConsumer.accept(Result.SERVICE_UNAVAILABLE);
+    }
+
+    public static CompletableFuture<Result> updateActivityFuture(Activity activity) {
+        CompletableFuture<Result> future = new CompletableFuture<>();
+        updateActivity(activity, future::complete);
+        return future;
+    }
+
+    public static void updateActivity(Activity activity) {
+        if (core != null)
+            core.activityManager().updateActivity(activity);
     }
 }

@@ -11,6 +11,13 @@ public class Silica {
 
     public static final Logger LOG = LogManager.getFormatterLogger();
 
+
+    private final Window window;
+
+    public Silica() {
+        this.window = new Window("Silica", 1000, 563);
+    }
+
     public void run() {
         DiscordUtil.setup();
 
@@ -23,19 +30,16 @@ public class Silica {
                 activity.assets().setLargeImage("logo");
                 activity.assets().setLargeText("Sandbox Silica v0.0.1");
 
-                DiscordUtil.getCore().activityManager().updateActivity(activity);
-            }
-
-            while (true) {
-                DiscordUtil.getCore().runCallbacks();
-                try {
-                    Thread.sleep(16);
-                } catch (InterruptedException e) {
-                    break;
-                }
+                DiscordUtil.updateActivity(activity);
             }
         }
 
+        while (!window.shouldClose()) {
+            window.update();
+            DiscordUtil.runCallbacks();
+        }
+
         DiscordUtil.close();
+        window.cleanup();
     }
 }
