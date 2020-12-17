@@ -1,19 +1,13 @@
 package org.sandboxpowered.silica.client.util;
-import de.jcm.discordgamesdk.Core;
-import de.jcm.discordgamesdk.CreateParams;
-import de.jcm.discordgamesdk.Result;
-import de.jcm.discordgamesdk.activity.Activity;
+
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
-import org.sandboxpowered.silica.client.Silica;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 public class DiscordUtil {
@@ -28,7 +22,7 @@ public class DiscordUtil {
         } else {
             suffix = ".so";
         }
-        File filePath = new File("./caches", name + suffix);
+        File filePath = new File("./cache", name + suffix);
         if (filePath.exists())
             return filePath;
 
@@ -61,60 +55,5 @@ public class DiscordUtil {
         zin.close();
         // We couldn't find the library inside the ZIP
         throw new FileNotFoundException("Unable to locate discord sdk");
-    }
-
-    private static Core core = null;
-
-    public static boolean isDiscordActive() {
-        return core != null;
-    }
-
-    public static Core getCore() {
-        return core;
-    }
-
-    public static void close() {
-        if (core != null)
-            core.close();
-    }
-
-    public static void setup() {
-        Silica.LOG.debug("Starting Discord Integration");
-        File discordLibrary = null;
-        try {
-            discordLibrary = DiscordUtil.getDiscordLibrary();
-        } catch (IOException e) {
-            Silica.LOG.error("Failed to get Discord library", e);
-        }
-        if (discordLibrary == null)
-            return;
-        Core.init(discordLibrary);
-        try (CreateParams params = new CreateParams()) {
-            params.setClientID(765951222082437152L);
-            params.setFlags(CreateParams.getDefaultFlags() | 2);
-            core = new Core(params);
-        }
-    }
-
-    public static void runCallbacks() {
-        if (core != null)
-            core.runCallbacks();
-    }
-
-    public static void updateActivity(Activity activity, Consumer<Result> resultConsumer) {
-        if (core != null)
-            core.activityManager().updateActivity(activity, resultConsumer);
-        resultConsumer.accept(Result.SERVICE_UNAVAILABLE);
-    }
-
-    public static CompletableFuture<Result> updateActivityFuture(Activity activity) {
-        CompletableFuture<Result> future = new CompletableFuture<>();
-        updateActivity(activity, future::complete);
-        return future;
-    }
-
-    public static void updateActivity(Activity activity) {
-        if (core != null)
-            core.activityManager().updateActivity(activity);
     }
 }
