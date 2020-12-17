@@ -1,0 +1,1932 @@
+package org.sandboxpowered.silica.client;
+
+import org.joml.Matrix4f;
+import org.joml.Vector2fc;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
+import org.lwjgl.PointerBuffer;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.Pointer;
+import org.lwjgl.vulkan.*;
+import org.sandboxpowered.silica.client.resources.ModelLoader;
+import org.sandboxpowered.silica.client.util.ShaderUtil;
+import org.sandboxpowered.silica.client.vulkan.*;
+import org.sandboxpowered.silica.client.vulkan.hardware.*;
+import org.sandboxpowered.silica.client.vulkan.instance.*;
+
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import static java.lang.ClassLoader.getSystemClassLoader;
+import static java.util.stream.Collectors.toSet;
+import static org.lwjgl.assimp.Assimp.aiProcess_DropNormals;
+import static org.lwjgl.assimp.Assimp.aiProcess_FlipUVs;
+import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.stb.STBImage.*;
+import static org.lwjgl.system.Configuration.DEBUG;
+import static org.lwjgl.system.MemoryStack.stackGet;
+import static org.lwjgl.system.MemoryStack.stackPush;
+import static org.lwjgl.vulkan.KHRSurface.*;
+import static org.lwjgl.vulkan.KHRSwapchain.*;
+import static org.lwjgl.vulkan.VK10.*;
+import static org.sandboxpowered.silica.client.util.ShaderUtil.ShaderType.FRAGMENT_SHADER;
+import static org.sandboxpowered.silica.client.util.ShaderUtil.ShaderType.VERTEX_SHADER;
+import static org.sandboxpowered.silica.client.util.ShaderUtil.compileShaderFile;
+import static org.sandboxpowered.silica.client.util.Sizes.alignAs;
+import static org.sandboxpowered.silica.client.util.Sizes.alignOf;
+
+public class Test {
+
+    public static void main(String[] args) {
+
+        HelloTriangleApplication app = new HelloTriangleApplication();
+
+        app.run();
+    }
+
+    private static class HelloTriangleApplication {
+
+        private static final int UINT32_MAX = 0xFFFFFFFF;
+        private static final long UINT64_MAX = 0xFFFFFFFFFFFFFFFFL;
+
+        private static final int MAX_FRAMES_IN_FLIGHT = 2;
+
+        boolean framebufferResize;
+        private long window;
+        private VkInstance instance;
+        private long debugMessenger;
+        private long surface;
+        private VkPhysicalDevice physicalDevice;
+        private int msaaSamples = VK_SAMPLE_COUNT_1_BIT;
+
+        // ======= FIELDS ======= //
+        private VkDevice device;
+        private VkQueue graphicsQueue;
+        private VkQueue presentQueue;
+        private long swapChain;
+        private List<Long> swapChainImages;
+        private int swapChainImageFormat;
+        private VkExtent2D swapChainExtent;
+        private List<Long> swapChainImageViews;
+        private List<Long> swapChainFramebuffers;
+        private long renderPass;
+        private long descriptorPool;
+        private long descriptorSetLayout;
+        private List<Long> descriptorSets;
+        private long pipelineLayout;
+        private long graphicsPipeline;
+        private long commandPool;
+        private long colorImage;
+        private long colorImageMemory;
+        private long colorImageView;
+        private long depthImage;
+        private long depthImageMemory;
+        private long depthImageView;
+        private int mipLevels;
+        private long textureImage;
+        private long textureImageMemory;
+        private long textureImageView;
+        private long textureSampler;
+        private Vertex[] vertices;
+        private int[] indices;
+        private long vertexBuffer;
+        private long vertexBufferMemory;
+        private long indexBuffer;
+        private long indexBufferMemory;
+        private List<Long> uniformBuffers;
+        private List<Long> uniformBuffersMemory;
+        private List<VkCommandBuffer> commandBuffers;
+        private List<Frame> inFlightFrames;
+        private Map<Integer, Frame> imagesInFlight;
+        private int currentFrame;
+
+        public void run() {
+            initVulkan();
+            mainLoop();
+            cleanup();
+        }
+
+        private void initVulkan() {
+            createTextureImage();
+            createTextureImageView();
+            createTextureSampler();
+            loadModel();
+            createVertexBuffer();
+            createIndexBuffer();
+            createDescriptorSetLayout();
+            createSwapChainObjects();
+            createSyncObjects();
+        }
+
+        // ======= METHODS ======= //
+
+        private void mainLoop() {
+
+            while (!glfwWindowShouldClose(window)) {
+                glfwPollEvents();
+                drawFrame();
+            }
+
+            // Wait for the device to complete all operations before release resources
+            vkDeviceWaitIdle(device);
+        }
+
+        private void cleanupSwapChain() {
+
+            vkDestroyImageView(device, colorImageView, null);
+            vkDestroyImage(device, colorImage, null);
+            vkFreeMemory(device, colorImageMemory, null);
+
+            vkDestroyImageView(device, depthImageView, null);
+            vkDestroyImage(device, depthImage, null);
+            vkFreeMemory(device, depthImageMemory, null);
+
+            uniformBuffers.forEach(ubo -> vkDestroyBuffer(device, ubo, null));
+            uniformBuffersMemory.forEach(uboMemory -> vkFreeMemory(device, uboMemory, null));
+
+            vkDestroyDescriptorPool(device, descriptorPool, null);
+
+            swapChainFramebuffers.forEach(framebuffer -> vkDestroyFramebuffer(device, framebuffer, null));
+
+            vkFreeCommandBuffers(device, commandPool, asPointerBuffer(commandBuffers));
+
+            vkDestroyPipeline(device, graphicsPipeline, null);
+
+            vkDestroyPipelineLayout(device, pipelineLayout, null);
+
+            vkDestroyRenderPass(device, renderPass, null);
+
+            swapChainImageViews.forEach(imageView -> vkDestroyImageView(device, imageView, null));
+
+            vkDestroySwapchainKHR(device, swapChain, null);
+        }
+
+        private void cleanup() {
+            cleanupSwapChain();
+
+            vkDestroySampler(device, textureSampler, null);
+            vkDestroyImageView(device, textureImageView, null);
+            vkDestroyImage(device, textureImage, null);
+            vkFreeMemory(device, textureImageMemory, null);
+
+            vkDestroyDescriptorSetLayout(device, descriptorSetLayout, null);
+
+            vkDestroyBuffer(device, indexBuffer, null);
+            vkFreeMemory(device, indexBufferMemory, null);
+
+            vkDestroyBuffer(device, vertexBuffer, null);
+            vkFreeMemory(device, vertexBufferMemory, null);
+
+            inFlightFrames.forEach(frame -> {
+                vkDestroySemaphore(device, frame.renderFinishedSemaphore(), null);
+                vkDestroySemaphore(device, frame.imageAvailableSemaphore(), null);
+                vkDestroyFence(device, frame.fence(), null);
+            });
+            inFlightFrames.clear();
+
+            vkDestroyCommandPool(device, commandPool, null);
+
+            vkDestroyDevice(device, null);
+        }
+
+        private void recreateSwapChain() {
+
+            try (MemoryStack stack = stackPush()) {
+
+                IntBuffer width = stack.ints(0);
+                IntBuffer height = stack.ints(0);
+
+                while (width.get(0) == 0 && height.get(0) == 0) {
+                    glfwGetFramebufferSize(window, width, height);
+                    glfwWaitEvents();
+                }
+            }
+
+            vkDeviceWaitIdle(device);
+
+            cleanupSwapChain();
+
+            createSwapChainObjects();
+        }
+
+        private void createSwapChainObjects() {
+            createSwapChain();
+            createImageViews();
+            createRenderPass();
+            createGraphicsPipeline();
+            createColorResources();
+            createDepthResources();
+            createFramebuffers();
+            createUniformBuffers();
+            createDescriptorPool();
+            createDescriptorSets();
+            createCommandBuffers();
+        }
+
+        private void createSwapChain() {
+
+            try (MemoryStack stack = stackPush()) {
+
+                SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice, stack);
+
+                VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
+                int presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
+                VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
+
+                IntBuffer imageCount = stack.ints(swapChainSupport.capabilities.minImageCount() + 1);
+
+                if (swapChainSupport.capabilities.maxImageCount() > 0 && imageCount.get(0) > swapChainSupport.capabilities.maxImageCount()) {
+                    imageCount.put(0, swapChainSupport.capabilities.maxImageCount());
+                }
+
+                VkSwapchainCreateInfoKHR createInfo = VkSwapchainCreateInfoKHR.callocStack(stack);
+
+                createInfo.sType(VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR);
+                createInfo.surface(surface);
+
+                // Image settings
+                createInfo.minImageCount(imageCount.get(0));
+                createInfo.imageFormat(surfaceFormat.format());
+                createInfo.imageColorSpace(surfaceFormat.colorSpace());
+                createInfo.imageExtent(extent);
+                createInfo.imageArrayLayers(1);
+                createInfo.imageUsage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+
+                QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+
+                if (!indices.graphicsFamily.equals(indices.presentFamily)) {
+                    createInfo.imageSharingMode(VK_SHARING_MODE_CONCURRENT);
+                    createInfo.pQueueFamilyIndices(stack.ints(indices.graphicsFamily, indices.presentFamily));
+                } else {
+                    createInfo.imageSharingMode(VK_SHARING_MODE_EXCLUSIVE);
+                }
+
+                createInfo.preTransform(swapChainSupport.capabilities.currentTransform());
+                createInfo.compositeAlpha(VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR);
+                createInfo.presentMode(presentMode);
+                createInfo.clipped(true);
+
+                createInfo.oldSwapchain(VK_NULL_HANDLE);
+
+                LongBuffer pSwapChain = stack.longs(VK_NULL_HANDLE);
+
+                if (vkCreateSwapchainKHR(device, createInfo, null, pSwapChain) != VK_SUCCESS) {
+                    throw new RuntimeException("Failed to create swap chain");
+                }
+
+                swapChain = pSwapChain.get(0);
+
+                vkGetSwapchainImagesKHR(device, swapChain, imageCount, null);
+
+                LongBuffer pSwapchainImages = stack.mallocLong(imageCount.get(0));
+
+                vkGetSwapchainImagesKHR(device, swapChain, imageCount, pSwapchainImages);
+
+                swapChainImages = new ArrayList<>(imageCount.get(0));
+
+                for (int i = 0; i < pSwapchainImages.capacity(); i++) {
+                    swapChainImages.add(pSwapchainImages.get(i));
+                }
+
+                swapChainImageFormat = surfaceFormat.format();
+                swapChainExtent = VkExtent2D.create().set(extent);
+            }
+        }
+
+        private void createImageViews() {
+
+            swapChainImageViews = new ArrayList<>(swapChainImages.size());
+
+            for (long swapChainImage : swapChainImages) {
+                swapChainImageViews.add(createImageView(swapChainImage, swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1));
+            }
+        }
+
+        private void createRenderPass() {
+
+            try (MemoryStack stack = stackPush()) {
+
+                VkAttachmentDescription.Buffer attachments = VkAttachmentDescription.callocStack(3, stack);
+                VkAttachmentReference.Buffer attachmentRefs = VkAttachmentReference.callocStack(3, stack);
+
+                // Color attachments
+
+                // MSAA Image
+                VkAttachmentDescription colorAttachment = attachments.get(0);
+                colorAttachment.format(swapChainImageFormat);
+                colorAttachment.samples(msaaSamples);
+                colorAttachment.loadOp(VK_ATTACHMENT_LOAD_OP_CLEAR);
+                colorAttachment.storeOp(VK_ATTACHMENT_STORE_OP_STORE);
+                colorAttachment.stencilLoadOp(VK_ATTACHMENT_LOAD_OP_DONT_CARE);
+                colorAttachment.stencilStoreOp(VK_ATTACHMENT_STORE_OP_DONT_CARE);
+                colorAttachment.initialLayout(VK_IMAGE_LAYOUT_UNDEFINED);
+                colorAttachment.finalLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+                VkAttachmentReference colorAttachmentRef = attachmentRefs.get(0);
+                colorAttachmentRef.attachment(0);
+                colorAttachmentRef.layout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+                // Present Image
+                VkAttachmentDescription colorAttachmentResolve = attachments.get(2);
+                colorAttachmentResolve.format(swapChainImageFormat);
+                colorAttachmentResolve.samples(VK_SAMPLE_COUNT_1_BIT);
+                colorAttachmentResolve.loadOp(VK_ATTACHMENT_LOAD_OP_DONT_CARE);
+                colorAttachmentResolve.storeOp(VK_ATTACHMENT_STORE_OP_STORE);
+                colorAttachmentResolve.stencilLoadOp(VK_ATTACHMENT_LOAD_OP_DONT_CARE);
+                colorAttachmentResolve.stencilStoreOp(VK_ATTACHMENT_STORE_OP_DONT_CARE);
+                colorAttachmentResolve.initialLayout(VK_IMAGE_LAYOUT_UNDEFINED);
+                colorAttachmentResolve.finalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
+                VkAttachmentReference colorAttachmentResolveRef = attachmentRefs.get(2);
+                colorAttachmentResolveRef.attachment(2);
+                colorAttachmentResolveRef.layout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+
+                // Depth-Stencil attachments
+
+                VkAttachmentDescription depthAttachment = attachments.get(1);
+                depthAttachment.format(findDepthFormat());
+                depthAttachment.samples(msaaSamples);
+                depthAttachment.loadOp(VK_ATTACHMENT_LOAD_OP_CLEAR);
+                depthAttachment.storeOp(VK_ATTACHMENT_STORE_OP_DONT_CARE);
+                depthAttachment.stencilLoadOp(VK_ATTACHMENT_LOAD_OP_DONT_CARE);
+                depthAttachment.stencilStoreOp(VK_ATTACHMENT_STORE_OP_DONT_CARE);
+                depthAttachment.initialLayout(VK_IMAGE_LAYOUT_UNDEFINED);
+                depthAttachment.finalLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+
+                VkAttachmentReference depthAttachmentRef = attachmentRefs.get(1);
+                depthAttachmentRef.attachment(1);
+                depthAttachmentRef.layout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+
+                VkSubpassDescription.Buffer subpass = VkSubpassDescription.callocStack(1, stack);
+                subpass.pipelineBindPoint(VK_PIPELINE_BIND_POINT_GRAPHICS);
+                subpass.colorAttachmentCount(1);
+                subpass.pColorAttachments(VkAttachmentReference.callocStack(1, stack).put(0, colorAttachmentRef));
+                subpass.pDepthStencilAttachment(depthAttachmentRef);
+                subpass.pResolveAttachments(VkAttachmentReference.callocStack(1, stack).put(0, colorAttachmentResolveRef));
+
+                VkSubpassDependency.Buffer dependency = VkSubpassDependency.callocStack(1, stack);
+                dependency.srcSubpass(VK_SUBPASS_EXTERNAL);
+                dependency.dstSubpass(0);
+                dependency.srcStageMask(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+                dependency.srcAccessMask(0);
+                dependency.dstStageMask(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+                dependency.dstAccessMask(VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
+
+                VkRenderPassCreateInfo renderPassInfo = VkRenderPassCreateInfo.callocStack(stack);
+                renderPassInfo.sType(VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO);
+                renderPassInfo.pAttachments(attachments);
+                renderPassInfo.pSubpasses(subpass);
+                renderPassInfo.pDependencies(dependency);
+
+                LongBuffer pRenderPass = stack.mallocLong(1);
+
+                if (vkCreateRenderPass(device, renderPassInfo, null, pRenderPass) != VK_SUCCESS) {
+                    throw new RuntimeException("Failed to create render pass");
+                }
+
+                renderPass = pRenderPass.get(0);
+            }
+        }
+
+        private void createDescriptorSetLayout() {
+
+            try (MemoryStack stack = stackPush()) {
+
+                VkDescriptorSetLayoutBinding.Buffer bindings = VkDescriptorSetLayoutBinding.callocStack(2, stack);
+
+                VkDescriptorSetLayoutBinding uboLayoutBinding = bindings.get(0);
+                uboLayoutBinding.binding(0);
+                uboLayoutBinding.descriptorCount(1);
+                uboLayoutBinding.descriptorType(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+                uboLayoutBinding.pImmutableSamplers(null);
+                uboLayoutBinding.stageFlags(VK_SHADER_STAGE_VERTEX_BIT);
+
+                VkDescriptorSetLayoutBinding samplerLayoutBinding = bindings.get(1);
+                samplerLayoutBinding.binding(1);
+                samplerLayoutBinding.descriptorCount(1);
+                samplerLayoutBinding.descriptorType(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+                samplerLayoutBinding.pImmutableSamplers(null);
+                samplerLayoutBinding.stageFlags(VK_SHADER_STAGE_FRAGMENT_BIT);
+
+                VkDescriptorSetLayoutCreateInfo layoutInfo = VkDescriptorSetLayoutCreateInfo.callocStack(stack);
+                layoutInfo.sType(VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO);
+                layoutInfo.pBindings(bindings);
+
+                LongBuffer pDescriptorSetLayout = stack.mallocLong(1);
+
+                if (vkCreateDescriptorSetLayout(device, layoutInfo, null, pDescriptorSetLayout) != VK_SUCCESS) {
+                    throw new RuntimeException("Failed to create descriptor set layout");
+                }
+                descriptorSetLayout = pDescriptorSetLayout.get(0);
+            }
+        }
+
+        private void createGraphicsPipeline() {
+
+            try (MemoryStack stack = stackPush()) {
+
+                // Let's compile the GLSL shaders into SPIR-V at runtime using the shaderc library
+                // Check ShaderSPIRVUtils class to see how it can be done
+                ShaderUtil.SPIRVShader vertShaderSPIRV = compileShaderFile("shaders/26_shader_depth.vert", VERTEX_SHADER);
+                ShaderUtil.SPIRVShader fragShaderSPIRV = compileShaderFile("shaders/26_shader_depth.frag", FRAGMENT_SHADER);
+
+                long vertShaderModule = createShaderModule(vertShaderSPIRV.bytecode());
+                long fragShaderModule = createShaderModule(fragShaderSPIRV.bytecode());
+
+                ByteBuffer entryPoint = stack.UTF8("main");
+
+                VkPipelineShaderStageCreateInfo.Buffer shaderStages = VkPipelineShaderStageCreateInfo.callocStack(2, stack);
+
+                VkPipelineShaderStageCreateInfo vertShaderStageInfo = shaderStages.get(0);
+
+                vertShaderStageInfo.sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO);
+                vertShaderStageInfo.stage(VK_SHADER_STAGE_VERTEX_BIT);
+                vertShaderStageInfo.module(vertShaderModule);
+                vertShaderStageInfo.pName(entryPoint);
+
+                VkPipelineShaderStageCreateInfo fragShaderStageInfo = shaderStages.get(1);
+
+                fragShaderStageInfo.sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO);
+                fragShaderStageInfo.stage(VK_SHADER_STAGE_FRAGMENT_BIT);
+                fragShaderStageInfo.module(fragShaderModule);
+                fragShaderStageInfo.pName(entryPoint);
+
+                // ===> VERTEX STAGE <===
+
+                VkPipelineVertexInputStateCreateInfo vertexInputInfo = VkPipelineVertexInputStateCreateInfo.callocStack(stack);
+                vertexInputInfo.sType(VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO);
+                vertexInputInfo.pVertexBindingDescriptions(Vertex.getBindingDescription());
+                vertexInputInfo.pVertexAttributeDescriptions(Vertex.getAttributeDescriptions());
+
+                // ===> ASSEMBLY STAGE <===
+
+                VkPipelineInputAssemblyStateCreateInfo inputAssembly = VkPipelineInputAssemblyStateCreateInfo.callocStack(stack);
+                inputAssembly.sType(VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO);
+                inputAssembly.topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+                inputAssembly.primitiveRestartEnable(false);
+
+                // ===> VIEWPORT & SCISSOR
+
+                VkViewport.Buffer viewport = VkViewport.callocStack(1, stack);
+                viewport.x(0.0f);
+                viewport.y(0.0f);
+                viewport.width(swapChainExtent.width());
+                viewport.height(swapChainExtent.height());
+                viewport.minDepth(0.0f);
+                viewport.maxDepth(1.0f);
+
+                VkRect2D.Buffer scissor = VkRect2D.callocStack(1, stack);
+                scissor.offset(VkOffset2D.callocStack(stack).set(0, 0));
+                scissor.extent(swapChainExtent);
+
+                VkPipelineViewportStateCreateInfo viewportState = VkPipelineViewportStateCreateInfo.callocStack(stack);
+                viewportState.sType(VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO);
+                viewportState.pViewports(viewport);
+                viewportState.pScissors(scissor);
+
+                // ===> RASTERIZATION STAGE <===
+
+                VkPipelineRasterizationStateCreateInfo rasterizer = VkPipelineRasterizationStateCreateInfo.callocStack(stack);
+                rasterizer.sType(VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO);
+                rasterizer.depthClampEnable(false);
+                rasterizer.rasterizerDiscardEnable(false);
+                rasterizer.polygonMode(VK_POLYGON_MODE_FILL);
+                rasterizer.lineWidth(1.0f);
+                rasterizer.cullMode(VK_CULL_MODE_BACK_BIT);
+                rasterizer.frontFace(VK_FRONT_FACE_COUNTER_CLOCKWISE);
+                rasterizer.depthBiasEnable(false);
+
+                // ===> MULTISAMPLING <===
+
+                VkPipelineMultisampleStateCreateInfo multisampling = VkPipelineMultisampleStateCreateInfo.callocStack(stack);
+                multisampling.sType(VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO);
+                multisampling.sampleShadingEnable(true);
+                multisampling.minSampleShading(0.2f); // Enable sample shading in the pipeline
+                multisampling.rasterizationSamples(msaaSamples); // Min fraction for sample shading; closer to one is smoother
+
+                VkPipelineDepthStencilStateCreateInfo depthStencil = VkPipelineDepthStencilStateCreateInfo.callocStack(stack);
+                depthStencil.sType(VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO);
+                depthStencil.depthTestEnable(true);
+                depthStencil.depthWriteEnable(true);
+                depthStencil.depthCompareOp(VK_COMPARE_OP_LESS);
+                depthStencil.depthBoundsTestEnable(false);
+                depthStencil.minDepthBounds(0.0f); // Optional
+                depthStencil.maxDepthBounds(1.0f); // Optional
+                depthStencil.stencilTestEnable(false);
+
+                // ===> COLOR BLENDING <===
+
+                VkPipelineColorBlendAttachmentState.Buffer colorBlendAttachment = VkPipelineColorBlendAttachmentState.callocStack(1, stack);
+                colorBlendAttachment.colorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
+                colorBlendAttachment.blendEnable(false);
+
+                VkPipelineColorBlendStateCreateInfo colorBlending = VkPipelineColorBlendStateCreateInfo.callocStack(stack);
+                colorBlending.sType(VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO);
+                colorBlending.logicOpEnable(false);
+                colorBlending.logicOp(VK_LOGIC_OP_COPY);
+                colorBlending.pAttachments(colorBlendAttachment);
+                colorBlending.blendConstants(stack.floats(0.0f, 0.0f, 0.0f, 0.0f));
+
+                // ===> PIPELINE LAYOUT CREATION <===
+
+                VkPipelineLayoutCreateInfo pipelineLayoutInfo = VkPipelineLayoutCreateInfo.callocStack(stack);
+                pipelineLayoutInfo.sType(VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO);
+                pipelineLayoutInfo.pSetLayouts(stack.longs(descriptorSetLayout));
+
+                LongBuffer pPipelineLayout = stack.longs(VK_NULL_HANDLE);
+
+                if (vkCreatePipelineLayout(device, pipelineLayoutInfo, null, pPipelineLayout) != VK_SUCCESS) {
+                    throw new RuntimeException("Failed to create pipeline layout");
+                }
+
+                pipelineLayout = pPipelineLayout.get(0);
+
+                VkGraphicsPipelineCreateInfo.Buffer pipelineInfo = VkGraphicsPipelineCreateInfo.callocStack(1, stack);
+                pipelineInfo.sType(VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO);
+                pipelineInfo.pStages(shaderStages);
+                pipelineInfo.pVertexInputState(vertexInputInfo);
+                pipelineInfo.pInputAssemblyState(inputAssembly);
+                pipelineInfo.pViewportState(viewportState);
+                pipelineInfo.pRasterizationState(rasterizer);
+                pipelineInfo.pMultisampleState(multisampling);
+                pipelineInfo.pDepthStencilState(depthStencil);
+                pipelineInfo.pColorBlendState(colorBlending);
+                pipelineInfo.layout(pipelineLayout);
+                pipelineInfo.renderPass(renderPass);
+                pipelineInfo.subpass(0);
+                pipelineInfo.basePipelineHandle(VK_NULL_HANDLE);
+                pipelineInfo.basePipelineIndex(-1);
+
+                LongBuffer pGraphicsPipeline = stack.mallocLong(1);
+
+                if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, pipelineInfo, null, pGraphicsPipeline) != VK_SUCCESS) {
+                    throw new RuntimeException("Failed to create graphics pipeline");
+                }
+
+                graphicsPipeline = pGraphicsPipeline.get(0);
+
+                // ===> RELEASE RESOURCES <===
+
+                vkDestroyShaderModule(device, vertShaderModule, null);
+                vkDestroyShaderModule(device, fragShaderModule, null);
+
+                vertShaderSPIRV.free();
+                fragShaderSPIRV.free();
+            }
+        }
+
+        private void createFramebuffers() {
+
+            swapChainFramebuffers = new ArrayList<>(swapChainImageViews.size());
+
+            try (MemoryStack stack = stackPush()) {
+
+                LongBuffer attachments = stack.longs(colorImageView, depthImageView, VK_NULL_HANDLE);
+                LongBuffer pFramebuffer = stack.mallocLong(1);
+
+                // Lets allocate the create info struct once and just update the pAttachments field each iteration
+                VkFramebufferCreateInfo framebufferInfo = VkFramebufferCreateInfo.callocStack(stack);
+                framebufferInfo.sType(VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO);
+                framebufferInfo.renderPass(renderPass);
+                framebufferInfo.width(swapChainExtent.width());
+                framebufferInfo.height(swapChainExtent.height());
+                framebufferInfo.layers(1);
+
+                for (long imageView : swapChainImageViews) {
+
+                    attachments.put(2, imageView);
+
+                    framebufferInfo.pAttachments(attachments);
+
+                    if (vkCreateFramebuffer(device, framebufferInfo, null, pFramebuffer) != VK_SUCCESS) {
+                        throw new RuntimeException("Failed to create framebuffer");
+                    }
+
+                    swapChainFramebuffers.add(pFramebuffer.get(0));
+                }
+            }
+        }
+
+        private void createColorResources() {
+
+            try (MemoryStack stack = stackPush()) {
+
+                LongBuffer pColorImage = stack.mallocLong(1);
+                LongBuffer pColorImageMemory = stack.mallocLong(1);
+
+                createImage(swapChainExtent.width(), swapChainExtent.height(),
+                        1,
+                        msaaSamples,
+                        swapChainImageFormat,
+                        VK_IMAGE_TILING_OPTIMAL,
+                        VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                        pColorImage,
+                        pColorImageMemory);
+
+                colorImage = pColorImage.get(0);
+                colorImageMemory = pColorImageMemory.get(0);
+
+                colorImageView = createImageView(colorImage, swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+
+                transitionImageLayout(colorImage, swapChainImageFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 1);
+            }
+        }
+
+        private void createDepthResources() {
+
+            try (MemoryStack stack = stackPush()) {
+
+                int depthFormat = findDepthFormat();
+
+                LongBuffer pDepthImage = stack.mallocLong(1);
+                LongBuffer pDepthImageMemory = stack.mallocLong(1);
+
+                createImage(
+                        swapChainExtent.width(), swapChainExtent.height(),
+                        1,
+                        msaaSamples,
+                        depthFormat,
+                        VK_IMAGE_TILING_OPTIMAL,
+                        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+                        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                        pDepthImage,
+                        pDepthImageMemory);
+
+                depthImage = pDepthImage.get(0);
+                depthImageMemory = pDepthImageMemory.get(0);
+
+                depthImageView = createImageView(depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
+
+                // Explicitly transitioning the depth image
+                transitionImageLayout(depthImage, depthFormat,
+                        VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+                        1);
+
+            }
+        }
+
+        private int findSupportedFormat(IntBuffer formatCandidates, int tiling, int features) {
+
+            try (MemoryStack stack = stackPush()) {
+
+                VkFormatProperties props = VkFormatProperties.callocStack(stack);
+
+                for (int i = 0; i < formatCandidates.capacity(); ++i) {
+
+                    int format = formatCandidates.get(i);
+
+                    vkGetPhysicalDeviceFormatProperties(physicalDevice, format, props);
+
+                    if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures() & features) == features) {
+                        return format;
+                    } else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures() & features) == features) {
+                        return format;
+                    }
+
+                }
+            }
+
+            throw new RuntimeException("Failed to find supported format");
+        }
+
+        private int findDepthFormat() {
+            return findSupportedFormat(
+                    stackGet().ints(VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT),
+                    VK_IMAGE_TILING_OPTIMAL,
+                    VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+        }
+
+        private boolean hasStencilComponent(int format) {
+            return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
+        }
+
+        private double log2(double n) {
+            return Math.log(n) / Math.log(2);
+        }
+
+        private void createTextureImage() {
+
+            try (MemoryStack stack = stackPush()) {
+
+                String filename = Paths.get(new URI(getSystemClassLoader().getResource("textures/chalet.jpg").toExternalForm())).toString();
+
+                IntBuffer pWidth = stack.mallocInt(1);
+                IntBuffer pHeight = stack.mallocInt(1);
+                IntBuffer pChannels = stack.mallocInt(1);
+
+                ByteBuffer pixels = stbi_load(filename, pWidth, pHeight, pChannels, STBI_rgb_alpha);
+
+                long imageSize = pWidth.get(0) * pHeight.get(0) * pChannels.get(0);
+
+                mipLevels = (int) Math.floor(log2(Math.max(pWidth.get(0), pHeight.get(0)))) + 1;
+
+                if (pixels == null) {
+                    throw new RuntimeException("Failed to load texture image " + filename);
+                }
+
+                LongBuffer pStagingBuffer = stack.mallocLong(1);
+                LongBuffer pStagingBufferMemory = stack.mallocLong(1);
+                createBuffer(imageSize,
+                        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                        pStagingBuffer,
+                        pStagingBufferMemory);
+
+
+                PointerBuffer data = stack.mallocPointer(1);
+                vkMapMemory(device, pStagingBufferMemory.get(0), 0, imageSize, 0, data);
+                {
+                    memcpy(data.getByteBuffer(0, (int) imageSize), pixels, imageSize);
+                }
+                vkUnmapMemory(device, pStagingBufferMemory.get(0));
+
+                stbi_image_free(pixels);
+
+                LongBuffer pTextureImage = stack.mallocLong(1);
+                LongBuffer pTextureImageMemory = stack.mallocLong(1);
+                createImage(pWidth.get(0), pHeight.get(0),
+                        mipLevels,
+                        VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL,
+                        VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+                        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                        pTextureImage,
+                        pTextureImageMemory);
+
+                textureImage = pTextureImage.get(0);
+                textureImageMemory = pTextureImageMemory.get(0);
+
+                transitionImageLayout(textureImage,
+                        VK_FORMAT_R8G8B8A8_SRGB,
+                        VK_IMAGE_LAYOUT_UNDEFINED,
+                        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                        mipLevels);
+
+                copyBufferToImage(pStagingBuffer.get(0), textureImage, pWidth.get(0), pHeight.get(0));
+
+                // Transitioned to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL while generating mipmaps
+                generateMipmaps(textureImage, VK_FORMAT_R8G8B8A8_SRGB, pWidth.get(0), pHeight.get(0), mipLevels);
+
+                vkDestroyBuffer(device, pStagingBuffer.get(0), null);
+                vkFreeMemory(device, pStagingBufferMemory.get(0), null);
+
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+        }
+
+        private void generateMipmaps(long image, int imageFormat, int width, int height, int mipLevels) {
+
+            try (MemoryStack stack = stackPush()) {
+
+                // Check if image format supports linear blitting
+                VkFormatProperties formatProperties = VkFormatProperties.mallocStack(stack);
+                vkGetPhysicalDeviceFormatProperties(physicalDevice, imageFormat, formatProperties);
+
+                if ((formatProperties.optimalTilingFeatures() & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT) == 0) {
+                    throw new RuntimeException("Texture image format does not support linear blitting");
+                }
+
+                VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+                VkImageMemoryBarrier.Buffer barrier = VkImageMemoryBarrier.callocStack(1, stack);
+                barrier.sType(VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER);
+                barrier.image(image);
+                barrier.srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED);
+                barrier.dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED);
+                barrier.dstAccessMask(VK_QUEUE_FAMILY_IGNORED);
+                barrier.subresourceRange().aspectMask(VK_IMAGE_ASPECT_COLOR_BIT);
+                barrier.subresourceRange().baseArrayLayer(0);
+                barrier.subresourceRange().layerCount(1);
+                barrier.subresourceRange().levelCount(1);
+
+                int mipWidth = width;
+                int mipHeight = height;
+
+                for (int i = 1; i < mipLevels; i++) {
+
+                    barrier.subresourceRange().baseMipLevel(i - 1);
+                    barrier.oldLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+                    barrier.newLayout(VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+                    barrier.srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT);
+                    barrier.dstAccessMask(VK_ACCESS_TRANSFER_READ_BIT);
+
+                    vkCmdPipelineBarrier(commandBuffer,
+                            VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
+                            null,
+                            null,
+                            barrier);
+
+                    VkImageBlit.Buffer blit = VkImageBlit.callocStack(1, stack);
+                    blit.srcOffsets(0).set(0, 0, 0);
+                    blit.srcOffsets(1).set(mipWidth, mipHeight, 1);
+                    blit.srcSubresource().aspectMask(VK_IMAGE_ASPECT_COLOR_BIT);
+                    blit.srcSubresource().mipLevel(i - 1);
+                    blit.srcSubresource().baseArrayLayer(0);
+                    blit.srcSubresource().layerCount(1);
+                    blit.dstOffsets(0).set(0, 0, 0);
+                    blit.dstOffsets(1).set(mipWidth > 1 ? mipWidth / 2 : 1, mipHeight > 1 ? mipHeight / 2 : 1, 1);
+                    blit.dstSubresource().aspectMask(VK_IMAGE_ASPECT_COLOR_BIT);
+                    blit.dstSubresource().mipLevel(i);
+                    blit.dstSubresource().baseArrayLayer(0);
+                    blit.dstSubresource().layerCount(1);
+
+                    vkCmdBlitImage(commandBuffer,
+                            image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                            image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                            blit,
+                            VK_FILTER_LINEAR);
+
+                    barrier.oldLayout(VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+                    barrier.newLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                    barrier.srcAccessMask(VK_ACCESS_TRANSFER_READ_BIT);
+                    barrier.dstAccessMask(VK_ACCESS_SHADER_READ_BIT);
+
+                    vkCmdPipelineBarrier(commandBuffer,
+                            VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+                            null,
+                            null,
+                            barrier);
+
+                    if (mipWidth > 1) {
+                        mipWidth /= 2;
+                    }
+
+                    if (mipHeight > 1) {
+                        mipHeight /= 2;
+                    }
+                }
+
+                barrier.subresourceRange().baseMipLevel(mipLevels - 1);
+                barrier.oldLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+                barrier.newLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                barrier.srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT);
+                barrier.dstAccessMask(VK_ACCESS_SHADER_READ_BIT);
+
+                vkCmdPipelineBarrier(commandBuffer,
+                        VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+                        null,
+                        null,
+                        barrier);
+
+                endSingleTimeCommands(commandBuffer);
+            }
+        }
+
+        private int getMaxUsableSampleCount() {
+
+            try (MemoryStack stack = stackPush()) {
+
+                VkPhysicalDeviceProperties physicalDeviceProperties = VkPhysicalDeviceProperties.mallocStack(stack);
+                vkGetPhysicalDeviceProperties(physicalDevice, physicalDeviceProperties);
+
+                int sampleCountFlags = physicalDeviceProperties.limits().framebufferColorSampleCounts()
+                        & physicalDeviceProperties.limits().framebufferDepthSampleCounts();
+
+                if ((sampleCountFlags & VK_SAMPLE_COUNT_64_BIT) != 0) {
+                    return VK_SAMPLE_COUNT_64_BIT;
+                }
+                if ((sampleCountFlags & VK_SAMPLE_COUNT_32_BIT) != 0) {
+                    return VK_SAMPLE_COUNT_32_BIT;
+                }
+                if ((sampleCountFlags & VK_SAMPLE_COUNT_16_BIT) != 0) {
+                    return VK_SAMPLE_COUNT_16_BIT;
+                }
+                if ((sampleCountFlags & VK_SAMPLE_COUNT_8_BIT) != 0) {
+                    return VK_SAMPLE_COUNT_8_BIT;
+                }
+                if ((sampleCountFlags & VK_SAMPLE_COUNT_4_BIT) != 0) {
+                    return VK_SAMPLE_COUNT_4_BIT;
+                }
+                if ((sampleCountFlags & VK_SAMPLE_COUNT_2_BIT) != 0) {
+                    return VK_SAMPLE_COUNT_2_BIT;
+                }
+
+                return VK_SAMPLE_COUNT_1_BIT;
+            }
+        }
+
+        private void createTextureImageView() {
+            textureImageView = createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels);
+        }
+
+        private void createTextureSampler() {
+
+            try (MemoryStack stack = stackPush()) {
+
+                VkSamplerCreateInfo samplerInfo = VkSamplerCreateInfo.callocStack(stack);
+                samplerInfo.sType(VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO);
+                samplerInfo.magFilter(VK_FILTER_LINEAR);
+                samplerInfo.minFilter(VK_FILTER_LINEAR);
+                samplerInfo.addressModeU(VK_SAMPLER_ADDRESS_MODE_REPEAT);
+                samplerInfo.addressModeV(VK_SAMPLER_ADDRESS_MODE_REPEAT);
+                samplerInfo.addressModeW(VK_SAMPLER_ADDRESS_MODE_REPEAT);
+                samplerInfo.anisotropyEnable(true);
+                samplerInfo.maxAnisotropy(16.0f);
+                samplerInfo.borderColor(VK_BORDER_COLOR_INT_OPAQUE_BLACK);
+                samplerInfo.unnormalizedCoordinates(false);
+                samplerInfo.compareEnable(false);
+                samplerInfo.compareOp(VK_COMPARE_OP_ALWAYS);
+                samplerInfo.mipmapMode(VK_SAMPLER_MIPMAP_MODE_LINEAR);
+                samplerInfo.minLod(0); // Optional
+                samplerInfo.maxLod((float) mipLevels);
+                samplerInfo.mipLodBias(0); // Optional
+
+                LongBuffer pTextureSampler = stack.mallocLong(1);
+
+                if (vkCreateSampler(device, samplerInfo, null, pTextureSampler) != VK_SUCCESS) {
+                    throw new RuntimeException("Failed to create texture sampler");
+                }
+
+                textureSampler = pTextureSampler.get(0);
+            }
+        }
+
+        private long createImageView(long image, int format, int aspectFlags, int mipLevels) {
+
+            try (MemoryStack stack = stackPush()) {
+
+                VkImageViewCreateInfo viewInfo = VkImageViewCreateInfo.callocStack(stack);
+                viewInfo.sType(VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO);
+                viewInfo.image(image);
+                viewInfo.viewType(VK_IMAGE_VIEW_TYPE_2D);
+                viewInfo.format(format);
+                viewInfo.subresourceRange().aspectMask(aspectFlags);
+                viewInfo.subresourceRange().baseMipLevel(0);
+                viewInfo.subresourceRange().levelCount(mipLevels);
+                viewInfo.subresourceRange().baseArrayLayer(0);
+                viewInfo.subresourceRange().layerCount(1);
+
+                LongBuffer pImageView = stack.mallocLong(1);
+
+                if (vkCreateImageView(device, viewInfo, null, pImageView) != VK_SUCCESS) {
+                    throw new RuntimeException("Failed to create texture image view");
+                }
+
+                return pImageView.get(0);
+            }
+        }
+
+        private void createImage(int width, int height, int mipLevels, int numSamples, int format, int tiling, int usage, int memProperties,
+                                 LongBuffer pTextureImage, LongBuffer pTextureImageMemory) {
+
+            try (MemoryStack stack = stackPush()) {
+
+                VkImageCreateInfo imageInfo = VkImageCreateInfo.callocStack(stack);
+                imageInfo.sType(VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO);
+                imageInfo.imageType(VK_IMAGE_TYPE_2D);
+                imageInfo.extent().width(width);
+                imageInfo.extent().height(height);
+                imageInfo.extent().depth(1);
+                imageInfo.mipLevels(mipLevels);
+                imageInfo.arrayLayers(1);
+                imageInfo.format(format);
+                imageInfo.tiling(tiling);
+                imageInfo.initialLayout(VK_IMAGE_LAYOUT_UNDEFINED);
+                imageInfo.usage(usage);
+                imageInfo.samples(numSamples);
+                imageInfo.sharingMode(VK_SHARING_MODE_EXCLUSIVE);
+
+                if (vkCreateImage(device, imageInfo, null, pTextureImage) != VK_SUCCESS) {
+                    throw new RuntimeException("Failed to create image");
+                }
+
+                VkMemoryRequirements memRequirements = VkMemoryRequirements.mallocStack(stack);
+                vkGetImageMemoryRequirements(device, pTextureImage.get(0), memRequirements);
+
+                VkMemoryAllocateInfo allocInfo = VkMemoryAllocateInfo.callocStack(stack);
+                allocInfo.sType(VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO);
+                allocInfo.allocationSize(memRequirements.size());
+                allocInfo.memoryTypeIndex(findMemoryType(memRequirements.memoryTypeBits(), memProperties));
+
+                if (vkAllocateMemory(device, allocInfo, null, pTextureImageMemory) != VK_SUCCESS) {
+                    throw new RuntimeException("Failed to allocate image memory");
+                }
+
+                vkBindImageMemory(device, pTextureImage.get(0), pTextureImageMemory.get(0), 0);
+            }
+        }
+
+        private void transitionImageLayout(long image, int format, int oldLayout, int newLayout, int mipLevels) {
+
+            try (MemoryStack stack = stackPush()) {
+
+                VkImageMemoryBarrier.Buffer barrier = VkImageMemoryBarrier.callocStack(1, stack);
+                barrier.sType(VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER);
+                barrier.oldLayout(oldLayout);
+                barrier.newLayout(newLayout);
+                barrier.srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED);
+                barrier.dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED);
+                barrier.image(image);
+
+                barrier.subresourceRange().baseMipLevel(0);
+                barrier.subresourceRange().levelCount(mipLevels);
+                barrier.subresourceRange().baseArrayLayer(0);
+                barrier.subresourceRange().layerCount(1);
+
+                if (newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+
+                    barrier.subresourceRange().aspectMask(VK_IMAGE_ASPECT_DEPTH_BIT);
+
+                    if (hasStencilComponent(format)) {
+                        barrier.subresourceRange().aspectMask(
+                                barrier.subresourceRange().aspectMask() | VK_IMAGE_ASPECT_STENCIL_BIT);
+                    }
+
+                } else {
+                    barrier.subresourceRange().aspectMask(VK_IMAGE_ASPECT_COLOR_BIT);
+                }
+
+                int sourceStage;
+                int destinationStage;
+
+                if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+
+                    barrier.srcAccessMask(0);
+                    barrier.dstAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT);
+
+                    sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+                    destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+
+                } else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+
+                    barrier.srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT);
+                    barrier.dstAccessMask(VK_ACCESS_SHADER_READ_BIT);
+
+                    sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+                    destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+
+                } else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+
+                    barrier.srcAccessMask(0);
+                    barrier.dstAccessMask(VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
+
+                    sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+                    destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+
+                } else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
+
+                    barrier.srcAccessMask(0);
+                    barrier.dstAccessMask(VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
+
+                    sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+                    destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+
+                } else {
+                    throw new IllegalArgumentException("Unsupported layout transition");
+                }
+
+                VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+                vkCmdPipelineBarrier(commandBuffer,
+                        sourceStage, destinationStage,
+                        0,
+                        null,
+                        null,
+                        barrier);
+
+                endSingleTimeCommands(commandBuffer);
+            }
+        }
+
+        private void copyBufferToImage(long buffer, long image, int width, int height) {
+
+            try (MemoryStack stack = stackPush()) {
+
+                VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+                VkBufferImageCopy.Buffer region = VkBufferImageCopy.callocStack(1, stack);
+                region.bufferOffset(0);
+                region.bufferRowLength(0);   // Tightly packed
+                region.bufferImageHeight(0);  // Tightly packed
+                region.imageSubresource().aspectMask(VK_IMAGE_ASPECT_COLOR_BIT);
+                region.imageSubresource().mipLevel(0);
+                region.imageSubresource().baseArrayLayer(0);
+                region.imageSubresource().layerCount(1);
+                region.imageOffset().set(0, 0, 0);
+                region.imageExtent(VkExtent3D.callocStack(stack).set(width, height, 1));
+
+                vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, region);
+
+                endSingleTimeCommands(commandBuffer);
+            }
+        }
+
+        private void memcpy(ByteBuffer dst, ByteBuffer src, long size) {
+            src.limit((int) size);
+            dst.put(src);
+            src.limit(src.capacity()).rewind();
+        }
+
+        private void loadModel() {
+
+            File modelFile = new File(getSystemClassLoader().getResource("models/chalet.obj").getFile());
+
+            ModelLoader.Model model = ModelLoader.loadModel(modelFile, aiProcess_FlipUVs | aiProcess_DropNormals);
+
+            final int vertexCount = model.positions.size();
+
+            vertices = new Vertex[vertexCount];
+
+            final Vector3fc color = new Vector3f(1.0f, 1.0f, 1.0f);
+
+            for (int i = 0; i < vertexCount; i++) {
+                vertices[i] = new Vertex(
+                        model.positions.get(i),
+                        color,
+                        model.texCoords.get(i));
+            }
+
+            indices = new int[model.indices.size()];
+
+            for (int i = 0; i < indices.length; i++) {
+                indices[i] = model.indices.get(i);
+            }
+        }
+
+        private void createVertexBuffer() {
+
+            try (MemoryStack stack = stackPush()) {
+
+                long bufferSize = Vertex.SIZEOF * vertices.length;
+
+                LongBuffer pBuffer = stack.mallocLong(1);
+                LongBuffer pBufferMemory = stack.mallocLong(1);
+                createBuffer(bufferSize,
+                        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                        pBuffer,
+                        pBufferMemory);
+
+                long stagingBuffer = pBuffer.get(0);
+                long stagingBufferMemory = pBufferMemory.get(0);
+
+                PointerBuffer data = stack.mallocPointer(1);
+
+                vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, data);
+                {
+                    memcpy(data.getByteBuffer(0, (int) bufferSize), vertices);
+                }
+                vkUnmapMemory(device, stagingBufferMemory);
+
+                createBuffer(bufferSize,
+                        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                        VK_MEMORY_HEAP_DEVICE_LOCAL_BIT,
+                        pBuffer,
+                        pBufferMemory);
+
+                vertexBuffer = pBuffer.get(0);
+                vertexBufferMemory = pBufferMemory.get(0);
+
+                copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+
+                vkDestroyBuffer(device, stagingBuffer, null);
+                vkFreeMemory(device, stagingBufferMemory, null);
+            }
+        }
+
+        private void createIndexBuffer() {
+
+            try (MemoryStack stack = stackPush()) {
+
+                long bufferSize = Integer.BYTES * indices.length;
+
+                LongBuffer pBuffer = stack.mallocLong(1);
+                LongBuffer pBufferMemory = stack.mallocLong(1);
+                createBuffer(bufferSize,
+                        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                        pBuffer,
+                        pBufferMemory);
+
+                long stagingBuffer = pBuffer.get(0);
+                long stagingBufferMemory = pBufferMemory.get(0);
+
+                PointerBuffer data = stack.mallocPointer(1);
+
+                vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, data);
+                {
+                    memcpy(data.getByteBuffer(0, (int) bufferSize), indices);
+                }
+                vkUnmapMemory(device, stagingBufferMemory);
+
+                createBuffer(bufferSize,
+                        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                        VK_MEMORY_HEAP_DEVICE_LOCAL_BIT,
+                        pBuffer,
+                        pBufferMemory);
+
+                indexBuffer = pBuffer.get(0);
+                indexBufferMemory = pBufferMemory.get(0);
+
+                copyBuffer(stagingBuffer, indexBuffer, bufferSize);
+
+                vkDestroyBuffer(device, stagingBuffer, null);
+                vkFreeMemory(device, stagingBufferMemory, null);
+            }
+        }
+
+        private void createUniformBuffers() {
+
+            try (MemoryStack stack = stackPush()) {
+
+                uniformBuffers = new ArrayList<>(swapChainImages.size());
+                uniformBuffersMemory = new ArrayList<>(swapChainImages.size());
+
+                LongBuffer pBuffer = stack.mallocLong(1);
+                LongBuffer pBufferMemory = stack.mallocLong(1);
+
+                for (int i = 0; i < swapChainImages.size(); i++) {
+                    createBuffer(UniformBufferObject.SIZEOF,
+                            VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                            pBuffer,
+                            pBufferMemory);
+
+                    uniformBuffers.add(pBuffer.get(0));
+                    uniformBuffersMemory.add(pBufferMemory.get(0));
+                }
+
+            }
+        }
+
+        private void createDescriptorPool() {
+
+            try (MemoryStack stack = stackPush()) {
+
+                VkDescriptorPoolSize.Buffer poolSizes = VkDescriptorPoolSize.callocStack(2, stack);
+
+                VkDescriptorPoolSize uniformBufferPoolSize = poolSizes.get(0);
+                uniformBufferPoolSize.type(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+                uniformBufferPoolSize.descriptorCount(swapChainImages.size());
+
+                VkDescriptorPoolSize textureSamplerPoolSize = poolSizes.get(1);
+                textureSamplerPoolSize.type(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+                textureSamplerPoolSize.descriptorCount(swapChainImages.size());
+
+                VkDescriptorPoolCreateInfo poolInfo = VkDescriptorPoolCreateInfo.callocStack(stack);
+                poolInfo.sType(VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO);
+                poolInfo.pPoolSizes(poolSizes);
+                poolInfo.maxSets(swapChainImages.size());
+
+                LongBuffer pDescriptorPool = stack.mallocLong(1);
+
+                if (vkCreateDescriptorPool(device, poolInfo, null, pDescriptorPool) != VK_SUCCESS) {
+                    throw new RuntimeException("Failed to create descriptor pool");
+                }
+
+                descriptorPool = pDescriptorPool.get(0);
+            }
+        }
+
+        private void createDescriptorSets() {
+
+            try (MemoryStack stack = stackPush()) {
+
+                LongBuffer layouts = stack.mallocLong(swapChainImages.size());
+                for (int i = 0; i < layouts.capacity(); i++) {
+                    layouts.put(i, descriptorSetLayout);
+                }
+
+                VkDescriptorSetAllocateInfo allocInfo = VkDescriptorSetAllocateInfo.callocStack(stack);
+                allocInfo.sType(VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO);
+                allocInfo.descriptorPool(descriptorPool);
+                allocInfo.pSetLayouts(layouts);
+
+                LongBuffer pDescriptorSets = stack.mallocLong(swapChainImages.size());
+
+                if (vkAllocateDescriptorSets(device, allocInfo, pDescriptorSets) != VK_SUCCESS) {
+                    throw new RuntimeException("Failed to allocate descriptor sets");
+                }
+
+                descriptorSets = new ArrayList<>(pDescriptorSets.capacity());
+
+                VkDescriptorBufferInfo.Buffer bufferInfo = VkDescriptorBufferInfo.callocStack(1, stack);
+                bufferInfo.offset(0);
+                bufferInfo.range(UniformBufferObject.SIZEOF);
+
+                VkDescriptorImageInfo.Buffer imageInfo = VkDescriptorImageInfo.callocStack(1, stack);
+                imageInfo.imageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                imageInfo.imageView(textureImageView);
+                imageInfo.sampler(textureSampler);
+
+                VkWriteDescriptorSet.Buffer descriptorWrites = VkWriteDescriptorSet.callocStack(2, stack);
+
+                VkWriteDescriptorSet uboDescriptorWrite = descriptorWrites.get(0);
+                uboDescriptorWrite.sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET);
+                uboDescriptorWrite.dstBinding(0);
+                uboDescriptorWrite.dstArrayElement(0);
+                uboDescriptorWrite.descriptorType(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+                uboDescriptorWrite.descriptorCount(1);
+                uboDescriptorWrite.pBufferInfo(bufferInfo);
+
+                VkWriteDescriptorSet samplerDescriptorWrite = descriptorWrites.get(1);
+                samplerDescriptorWrite.sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET);
+                samplerDescriptorWrite.dstBinding(1);
+                samplerDescriptorWrite.dstArrayElement(0);
+                samplerDescriptorWrite.descriptorType(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+                samplerDescriptorWrite.descriptorCount(1);
+                samplerDescriptorWrite.pImageInfo(imageInfo);
+
+                for (int i = 0; i < pDescriptorSets.capacity(); i++) {
+
+                    long descriptorSet = pDescriptorSets.get(i);
+
+                    bufferInfo.buffer(uniformBuffers.get(i));
+
+                    uboDescriptorWrite.dstSet(descriptorSet);
+                    samplerDescriptorWrite.dstSet(descriptorSet);
+
+                    vkUpdateDescriptorSets(device, descriptorWrites, null);
+
+                    descriptorSets.add(descriptorSet);
+                }
+            }
+        }
+
+        private void createBuffer(long size, int usage, int properties, LongBuffer pBuffer, LongBuffer pBufferMemory) {
+
+            try (MemoryStack stack = stackPush()) {
+
+                VkBufferCreateInfo bufferInfo = VkBufferCreateInfo.callocStack(stack);
+                bufferInfo.sType(VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO);
+                bufferInfo.size(size);
+                bufferInfo.usage(usage);
+                bufferInfo.sharingMode(VK_SHARING_MODE_EXCLUSIVE);
+
+                if (vkCreateBuffer(device, bufferInfo, null, pBuffer) != VK_SUCCESS) {
+                    throw new RuntimeException("Failed to create vertex buffer");
+                }
+
+                VkMemoryRequirements memRequirements = VkMemoryRequirements.mallocStack(stack);
+                vkGetBufferMemoryRequirements(device, pBuffer.get(0), memRequirements);
+
+                VkMemoryAllocateInfo allocInfo = VkMemoryAllocateInfo.callocStack(stack);
+                allocInfo.sType(VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO);
+                allocInfo.allocationSize(memRequirements.size());
+                allocInfo.memoryTypeIndex(findMemoryType(memRequirements.memoryTypeBits(), properties));
+
+                if (vkAllocateMemory(device, allocInfo, null, pBufferMemory) != VK_SUCCESS) {
+                    throw new RuntimeException("Failed to allocate vertex buffer memory");
+                }
+
+                vkBindBufferMemory(device, pBuffer.get(0), pBufferMemory.get(0), 0);
+            }
+        }
+
+        private VkCommandBuffer beginSingleTimeCommands() {
+
+            try (MemoryStack stack = stackPush()) {
+
+                VkCommandBufferAllocateInfo allocInfo = VkCommandBufferAllocateInfo.callocStack(stack);
+                allocInfo.sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO);
+                allocInfo.level(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+                allocInfo.commandPool(commandPool);
+                allocInfo.commandBufferCount(1);
+
+                PointerBuffer pCommandBuffer = stack.mallocPointer(1);
+                vkAllocateCommandBuffers(device, allocInfo, pCommandBuffer);
+                VkCommandBuffer commandBuffer = new VkCommandBuffer(pCommandBuffer.get(0), device);
+
+                VkCommandBufferBeginInfo beginInfo = VkCommandBufferBeginInfo.callocStack(stack);
+                beginInfo.sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO);
+                beginInfo.flags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+
+                vkBeginCommandBuffer(commandBuffer, beginInfo);
+
+                return commandBuffer;
+            }
+        }
+
+        private void endSingleTimeCommands(VkCommandBuffer commandBuffer) {
+
+            try (MemoryStack stack = stackPush()) {
+
+                vkEndCommandBuffer(commandBuffer);
+
+                VkSubmitInfo.Buffer submitInfo = VkSubmitInfo.callocStack(1, stack);
+                submitInfo.sType(VK_STRUCTURE_TYPE_SUBMIT_INFO);
+                submitInfo.pCommandBuffers(stack.pointers(commandBuffer));
+
+                vkQueueSubmit(graphicsQueue, submitInfo, VK_NULL_HANDLE);
+                vkQueueWaitIdle(graphicsQueue);
+
+                vkFreeCommandBuffers(device, commandPool, commandBuffer);
+            }
+        }
+
+        private void copyBuffer(long srcBuffer, long dstBuffer, long size) {
+
+            try (MemoryStack stack = stackPush()) {
+
+                VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+                VkBufferCopy.Buffer copyRegion = VkBufferCopy.callocStack(1, stack);
+                copyRegion.size(size);
+
+                vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, copyRegion);
+
+                endSingleTimeCommands(commandBuffer);
+            }
+        }
+
+        private void memcpy(ByteBuffer buffer, Vertex[] vertices) {
+            for (Vertex vertex : vertices) {
+                buffer.putFloat(vertex.pos.x());
+                buffer.putFloat(vertex.pos.y());
+                buffer.putFloat(vertex.pos.z());
+
+                buffer.putFloat(vertex.color.x());
+                buffer.putFloat(vertex.color.y());
+                buffer.putFloat(vertex.color.z());
+
+                buffer.putFloat(vertex.texCoords.x());
+                buffer.putFloat(vertex.texCoords.y());
+            }
+        }
+
+        private void memcpy(ByteBuffer buffer, int[] indices) {
+
+            for (int index : indices) {
+                buffer.putInt(index);
+            }
+
+            buffer.rewind();
+        }
+
+        private void memcpy(ByteBuffer buffer, UniformBufferObject ubo) {
+
+            final int mat4Size = 16 * Float.BYTES;
+
+            ubo.model.get(0, buffer);
+            ubo.view.get(alignAs(mat4Size, alignOf(ubo.view)), buffer);
+            ubo.proj.get(alignAs(mat4Size * 2, alignOf(ubo.view)), buffer);
+        }
+
+        private int findMemoryType(int typeFilter, int properties) {
+
+            VkPhysicalDeviceMemoryProperties memProperties = VkPhysicalDeviceMemoryProperties.mallocStack();
+            vkGetPhysicalDeviceMemoryProperties(physicalDevice, memProperties);
+
+            for (int i = 0; i < memProperties.memoryTypeCount(); i++) {
+                if ((typeFilter & (1 << i)) != 0 && (memProperties.memoryTypes(i).propertyFlags() & properties) == properties) {
+                    return i;
+                }
+            }
+
+            throw new RuntimeException("Failed to find suitable memory type");
+        }
+
+        private void createCommandBuffers() {
+
+            final int commandBuffersCount = swapChainFramebuffers.size();
+
+            commandBuffers = new ArrayList<>(commandBuffersCount);
+
+            try (MemoryStack stack = stackPush()) {
+
+                VkCommandBufferAllocateInfo allocInfo = VkCommandBufferAllocateInfo.callocStack(stack);
+                allocInfo.sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO);
+                allocInfo.commandPool(commandPool);
+                allocInfo.level(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+                allocInfo.commandBufferCount(commandBuffersCount);
+
+                PointerBuffer pCommandBuffers = stack.mallocPointer(commandBuffersCount);
+
+                if (vkAllocateCommandBuffers(device, allocInfo, pCommandBuffers) != VK_SUCCESS) {
+                    throw new RuntimeException("Failed to allocate command buffers");
+                }
+
+                for (int i = 0; i < commandBuffersCount; i++) {
+                    commandBuffers.add(new VkCommandBuffer(pCommandBuffers.get(i), device));
+                }
+
+                VkCommandBufferBeginInfo beginInfo = VkCommandBufferBeginInfo.callocStack(stack);
+                beginInfo.sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO);
+
+                VkRenderPassBeginInfo renderPassInfo = VkRenderPassBeginInfo.callocStack(stack);
+                renderPassInfo.sType(VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO);
+
+                renderPassInfo.renderPass(renderPass);
+
+                VkRect2D renderArea = VkRect2D.callocStack(stack);
+                renderArea.offset(VkOffset2D.callocStack(stack).set(0, 0));
+                renderArea.extent(swapChainExtent);
+                renderPassInfo.renderArea(renderArea);
+
+                VkClearValue.Buffer clearValues = VkClearValue.callocStack(2, stack);
+                clearValues.get(0).color().float32(stack.floats(0.0f, 0.0f, 0.0f, 1.0f));
+                clearValues.get(1).depthStencil().set(1.0f, 0);
+
+                renderPassInfo.pClearValues(clearValues);
+
+                for (int i = 0; i < commandBuffersCount; i++) {
+
+                    VkCommandBuffer commandBuffer = commandBuffers.get(i);
+
+                    if (vkBeginCommandBuffer(commandBuffer, beginInfo) != VK_SUCCESS) {
+                        throw new RuntimeException("Failed to begin recording command buffer");
+                    }
+
+                    renderPassInfo.framebuffer(swapChainFramebuffers.get(i));
+
+
+                    vkCmdBeginRenderPass(commandBuffer, renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+                    {
+                        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+
+                        LongBuffer vertexBuffers = stack.longs(vertexBuffer);
+                        LongBuffer offsets = stack.longs(0);
+                        vkCmdBindVertexBuffers(commandBuffer, 0, vertexBuffers, offsets);
+
+                        vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
+                        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                pipelineLayout, 0, stack.longs(descriptorSets.get(i)), null);
+
+                        vkCmdDrawIndexed(commandBuffer, indices.length, 1, 0, 0, 0);
+                    }
+                    vkCmdEndRenderPass(commandBuffer);
+
+
+                    if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
+                        throw new RuntimeException("Failed to record command buffer");
+                    }
+
+                }
+
+            }
+        }
+
+        private void createSyncObjects() {
+
+            inFlightFrames = new ArrayList<>(MAX_FRAMES_IN_FLIGHT);
+            imagesInFlight = new HashMap<>(swapChainImages.size());
+
+            try (MemoryStack stack = stackPush()) {
+
+                VkSemaphoreCreateInfo semaphoreInfo = VkSemaphoreCreateInfo.callocStack(stack);
+                semaphoreInfo.sType(VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO);
+
+                VkFenceCreateInfo fenceInfo = VkFenceCreateInfo.callocStack(stack);
+                fenceInfo.sType(VK_STRUCTURE_TYPE_FENCE_CREATE_INFO);
+                fenceInfo.flags(VK_FENCE_CREATE_SIGNALED_BIT);
+
+                LongBuffer pImageAvailableSemaphore = stack.mallocLong(1);
+                LongBuffer pRenderFinishedSemaphore = stack.mallocLong(1);
+                LongBuffer pFence = stack.mallocLong(1);
+
+                for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+
+                    if (vkCreateSemaphore(device, semaphoreInfo, null, pImageAvailableSemaphore) != VK_SUCCESS
+                            || vkCreateSemaphore(device, semaphoreInfo, null, pRenderFinishedSemaphore) != VK_SUCCESS
+                            || vkCreateFence(device, fenceInfo, null, pFence) != VK_SUCCESS) {
+
+                        throw new RuntimeException("Failed to create synchronization objects for the frame " + i);
+                    }
+
+                    inFlightFrames.add(new Frame(pImageAvailableSemaphore.get(0), pRenderFinishedSemaphore.get(0), pFence.get(0)));
+                }
+
+            }
+        }
+
+        private void updateUniformBuffer(int currentImage) {
+
+            try (MemoryStack stack = stackPush()) {
+
+                UniformBufferObject ubo = new UniformBufferObject();
+
+                ubo.model.rotate((float) (glfwGetTime() * Math.toRadians(90)), 0.0f, 0.0f, 1.0f);
+                ubo.view.lookAt(2.0f, 2.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+                ubo.proj.perspective((float) Math.toRadians(45),
+                        (float) swapChainExtent.width() / (float) swapChainExtent.height(), 0.1f, 10.0f);
+                ubo.proj.m11(ubo.proj.m11() * -1);
+
+                PointerBuffer data = stack.mallocPointer(1);
+                vkMapMemory(device, uniformBuffersMemory.get(currentImage), 0, UniformBufferObject.SIZEOF, 0, data);
+                {
+                    memcpy(data.getByteBuffer(0, UniformBufferObject.SIZEOF), ubo);
+                }
+                vkUnmapMemory(device, uniformBuffersMemory.get(currentImage));
+            }
+        }
+
+        private void drawFrame() {
+
+            try (MemoryStack stack = stackPush()) {
+
+                Frame thisFrame = inFlightFrames.get(currentFrame);
+
+                vkWaitForFences(device, thisFrame.pFence(), true, UINT64_MAX);
+
+                IntBuffer pImageIndex = stack.mallocInt(1);
+
+                int vkResult = vkAcquireNextImageKHR(device, swapChain, UINT64_MAX,
+                        thisFrame.imageAvailableSemaphore(), VK_NULL_HANDLE, pImageIndex);
+
+                if (vkResult == VK_ERROR_OUT_OF_DATE_KHR) {
+                    recreateSwapChain();
+                    return;
+                } else if (vkResult != VK_SUCCESS) {
+                    throw new RuntimeException("Cannot get image");
+                }
+
+                final int imageIndex = pImageIndex.get(0);
+
+                updateUniformBuffer(imageIndex);
+
+                if (imagesInFlight.containsKey(imageIndex)) {
+                    vkWaitForFences(device, imagesInFlight.get(imageIndex).fence(), true, UINT64_MAX);
+                }
+
+                imagesInFlight.put(imageIndex, thisFrame);
+
+                VkSubmitInfo submitInfo = VkSubmitInfo.callocStack(stack);
+                submitInfo.sType(VK_STRUCTURE_TYPE_SUBMIT_INFO);
+
+                submitInfo.waitSemaphoreCount(1);
+                submitInfo.pWaitSemaphores(thisFrame.pImageAvailableSemaphore());
+                submitInfo.pWaitDstStageMask(stack.ints(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT));
+
+                submitInfo.pSignalSemaphores(thisFrame.pRenderFinishedSemaphore());
+
+                submitInfo.pCommandBuffers(stack.pointers(commandBuffers.get(imageIndex)));
+
+                vkResetFences(device, thisFrame.pFence());
+
+                if ((vkResult = vkQueueSubmit(graphicsQueue, submitInfo, thisFrame.fence())) != VK_SUCCESS) {
+                    vkResetFences(device, thisFrame.pFence());
+                    throw new RuntimeException("Failed to submit draw command buffer: " + vkResult);
+                }
+
+                VkPresentInfoKHR presentInfo = VkPresentInfoKHR.callocStack(stack);
+                presentInfo.sType(VK_STRUCTURE_TYPE_PRESENT_INFO_KHR);
+
+                presentInfo.pWaitSemaphores(thisFrame.pRenderFinishedSemaphore());
+
+                presentInfo.swapchainCount(1);
+                presentInfo.pSwapchains(stack.longs(swapChain));
+
+                presentInfo.pImageIndices(pImageIndex);
+
+                vkResult = vkQueuePresentKHR(presentQueue, presentInfo);
+
+                if (vkResult == VK_ERROR_OUT_OF_DATE_KHR || vkResult == VK_SUBOPTIMAL_KHR || framebufferResize) {
+                    framebufferResize = false;
+                    recreateSwapChain();
+                } else if (vkResult != VK_SUCCESS) {
+                    throw new RuntimeException("Failed to present swap chain image");
+                }
+
+                currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+            }
+        }
+
+        private long createShaderModule(ByteBuffer spirvCode) {
+
+            try (MemoryStack stack = stackPush()) {
+
+                VkShaderModuleCreateInfo createInfo = VkShaderModuleCreateInfo.callocStack(stack);
+
+                createInfo.sType(VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO);
+                createInfo.pCode(spirvCode);
+
+                LongBuffer pShaderModule = stack.mallocLong(1);
+
+                if (vkCreateShaderModule(device, createInfo, null, pShaderModule) != VK_SUCCESS) {
+                    throw new RuntimeException("Failed to create shader module");
+                }
+
+                return pShaderModule.get(0);
+            }
+        }
+
+        private VkSurfaceFormatKHR chooseSwapSurfaceFormat(VkSurfaceFormatKHR.Buffer availableFormats) {
+            return availableFormats.stream()
+                    .filter(availableFormat -> availableFormat.format() == VK_FORMAT_B8G8R8_SRGB)
+                    .filter(availableFormat -> availableFormat.colorSpace() == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+                    .findAny()
+                    .orElse(availableFormats.get(0));
+        }
+
+        private int chooseSwapPresentMode(IntBuffer availablePresentModes) {
+
+            for (int i = 0; i < availablePresentModes.capacity(); i++) {
+                if (availablePresentModes.get(i) == VK_PRESENT_MODE_MAILBOX_KHR) {
+                    return availablePresentModes.get(i);
+                }
+            }
+
+            return VK_PRESENT_MODE_FIFO_KHR;
+        }
+
+        private VkExtent2D chooseSwapExtent(VkSurfaceCapabilitiesKHR capabilities) {
+
+            if (capabilities.currentExtent().width() != UINT32_MAX) {
+                return capabilities.currentExtent();
+            }
+
+            IntBuffer width = stackGet().ints(0);
+            IntBuffer height = stackGet().ints(0);
+
+            glfwGetFramebufferSize(window, width, height);
+
+            VkExtent2D actualExtent = VkExtent2D.mallocStack().set(width.get(0), height.get(0));
+
+            VkExtent2D minExtent = capabilities.minImageExtent();
+            VkExtent2D maxExtent = capabilities.maxImageExtent();
+
+            actualExtent.width(clamp(minExtent.width(), maxExtent.width(), actualExtent.width()));
+            actualExtent.height(clamp(minExtent.height(), maxExtent.height(), actualExtent.height()));
+
+            return actualExtent;
+        }
+
+        private int clamp(int min, int max, int value) {
+            return Math.max(min, Math.min(max, value));
+        }
+
+        private SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device, MemoryStack stack) {
+
+            SwapChainSupportDetails details = new SwapChainSupportDetails();
+
+            details.capabilities = VkSurfaceCapabilitiesKHR.mallocStack(stack);
+            vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, details.capabilities);
+
+            IntBuffer count = stack.ints(0);
+
+            vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, count, null);
+
+            if (count.get(0) != 0) {
+                details.formats = VkSurfaceFormatKHR.mallocStack(count.get(0), stack);
+                vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, count, details.formats);
+            }
+
+            vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, count, null);
+
+            if (count.get(0) != 0) {
+                details.presentModes = stack.mallocInt(count.get(0));
+                vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, count, details.presentModes);
+            }
+
+            return details;
+        }
+
+        private QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) {
+
+            QueueFamilyIndices indices = new QueueFamilyIndices();
+
+            try (MemoryStack stack = stackPush()) {
+
+                IntBuffer queueFamilyCount = stack.ints(0);
+
+                vkGetPhysicalDeviceQueueFamilyProperties(device, queueFamilyCount, null);
+
+                VkQueueFamilyProperties.Buffer queueFamilies = VkQueueFamilyProperties.mallocStack(queueFamilyCount.get(0), stack);
+
+                vkGetPhysicalDeviceQueueFamilyProperties(device, queueFamilyCount, queueFamilies);
+
+                IntBuffer presentSupport = stack.ints(VK_FALSE);
+
+                for (int i = 0; i < queueFamilies.capacity() || !indices.isComplete(); i++) {
+
+                    if ((queueFamilies.get(i).queueFlags() & VK_QUEUE_GRAPHICS_BIT) != 0) {
+                        indices.graphicsFamily = i;
+                    }
+
+                    vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, presentSupport);
+
+                    if (presentSupport.get(0) == VK_TRUE) {
+                        indices.presentFamily = i;
+                    }
+                }
+
+                return indices;
+            }
+        }
+
+        private PointerBuffer asPointerBuffer(List<? extends Pointer> list) {
+
+            MemoryStack stack = stackGet();
+
+            PointerBuffer buffer = stack.mallocPointer(list.size());
+
+            list.forEach(buffer::put);
+
+            return buffer.rewind();
+        }
+
+        private static class UniformBufferObject {
+
+            private static final int SIZEOF = 3 * 16 * Float.BYTES;
+
+            private final Matrix4f model;
+            private final Matrix4f view;
+            private final Matrix4f proj;
+
+            public UniformBufferObject() {
+                model = new Matrix4f();
+                view = new Matrix4f();
+                proj = new Matrix4f();
+            }
+        }
+
+        private static class Vertex {
+
+            private static final int SIZEOF = (3 + 3 + 2) * Float.BYTES;
+            private static final int OFFSETOF_POS = 0;
+            private static final int OFFSETOF_COLOR = 3 * Float.BYTES;
+            private static final int OFFSETOF_TEXTCOORDS = (3 + 3) * Float.BYTES;
+
+            private final Vector3fc pos;
+            private final Vector3fc color;
+            private final Vector2fc texCoords;
+
+            public Vertex(Vector3fc pos, Vector3fc color, Vector2fc texCoords) {
+                this.pos = pos;
+                this.color = color;
+                this.texCoords = texCoords;
+            }
+
+            private static VkVertexInputBindingDescription.Buffer getBindingDescription() {
+
+                VkVertexInputBindingDescription.Buffer bindingDescription =
+                        VkVertexInputBindingDescription.callocStack(1);
+
+                bindingDescription.binding(0);
+                bindingDescription.stride(Vertex.SIZEOF);
+                bindingDescription.inputRate(VK_VERTEX_INPUT_RATE_VERTEX);
+
+                return bindingDescription;
+            }
+
+            private static VkVertexInputAttributeDescription.Buffer getAttributeDescriptions() {
+
+                VkVertexInputAttributeDescription.Buffer attributeDescriptions =
+                        VkVertexInputAttributeDescription.callocStack(3);
+
+                // Position
+                VkVertexInputAttributeDescription posDescription = attributeDescriptions.get(0);
+                posDescription.binding(0);
+                posDescription.location(0);
+                posDescription.format(VK_FORMAT_R32G32B32_SFLOAT);
+                posDescription.offset(OFFSETOF_POS);
+
+                // Color
+                VkVertexInputAttributeDescription colorDescription = attributeDescriptions.get(1);
+                colorDescription.binding(0);
+                colorDescription.location(1);
+                colorDescription.format(VK_FORMAT_R32G32B32_SFLOAT);
+                colorDescription.offset(OFFSETOF_COLOR);
+
+                // Texture coordinates
+                VkVertexInputAttributeDescription texCoordsDescription = attributeDescriptions.get(2);
+                texCoordsDescription.binding(0);
+                texCoordsDescription.location(2);
+                texCoordsDescription.format(VK_FORMAT_R32G32_SFLOAT);
+                texCoordsDescription.offset(OFFSETOF_TEXTCOORDS);
+
+                return attributeDescriptions.rewind();
+            }
+
+        }
+
+        private class QueueFamilyIndices {
+
+            // We use Integer to use null as the empty value
+            private Integer graphicsFamily;
+            private Integer presentFamily;
+
+            private boolean isComplete() {
+                return graphicsFamily != null && presentFamily != null;
+            }
+
+            public int[] unique() {
+                return IntStream.of(graphicsFamily, presentFamily).distinct().toArray();
+            }
+
+            public int[] array() {
+                return new int[]{graphicsFamily, presentFamily};
+            }
+        }
+
+        private class SwapChainSupportDetails {
+
+            private VkSurfaceCapabilitiesKHR capabilities;
+            private VkSurfaceFormatKHR.Buffer formats;
+            private IntBuffer presentModes;
+
+        }
+
+    }
+}

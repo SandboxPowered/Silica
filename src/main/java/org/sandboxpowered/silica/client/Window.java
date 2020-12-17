@@ -23,11 +23,10 @@ public class Window {
         this.windowName = name;
         this.width = width;
         this.height = height;
-        if (!glfwInit())
-            throw new IllegalStateException("Unable to initialize GLFW");
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
         pointer = glfwCreateWindow(width, height, name, NULL, NULL);
         if (pointer == NULL)
@@ -53,7 +52,7 @@ public class Window {
             );
         }
 
-        glfwMakeContextCurrent(pointer);
+//        glfwMakeContextCurrent(pointer);
         glfwSwapInterval(1);
         glfwShowWindow(pointer);
     }

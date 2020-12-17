@@ -4,7 +4,6 @@ import de.jcm.discordgamesdk.Core;
 import de.jcm.discordgamesdk.CreateParams;
 import de.jcm.discordgamesdk.activity.Activity;
 import org.sandboxpowered.silica.client.Silica;
-import org.sandboxpowered.silica.client.util.DiscordUtil;
 
 import java.io.File;
 import java.io.IOException;

@@ -115,6 +115,12 @@ public class Silica implements Runnable {
 
         LOG.debug("Loaded namespaces: [{}]", StringUtils.join(manager.getNamespaces(), ","));
 
+        if (!GLFW.glfwInit()) {
+            throw new IllegalStateException("Failed to initialize GLFW, errors: " + Joiner.on(",").join(list));
+        }
+        if (!glfwVulkanSupported()) {
+            throw new IllegalStateException("Cannot find a compatible Vulkan installable client driver (ICD)");
+        }
         window = new Window("Sandbox Silica", args.width, args.height);
 
         discordManager = new DiscordManager();
@@ -164,6 +170,8 @@ public class Silica implements Runnable {
         if (ENABLE_DEBUG) {
             destroyDebugUtilsMessengerEXT(vInstance, debugMessenger, null);
         }
+        vkDestroyCommandPool(logicalDevice.getLogicalDevice(), commandPool, null);
+        vkDestroyDevice(logicalDevice.getLogicalDevice(), null);
         vkDestroySurfaceKHR(vInstance, surface, null);
         vkDestroyInstance(vInstance, null);
         window.cleanup();

@@ -1,5 +1,7 @@
 package org.sandboxpowered.silica.client.resources;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
@@ -11,7 +13,6 @@ import java.io.File;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import static java.util.Objects.requireNonNull;
 import static org.lwjgl.assimp.Assimp.aiGetErrorString;
@@ -20,10 +21,9 @@ import static org.lwjgl.assimp.Assimp.aiImportFile;
 public class ModelLoader {
 
     public static Model loadModel(File file, int flags) {
-
         try (AIScene scene = aiImportFile(file.getAbsolutePath(), flags)) {
 
-            Logger logger = Logger.getLogger(ModelLoader.class.getSimpleName());
+            Logger logger = LogManager.getLogger(ModelLoader.class);
 
             logger.info("Loading model " + file.getPath() + "...");
 
