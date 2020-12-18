@@ -10,13 +10,12 @@ import org.lwjgl.vulkan.VkAllocationCallbacks;
 import org.lwjgl.vulkan.VkDebugUtilsMessengerCreateInfoEXT;
 import org.lwjgl.vulkan.VkInstance;
 import org.lwjgl.vulkan.VkPhysicalDevice;
-import org.sandboxpowered.silica.client.util.DiscordManager;
-import org.sandboxpowered.silica.client.vulkan.error.VkError;
-import org.sandboxpowered.silica.client.vulkan.hardware.LogicalDevice;
-import org.sandboxpowered.silica.client.vulkan.instance.InstanceUtil;
 import org.sandboxpowered.silica.client.resources.DirectoryResourceLoader;
 import org.sandboxpowered.silica.client.resources.ResourceManager;
 import org.sandboxpowered.silica.client.resources.ZIPResourceLoader;
+import org.sandboxpowered.silica.client.vulkan.error.VkError;
+import org.sandboxpowered.silica.client.vulkan.hardware.LogicalDevice;
+import org.sandboxpowered.silica.client.vulkan.instance.InstanceUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,12 +45,10 @@ public class Silica implements Runnable {
     public static final boolean ENABLE_DEBUG = DEBUG.get(true);
     public static final Logger LOG = LogManager.getLogger(Silica.class);
 
-    private static Silica silicaInstance;
     private final VkInstance vInstance;
     private final VkPhysicalDevice[] vPhysicalDevices;
     private final VkPhysicalDevice physicalDevice;
     private final Window window;
-    private final DiscordManager discordManager;
     private final long surface;
     private final long debugMessenger;
     private final LogicalDevice logicalDevice;
@@ -115,21 +112,7 @@ public class Silica implements Runnable {
 
         LOG.debug("Loaded namespaces: [{}]", StringUtils.join(manager.getNamespaces(), ","));
 
-        if (!GLFW.glfwInit()) {
-            throw new IllegalStateException("Failed to initialize GLFW, errors: " + Joiner.on(",").join(list));
-        }
-        if (!glfwVulkanSupported()) {
-            throw new IllegalStateException("Cannot find a compatible Vulkan installable client driver (ICD)");
-        }
         window = new Window("Sandbox Silica", args.width, args.height);
-
-        discordManager = new DiscordManager();
-
-        discordManager.updateActivity(activity -> {
-            activity.setState("Loading");
-        });
-        // Force an update to set activity before doing game load
-        discordManager.update();
 
         vInstance = InstanceUtil.createInstance();
         debugMessenger = setupDebugMessenger();
@@ -141,7 +124,6 @@ public class Silica implements Runnable {
 
         while (!window.shouldClose()) {
             window.update();
-            discordManager.update();
         }
 
         close();
@@ -160,13 +142,7 @@ public class Silica implements Runnable {
         return VK_ERROR_EXTENSION_NOT_PRESENT;
     }
 
-    public static Silica getInstance() {
-        return silicaInstance;
-    }
-
     public void close() {
-        discordManager.close();
-
         if (ENABLE_DEBUG) {
             destroyDebugUtilsMessengerEXT(vInstance, debugMessenger, null);
         }
