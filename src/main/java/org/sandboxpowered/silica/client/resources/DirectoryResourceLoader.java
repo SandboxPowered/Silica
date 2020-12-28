@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public class DirectoryResourceLoader implements ResourceLoader {
@@ -16,6 +16,10 @@ public class DirectoryResourceLoader implements ResourceLoader {
 
     public DirectoryResourceLoader(File directory) {
         this.directory = directory;
+    }
+
+    protected static String relativize(File file, File file2) {
+        return file.toURI().relativize(file2.toURI()).getPath();
     }
 
     @Override
@@ -48,9 +52,5 @@ public class DirectoryResourceLoader implements ResourceLoader {
             namespaces = set;
         }
         return namespaces;
-    }
-
-    protected static String relativize(File file, File file2) {
-        return file.toURI().relativize(file2.toURI()).getPath();
     }
 }

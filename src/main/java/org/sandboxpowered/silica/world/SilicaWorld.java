@@ -38,8 +38,10 @@ public class SilicaWorld implements World {
     public Side getSide() {
         return null;
     }
+
+    @Nullable
     @Override
-    public @Nullable BlockEntity getBlockEntity(Position position) {
+    public BlockEntity getBlockEntity(Position position) {
         return null;
     }
 

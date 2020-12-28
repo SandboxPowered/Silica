@@ -1,6 +1,5 @@
 package org.sandboxpowered.silica.content.blocks;
 
-import org.sandboxpowered.api.block.BaseBlock;
 import org.sandboxpowered.api.block.Blocks;
 import org.sandboxpowered.api.state.BlockState;
 import org.sandboxpowered.api.state.Properties;

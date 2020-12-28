@@ -53,28 +53,29 @@ repositories {
 
 dependencies {
     implementation platform('org.sandboxpowered.api:api:coded-tweaks-SNAPSHOT')
+    implementation 'org.sandboxpowered.api:base'
+    implementation 'org.sandboxpowered.api:rendering'
+    implementation 'org.sandboxpowered.api:resources'
 
-    implementation('org.sandboxpowered.api:base')
-    implementation('org.sandboxpowered.api:rendering')
-    implementation('org.sandboxpowered.api:resources')
+    implementation 'org.jetbrains:annotations:20.1.0'
 
-    implementation 'com.github.JnCrMx:discord-game-sdk4j:8cafb76013'
-    implementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
-
+    implementation 'commons-io:commons-io:2.8.0'
+    implementation 'org.apache.commons:commons-lang3:3.11'
     implementation 'com.google.guava:guava:30.0-jre'
     implementation 'com.google.code.gson:gson:2.8.6'
-    implementation "org.joml:joml:1.9.25"
 
     implementation 'org.apache.logging.log4j:log4j-api:2.13.3'
     implementation 'org.apache.logging.log4j:log4j-core:2.13.3'
+
     implementation 'net.sf.jopt-simple:jopt-simple:5.0.4'
+
     implementation 'com.electronwill.night-config:core:3.6.3'
     implementation 'com.electronwill.night-config:json:3.6.3'
     implementation 'com.electronwill.night-config:toml:3.6.3'
 
-    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+    implementation 'org.joml:joml:1.9.25'
 
+    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
     implementation "org.lwjgl:lwjgl"
     implementation "org.lwjgl:lwjgl-assimp"
     implementation "org.lwjgl:lwjgl-glfw"

@@ -6,7 +6,7 @@ import org.sandboxpowered.api.state.FluidState;
 import org.sandboxpowered.api.state.property.Property;
 import org.sandboxpowered.silica.state.BaseState;
 
-public class SilicaFluidState extends BaseState<Fluid,FluidState> implements FluidState {
+public class SilicaFluidState extends BaseState<Fluid, FluidState> implements FluidState {
     public SilicaFluidState(Fluid base, ImmutableMap<Property<?>, Comparable<?>> properties) {
         super(base, properties);
     }

@@ -35,28 +35,6 @@ public class Silica implements Runnable {
     private final ResourceManager manager;
 
 
-    public static Path asPath(URL url) {
-        if (url.getProtocol().equals("file")) {
-            return asFile(url).toPath();
-        } else {
-            try {
-                return Paths.get(url.toURI());
-            } catch (URISyntaxException var2) {
-                LOG.error("Error finding path of url", var2);
-                return null;
-            }
-        }
-    }
-
-    public static File asFile(URL url) {
-        try {
-            return new File(url.toURI());
-        } catch (URISyntaxException var2) {
-            LOG.error("Error finding file of url", var2);
-            return null;
-        }
-    }
-
     public Silica(Args args) {
         List<String> list = new ArrayList<>();
         glfwSetErrorCallback((i, l) ->
@@ -87,7 +65,7 @@ public class Silica implements Runnable {
 
         File resourcePacks = new File("resourcepacks");
 
-        if(!resourcePacks.exists())
+        if (!resourcePacks.exists())
             resourcePacks.mkdirs();
 
         Collection<File> files = FileUtils.listFiles(resourcePacks, FileFilters.ZIP.or(FileFilters.JAR), new IOFileFilter() {
@@ -129,9 +107,32 @@ public class Silica implements Runnable {
         close();
     }
 
+    public static Path asPath(URL url) {
+        if (url.getProtocol().equals("file")) {
+            return asFile(url).toPath();
+        } else {
+            try {
+                return Paths.get(url.toURI());
+            } catch (URISyntaxException var2) {
+                LOG.error("Error finding path of url", var2);
+                return null;
+            }
+        }
+    }
+
+    public static File asFile(URL url) {
+        try {
+            return new File(url.toURI());
+        } catch (URISyntaxException var2) {
+            LOG.error("Error finding file of url", var2);
+            return null;
+        }
+    }
+
     public void close() {
         window.cleanup();
     }
+
     @Override
     public void run() {
 

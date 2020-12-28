@@ -10,12 +10,12 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Window {
-    private final long pointer;
-    private String windowName;
     private static double lastDrawTime = Double.MIN_VALUE;
-    private int width;
-    private int height;
+    private final long pointer;
     public int currentFps;
+    private String windowName;
+    private final int width;
+    private final int height;
     private int fpsCounter;
     private long nextDebugInfoUpdateTime = System.currentTimeMillis();
 
