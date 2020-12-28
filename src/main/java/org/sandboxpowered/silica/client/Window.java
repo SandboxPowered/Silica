@@ -26,7 +26,6 @@ public class Window {
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
         pointer = glfwCreateWindow(width, height, name, NULL, NULL);
         if (pointer == NULL)
@@ -52,7 +51,7 @@ public class Window {
             );
         }
 
-//        glfwMakeContextCurrent(pointer);
+        glfwMakeContextCurrent(pointer);
         glfwSwapInterval(1);
         glfwShowWindow(pointer);
     }
@@ -73,6 +72,8 @@ public class Window {
     }
 
     public void update() {
+        glfwSwapBuffers(pointer);
+        glfwPollEvents();
         limitDisplayFPS(144);
         ++this.fpsCounter;
         while (System.currentTimeMillis() >= this.nextDebugInfoUpdateTime + 1000L) {
