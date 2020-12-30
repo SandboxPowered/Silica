@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.client.resources;
+package org.sandboxpowered.silica.resources;
 
 import java.io.File;
 import java.io.IOException;

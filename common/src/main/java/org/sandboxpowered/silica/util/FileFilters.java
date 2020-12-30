@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.client.util;
+package org.sandboxpowered.silica.util;
 
 import org.apache.commons.io.filefilter.IOFileFilter;
 

@@ -17,6 +17,7 @@ import org.sandboxpowered.api.server.Server;
 import org.sandboxpowered.api.shape.Box;
 import org.sandboxpowered.api.shape.Shape;
 import org.sandboxpowered.api.state.property.Property;
+import org.sandboxpowered.api.tags.Tag;
 import org.sandboxpowered.api.util.Identity;
 import org.sandboxpowered.api.util.math.Position;
 import org.sandboxpowered.api.util.math.Vec2i;
@@ -27,18 +28,19 @@ import org.sandboxpowered.api.util.text.Text;
 import org.sandboxpowered.eventhandler.EventHandler;
 import org.sandboxpowered.eventhandler.ResettableEventHandler;
 import org.sandboxpowered.internal.InternalService;
+import org.sandboxpowered.silica.util.SilicaIdentity;
 
 import java.util.function.Supplier;
 
 public class SilicaInternalService  implements InternalService {
     @Override
     public Identity createIdentityFromString(String identity) {
-        return null;
+        return new SilicaIdentity("silica", identity); //TODO: do split logic
     }
 
     @Override
     public Identity createIdentityFromString(String name, String path) {
-        return null;
+        return new SilicaIdentity(name, path);
     }
 
     @Override
@@ -173,6 +175,11 @@ public class SilicaInternalService  implements InternalService {
 
     @Override
     public ToolMaterial toolMaterial(String material) {
+        return null;
+    }
+
+    @Override
+    public Tag<Block> getBlockTag(String string) {
         return null;
     }
 }

@@ -1,10 +1,12 @@
-package org.sandboxpowered.silica.client.util;
+package org.sandboxpowered.silica.util;
 
-public class Identifier {
+import org.sandboxpowered.api.util.Identity;
+
+public class SilicaIdentity implements Identity {
     public final String namespace;
     public final String path;
 
-    public Identifier(String namespace, String path) {
+    public SilicaIdentity(String namespace, String path) {
         this.namespace = namespace;
         this.path = path;
     }

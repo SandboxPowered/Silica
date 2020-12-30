@@ -10,10 +10,10 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 import org.sandboxpowered.api.client.Client;
 import org.sandboxpowered.api.client.GraphicsMode;
-import org.sandboxpowered.silica.client.resources.DirectoryResourceLoader;
-import org.sandboxpowered.silica.client.resources.ResourceManager;
-import org.sandboxpowered.silica.client.resources.ZIPResourceLoader;
-import org.sandboxpowered.silica.client.util.FileFilters;
+import org.sandboxpowered.silica.resources.DirectoryResourceLoader;
+import org.sandboxpowered.silica.resources.ResourceManager;
+import org.sandboxpowered.silica.resources.ZIPResourceLoader;
+import org.sandboxpowered.silica.util.FileFilters;
 
 import java.io.File;
 import java.io.IOException;

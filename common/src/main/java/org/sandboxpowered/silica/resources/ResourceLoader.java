@@ -1,6 +1,6 @@
-package org.sandboxpowered.silica.client.resources;
+package org.sandboxpowered.silica.resources;
 
-import org.sandboxpowered.silica.client.util.Identifier;
+import org.sandboxpowered.api.util.Identity;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,8 +8,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 public interface ResourceLoader {
-    private static String getFilename(String type, Identifier identifier) {
-        return String.format("%s/%s/%s", "assets", identifier.getNamespace(), identifier.getPath());
+    private static String getFilename(String type, Identity identity) {
+        return String.format("%s/%s/%s", "assets", identity.getNamespace(), identity.getPath());
     }
 
     boolean containsFile(String path);

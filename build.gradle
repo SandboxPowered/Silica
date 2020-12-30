@@ -1,18 +1,37 @@
 import org.gradle.internal.os.OperatingSystem
-import proguard.gradle.ProGuardTask
-buildscript {
-    repositories {
-        google()
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.0'
-        classpath 'com.guardsquare:proguard-gradle:7.0.1'
-    }
-}
+
 plugins {
     id 'application'
     id 'java'
+    id 'org.jetbrains.kotlin.jvm' version '1.4.30-M1'
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url 'https://jitpack.io' }
+        maven { url 'https://nexus.sandboxpowered.org/repository/maven-public/' }
+        maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'org.jetbrains.kotlin.jvm'
+
+    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_14
+
+    compileKotlin {
+        kotlinOptions {
+            jvmTarget = "14"
+        }
+    }
+    compileTestKotlin {
+        kotlinOptions {
+            jvmTarget = "14"
+        }
+    }
 }
 
 application {
@@ -43,89 +62,3 @@ sourceCompatibility = targetCompatibility = JavaVersion.VERSION_14
 
 group 'org.sandboxpowered'
 version '1.0-SNAPSHOT'
-
-repositories {
-    mavenCentral()
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-    maven { url 'https://jitpack.io' }
-    maven { url 'https://nexus.sandboxpowered.org/repository/maven-public/' }
-}
-
-dependencies {
-    implementation platform('org.sandboxpowered.api:api:coded-tweaks-SNAPSHOT')
-    implementation 'org.sandboxpowered.api:base'
-    implementation 'org.sandboxpowered.api:rendering'
-    implementation 'org.sandboxpowered.api:resources'
-
-    implementation 'com.github.zafarkhaja:java-semver:0.9.0'
-    implementation 'org.sandboxpowered:SimpleEventHandler:2.0.3'
-
-    implementation 'org.jetbrains:annotations:20.1.0'
-
-    implementation 'commons-io:commons-io:2.8.0'
-    implementation 'org.apache.commons:commons-lang3:3.11'
-    implementation 'com.google.code.gson:gson:2.8.6'
-
-
-    implementation 'net.sf.jopt-simple:jopt-simple:5.0.4'
-
-    implementation 'com.electronwill.night-config:core:3.6.3'
-    implementation 'com.electronwill.night-config:json:3.6.3'
-    implementation 'com.electronwill.night-config:toml:3.6.3'
-
-    implementation 'org.joml:joml:1.9.25'
-
-    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
-    implementation "org.lwjgl:lwjgl"
-    implementation "org.lwjgl:lwjgl-assimp"
-    implementation "org.lwjgl:lwjgl-glfw"
-    implementation "org.lwjgl:lwjgl-nfd"
-    implementation "org.lwjgl:lwjgl-openal"
-    implementation "org.lwjgl:lwjgl-opengl"
-    implementation "org.lwjgl:lwjgl-openvr"
-    implementation "org.lwjgl:lwjgl-opus"
-    implementation "org.lwjgl:lwjgl-shaderc"
-    implementation "org.lwjgl:lwjgl-stb"
-    implementation "org.lwjgl:lwjgl-tinyexr"
-    runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-nfd::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-openvr::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-opus::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-shaderc::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-tinyexr::$lwjglNatives"
-    implementation "org.joml:joml:${jomlVersion}"
-    implementation 'org.apache.logging.log4j:log4j-api:2.14.0'
-    implementation 'org.apache.logging.log4j:log4j-core:2.14.0'
-    implementation 'com.google.guava:guava:30.1-jre'
-}
-
-task optimizeJar(type: ProGuardTask, dependsOn: jar) {
-    configuration "proguard.cfg"
-
-    libraryjars configurations.compileClasspath.files
-
-    //add jre files
-    if (JavaVersion.current() >= JavaVersion.VERSION_1_9) {
-        doFirst {
-            println("using java 9+ module for proguard")
-        }
-        libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod", filter: "(!**.jar,!module-info.class)"
-    } else {
-        doFirst {
-            println("java 8 detected, using rt.jar for proguard")
-        }
-        libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
-    }
-
-    injars tasks.jar.archiveFile
-    outjars "${project.buildDir}/libs/${project.archivesBaseName}-${project.version}-obfuscated.jar"
-
-    printmapping "${project.buildDir}/libs/${project.archivesBaseName}-${project.version}-obfuscated.proguard"
-}
-
-build.finalizedBy optimizeJar

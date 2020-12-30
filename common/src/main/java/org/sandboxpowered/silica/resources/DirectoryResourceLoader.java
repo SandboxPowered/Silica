@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.client.resources;
+package org.sandboxpowered.silica.resources;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;

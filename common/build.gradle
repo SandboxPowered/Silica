@@ -1,0 +1,74 @@
+import org.gradle.internal.os.OperatingSystem
+
+project.ext.lwjglVersion = "3.2.4-SNAPSHOT"
+project.ext.jomlVersion = "1.9.25"
+
+switch (OperatingSystem.current()) {
+    case OperatingSystem.LINUX:
+        def osArch = System.getProperty("os.arch")
+        project.ext.lwjglNatives = osArch.startsWith("arm") || osArch.startsWith("aarch64") ? "natives-linux-arm64" : "natives-linux"
+        break
+    case OperatingSystem.MAC_OS:
+        project.ext.lwjglNatives = "natives-macos"
+        break
+    case OperatingSystem.WINDOWS:
+        project.ext.lwjglNatives = "natives-windows"
+        break
+}
+
+group 'org.sandboxpowered'
+version '1.0-SNAPSHOT'
+
+dependencies {
+    api platform('org.sandboxpowered.api:api:coded-tweaks-SNAPSHOT')
+    api 'org.sandboxpowered.api:base'
+    api 'org.sandboxpowered.api:rendering'
+    api 'org.sandboxpowered.api:resources'
+
+    api 'com.github.zafarkhaja:java-semver:0.9.0'
+    api 'org.sandboxpowered:SimpleEventHandler:2.0.3'
+
+    api 'org.jetbrains:annotations:20.1.0'
+
+    api 'commons-io:commons-io:2.8.0'
+    api 'org.apache.commons:commons-lang3:3.11'
+    api 'com.google.code.gson:gson:2.8.6'
+
+
+    api 'net.sf.jopt-simple:jopt-simple:5.0.4'
+
+    api 'com.electronwill.night-config:core:3.6.3'
+    api 'com.electronwill.night-config:json:3.6.3'
+    api 'com.electronwill.night-config:toml:3.6.3'
+
+    api 'org.joml:joml:1.9.25'
+
+    api platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+    api "org.lwjgl:lwjgl"
+    api "org.lwjgl:lwjgl-assimp"
+    api "org.lwjgl:lwjgl-glfw"
+    api "org.lwjgl:lwjgl-nfd"
+    api "org.lwjgl:lwjgl-openal"
+    api "org.lwjgl:lwjgl-opengl"
+    api "org.lwjgl:lwjgl-openvr"
+    api "org.lwjgl:lwjgl-opus"
+    api "org.lwjgl:lwjgl-shaderc"
+    api "org.lwjgl:lwjgl-stb"
+    api "org.lwjgl:lwjgl-tinyexr"
+    runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-nfd::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-openvr::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-opus::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-shaderc::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-tinyexr::$lwjglNatives"
+    api "org.joml:joml:${jomlVersion}"
+    api 'org.apache.logging.log4j:log4j-api:2.14.0'
+    api 'org.apache.logging.log4j:log4j-core:2.14.0'
+    api 'com.google.guava:guava:30.1-jre'
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+}

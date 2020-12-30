@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.client.resources;
+package org.sandboxpowered.silica.resources;
 
 import java.util.*;
 import java.util.stream.Collectors;
