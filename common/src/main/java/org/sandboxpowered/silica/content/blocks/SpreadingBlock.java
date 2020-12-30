@@ -5,6 +5,7 @@ import org.sandboxpowered.api.state.BlockState;
 import org.sandboxpowered.api.state.Properties;
 import org.sandboxpowered.api.util.math.Position;
 import org.sandboxpowered.api.world.World;
+import org.sandboxpowered.silica.content.SilicaTags;
 
 import java.util.Random;
 
@@ -35,8 +36,8 @@ public class SpreadingBlock extends SnowBlock {
                 mutable.set(position);
                 Position offsetPos = mutable.add(random.nextInt(3) - 1, random.nextInt(5) - 3, random.nextInt(3) - 1);
                 BlockState offsetState = world.getBlockState(offsetPos);
-                if (offsetState.is(Blocks.DIRT)) {
-                    world.setBlockState(offsetPos, blockState2.with(Properties.SNOWY, Blocks.SNOW.matches(world.getBlockState(offsetPos.up()).getBlock()))); // TODO replace with snow tag check
+                if (offsetState.isIn(SilicaTags.SPREADABLE_TARGET)) {
+                    world.setBlockState(offsetPos, blockState2.with(Properties.SNOWY, world.getBlockState(offsetPos.up()).isIn(SilicaTags.SNOWY)));
                 }
             }
         }

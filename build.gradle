@@ -13,6 +13,7 @@ allprojects {
         maven { url 'https://jitpack.io' }
         maven { url 'https://nexus.sandboxpowered.org/repository/maven-public/' }
         maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
+        maven { url 'https://libraries.minecraft.net/' }
     }
 }
 

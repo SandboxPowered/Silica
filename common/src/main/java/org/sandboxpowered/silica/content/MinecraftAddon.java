@@ -67,6 +67,6 @@ public class MinecraftAddon implements Addon {
 
     public enum Extra {
         SLAB,
-        STAIRS;
+        STAIRS
     }
 }

@@ -23,6 +23,8 @@ public class SilicaWorld implements World {
 
     private final BlockState defaultState = Blocks.AIR.get().getBaseState();
 
+    private com.artemis.World artemisWorld;
+
     @Override
     public BlockState getBlockState(Position position) {
         return stateMap.getOrDefault(position, defaultState);

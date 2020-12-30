@@ -49,32 +49,26 @@ public class StairsBlock extends BaseBlock implements FluidLoggable {
         BlockState offsetState = reader.getBlockState(pos.offset(direction));
         if (isInStairTag(offsetState) && state.get(HALF) == offsetState.get(HALF)) {
             Direction offsetDir = offsetState.get(FACING);
-            if (offsetDir.getAxis() != state.get(FACING).getAxis() && shouldConsiderStair(state, reader, pos, offsetDir.getOppositeDirection())) {
-                if (offsetDir == direction.rotateYCounterClockwise()) {
-                    return StairShape.OUTER_LEFT;
-                }
-                return StairShape.OUTER_RIGHT;
+            if (offsetDir.getAxis() != state.get(FACING).getAxis() && shouldIgnoreStairDirection(state, reader, pos, offsetDir.getOppositeDirection())) {
+                return offsetDir == direction.rotateYCounterClockwise() ? StairShape.OUTER_LEFT : StairShape.OUTER_RIGHT;
             }
         }
         offsetState = reader.getBlockState(pos.offset(direction.getOppositeDirection()));
         if (isInStairTag(offsetState) && offsetState.get(HALF) == offsetState.get(HALF)) {
             Direction offsetDir = offsetState.get(FACING);
-            if (offsetDir.getAxis() != state.get(FACING).getAxis() && shouldConsiderStair(state, reader, pos, offsetDir)) {
-                if (offsetDir == direction.rotateYCounterClockwise()) {
-                    return StairShape.INNER_LEFT;
-                }
-                return StairShape.INNER_RIGHT;
+            if (offsetDir.getAxis() != state.get(FACING).getAxis() && shouldIgnoreStairDirection(state, reader, pos, offsetDir)) {
+                return offsetDir == direction.rotateYCounterClockwise() ? StairShape.INNER_LEFT : StairShape.INNER_RIGHT;
             }
         }
         return StairShape.STRAIGHT;
     }
 
-    private boolean shouldConsiderStair(BlockState state, WorldReader reader, Position pos, Direction direction) {
-        BlockState blockState2 = reader.getBlockState(pos.offset(direction));
-        return !isInStairTag(blockState2) || blockState2.get(FACING) != state.get(FACING) || blockState2.get(HALF) != state.get(HALF);
+    private boolean shouldIgnoreStairDirection(BlockState state, WorldReader reader, Position pos, Direction direction) {
+        BlockState offsetState = reader.getBlockState(pos.offset(direction));
+        return !isInStairTag(offsetState) || offsetState.get(FACING) != state.get(FACING) || offsetState.get(HALF) != state.get(HALF);
     }
 
-    public static boolean isInStairTag(BlockState blockState) {
-        return blockState.isIn(BlockTags.STAIRS);
+    public static boolean isInStairTag(BlockState state) {
+        return state.isIn(BlockTags.STAIRS);
     }
 }
