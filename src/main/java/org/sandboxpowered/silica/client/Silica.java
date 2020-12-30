@@ -8,6 +8,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
+import org.sandboxpowered.api.client.Client;
+import org.sandboxpowered.api.client.GraphicsMode;
 import org.sandboxpowered.silica.client.resources.DirectoryResourceLoader;
 import org.sandboxpowered.silica.client.resources.ResourceManager;
 import org.sandboxpowered.silica.client.resources.ZIPResourceLoader;
@@ -27,7 +29,7 @@ import java.util.List;
 import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
 import static org.lwjgl.opengl.GL11.*;
 
-public class Silica implements Runnable {
+public class Silica implements Runnable, Client {
     public static final Logger LOG = LogManager.getLogger(Silica.class);
 
     private final Window window;
@@ -145,5 +147,10 @@ public class Silica implements Runnable {
             this.width = width;
             this.height = height;
         }
+    }
+
+    @Override
+    public GraphicsMode getGraphicsMode() {
+        return GraphicsMode.FABULOUS;
     }
 }
