@@ -7,8 +7,10 @@ import io.netty.util.AttributeKey;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.apache.logging.log4j.LogManager;
+import org.sandboxpowered.silica.network.clientbound.PongResponse;
 import org.sandboxpowered.silica.network.clientbound.StatusResponse;
 import org.sandboxpowered.silica.network.serverbound.HandshakeRequest;
+import org.sandboxpowered.silica.network.serverbound.PingRequest;
 import org.sandboxpowered.silica.network.serverbound.StatusRequest;
 
 import java.util.ArrayList;
@@ -25,10 +27,14 @@ public enum Protocol {
     STATUS(1, newProtocol()
             .addFlow(Flow.SERVERBOUND, new Packets()
                     .addPacket(StatusRequest.class, StatusRequest::new)
+                    .addPacket(PingRequest.class, PingRequest::new)
             ).addFlow(Flow.CLIENTBOUND, new Packets()
                     .addPacket(StatusResponse.class, StatusResponse::new)
+                    .addPacket(PongResponse.class, PongResponse::new)
             )),
     LOGIN(2, newProtocol());
+
+
     public static final AttributeKey<Protocol> PROTOCOL_ATTRIBUTE_KEY = AttributeKey.valueOf("protocol");
     private static final Map<Class<? extends Packet>, Protocol> PROTOCOL_BY_PACKET = Maps.newHashMap();
 
@@ -63,7 +69,7 @@ public enum Protocol {
     }
 
     public Packet createPacket(Flow flow, int packetId) {
-        return packets.get(flow).idToConstructor.get(packetId).get();
+        return packets.get(flow).createPacket(packetId);
     }
 
     public static class Builder {
@@ -82,8 +88,10 @@ public enum Protocol {
         private final List<Supplier<? extends Packet>> idToConstructor = new ArrayList<>();
 
         public <P extends Packet> Packets addPacket(Class<P> pClass, Supplier<P> supplier) {
-            int i = this.idToConstructor.size();
-            int j = this.classToId.put(pClass, i);
+            return addPacket(this.idToConstructor.size(), pClass, supplier);
+        }
+        public <P extends Packet> Packets addPacket(int targetId, Class<P> pClass, Supplier<P> supplier) {
+            int j = this.classToId.put(pClass, targetId);
             if (j != -1) {
                 String string = "Packet " + pClass + " is already registered to ID " + j;
                 LogManager.getLogger().fatal(string);
@@ -100,6 +108,12 @@ public enum Protocol {
 
         public Iterable<Class<? extends Packet>> getAllPackets() {
             return Iterables.unmodifiableIterable(this.classToId.keySet());
+        }
+
+        public Packet createPacket(int packetId) {
+            if (idToConstructor.size() <= packetId)
+                return null;
+            return idToConstructor.get(packetId).get();
         }
     }
 }

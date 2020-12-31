@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
+import java.io.IOException;
 import java.util.List;
 
 public class PacketDecoder extends ByteToMessageDecoder {
@@ -20,8 +21,12 @@ public class PacketDecoder extends ByteToMessageDecoder {
             int packetId = buf.readVarInt();
             Protocol protocol = ctx.channel().attr(Protocol.PROTOCOL_ATTRIBUTE_KEY).get();
             Packet packet = protocol.createPacket(flow, packetId);
-            packet.read(buf);
-            out.add(packet);
+            if (packet != null) {
+                packet.read(buf);
+                out.add(packet);
+            } else {
+                throw new IOException("Unknown packet " + packetId);
+            }
         }
     }
 }
