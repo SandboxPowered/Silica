@@ -21,16 +21,16 @@ import java.util.function.Supplier;
 
 public enum Protocol {
     HANDSHAKE(-1, newProtocol().addFlow(Flow.SERVERBOUND, new Packets()
-            .addPacket(HandshakeRequest.class, HandshakeRequest::new)
+            .addPacket(0x00, HandshakeRequest.class, HandshakeRequest::new)
     )),
     PLAY(0, newProtocol()),
     STATUS(1, newProtocol()
             .addFlow(Flow.SERVERBOUND, new Packets()
-                    .addPacket(StatusRequest.class, StatusRequest::new)
-                    .addPacket(PingRequest.class, PingRequest::new)
+                    .addPacket(0x00, StatusRequest.class, StatusRequest::new)
+                    .addPacket(0x01, PingRequest.class, PingRequest::new)
             ).addFlow(Flow.CLIENTBOUND, new Packets()
-                    .addPacket(StatusResponse.class, StatusResponse::new)
-                    .addPacket(PongResponse.class, PongResponse::new)
+                    .addPacket(0x00, StatusResponse.class, StatusResponse::new)
+                    .addPacket(0x01, PongResponse.class, PongResponse::new)
             )),
     LOGIN(2, newProtocol());
 
@@ -87,9 +87,6 @@ public enum Protocol {
         }};
         private final List<Supplier<? extends Packet>> idToConstructor = new ArrayList<>();
 
-        public <P extends Packet> Packets addPacket(Class<P> pClass, Supplier<P> supplier) {
-            return addPacket(this.idToConstructor.size(), pClass, supplier);
-        }
         public <P extends Packet> Packets addPacket(int targetId, Class<P> pClass, Supplier<P> supplier) {
             int j = this.classToId.put(pClass, targetId);
             if (j != -1) {
