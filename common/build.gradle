@@ -50,6 +50,8 @@ dependencies {
     api "it.unimi.dsi:fastutil:8.4.4"
     api 'com.mojang:authlib:1.5.21'
 
+    api 'io.netty:netty-all:4.1.56.Final'
+
     api platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
     api "org.lwjgl:lwjgl"
     api "org.lwjgl:lwjgl-assimp"

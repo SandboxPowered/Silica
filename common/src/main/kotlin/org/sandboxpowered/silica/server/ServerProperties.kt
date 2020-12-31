@@ -1,5 +1,10 @@
 package org.sandboxpowered.silica.server
 
+import java.io.FileWriter
+import java.io.InputStream
+import java.io.OutputStream
+import java.nio.file.Files
+import java.nio.file.Path
 import java.util.*
 import java.util.function.Function
 
@@ -34,5 +39,35 @@ class ServerProperties(private val properties: Properties) {
                 ?.let(stringToValue)
                 ?: defaultValue)
                 .also { properties[name] = valueToString(it) }
+    }
+
+    private fun save(path: Path) {
+        val outputStream = Files.newOutputStream(path)
+
+        properties.store(outputStream, "Silica server properties")
+
+        outputStream.close()
+    }
+
+    companion object {
+        @JvmStatic
+        fun fromFile(path: Path): ServerProperties {
+            val properties = Properties()
+
+            if (Files.notExists(path))
+                Files.createFile(path)
+
+            val inputStream = Files.newInputStream(path)
+
+            properties.load(inputStream)
+
+            inputStream.close()
+
+            val props = ServerProperties(properties)
+
+            props.save(path)
+
+            return props
+        }
     }
 }
