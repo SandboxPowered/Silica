@@ -39,23 +39,21 @@ public class PacketHandler extends SimpleChannelInboundHandler<Packet> {
             this.channel.config().setAutoRead(false);
         }
         if (this.channel.eventLoop().inEventLoop()) {
-            if (wantedProtocol != currentProtocol) {
-                setProtocol(wantedProtocol);
-            }
-
-            ChannelFuture channelFuture = this.channel.writeAndFlush(packet);
-
-            channelFuture.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+            sendPacketInternal(packet, wantedProtocol, currentProtocol);
         } else {
             channel.eventLoop().execute(() -> {
-                if (wantedProtocol != currentProtocol) {
-                    setProtocol(wantedProtocol);
-                }
-
-                ChannelFuture channelFuture = this.channel.writeAndFlush(packet);
-
-                channelFuture.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                sendPacketInternal(packet, wantedProtocol, currentProtocol);
             });
         }
+    }
+
+    private void sendPacketInternal(Packet packet, Protocol wantedProtocol, Protocol currentProtocol) {
+        if (wantedProtocol != currentProtocol) {
+            setProtocol(wantedProtocol);
+        }
+
+        ChannelFuture channelFuture = this.channel.writeAndFlush(packet);
+
+        channelFuture.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
     }
 }
