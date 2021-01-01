@@ -13,9 +13,14 @@ import org.sandboxpowered.silica.network.*;
 import org.sandboxpowered.silica.server.ServerProperties;
 
 import java.nio.file.Paths;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 
 public class Main {
-    public static void main(String[] args) throws InterruptedException {
+
+    public static void main(String[] args) throws InterruptedException, NoSuchAlgorithmException {
+
         ServerProperties properties = ServerProperties.fromFile(Paths.get("server.properties"));
 
         EventLoopGroup bossGroup = new NioEventLoopGroup();

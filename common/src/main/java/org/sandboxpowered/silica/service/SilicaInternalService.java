@@ -32,7 +32,7 @@ import org.sandboxpowered.silica.util.SilicaIdentity;
 
 import java.util.function.Supplier;
 
-public class SilicaInternalService  implements InternalService {
+public class SilicaInternalService implements InternalService {
     @Override
     public Identity createIdentityFromString(String identity) {
         return new SilicaIdentity("silica", identity); //TODO: do split logic

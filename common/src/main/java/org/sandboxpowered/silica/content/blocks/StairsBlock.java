@@ -28,6 +28,10 @@ public class StairsBlock extends BaseBlock implements FluidLoggable {
         super(settings);
     }
 
+    public static boolean isInStairTag(BlockState state) {
+        return state.isIn(BlockTags.STAIRS);
+    }
+
     @Override
     public void appendProperties(StateFactory.Builder<Block, BlockState> builder) {
         super.appendProperties(builder);
@@ -66,9 +70,5 @@ public class StairsBlock extends BaseBlock implements FluidLoggable {
     private boolean shouldIgnoreStairDirection(BlockState state, WorldReader reader, Position pos, Direction direction) {
         BlockState offsetState = reader.getBlockState(pos.offset(direction));
         return !isInStairTag(offsetState) || offsetState.get(FACING) != state.get(FACING) || offsetState.get(HALF) != state.get(HALF);
-    }
-
-    public static boolean isInStairTag(BlockState state) {
-        return state.isIn(BlockTags.STAIRS);
     }
 }

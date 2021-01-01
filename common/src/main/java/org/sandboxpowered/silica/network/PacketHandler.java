@@ -1,9 +1,6 @@
 package org.sandboxpowered.silica.network;
 
 import io.netty.channel.*;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
-import org.jetbrains.annotations.Nullable;
 
 import java.net.SocketAddress;
 
@@ -26,7 +23,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Packet> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Packet msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, Packet msg) {
         if (this.channel.isOpen()) {
             msg.handle(this);
         }

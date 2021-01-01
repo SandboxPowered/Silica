@@ -6,7 +6,7 @@ import io.netty.handler.codec.MessageToByteEncoder;
 
 public class LengthPrepender extends MessageToByteEncoder<ByteBuf> {
     public static int getVarIntSize(int value) {
-        for(int variable = 1; variable < 5; ++variable) {
+        for (int variable = 1; variable < 5; ++variable) {
             if ((value & -1 << variable * 7) == 0) {
                 return variable;
             }

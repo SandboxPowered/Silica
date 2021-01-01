@@ -14,7 +14,7 @@ public class LengthSplitter extends ByteToMessageDecoder {
         buf.markReaderIndex();
         byte[] bs = new byte[3];
 
-        for(int i = 0; i < bs.length; ++i) {
+        for (int i = 0; i < bs.length; ++i) {
             if (!buf.isReadable()) {
                 buf.resetReaderIndex();
                 return;

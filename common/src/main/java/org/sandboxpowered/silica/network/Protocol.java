@@ -4,14 +4,16 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import io.netty.util.AttributeKey;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.apache.logging.log4j.LogManager;
+import org.sandboxpowered.silica.network.clientbound.Disconnect;
+import org.sandboxpowered.silica.network.clientbound.EncryptionRequest;
 import org.sandboxpowered.silica.network.clientbound.PongResponse;
 import org.sandboxpowered.silica.network.clientbound.StatusResponse;
-import org.sandboxpowered.silica.network.serverbound.HandshakeRequest;
-import org.sandboxpowered.silica.network.serverbound.PingRequest;
-import org.sandboxpowered.silica.network.serverbound.StatusRequest;
+import org.sandboxpowered.silica.network.serverbound.*;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -32,11 +34,20 @@ public enum Protocol {
                     .addPacket(0x00, StatusResponse.class, StatusResponse::new)
                     .addPacket(0x01, PongResponse.class, PongResponse::new)
             )),
-    LOGIN(2, newProtocol());
+    LOGIN(2, newProtocol()
+            .addFlow(Flow.SERVERBOUND, new Packets()
+                    .addPacket(0x00, LoginStart.class, LoginStart::new)
+                    .addPacket(0x01, EncryptionResponse.class, EncryptionResponse::new)
+            ).addFlow(Flow.CLIENTBOUND, new Packets()
+                    .addPacket(0x00, Disconnect.class, Disconnect::new)
+                    .addPacket(0x01, EncryptionRequest.class, EncryptionRequest::new)
+            )
+    );
 
 
     public static final AttributeKey<Protocol> PROTOCOL_ATTRIBUTE_KEY = AttributeKey.valueOf("protocol");
     private static final Map<Class<? extends Packet>, Protocol> PROTOCOL_BY_PACKET = Maps.newHashMap();
+    private static final Int2ObjectMap<Protocol> ID_2_PROTOCOL = new Int2ObjectOpenHashMap<>();
 
     static {
         for (Protocol protocol : values()) {
@@ -45,6 +56,7 @@ public enum Protocol {
                     PROTOCOL_BY_PACKET.put(class_, protocol);
                 });
             });
+            ID_2_PROTOCOL.put(protocol.id, protocol);
         }
     }
 
@@ -62,6 +74,10 @@ public enum Protocol {
 
     public static Protocol getProtocolForPacket(Packet packet) {
         return PROTOCOL_BY_PACKET.get(packet.getClass());
+    }
+
+    public static Protocol getProtocolFromId(int id) {
+        return ID_2_PROTOCOL.get(id);
     }
 
     public int getPacketId(Flow flow, Packet msg) {

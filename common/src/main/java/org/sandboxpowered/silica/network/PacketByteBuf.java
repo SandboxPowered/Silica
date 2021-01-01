@@ -1016,4 +1016,25 @@ public class PacketByteBuf extends ByteBuf {
     public String readString() {
         return readString(32767);
     }
+
+    public byte[] readByteArray() {
+        return readByteArray(readableBytes());
+    }
+
+    public byte[] readByteArray(int maxSize) {
+        int length = this.readVarInt();
+        if (length > maxSize) {
+            throw new DecoderException("ByteArray with size " + length + " is bigger than allowed " + maxSize);
+        } else {
+            byte[] bs = new byte[length];
+            this.readBytes(bs);
+            return bs;
+        }
+    }
+
+    public ByteBuf writeByteArray(byte[] array) {
+        this.writeVarInt(array.length);
+        this.writeBytes(array);
+        return this;
+    }
 }
