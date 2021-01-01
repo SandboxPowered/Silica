@@ -1,9 +1,9 @@
 package org.sandboxpowered.silica.network.serverbound;
 
-import org.apache.logging.log4j.LogManager;
 import org.sandboxpowered.silica.network.Packet;
 import org.sandboxpowered.silica.network.PacketByteBuf;
 import org.sandboxpowered.silica.network.PacketHandler;
+import org.sandboxpowered.silica.server.SilicaServer;
 
 public class EncryptionResponse implements Packet {
     private byte[] sharedSecret;
@@ -17,11 +17,12 @@ public class EncryptionResponse implements Packet {
 
     @Override
     public void write(PacketByteBuf buf) {
-
+        buf.writeByteArray(sharedSecret);
+        buf.writeByteArray(verifyToken);
     }
 
     @Override
-    public void handle(PacketHandler packetHandler) {
-        LogManager.getLogger().info("Got encryption response");
+    public void handle(PacketHandler packetHandler, SilicaServer server) {
+
     }
 }

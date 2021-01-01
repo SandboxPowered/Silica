@@ -4,6 +4,7 @@ import org.sandboxpowered.silica.network.Packet;
 import org.sandboxpowered.silica.network.PacketByteBuf;
 import org.sandboxpowered.silica.network.PacketHandler;
 import org.sandboxpowered.silica.network.clientbound.PongResponse;
+import org.sandboxpowered.silica.server.SilicaServer;
 
 public class PingRequest implements Packet {
     private long time;
@@ -19,7 +20,7 @@ public class PingRequest implements Packet {
     }
 
     @Override
-    public void handle(PacketHandler packetHandler) {
+    public void handle(PacketHandler packetHandler, SilicaServer server) {
         packetHandler.sendPacket(new PongResponse(time));
     }
 }

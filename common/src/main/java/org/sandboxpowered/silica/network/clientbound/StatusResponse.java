@@ -3,6 +3,7 @@ package org.sandboxpowered.silica.network.clientbound;
 import org.sandboxpowered.silica.network.Packet;
 import org.sandboxpowered.silica.network.PacketByteBuf;
 import org.sandboxpowered.silica.network.PacketHandler;
+import org.sandboxpowered.silica.server.SilicaServer;
 
 public class StatusResponse implements Packet {
     private String responseJson = "{\n" +
@@ -40,7 +41,7 @@ public class StatusResponse implements Packet {
     }
 
     @Override
-    public void handle(PacketHandler packetHandler) {
+    public void handle(PacketHandler packetHandler, SilicaServer server) {
 
     }
 }

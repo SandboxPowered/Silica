@@ -1,10 +1,17 @@
 package org.sandboxpowered.silica.network;
 
 import io.netty.channel.*;
+import org.sandboxpowered.silica.server.SilicaServer;
 
 import java.net.SocketAddress;
 
 public class PacketHandler extends SimpleChannelInboundHandler<Packet> {
+    private SilicaServer server;
+
+    public PacketHandler(SilicaServer server) {
+        this.server = server;
+    }
+
     private Channel channel;
     private SocketAddress address;
 
@@ -25,7 +32,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Packet> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Packet msg) {
         if (this.channel.isOpen()) {
-            msg.handle(this);
+            msg.handle(this, server);
         }
     }
 

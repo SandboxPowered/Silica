@@ -3,6 +3,7 @@ package org.sandboxpowered.silica.network.clientbound;
 import org.sandboxpowered.silica.network.Packet;
 import org.sandboxpowered.silica.network.PacketByteBuf;
 import org.sandboxpowered.silica.network.PacketHandler;
+import org.sandboxpowered.silica.server.SilicaServer;
 
 public class EncryptionRequest implements Packet {
     private String serverId;
@@ -33,7 +34,7 @@ public class EncryptionRequest implements Packet {
     }
 
     @Override
-    public void handle(PacketHandler packetHandler) {
+    public void handle(PacketHandler packetHandler, SilicaServer server) {
 
     }
 }
