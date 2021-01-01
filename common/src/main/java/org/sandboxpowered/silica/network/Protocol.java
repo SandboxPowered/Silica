@@ -9,10 +9,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.apache.logging.log4j.LogManager;
-import org.sandboxpowered.silica.network.clientbound.Disconnect;
-import org.sandboxpowered.silica.network.clientbound.EncryptionRequest;
-import org.sandboxpowered.silica.network.clientbound.PongResponse;
-import org.sandboxpowered.silica.network.clientbound.StatusResponse;
+import org.sandboxpowered.silica.network.clientbound.*;
 import org.sandboxpowered.silica.network.serverbound.*;
 
 import java.util.ArrayList;
@@ -41,6 +38,7 @@ public enum Protocol {
             ).addFlow(Flow.CLIENTBOUND, new Packets()
                     .addPacket(0x00, Disconnect.class, Disconnect::new)
                     .addPacket(0x01, EncryptionRequest.class, EncryptionRequest::new)
+                    .addPacket(0x02, LoginSuccess.class, LoginSuccess::new)
             )
     );
 

@@ -1,10 +1,6 @@
 package org.sandboxpowered.silica.network.serverbound;
 
-import org.sandboxpowered.silica.network.Packet;
-import org.sandboxpowered.silica.network.PacketByteBuf;
-import org.sandboxpowered.silica.network.PacketHandler;
-import org.sandboxpowered.silica.network.Protocol;
-import org.sandboxpowered.silica.server.SilicaServer;
+import org.sandboxpowered.silica.network.*;
 
 public class HandshakeRequest implements Packet {
     private int protocolVersion;
@@ -29,7 +25,7 @@ public class HandshakeRequest implements Packet {
     }
 
     @Override
-    public void handle(PacketHandler packetHandler, SilicaServer server) {
+    public void handle(PacketHandler packetHandler, Connection connection) {
         Protocol protocol = Protocol.getProtocolFromId(this.intention);
         if (protocol != null) {
             packetHandler.setProtocol(protocol);

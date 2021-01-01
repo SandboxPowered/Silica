@@ -1,9 +1,7 @@
 package org.sandboxpowered.silica.network.serverbound;
 
-import org.sandboxpowered.silica.network.Packet;
-import org.sandboxpowered.silica.network.PacketByteBuf;
-import org.sandboxpowered.silica.network.PacketHandler;
-import org.sandboxpowered.silica.network.clientbound.EncryptionRequest;
+import org.sandboxpowered.silica.network.*;
+import org.sandboxpowered.silica.network.clientbound.LoginSuccess;
 import org.sandboxpowered.silica.server.SilicaServer;
 
 public class LoginStart implements Packet {
@@ -20,7 +18,11 @@ public class LoginStart implements Packet {
     }
 
     @Override
-    public void handle(PacketHandler packetHandler, SilicaServer server) {
-        packetHandler.sendPacket(new EncryptionRequest("", server.getKeyPair().getPublic().getEncoded(), server.getVerificationArray()));
+    public void handle(PacketHandler packetHandler, Connection connection) {
+        SilicaServer server = connection.getServer();
+        connection.handleLoginStart(username);
+//        packetHandler.sendPacket(new EncryptionRequest("", server.getKeyPair().getPublic().getEncoded(), server.getVerificationArray()));
+        packetHandler.sendPacket(new LoginSuccess(connection.getProfile().getId(), username));
+        packetHandler.setProtocol(Protocol.PLAY);
     }
 }

@@ -6,14 +6,14 @@ import org.sandboxpowered.silica.server.SilicaServer;
 import java.net.SocketAddress;
 
 public class PacketHandler extends SimpleChannelInboundHandler<Packet> {
-    private SilicaServer server;
-
-    public PacketHandler(SilicaServer server) {
-        this.server = server;
-    }
-
+    private final SilicaServer server;
+    private final Connection connection;
     private Channel channel;
     private SocketAddress address;
+    public PacketHandler(Connection connection) {
+        this.connection = connection;
+        this.server = connection.getServer();
+    }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -32,7 +32,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Packet> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Packet msg) {
         if (this.channel.isOpen()) {
-            msg.handle(this, server);
+            msg.handle(this, connection);
         }
     }
 

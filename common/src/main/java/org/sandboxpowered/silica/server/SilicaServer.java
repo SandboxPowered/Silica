@@ -10,14 +10,13 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
 public class SilicaServer implements Server {
-    private SilicaWorld world;
     private final KeyPair encryptionKeyPair;
     private final byte[] verificationArray = new byte[4];
     private final Random serverRandom = new Random();
+    private SilicaWorld world;
 
     public SilicaServer() {
         try {

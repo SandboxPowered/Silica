@@ -33,7 +33,7 @@ public class DedicatedServer extends SilicaServer {
                                     .addLast(new PacketDecoder(Flow.SERVERBOUND))
                                     .addLast(new LengthPrepender())
                                     .addLast(new PacketEncoder(Flow.CLIENTBOUND))
-                                    .addLast(new PacketHandler(DedicatedServer.this));
+                                    .addLast(new PacketHandler(new Connection(DedicatedServer.this)));
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)

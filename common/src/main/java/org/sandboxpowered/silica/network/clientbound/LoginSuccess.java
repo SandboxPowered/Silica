@@ -5,24 +5,30 @@ import org.sandboxpowered.silica.network.Packet;
 import org.sandboxpowered.silica.network.PacketByteBuf;
 import org.sandboxpowered.silica.network.PacketHandler;
 
-public class PongResponse implements Packet {
-    private long time;
+import java.util.UUID;
 
-    public PongResponse(long time) {
-        this.time = time;
+public class LoginSuccess implements Packet {
+    private UUID uuid;
+    private String username;
+
+    public LoginSuccess(UUID uuid, String username) {
+        this.uuid = uuid;
+        this.username = username;
     }
 
-    public PongResponse() {
+    public LoginSuccess() {
     }
 
     @Override
     public void read(PacketByteBuf buf) {
-        this.time = buf.readLong();
+        uuid = buf.readUUID();
+        username = buf.readString(16);
     }
 
     @Override
     public void write(PacketByteBuf buf) {
-        buf.writeLong(this.time);
+        buf.writeUUID(uuid);
+        buf.writeString(username);
     }
 
     @Override

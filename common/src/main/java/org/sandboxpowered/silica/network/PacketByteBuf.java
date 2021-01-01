@@ -16,6 +16,7 @@ import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ScatteringByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 public class PacketByteBuf extends ByteBuf {
     private final ByteBuf source;
@@ -1035,6 +1036,16 @@ public class PacketByteBuf extends ByteBuf {
     public ByteBuf writeByteArray(byte[] array) {
         this.writeVarInt(array.length);
         this.writeBytes(array);
+        return this;
+    }
+
+    public UUID readUUID() {
+        return new UUID(readLong(), readLong());
+    }
+
+    public ByteBuf writeUUID(UUID uuid) {
+        this.writeLong(uuid.getMostSignificantBits());
+        this.writeLong(uuid.getLeastSignificantBits());
         return this;
     }
 }
