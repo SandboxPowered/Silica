@@ -1,12 +1,8 @@
 package org.sandboxpowered.silica.server
 
-import java.io.FileWriter
-import java.io.InputStream
-import java.io.OutputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
-import java.util.function.Function
 
 class ServerProperties(private val properties: Properties) {
     val onlineMode = get("online-mode", true)

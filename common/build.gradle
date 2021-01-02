@@ -25,6 +25,13 @@ dependencies {
     api artemisContrib('plugin-singleton')
     api artemisContrib('plugin-operations')
 
+    def akka_version='2.6.10'
+    def alpakka_version='2.0.2'
+    def scala_bin_version= '2.13'
+    api "com.typesafe.akka:akka-actor-typed_$scala_bin_version:$akka_version"
+    api "com.typesafe.akka:akka-stream-typed_$scala_bin_version:$akka_version"
+    api "com.lightbend.akka:akka-stream-alpakka-udp_$scala_bin_version:$alpakka_version"
+
     api 'net.sf.jopt-simple:jopt-simple:5.0.4'
 
     api 'com.electronwill.night-config:core:3.6.3'
@@ -33,7 +40,8 @@ dependencies {
 
     api "org.joml:joml:${jomlVersion}"
     api 'org.apache.logging.log4j:log4j-api:2.14.0'
-    api 'org.apache.logging.log4j:log4j-core:2.14.0'
+    runtimeOnly 'org.apache.logging.log4j:log4j-core:2.14.0'
+    runtimeOnly 'org.apache.logging.log4j:log4j-slf4j-impl:2.14.0'
     api 'com.google.guava:guava:30.1-jre'
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     api "it.unimi.dsi:fastutil:8.4.4"

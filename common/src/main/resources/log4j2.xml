@@ -17,5 +17,6 @@
             <AppenderRef ref="SysOut"/>
             <AppenderRef ref="File"/>
         </Root>
+        <Logger name="io.netty" level="INFO"/>
     </Loggers>
 </Configuration>
