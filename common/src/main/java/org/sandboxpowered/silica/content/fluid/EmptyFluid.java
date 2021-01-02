@@ -16,6 +16,7 @@ import java.util.Optional;
 
 public class EmptyFluid implements Fluid {
     private StateFactory<Fluid, FluidState> stateFactory;
+    private Identity identity;
 
     @Override
     public FluidState getBaseState() {
@@ -61,8 +62,6 @@ public class EmptyFluid implements Fluid {
     public Item asBucket() {
         return Items.AIR.get();
     }
-
-    private Identity identity;
 
     @Override
     public Identity getIdentity() {

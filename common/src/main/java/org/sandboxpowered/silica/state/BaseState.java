@@ -1,17 +1,20 @@
 package org.sandboxpowered.silica.state;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.*;
 import org.sandboxpowered.api.state.property.Property;
 import org.sandboxpowered.api.state.property.PropertyContainer;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
-public class BaseState<A, B> implements PropertyContainer<B> {
-    protected final A base;
+public class BaseState<B, S> implements PropertyContainer<S> {
+    protected final B base;
     private final ImmutableMap<Property<?>, Comparable<?>> properties;
+    private Table<Property<?>, Comparable<?>, S> possibleStates;
 
-    public BaseState(A base, ImmutableMap<Property<?>, Comparable<?>> properties) {
+    public BaseState(B base, ImmutableMap<Property<?>, Comparable<?>> properties) {
         this.base = base;
         this.properties = properties;
     }
@@ -39,12 +42,12 @@ public class BaseState<A, B> implements PropertyContainer<B> {
     }
 
     @Override
-    public <T extends Comparable<T>, V extends T> B with(Property<T> property, V value) {
+    public <T extends Comparable<T>, V extends T> S with(Property<T> property, V value) {
         Comparable<?> currentValue = this.properties.get(property);
         if (currentValue == null) {
             throw new IllegalArgumentException(String.format("Cannot set property %s as it does not exist in %s", property, this.base));
         } else {
-            B state = getState(property, value);
+            S state = getState(property, value);
             if (state == null) {
                 throw new IllegalArgumentException(String.format("Cannot set property %s to %s on %s, it is not an allowed value", property, value, this.base));
             } else {
@@ -54,7 +57,7 @@ public class BaseState<A, B> implements PropertyContainer<B> {
     }
 
     @Override
-    public <T extends Comparable<T>> B cycle(Property<T> property) {
+    public <T extends Comparable<T>> S cycle(Property<T> property) {
         Comparable<?> currentValue = this.properties.get(property);
         if (currentValue == null) {
             throw new IllegalArgumentException(String.format("Cannot set property %s as it does not exist in %s", property, this.base));
@@ -62,8 +65,36 @@ public class BaseState<A, B> implements PropertyContainer<B> {
         return getState(property, findNextInCollection(property.getValues(), (T) currentValue));
     }
 
-    private <T extends Comparable<T>, V extends T> B getState(Property<T> property, V value) {
-        return null; // TODO
+    public void initTable(Map<Map<Property<?>, Comparable<?>>, S> map) {
+        if (this.possibleStates != null) {
+            throw new IllegalStateException();
+        } else {
+            Table<Property<?>, Comparable<?>, S> table = HashBasedTable.create();
+
+            for (Map.Entry<Property<?>, Comparable<?>> entry : this.properties.entrySet()) {
+                Property<?> property = entry.getKey();
+                Iterator<Comparable<?>> comparableIterator = (Iterator<Comparable<?>>) property.getValues().iterator();
+
+                while (comparableIterator.hasNext()) {
+                    Comparable<?> comparable = comparableIterator.next();
+                    if (comparable != entry.getValue()) {
+                        table.put(property, comparable, map.get(this.createPropertiesCollectionWith(property, comparable)));
+                    }
+                }
+            }
+
+            this.possibleStates = table.isEmpty() ? table : ArrayTable.create(table);
+        }
+    }
+
+    private Map<Property<?>, Comparable<?>> createPropertiesCollectionWith(Property<?> property, Comparable<?> comparable) {
+        Map<Property<?>, Comparable<?>> map = new HashMap<>(this.properties);
+        map.put(property, comparable);
+        return map;
+    }
+
+    private <T extends Comparable<T>, V extends T> S getState(Property<T> property, V value) {
+        return possibleStates.get(property, value); // TODO: replace with global state holder object rather than holding every possible state within all states.
     }
 
     @Override

@@ -10,6 +10,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Packet> {
     private final Connection connection;
     private Channel channel;
     private SocketAddress address;
+
     public PacketHandler(Connection connection) {
         this.connection = connection;
         this.server = connection.getServer();

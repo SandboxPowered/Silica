@@ -29,7 +29,7 @@ public class JoinGame implements Packet {
     public void read(PacketByteBuf buf) {
         playerId = buf.readInt();
         hardcore = buf.readBoolean();
-        gamemode= buf.readUnsignedByte();
+        gamemode = buf.readUnsignedByte();
         previousGamemode = buf.readUnsignedByte();
         worldCount = buf.readVarInt();
         worldNames = buf.readIdentityArray();
