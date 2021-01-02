@@ -2,7 +2,6 @@ package org.sandboxpowered.silica.world.util
 
 import net.mostlyoriginal.api.utils.pooling.ObjectPool
 import net.mostlyoriginal.api.utils.pooling.Poolable
-import org.sandboxpowered.api.block.Blocks
 import org.sandboxpowered.api.state.BlockState
 import org.sandboxpowered.silica.getPool
 
@@ -23,15 +22,16 @@ import org.sandboxpowered.silica.getPool
  * N: -z
  */
 @Suppress("unused")
-class BlocTree constructor(
+class BlocTree private constructor(
     x: Int, y: Int, z: Int,
     size: Int
 ) : Poolable {
     private var bounds = Bounds().set(x, y, z, size)
     private var nodes = arrayOfNulls<BlocTree>(8)
     private var containers = arrayOfNulls<BlockState>(8)
-    private var default: BlockState = Blocks.AIR.get().baseState
-    private var treeDepth = 0
+    private lateinit var default: BlockState
+    var treeDepth = 0
+        private set
     private var parent: BlocTree? = null
 
     /**
@@ -111,26 +111,35 @@ class BlocTree constructor(
     }
 
     /**
-     * Sets the target position to [state]
+     * Sets the target position to [state].
+     * Throws an [IllegalArgumentException] if the given position is out of bounds.
      */
     operator fun set(
+        x: Int, y: Int, z: Int,
+        state: BlockState
+    ) {
+        require(bounds.contains(x, y, z)) { "Position $x, $y, $z outside of $bounds" }
+        internalSet(x, y, z, state)
+    }
+
+    private fun internalSet(
         x: Int, y: Int, z: Int,
         state: BlockState
     ) {
         val index = indexOf(x, y, z)
         val n = nodes[index]
         if (n != null) {
-            n[x, y, z] = state
+            n.internalSet(x, y, z, state)
             if (n.shouldShrink()) {
                 containers[index] = n.default
                 nodes[index] = null
                 otPool.free(n)
             }
         } else {
-            if (bounds.size > 8) {
+            if (bounds.size > 2) {
                 if ((containers[index] ?: default) != state) {
                     this.split(index)
-                    nodes[index]!![x, y, z] = state
+                    nodes[index]!!.internalSet(x, y, z, state)
                 }
             } else {
                 this.containers[index] = if (state != this.default) state else null
@@ -244,7 +253,7 @@ class BlocTree constructor(
      */
     fun dispose() = reset()
 
-    override fun toString() = "BlocTree(treeDepth=$treeDepth)"
+    override fun toString() = "BlocTree(depth=$treeDepth, $bounds)"
 
     /**
      * Simple square AABB
@@ -271,9 +280,11 @@ class BlocTree constructor(
         }
 
         fun contains(x: Int, y: Int, z: Int): Boolean =
-            this.x <= x && this.x + this.size >= x
-                    && this.y <= y && this.y + this.size >= y
-                    && this.z <= z && this.z + this.size >= z
+            this.x <= x && this.x + this.size > x
+                    && this.y <= y && this.y + this.size > y
+                    && this.z <= z && this.z + this.size > z
+
+        override fun toString() = "Bounds(x=$x, y=$y, z=$z, size=$size)"
     }
 
     companion object {
@@ -294,5 +305,12 @@ class BlocTree constructor(
         private const val UNE = U or N or E
 
         private val otPool: ObjectPool<BlocTree> = getPool()
+
+        operator fun invoke(
+            x: Int, y: Int, z: Int,
+            size: Int, default: BlockState
+        ): BlocTree {
+            return BlocTree(x, y, z, size).apply { this.default = default }
+        }
     }
 }

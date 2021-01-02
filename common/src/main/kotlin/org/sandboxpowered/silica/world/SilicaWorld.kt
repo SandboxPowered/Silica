@@ -15,7 +15,7 @@ import org.sandboxpowered.silica.world.util.BlocTree
 import java.util.stream.Stream
 
 abstract class SilicaWorld : World {
-    private val blocks: BlocTree = BlocTree(WORLD_MIN, WORLD_MIN, WORLD_MIN, WORLD_SIZE)
+    private val blocks: BlocTree = BlocTree(WORLD_MIN, WORLD_MIN, WORLD_MIN, WORLD_SIZE, Blocks.AIR.get().baseState)
     private val defaultState = Blocks.AIR.get().baseState
     private val artemisWorld: com.artemis.World? = null
 
@@ -55,8 +55,8 @@ abstract class SilicaWorld : World {
     override fun spawnItem(x: Double, y: Double, z: Double, stack: ItemStack) {}
 
     private companion object {
-        private const val WORLD_MIN = -33554432
-        private const val WORLD_MAX = 33554431
-        private const val WORLD_SIZE = - WORLD_MIN + WORLD_MAX + 1
+        private const val WORLD_MIN = -1 shl 25 // -2^25
+        private const val WORLD_MAX = (1 shl 25) - 1 // (2^25)-1
+        private const val WORLD_SIZE = - WORLD_MIN + WORLD_MAX + 1 // 2^26
     }
 }

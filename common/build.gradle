@@ -18,12 +18,12 @@ dependencies {
     api 'org.apache.commons:commons-lang3:3.11'
     api 'com.google.code.gson:gson:2.8.6'
 
-    api "net.onedaybeard.artemis:artemis-odb:2.3.0"
+    api 'net.onedaybeard.artemis:artemis-odb:2.3.0'
 
-    api(artemisContrib("core"))
-    api(artemisContrib("eventbus"))
-    api(artemisContrib("plugin-singleton"))
-    api(artemisContrib("plugin-operations"))
+    api artemisContrib('core')
+    api artemisContrib('eventbus')
+    api artemisContrib('plugin-singleton')
+    api artemisContrib('plugin-operations')
 
     api 'net.sf.jopt-simple:jopt-simple:5.0.4'
 

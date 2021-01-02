@@ -104,4 +104,12 @@ public class BaseState<B, S> implements PropertyContainer<S> {
     public <T extends Comparable<T>> boolean contains(Property<T> property) {
         return properties.containsKey(property);
     }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "{" +
+                "base=" + base +
+                ", properties=" + properties +
+                '}';
+    }
 }

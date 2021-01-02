@@ -33,6 +33,18 @@ subprojects {
             jvmTarget = "14"
         }
     }
+
+    dependencies {
+        def junitVersion = '5.5.2'
+        testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+        testImplementation "org.junit.jupiter:junit-jupiter-params:$junitVersion"
+        testImplementation "io.mockk:mockk:1.10.4"
+        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    }
+
+    tasks.test {
+        useJUnitPlatform()
+    }
 }
 
 application {
