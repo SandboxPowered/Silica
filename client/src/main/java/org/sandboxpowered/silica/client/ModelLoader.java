@@ -19,7 +19,6 @@ import static org.lwjgl.assimp.Assimp.aiGetErrorString;
 import static org.lwjgl.assimp.Assimp.aiImportFile;
 
 public class ModelLoader {
-
     public static Model loadModel(File file, int flags) {
         try (AIScene scene = aiImportFile(file.getAbsolutePath(), flags)) {
 
@@ -44,7 +43,6 @@ public class ModelLoader {
     }
 
     private static void processNode(AINode node, AIScene scene, Model model) {
-
         if (node.mMeshes() != null) {
             processNodeMeshes(scene, node, model);
         }
@@ -62,7 +60,6 @@ public class ModelLoader {
     }
 
     private static void processNodeMeshes(AIScene scene, AINode node, Model model) {
-
         PointerBuffer pMeshes = scene.mMeshes();
         IntBuffer meshIndices = node.mMeshes();
 
@@ -74,7 +71,6 @@ public class ModelLoader {
     }
 
     private static void processMesh(AIScene scene, AIMesh mesh, Model model) {
-
         processPositions(mesh, model.positions);
         processTexCoords(mesh, model.texCoords);
 
@@ -82,7 +78,6 @@ public class ModelLoader {
     }
 
     private static void processPositions(AIMesh mesh, List<Vector3fc> positions) {
-
         AIVector3D.Buffer vertices = requireNonNull(mesh.mVertices());
 
         for (int i = 0; i < vertices.capacity(); i++) {
@@ -93,7 +88,6 @@ public class ModelLoader {
     }
 
     private static void processTexCoords(AIMesh mesh, List<Vector2fc> texCoords) {
-
         AIVector3D.Buffer aiTexCoords = requireNonNull(mesh.mTextureCoords(0));
 
         for (int i = 0; i < aiTexCoords.capacity(); i++) {
@@ -104,7 +98,6 @@ public class ModelLoader {
     }
 
     private static void processIndices(AIMesh mesh, List<Integer> indices) {
-
         AIFace.Buffer aiFaces = mesh.mFaces();
 
         for (int i = 0; i < mesh.mNumFaces(); i++) {
@@ -118,7 +111,6 @@ public class ModelLoader {
     }
 
     public static class Model {
-
         public final List<Vector3fc> positions;
         public final List<Vector2fc> texCoords;
         public final List<Integer> indices;

@@ -183,10 +183,6 @@ public class SandboxLoader {
         return Side.SERVER;
     }
 
-    public boolean isExternalModLoaded(String loader, String modId) {
-        return false;
-    }
-
     public boolean isLoaded() {
         return loaded;
     }

@@ -28,7 +28,7 @@ public class AddonSpecificAPIReference implements SandboxAPI {
 
     @Override
     public boolean isExternalModLoaded(String loader, String modId) {
-        return this.loader.isExternalModLoaded(loader, modId);
+        return false;
     }
 
     @Override

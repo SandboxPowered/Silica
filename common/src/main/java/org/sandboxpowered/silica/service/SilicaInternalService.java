@@ -28,6 +28,7 @@ import org.sandboxpowered.api.util.text.Text;
 import org.sandboxpowered.eventhandler.EventHandler;
 import org.sandboxpowered.eventhandler.ResettableEventHandler;
 import org.sandboxpowered.internal.InternalService;
+import org.sandboxpowered.silica.registry.SilicaRegistries;
 import org.sandboxpowered.silica.util.SilicaIdentity;
 
 import java.util.function.Supplier;
@@ -75,6 +76,11 @@ public class SilicaInternalService implements InternalService {
 
     @Override
     public <T extends Content<T>> Registry<T> registryFunction(Class<T> c) {
+        if (c == Block.class) {
+            return SilicaRegistries.BLOCK_REGISTRY.cast();
+        } else if (c == Item.class) {
+            return SilicaRegistries.ITEM_REGISTRY.cast();
+        }
         return null;
     }
 
