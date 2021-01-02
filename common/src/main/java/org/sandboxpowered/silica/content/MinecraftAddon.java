@@ -11,6 +11,7 @@ import org.sandboxpowered.silica.content.blocks.AirBlock;
 import org.sandboxpowered.silica.content.blocks.AxisBlock;
 import org.sandboxpowered.silica.content.blocks.SpreadingBlock;
 import org.sandboxpowered.silica.content.blocks.StairsBlock;
+import org.sandboxpowered.silica.content.fluid.EmptyFluid;
 
 import java.util.Collections;
 import java.util.Set;
@@ -25,6 +26,12 @@ public class MinecraftAddon implements Addon {
 
     @Override
     public void register(SandboxAPI api, Registrar registrar) {
+        registerBlocks(api, registrar);
+        registerItems(api, registrar);
+        registerFluids(api, registrar);
+    }
+
+    public void registerBlocks(SandboxAPI api, Registrar registrar) {
         Extra[] baseExtras = new Extra[]{Extra.SLAB, Extra.STAIRS};
 
         registrar.register("air", new AirBlock(builder(Material.AIR).build()));
@@ -54,6 +61,14 @@ public class MinecraftAddon implements Addon {
 
             registerWithExtra(registrar, String.format("%s_planks", wood.getPrefix()), new BaseBlock(builder(Material.WOOD).build()), baseExtras);
         }
+    }
+
+    public void registerItems(SandboxAPI api, Registrar registrar) {
+
+    }
+
+    public void registerFluids(SandboxAPI api, Registrar registrar) {
+        registrar.register("empty", new EmptyFluid());
     }
 
     public void registerWithExtra(Registrar registrar, String name, BaseBlock block, Extra... extras) {
