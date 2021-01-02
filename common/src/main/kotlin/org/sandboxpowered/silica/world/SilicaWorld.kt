@@ -32,8 +32,8 @@ abstract class SilicaWorld : World {
         return null
     }
 
-    override fun getFluidState(position: Position): FluidState? {
-        return null
+    override fun getFluidState(position: Position): FluidState {
+        return getBlockState(position).fluidState
     }
 
     override fun getEntitiesWithin(box: Box): Stream<Entity> {
