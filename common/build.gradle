@@ -36,6 +36,11 @@ dependencies {
 
     api "net.onedaybeard.artemis:artemis-odb:2.3.0"
 
+    api(artemisContrib("core"))
+    api(artemisContrib("eventbus"))
+    api(artemisContrib("plugin-singleton"))
+    api(artemisContrib("plugin-operations"))
+
     api 'net.sf.jopt-simple:jopt-simple:5.0.4'
 
     api 'com.electronwill.night-config:core:3.6.3'
@@ -75,4 +80,9 @@ dependencies {
     runtimeOnly "org.lwjgl:lwjgl-shaderc::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-tinyexr::$lwjglNatives"
+}
+
+
+static GString artemisContrib(String module) {
+    return "net.mostlyoriginal.artemis-odb:contrib-$module:2.5.0"
 }
