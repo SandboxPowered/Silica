@@ -5,6 +5,7 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
 import io.netty.util.ByteProcessor;
+import org.sandboxpowered.api.util.Identity;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -1046,6 +1047,24 @@ public class PacketByteBuf extends ByteBuf {
     public ByteBuf writeUUID(UUID uuid) {
         this.writeLong(uuid.getMostSignificantBits());
         this.writeLong(uuid.getLeastSignificantBits());
+        return this;
+    }
+
+    public Identity[] readIdentityArray() {
+        int size = readVarInt();
+        Identity[] arr = new Identity[size];
+        for (int i = 0; i < size; i++) {
+            arr[i] = readIdentity();
+        }
+        return arr;
+    }
+
+    public Identity readIdentity() {
+        return Identity.of(readString());
+    }
+
+    public ByteBuf writeIdentity(Identity identity) {
+        writeString(identity.toString());
         return this;
     }
 }

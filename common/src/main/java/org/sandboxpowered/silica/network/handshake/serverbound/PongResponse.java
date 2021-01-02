@@ -1,13 +1,19 @@
-package org.sandboxpowered.silica.network.serverbound;
+package org.sandboxpowered.silica.network.handshake.serverbound;
 
 import org.sandboxpowered.silica.network.Connection;
 import org.sandboxpowered.silica.network.Packet;
 import org.sandboxpowered.silica.network.PacketByteBuf;
 import org.sandboxpowered.silica.network.PacketHandler;
-import org.sandboxpowered.silica.network.clientbound.PongResponse;
 
-public class PingRequest implements Packet {
+public class PongResponse implements Packet {
     private long time;
+
+    public PongResponse(long time) {
+        this.time = time;
+    }
+
+    public PongResponse() {
+    }
 
     @Override
     public void read(PacketByteBuf buf) {
@@ -21,6 +27,6 @@ public class PingRequest implements Packet {
 
     @Override
     public void handle(PacketHandler packetHandler, Connection connection) {
-        packetHandler.sendPacket(new PongResponse(time));
+
     }
 }

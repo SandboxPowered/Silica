@@ -9,8 +9,14 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.apache.logging.log4j.LogManager;
-import org.sandboxpowered.silica.network.clientbound.*;
-import org.sandboxpowered.silica.network.serverbound.*;
+import org.sandboxpowered.silica.network.login.serverbound.EncryptionResponse;
+import org.sandboxpowered.silica.network.login.clientbound.*;
+import org.sandboxpowered.silica.network.handshake.serverbound.PongResponse;
+import org.sandboxpowered.silica.network.handshake.serverbound.StatusResponse;
+import org.sandboxpowered.silica.network.handshake.clientbound.PingRequest;
+import org.sandboxpowered.silica.network.handshake.clientbound.StatusRequest;
+import org.sandboxpowered.silica.network.login.serverbound.*;
+import org.sandboxpowered.silica.network.play.clientbound.JoinGame;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -22,7 +28,13 @@ public enum Protocol {
     HANDSHAKE(-1, newProtocol().addFlow(Flow.SERVERBOUND, new Packets()
             .addPacket(0x00, HandshakeRequest.class, HandshakeRequest::new)
     )),
-    PLAY(0, newProtocol()),
+    PLAY(0, newProtocol()
+            .addFlow(Flow.SERVERBOUND, new Packets()
+
+            ).addFlow(Flow.CLIENTBOUND, new Packets()
+                    .addPacket(0x24, JoinGame.class, JoinGame::new)
+            )
+    ),
     STATUS(1, newProtocol()
             .addFlow(Flow.SERVERBOUND, new Packets()
                     .addPacket(0x00, StatusRequest.class, StatusRequest::new)

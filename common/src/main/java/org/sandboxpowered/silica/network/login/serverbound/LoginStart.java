@@ -1,7 +1,7 @@
-package org.sandboxpowered.silica.network.serverbound;
+package org.sandboxpowered.silica.network.login.serverbound;
 
 import org.sandboxpowered.silica.network.*;
-import org.sandboxpowered.silica.network.clientbound.LoginSuccess;
+import org.sandboxpowered.silica.network.login.clientbound.LoginSuccess;
 import org.sandboxpowered.silica.server.SilicaServer;
 
 public class LoginStart implements Packet {

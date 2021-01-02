@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.network;
 
 import com.mojang.authlib.GameProfile;
-import org.sandboxpowered.silica.network.serverbound.EncryptionResponse;
+import org.sandboxpowered.silica.network.login.serverbound.EncryptionResponse;
 import org.sandboxpowered.silica.server.SilicaServer;
 
 import javax.crypto.Cipher;

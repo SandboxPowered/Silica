@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.network.serverbound;
+package org.sandboxpowered.silica.network.login.serverbound;
 
 import org.sandboxpowered.silica.network.*;
 
