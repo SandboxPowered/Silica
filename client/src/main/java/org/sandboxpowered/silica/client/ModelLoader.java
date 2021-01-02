@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.resources;
+package org.sandboxpowered.silica.client;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
