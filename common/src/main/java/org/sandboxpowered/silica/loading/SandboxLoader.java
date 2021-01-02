@@ -34,9 +34,9 @@ public class SandboxLoader {
     private final Map<AddonSpec, Addon> addonMap = new HashMap<>();
     private final Map<AddonSpec, AddonSpecificAPIReference> addonAPIs = new HashMap<>();
     private final Map<AddonSpec, AddonSpecificRegistrarReference> addonRegistrars = new HashMap<>();
-    private final AddonFinder scanner = new AddonFinder.MergedScanner(
-            new AddonFinder.FolderScanner(Paths.get("addons")),
-            new AddonFinder.ClasspathScanner()
+    private final AddonFinder scanner = new AddonFinder.MergedFinder(
+            new AddonFinder.DirectoryFinder(Paths.get("addons")),
+            new AddonFinder.ClasspathFinder()
     );
     private final Map<String, AddonClassLoader> addonToClassLoader = new LinkedHashMap<>();
     public Logger log = LogManager.getLogger(SandboxLoader.class);

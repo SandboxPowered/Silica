@@ -9,13 +9,18 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
+import org.sandboxpowered.silica.loading.SandboxLoader;
 import org.sandboxpowered.silica.network.*;
 
 import java.nio.file.Paths;
 
 public class DedicatedServer extends SilicaServer {
+    private SandboxLoader loader;
     public DedicatedServer() {
         ServerProperties properties = ServerProperties.fromFile(Paths.get("server.properties"));
+
+        loader = new SandboxLoader();
+        loader.load();
 
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();

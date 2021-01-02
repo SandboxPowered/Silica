@@ -1,0 +1,12 @@
+id="minecraft" # required `[a-z0-9-_]{4,15}`
+version="16.4.0" # required Semver Enforced!
+title="Minecraft" # optional DEFAULT: modid
+description="""
+Multiline Description
+"""  # optional DEFAULT: ""
+entrypoint="org.sandboxpowered.silica.content.MinecraftAddon" # required
+authors = [ # required 1
+    "SandboxPowered",
+]
+url = "" # optional DEFAULT: ""
+side = "COMMON" # optional [SERVER, CLIENT, COMMON] DEFAULT: "COMMON"

@@ -18,18 +18,18 @@ public interface AddonFinder {
 
     Collection<URL> findAddons() throws IOException;
 
-    class MergedScanner implements AddonFinder {
+    class MergedFinder implements AddonFinder {
         private final Set<AddonFinder> finders;
 
-        public MergedScanner(Set<AddonFinder> finders) {
+        public MergedFinder(Set<AddonFinder> finders) {
             this.finders = finders;
         }
 
-        public MergedScanner(AddonFinder... finders) {
+        public MergedFinder(AddonFinder... finders) {
             this(Sets.newHashSet(finders));
         }
 
-        public MergedScanner(AddonFinder finder) {
+        public MergedFinder(AddonFinder finder) {
             this(Collections.singleton(finder));
         }
 
@@ -43,10 +43,10 @@ public interface AddonFinder {
         }
     }
 
-    class FolderScanner implements AddonFinder {
+    class DirectoryFinder implements AddonFinder {
         private final Path addonPath;
 
-        public FolderScanner(Path path) {
+        public DirectoryFinder(Path path) {
             this.addonPath = path;
         }
 
@@ -66,7 +66,7 @@ public interface AddonFinder {
         }
     }
 
-    class ClasspathScanner implements AddonFinder {
+    class ClasspathFinder implements AddonFinder {
         public static URL getSource(String filename, URL resourceURL) {
             try {
                 URLConnection connection = resourceURL.openConnection();

@@ -1,6 +1,9 @@
 package org.sandboxpowered.silica.state;
 
-import com.google.common.collect.*;
+import com.google.common.collect.ArrayTable;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Table;
 import org.sandboxpowered.api.state.property.Property;
 import org.sandboxpowered.api.state.property.PropertyContainer;
 
