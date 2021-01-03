@@ -1,5 +1,6 @@
 package org.sandboxpowered.silica.util;
 
+import com.google.common.base.Objects;
 import org.sandboxpowered.api.util.Identity;
 
 public class SilicaIdentity implements Identity {
@@ -17,5 +18,18 @@ public class SilicaIdentity implements Identity {
 
     public String getPath() {
         return path;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SilicaIdentity that = (SilicaIdentity) o;
+        return Objects.equal(namespace, that.namespace) && Objects.equal(path, that.path);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(namespace, path);
     }
 }
