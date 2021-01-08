@@ -183,7 +183,7 @@ public class SilicaInternalService implements InternalService {
 
     @Override
     public Position createPosition(int x, int y, int z) {
-        return null;
+        return new org.sandboxpowered.silica.util.math.Position(x, y, z);
     }
 
     @Override

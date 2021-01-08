@@ -1,0 +1,192 @@
+package org.sandboxpowered.silica.nbt
+
+import org.sandboxpowered.api.util.Identity
+import org.sandboxpowered.api.util.math.Position
+import org.sandboxpowered.api.util.nbt.CompoundTag
+import org.sandboxpowered.api.util.nbt.Tag
+import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.byte
+import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.byteArray
+import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.double
+import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.int
+import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.intArray
+import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.long
+import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.string
+import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.tag
+import java.util.*
+
+class CompoundTag : CompoundTag {
+    internal val tags: MutableMap<String, Entry> = mutableMapOf()
+
+    override fun asString(): String {
+        TODO("Not yet implemented")
+    }
+
+    override fun size() = tags.size
+
+    override fun getKeys() = tags.keys
+
+    override fun contains(key: String) = key in tags
+
+    override fun getInt(key: String): Int = tags[key].int()
+
+    override fun getIntArray(key: String): IntArray = tags[key].intArray()
+
+    override fun getString(key: String): String = tags[key].string()
+
+    override fun getDouble(key: String): Double = tags[key].double()
+
+    override fun getByte(key: String): Byte = tags[key].byte()
+
+    override fun getByteArray(key: String): ByteArray = tags[key].byteArray()
+
+    override fun getLong(key: String): Long = tags[key].long()
+
+    override fun getBoolean(key: String) = getByte(key) != 0.toByte()
+
+    override fun getUUID(key: String) = getTag(key).let {
+        it as CompoundTag
+        UUID(it.getLong("M"), it.getLong("L"))
+    }
+
+    override fun remove(key: String) = tags.remove(key) != null
+
+    override fun getTag(key: String): Tag = tags[key].tag()
+
+    override fun <T : Any> getList(key: String, tagType: Class<T>): MutableList<T> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getCompoundTag(key: String) = tags[key].tag() as? CompoundTag ?: CompoundTag()
+
+    override fun getIdentity(key: String): Identity {
+        TODO("Not yet implemented")
+    }
+
+    override fun getPosition(key: String): Position = getTag(key).let {
+        it as CompoundTag
+        Position.create(it.getInt("X"), it.getInt("Y"), it.getInt("Z"))
+    }
+
+    override fun setInt(key: String, i: Int) {
+        tags[key] = int(i)
+    }
+
+    override fun setIntArray(key: String, i: IntArray) {
+        tags[key] = intArray(i)
+    }
+
+    override fun setString(key: String, s: String) {
+        tags[key] = string(s)
+    }
+
+    override fun setDouble(key: String, d: Double) {
+        tags[key] = double(d)
+    }
+
+    override fun setByte(key: String, b: Byte) {
+        tags[key] = byte(b)
+    }
+
+    override fun setByteArray(key: String, b: ByteArray) {
+        tags[key] = byteArray(b)
+    }
+
+    override fun setLong(key: String, l: Long) {
+        tags[key] = long(l)
+    }
+
+    override fun setBoolean(key: String, bool: Boolean) {
+        tags[key] = byte(if (bool) 1 else 0)
+    }
+
+    override fun setUUID(key: String, uuid: UUID) {
+        setTag(key, CompoundTag().apply {
+            setLong("M", uuid.mostSignificantBits)
+            setLong("L", uuid.leastSignificantBits)
+        })
+    }
+
+    override fun setTag(key: String, tag: Tag) {
+        tags[key] = tag(tag)
+    }
+
+    override fun <T : Tag?> setList(key: String, list: List<T>) {
+        tags[key] = Entry.list(list)
+    }
+
+    override fun setPosition(key: String, position: Position) {
+        setTag(key, CompoundTag().apply {
+            setInt("X", position.x)
+            setInt("Y", position.y)
+            setInt("Z", position.z)
+        })
+    }
+
+    override fun setIdentity(key: String, identity: Identity) {
+        TODO("Not yet implemented")
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is org.sandboxpowered.silica.nbt.CompoundTag) return false
+
+        if (tags.keys != other.tags.keys) return false
+        return tags.all { (k, v) -> v == other.tags[k] } // TODO: this doesn't support comparing arrays ;-;
+    }
+
+    override fun hashCode(): Int {
+        return tags.hashCode()
+    }
+
+    internal class Entry private constructor(val type: Int, val value: Any) {
+        companion object {
+            // 0 = end
+            fun byte(value: Byte) = Entry(1, value)
+            fun short(value: Short) = Entry(2, value)
+            fun int(value: Int) = Entry(3, value)
+            fun long(value: Long) = Entry(4, value)
+            fun float(value: Float) = Entry(5, value)
+            fun double(value: Double) = Entry(6, value)
+            fun byteArray(value: ByteArray) = Entry(7, value)
+            fun string(value: String) = Entry(8, value)
+            fun list(value: List<*>) = Entry(9, value)
+            fun tag(value: Tag) = Entry(10, value)
+            fun intArray(value: IntArray) = Entry(11, value)
+            fun longArray(value: LongArray) = Entry(12, value)
+            fun unsafe(type: Int, value: Any) = Entry(type, value)
+
+            fun Entry?.byte(): Byte = if (this == null || type != 1) 0 else value as Byte
+            fun Entry?.short(): Short = if (this == null || type != 2) 0 else value as Short
+            fun Entry?.int(): Int = if (this == null || type != 3) 0 else value as Int
+            fun Entry?.long(): Long = if (this == null || type != 4) 0 else value as Long
+            fun Entry?.float(): Float = if (this == null || type != 5) 0f else value as Float
+            fun Entry?.double(): Double = if (this == null || type != 6) 0.0 else value as Double
+            fun Entry?.byteArray(): ByteArray = if (this == null || type != 7) ByteArray(0) else value as ByteArray
+            fun Entry?.string(): String = if (this == null || type != 8) "" else value as String
+            fun Entry?.list(): List<*> = if (this == null || type != 9) emptyList<Any>() else value as List<*>
+            fun Entry?.tag(): Tag = if (this == null || type != 10) CompoundTag.create() else value as Tag
+            fun Entry?.intArray(): IntArray = if (this == null || type != 11) IntArray(0) else value as IntArray
+            fun Entry?.longArray(): LongArray = if (this == null || type != 12) LongArray(0) else value as LongArray
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other !is Entry) return false
+
+            if (type != other.type) return false
+            if (value != other.value) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = type
+            result = 31 * result + value.hashCode()
+            return result
+        }
+
+        override fun toString(): String {
+            return "Entry(type=$type, value=$value)"
+        }
+    }
+}
