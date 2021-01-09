@@ -5,8 +5,15 @@ import org.sandboxpowered.silica.network.Packet;
 import org.sandboxpowered.silica.network.PacketByteBuf;
 import org.sandboxpowered.silica.network.PacketHandler;
 
-public class DeclareCommands implements Packet {
-    public DeclareCommands() {
+public class UpdateChunkPosition implements Packet {
+    private int x,y;
+
+    public UpdateChunkPosition() {
+    }
+
+    public UpdateChunkPosition(int x, int y) {
+        this.x = x;
+        this.y = y;
     }
 
     @Override
@@ -16,12 +23,8 @@ public class DeclareCommands implements Packet {
 
     @Override
     public void write(PacketByteBuf buf) {
-        buf.writeVarInt(1);
-
-        buf.writeByte(0);
-        buf.writeVarInt(0);
-
-        buf.writeVarInt(0);
+        buf.writeVarInt(x);
+        buf.writeVarInt(y);
     }
 
     @Override

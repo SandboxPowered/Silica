@@ -42,7 +42,10 @@ public enum Protocol {
                     .addPacket(0x5B, DeclareTags.class, DeclareTags::new)
                     .addPacket(0x1A, EntityStatus.class, EntityStatus::new)
                     .addPacket(0x10, DeclareCommands.class, DeclareCommands::new)
+                    .addPacket(0x34, SetPlayerPositionAndLook.class, SetPlayerPositionAndLook::new)
                     .addPacket(0x35, UnlockRecipes.class, UnlockRecipes::new)
+                    .addPacket(0x32, PlayerInfo.class, PlayerInfo::new)
+                    .addPacket(0x40, UpdateChunkPosition.class, UpdateChunkPosition::new)
             )
     ),
     STATUS(1, newProtocol()
