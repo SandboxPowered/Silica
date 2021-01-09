@@ -82,8 +82,10 @@ public class SilicaRegistry<T extends Content<T>> implements Registry<T> {
         }
 
         public void updateCache() {
-            cachedValue = registry.internalMap.get(target);
-            hasCached = true;
+            if(!hasCached) {
+                cachedValue = registry.internalMap.get(target);
+                hasCached = true;
+            }
         }
 
         public void clearCache() {

@@ -48,7 +48,27 @@ private enum class NbtType(
         write(it)
     }),
     STRING(DataInput::readUTF, { writeUTF(it as String) }),
-    LIST({ TODO("Not yet implemented") }, { TODO("Not yet implemented") }),
+    LIST({
+        val type = readByte();
+        val s = readInt()
+        List<Entry>(s) {
+            read(type.toInt(), this)
+        }
+    }, {
+        it as List<org.sandboxpowered.silica.nbt.CompoundTag>
+        val type = if(it.isEmpty()) {
+            0
+        } else {
+            TAG.vanillaId
+        }
+
+        writeByte(type)
+        writeInt(it.size)
+
+        it.forEach { entry ->
+            getNbtType(TAG.vanillaId).write(this, entry)
+        }
+    }),
     TAG({
         val compound = CompoundTag()
         var type = readByte().toInt()

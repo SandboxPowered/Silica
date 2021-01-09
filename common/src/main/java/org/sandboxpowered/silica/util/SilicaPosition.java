@@ -1,5 +1,6 @@
 package org.sandboxpowered.silica.util;
 
+import com.google.common.base.Objects;
 import org.sandboxpowered.api.util.Direction;
 import org.sandboxpowered.api.util.math.Position;
 
@@ -50,5 +51,18 @@ public class SilicaPosition implements Position {
     @Override
     public int getZ() {
         return z;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SilicaPosition that = (SilicaPosition) o;
+        return x == that.x && y == that.y && z == that.z;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(x, y, z);
     }
 }

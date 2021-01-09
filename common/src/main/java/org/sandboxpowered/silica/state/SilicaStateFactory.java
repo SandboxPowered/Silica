@@ -8,6 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.sandboxpowered.api.state.StateFactory;
 import org.sandboxpowered.api.state.property.Property;
 import org.sandboxpowered.api.state.property.PropertyContainer;
+import scala.sys.Prop;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -18,7 +19,11 @@ public class SilicaStateFactory<A, B extends PropertyContainer<B>> implements St
     private final ImmutableSortedMap<String, Property<?>> propertiesByName;
     private final ImmutableList<B> states;
 
-    public SilicaStateFactory(A base, Map<String, Property<?>> map, BiFunction<A, ImmutableMap<Property<?>, Comparable<?>>, B> stateCreator) {
+    public interface Factory<A,B extends PropertyContainer<B>> {
+        B create(A base, ImmutableMap<Property<?>, Comparable<?>> values);
+    }
+
+    public SilicaStateFactory(A base, Map<String, Property<?>> map, Factory<A, B> stateCreator) {
         this.base = base;
         this.propertiesByName = ImmutableSortedMap.copyOf(map);
 
@@ -38,7 +43,7 @@ public class SilicaStateFactory<A, B extends PropertyContainer<B>> implements St
         // Generate combined states with all possible values
         stream.forEach(list -> {
             ImmutableMap<Property<?>, Comparable<?>> propertyValues = list.stream().collect(ImmutableMap.toImmutableMap(Pair::getKey, Pair::getValue));
-            B state = stateCreator.apply(base, propertyValues);
+            B state = stateCreator.create(base, propertyValues);
             propertyToState.put(propertyValues, state);
             allStates.add(state);
         });

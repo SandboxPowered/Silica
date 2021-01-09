@@ -10,6 +10,7 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 import org.sandboxpowered.api.client.Client;
 import org.sandboxpowered.api.client.GraphicsMode;
+import org.sandboxpowered.silica.resources.ClasspathResourceLoader;
 import org.sandboxpowered.silica.resources.DirectoryResourceLoader;
 import org.sandboxpowered.silica.resources.ResourceManager;
 import org.sandboxpowered.silica.resources.ZIPResourceLoader;
@@ -36,7 +37,6 @@ public class Silica implements Runnable, Client {
 
     private final ResourceManager manager;
 
-
     public Silica(Args args) {
         List<String> list = new ArrayList<>();
         glfwSetErrorCallback((i, l) ->
@@ -51,19 +51,7 @@ public class Silica implements Runnable, Client {
 
         manager = new ResourceManager();
 
-        try {
-            URL url = Silica.class.getResource("/log4j2.xml").toURI().resolve(".").toURL();
-            Path path = asPath(url);
-            if (path != null) {
-                if (Files.isDirectory(path)) {
-                    manager.add(new DirectoryResourceLoader(path.toFile()));
-                } else {
-                    manager.add(new ZIPResourceLoader(path.toFile()));
-                }
-            }
-        } catch (IOException | URISyntaxException e) {
-            LOG.error("Error loading default resources", e);
-        }
+        manager.add(new ClasspathResourceLoader());
 
         File resourcePacks = new File("resourcepacks");
 

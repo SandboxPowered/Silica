@@ -7,6 +7,7 @@ import org.sandboxpowered.api.util.nbt.Tag
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.byte
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.byteArray
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.double
+import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.float
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.int
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.intArray
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.long
@@ -140,6 +141,10 @@ class CompoundTag : CompoundTag {
     }
 
     override fun toString() = "CompoundTag(tags=$tags)"
+
+    fun setFloat(key: String, f: Float) {
+        tags[key] = float(f)
+    }
 
     internal class Entry private constructor(val type: Int, val value: Any) {
         companion object {

@@ -55,7 +55,7 @@ class DedicatedServer : SilicaServer() {
                 })
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
-            val future = bootstrap.bind(properties.serverPort).sync()
+            val future = bootstrap.bind(properties.serverIp.ifEmpty { "0.0.0.0" }, properties.serverPort).sync()
             future.channel().closeFuture().sync()
         } catch (e: InterruptedException) {
             e.printStackTrace()

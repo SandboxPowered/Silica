@@ -6,11 +6,10 @@ import org.sandboxpowered.api.addon.Addon;
 import org.sandboxpowered.api.block.BaseBlock;
 import org.sandboxpowered.api.block.Material;
 import org.sandboxpowered.api.block.SlabBlock;
+import org.sandboxpowered.api.item.BaseItem;
+import org.sandboxpowered.api.item.Item;
 import org.sandboxpowered.api.registry.Registrar;
-import org.sandboxpowered.silica.content.blocks.AirBlock;
-import org.sandboxpowered.silica.content.blocks.AxisBlock;
-import org.sandboxpowered.silica.content.blocks.SpreadingBlock;
-import org.sandboxpowered.silica.content.blocks.StairsBlock;
+import org.sandboxpowered.silica.content.blocks.*;
 import org.sandboxpowered.silica.content.fluid.EmptyFluid;
 
 import java.util.Collections;
@@ -34,7 +33,8 @@ public class MinecraftAddon implements Addon {
     public void registerBlocks(SandboxAPI api, Registrar registrar) {
         Extra[] baseExtras = new Extra[]{Extra.SLAB, Extra.STAIRS};
 
-        registrar.register("air", new AirBlock(builder(Material.AIR).build()));
+        registrar.register("air", new AirBlock(builder(Material.AIR).removeItemBlock().build()));
+
         registerWithExtra(registrar, "stone", new BaseBlock(builder(Material.STONE).build()), baseExtras);
         registerWithExtra(registrar, "cobblestone", new BaseBlock(builder(Material.STONE).build()), baseExtras);
         registerWithExtra(registrar, "granite", new BaseBlock(builder(Material.STONE).build()), baseExtras);
@@ -46,6 +46,19 @@ public class MinecraftAddon implements Addon {
         registrar.register("sand", new BaseBlock(builder(Material.SAND).build()));
         registrar.register("red_sand", new BaseBlock(builder(Material.SAND).build()));
 
+        registrar.register("netherrack", new BaseBlock(builder(Material.STONE).build()));
+        registrar.register("glowstone", new BaseBlock(builder(Material.GLASS).setLuminance(15).build()));
+
+        for(Colour colour : Colour.values()) {
+            registrar.register(String.format("%s_wool", colour.getName()), new BaseBlock(builder(Material.WOOL).build()));
+            registrar.register(String.format("%s_carpet", colour.getName()), new CarpetBlock(builder(Material.WOOL).build()));
+
+            registrar.register(String.format("%s_concrete", colour.getName()), new BaseBlock(builder(Material.STONE).build()));
+            registrar.register(String.format("%s_concrete_powder", colour.getName()), new BaseBlock(builder(Material.SAND).build()));
+            registrar.register(String.format("%s_terracotta", colour.getName()), new BaseBlock(builder(Material.SAND).build()));
+            registrar.register(String.format("%s_stained_glass", colour.getName()), new BaseBlock(builder(Material.SAND).build()));
+            registrar.register(String.format("%s_stained_glass_pane", colour.getName()), new BaseBlock(builder(Material.SAND).build()));
+        }
 
         for (Sandstone sandstone : Sandstone.values()) {
             registerWithExtra(registrar, sandstone.formatted("sandstone"), new BaseBlock(builder(Material.SAND).build()), sandstone != Sandstone.CHISELED ? baseExtras : null);
@@ -64,7 +77,7 @@ public class MinecraftAddon implements Addon {
     }
 
     public void registerItems(SandboxAPI api, Registrar registrar) {
-
+        registrar.register("air", new BaseItem(new Item.Settings()));
     }
 
     public void registerFluids(SandboxAPI api, Registrar registrar) {
