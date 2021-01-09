@@ -19,11 +19,11 @@ import org.sandboxpowered.silica.network.login.clientbound.LoginSuccess;
 import org.sandboxpowered.silica.network.login.serverbound.EncryptionResponse;
 import org.sandboxpowered.silica.network.login.serverbound.HandshakeRequest;
 import org.sandboxpowered.silica.network.login.serverbound.LoginStart;
-import org.sandboxpowered.silica.network.play.clientbound.JoinGame;
+import org.sandboxpowered.silica.network.play.clientbound.*;
+import org.sandboxpowered.silica.network.play.serverbound.ClientPluginChannel;
+import org.sandboxpowered.silica.network.play.serverbound.ClientSettings;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -33,9 +33,16 @@ public enum Protocol {
     )),
     PLAY(0, newProtocol()
             .addFlow(Flow.SERVERBOUND, new Packets()
-
+                    .addPacket(0x05, ClientSettings.class, ClientSettings::new)
+                    .addPacket(0x0B, ClientPluginChannel.class, ClientPluginChannel::new)
             ).addFlow(Flow.CLIENTBOUND, new Packets()
                     .addPacket(0x24, JoinGame.class, JoinGame::new)
+                    .addPacket(0x3F, HeldItemChange.class, HeldItemChange::new)
+                    .addPacket(0x5A, DeclareRecipes.class, DeclareRecipes::new)
+                    .addPacket(0x5B, DeclareTags.class, DeclareTags::new)
+                    .addPacket(0x1A, EntityStatus.class, EntityStatus::new)
+                    .addPacket(0x10, DeclareCommands.class, DeclareCommands::new)
+                    .addPacket(0x35, UnlockRecipes.class, UnlockRecipes::new)
             )
     ),
     STATUS(1, newProtocol()
@@ -86,7 +93,10 @@ public enum Protocol {
     }
 
     public static Protocol getProtocolForPacket(Packet packet) {
-        return PROTOCOL_BY_PACKET.get(packet.getClass());
+        Protocol protocol = PROTOCOL_BY_PACKET.get(packet.getClass());
+        if (protocol == null)
+            throw new NullPointerException("No protocol found for " + packet.getClass());
+        return protocol;
     }
 
     public static Protocol getProtocolFromId(int id) {
@@ -114,7 +124,7 @@ public enum Protocol {
         private final Object2IntMap<Class<? extends Packet>> classToId = new Object2IntOpenHashMap<>() {{
             defaultReturnValue(-1);
         }};
-        private final List<Supplier<? extends Packet>> idToConstructor = new ArrayList<>();
+        private final Int2ObjectMap<Supplier<? extends Packet>> idToConstructor = new Int2ObjectOpenHashMap<>();
 
         public <P extends Packet> Packets addPacket(int targetId, Class<P> pClass, Supplier<P> supplier) {
             int j = this.classToId.put(pClass, targetId);
@@ -123,7 +133,7 @@ public enum Protocol {
                 LogManager.getLogger().fatal(string);
                 throw new IllegalArgumentException(string);
             } else {
-                this.idToConstructor.add(supplier);
+                this.idToConstructor.put(targetId, supplier);
                 return this;
             }
         }
@@ -137,7 +147,7 @@ public enum Protocol {
         }
 
         public Packet createPacket(int packetId) {
-            if (idToConstructor.size() <= packetId)
+            if (!idToConstructor.containsKey(packetId))
                 return null;
             return idToConstructor.get(packetId).get();
         }

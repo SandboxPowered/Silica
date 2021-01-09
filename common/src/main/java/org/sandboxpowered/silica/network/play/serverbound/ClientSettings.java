@@ -1,0 +1,34 @@
+package org.sandboxpowered.silica.network.play.serverbound;
+
+import org.sandboxpowered.silica.network.Connection;
+import org.sandboxpowered.silica.network.Packet;
+import org.sandboxpowered.silica.network.PacketByteBuf;
+import org.sandboxpowered.silica.network.PacketHandler;
+
+public class ClientSettings implements Packet {
+    private String language;
+    private byte renderDistance;
+    private int chatMode;
+    private boolean enableColour;
+    private short displayedSkin;
+    private int hand;
+
+    @Override
+    public void read(PacketByteBuf buf) {
+        language = buf.readString(16);
+        renderDistance = buf.readByte();
+        chatMode = buf.readVarInt();
+        enableColour = buf.readBoolean();
+        displayedSkin = buf.readUnsignedByte();
+        hand = buf.readVarInt();
+    }
+
+    @Override
+    public void write(PacketByteBuf buf) {
+
+    }
+
+    @Override
+    public void handle(PacketHandler packetHandler, Connection connection) {
+    }
+}

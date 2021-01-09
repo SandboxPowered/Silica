@@ -1,9 +1,11 @@
 package org.sandboxpowered.silica.server;
 
+import org.checkerframework.checker.units.qual.C;
 import org.sandboxpowered.api.entity.player.PlayerEntity;
 import org.sandboxpowered.api.server.Server;
 import org.sandboxpowered.api.util.Identity;
 import org.sandboxpowered.api.world.World;
+import org.sandboxpowered.silica.command.Commands;
 import org.sandboxpowered.silica.world.SilicaWorld;
 
 import java.security.KeyPair;
@@ -17,6 +19,7 @@ public class SilicaServer implements Server {
     private final byte[] verificationArray = new byte[4];
     private final Random serverRandom = new Random();
     private SilicaWorld world;
+    private Commands commands;
 
     public SilicaServer() {
         try {
@@ -27,6 +30,11 @@ public class SilicaServer implements Server {
             throw new RuntimeException(e);
         }
         serverRandom.nextBytes(verificationArray);
+        commands = new Commands();
+    }
+
+    public Commands getCommands() {
+        return commands;
     }
 
     public byte[] getVerificationArray() {

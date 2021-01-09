@@ -37,7 +37,16 @@ import java.util.function.Supplier;
 public class SilicaInternalService implements InternalService {
     @Override
     public Identity createIdentityFromString(String identity) {
-        return new SilicaIdentity("silica", identity); //TODO: do split logic
+        String[] strings = new String[]{"minecraft", identity};
+        int i = identity.indexOf(':');
+        if (i >= 0) {
+            strings[1] = identity.substring(i + 1);
+            if (i >= 1) {
+                strings[0] = identity.substring(0, i);
+            }
+        }
+
+        return new SilicaIdentity(strings[0], strings[1]);
     }
 
     @Override

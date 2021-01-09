@@ -1,13 +1,19 @@
 package org.sandboxpowered.silica.network.login.serverbound;
 
+import com.google.common.collect.Maps;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.RootCommandNode;
 import org.sandboxpowered.api.util.Identity;
+import org.sandboxpowered.silica.command.CommandSource;
 import org.sandboxpowered.silica.nbt.CompoundTag;
 import org.sandboxpowered.silica.network.*;
 import org.sandboxpowered.silica.network.login.clientbound.LoginSuccess;
-import org.sandboxpowered.silica.network.play.clientbound.JoinGame;
+import org.sandboxpowered.silica.network.play.clientbound.*;
 import org.sandboxpowered.silica.server.SilicaServer;
 
 import java.util.Collections;
+import java.util.Map;
 
 public class LoginStart implements Packet {
     private String username;
@@ -111,5 +117,14 @@ public class LoginStart implements Packet {
                 false,
                 true
         ));
+
+        packetHandler.sendPacket(new HeldItemChange((byte) 0));
+        packetHandler.sendPacket(new DeclareRecipes());
+        packetHandler.sendPacket(new DeclareTags());
+        packetHandler.sendPacket(new EntityStatus());
+        RootCommandNode<CommandSource> rootcommandnode = new RootCommandNode<>();
+        packetHandler.sendPacket(new DeclareCommands(rootcommandnode));
+        packetHandler.sendPacket(new UnlockRecipes());
+
     }
 }

@@ -18,6 +18,8 @@ dependencies {
     api 'org.apache.commons:commons-lang3:3.11'
     api 'com.google.code.gson:gson:2.8.6'
 
+    api 'com.mojang:brigadier:1.0.17'
+
     api 'net.onedaybeard.artemis:artemis-odb:2.3.0'
 
     api artemisContrib('core')
