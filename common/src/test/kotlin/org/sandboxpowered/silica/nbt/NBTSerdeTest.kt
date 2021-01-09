@@ -1,15 +1,15 @@
 package org.sandboxpowered.silica.nbt
 
-import org.apache.commons.codec.binary.Base64
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.sandboxpowered.silica.util.math.Position
 import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
+import java.io.DataOutputStream
 import java.util.*
 import java.util.stream.Stream
 
@@ -19,7 +19,7 @@ internal class NBTSerdeTest {
     @ParameterizedTest
     @MethodSource("examples")
     fun readNbt(data: String, expected: CompoundTag) {
-        val iss = ByteArrayInputStream(Base64.decodeBase64(data))
+        val iss = ByteArrayInputStream(Base64.getDecoder().decode(data))
         val dis = DataInputStream(iss)
         val nbt = dis.readNbt() as CompoundTag
         assertEquals(-1, dis.read()) // End of stream, to make sure everything was read
@@ -36,8 +36,14 @@ internal class NBTSerdeTest {
         }
     }
 
-    @Test
-    fun write() {
+    @ParameterizedTest
+    @MethodSource("examples")
+    fun write(expected: String, data: CompoundTag) {
+        val oss = ByteArrayOutputStream()
+        val dos = DataOutputStream(oss)
+        dos.write(data)
+        val result = Base64.getEncoder().encodeToString(oss.toByteArray())
+        assertEquals(expected, result)
     }
 
     @Suppress("unused")

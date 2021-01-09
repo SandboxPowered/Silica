@@ -13,9 +13,10 @@ import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.long
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.string
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.tag
 import java.util.*
+import kotlin.collections.HashMap
 
 class CompoundTag : CompoundTag {
-    internal val tags: MutableMap<String, Entry> = mutableMapOf()
+    internal val tags: MutableMap<String, Entry> = HashMap()
 
     override fun asString(): String {
         TODO("Not yet implemented")
@@ -135,8 +136,10 @@ class CompoundTag : CompoundTag {
     }
 
     override fun hashCode(): Int {
-        return tags.hashCode()
+        return tags.hashCode() // TODO: probs incorrect
     }
+
+    override fun toString() = "CompoundTag(tags=$tags)"
 
     internal class Entry private constructor(val type: Int, val value: Any) {
         companion object {
@@ -185,8 +188,6 @@ class CompoundTag : CompoundTag {
             return result
         }
 
-        override fun toString(): String {
-            return "Entry(type=$type, value=$value)"
-        }
+        override fun toString() = "Entry(type=$type, value=$value)"
     }
 }
