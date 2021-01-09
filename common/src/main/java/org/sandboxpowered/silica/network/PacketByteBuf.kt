@@ -893,8 +893,7 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         return this
     }
 
-    @JvmOverloads
-    fun readNBT(counter: Counter? = Counter(2097152L)): CompoundTag? {
+    fun readNBT(): CompoundTag? {
         val i = readerIndex()
         val b = readByte()
         return if (b.toInt() == 0) {
@@ -915,25 +914,14 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         }
     }
 
-    open class Counter(private val quota: Long) {
-        private var usage: Long = 0
-        fun add(l: Long) {
-            usage += l / 8L
-            if (usage > quota) {
-                throw RuntimeException(
-                    String.format(
-                        "Tried to read NBT tag that was too big; tried to allocate: %dbytes where max allowed: %d",
-                        usage,
-                        quota
-                    )
-                )
-            }
+    fun writeVarLong(i: Long): ByteBuf {
+        var l = i
+        while (l and -128L != 0L) {
+            writeByte((l and 127L).toInt() or 128)
+            l = l ushr 7
         }
 
-        companion object {
-            val UNLIMITED: Counter = object : Counter(0L) {
-                fun accountBits(l: Long) {}
-            }
-        }
+        writeByte(l.toInt())
+        return this
     }
 }

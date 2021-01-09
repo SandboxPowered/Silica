@@ -14,6 +14,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Packet> {
     public PacketHandler(Connection connection) {
         this.connection = connection;
         this.server = connection.getServer();
+        connection.setPacketHandler(this);
     }
 
     @Override

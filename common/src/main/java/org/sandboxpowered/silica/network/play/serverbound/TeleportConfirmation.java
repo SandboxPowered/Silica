@@ -1,27 +1,25 @@
-package org.sandboxpowered.silica.network.login.serverbound;
+package org.sandboxpowered.silica.network.play.serverbound;
 
 import org.sandboxpowered.silica.network.Connection;
 import org.sandboxpowered.silica.network.Packet;
 import org.sandboxpowered.silica.network.PacketByteBuf;
 import org.sandboxpowered.silica.network.PacketHandler;
-import org.sandboxpowered.silica.server.SilicaServer;
 
-public class LoginStart implements Packet {
-    private String username;
+public class TeleportConfirmation implements Packet {
+    private int tpId;
 
     @Override
     public void read(PacketByteBuf buf) {
-        username = buf.readString(16);
+        tpId=buf.readVarInt();
     }
 
     @Override
     public void write(PacketByteBuf buf) {
-        buf.writeString(username);
+
     }
 
     @Override
     public void handle(PacketHandler packetHandler, Connection connection) {
-        SilicaServer server = connection.getServer();
-        connection.handleLoginStart(username);
+
     }
 }

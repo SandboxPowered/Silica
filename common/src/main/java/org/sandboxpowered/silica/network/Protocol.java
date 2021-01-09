@@ -6,6 +6,8 @@ import com.google.common.collect.Maps;
 import io.netty.util.AttributeKey;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.apache.logging.log4j.LogManager;
@@ -22,8 +24,10 @@ import org.sandboxpowered.silica.network.login.serverbound.LoginStart;
 import org.sandboxpowered.silica.network.play.clientbound.*;
 import org.sandboxpowered.silica.network.play.serverbound.ClientPluginChannel;
 import org.sandboxpowered.silica.network.play.serverbound.ClientSettings;
+import org.sandboxpowered.silica.network.play.serverbound.TeleportConfirmation;
 
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -35,6 +39,7 @@ public enum Protocol {
             .addFlow(Flow.SERVERBOUND, new Packets()
                     .addPacket(0x05, ClientSettings.class, ClientSettings::new)
                     .addPacket(0x0B, ClientPluginChannel.class, ClientPluginChannel::new)
+                    .addPacket(0x00, TeleportConfirmation.class, TeleportConfirmation::new)
             ).addFlow(Flow.CLIENTBOUND, new Packets()
                     .addPacket(0x24, JoinGame.class, JoinGame::new)
                     .addPacket(0x3F, HeldItemChange.class, HeldItemChange::new)
@@ -46,6 +51,8 @@ public enum Protocol {
                     .addPacket(0x35, UnlockRecipes.class, UnlockRecipes::new)
                     .addPacket(0x32, PlayerInfo.class, PlayerInfo::new)
                     .addPacket(0x40, UpdateChunkPosition.class, UpdateChunkPosition::new)
+                    .addPacket(0x23, UpdateLight.class, UpdateLight::new)
+                    .addPacket(0x3D, WorldBorder.class, WorldBorder::new)
             )
     ),
     STATUS(1, newProtocol()
@@ -128,6 +135,7 @@ public enum Protocol {
             defaultReturnValue(-1);
         }};
         private final Int2ObjectMap<Supplier<? extends Packet>> idToConstructor = new Int2ObjectOpenHashMap<>();
+        private final IntList ignoredIds = new IntArrayList();
 
         public <P extends Packet> Packets addPacket(int targetId, Class<P> pClass, Supplier<P> supplier) {
             int j = this.classToId.put(pClass, targetId);
@@ -141,6 +149,13 @@ public enum Protocol {
             }
         }
 
+        public Packets ignore(int... ids) {
+            for (int i : ids) {
+                ignoredIds.add(i);
+            }
+            return this;
+        }
+
         public int getId(Class<? extends Packet> aClass) {
             return classToId.getInt(aClass);
         }
@@ -150,7 +165,7 @@ public enum Protocol {
         }
 
         public Packet createPacket(int packetId) {
-            if (!idToConstructor.containsKey(packetId))
+            if (ignoredIds.contains(packetId) || !idToConstructor.containsKey(packetId))
                 return null;
             return idToConstructor.get(packetId).get();
         }
