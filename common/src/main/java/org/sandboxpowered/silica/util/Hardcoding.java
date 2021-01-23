@@ -100,7 +100,7 @@ public class Hardcoding {
             Identity.of("minecraft", "guarded_by_piglins"),
             Identity.of("minecraft", "standing_signs"),
             Identity.of("minecraft", "infiniburn_end"),
-            Identity.of("minecraft", "unstable_bottom_center"),
+            Identity.of("minecraft", "unstable_bottom_center")
     };
     public static Identity[] FLUIDTAGS = new Identity[]{
             Identity.of("minecraft", "lava"),

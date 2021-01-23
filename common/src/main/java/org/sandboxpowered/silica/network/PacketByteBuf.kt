@@ -827,6 +827,14 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         return this
     }
 
+    fun writeVarIntArray(array: IntArray): ByteBuf {
+        writeVarInt(array.size)
+        for (element in array) {
+            writeVarInt(element)
+        }
+        return this
+    }
+
     @JvmOverloads
     fun writeString(string: String, i: Int = 32767): ByteBuf {
         val bs = string.toByteArray(StandardCharsets.UTF_8)

@@ -1,6 +1,5 @@
 package org.sandboxpowered.silica.network.play.clientbound;
 
-import com.google.common.collect.Lists;
 import org.sandboxpowered.silica.network.Connection;
 import org.sandboxpowered.silica.network.Packet;
 import org.sandboxpowered.silica.network.PacketByteBuf;
@@ -28,13 +27,21 @@ public class UpdateLight implements Packet {
         this.trustEdges = trustEdges;
         this.skyUpdates = new ArrayList<>();
         this.blockUpdates = new ArrayList<>();
-        this.skyYMask = 1;
-        this.blockYMask = 1;
+        byte[] data = new byte[2048];
         for (int i = 0; i < 18; ++i) {
-            this.skyYMask &= ~(1 << i);
             this.emptySkyYMask |= 1 << i;
-            this.blockYMask &= ~(1 << i);
             this.emptyBlockYMask |= 1 << i;
+        }
+        int j;
+        for(j = 0; j < 18; ++j) {
+            if ((this.skyYMask & 1 << j) != 0) {
+                System.out.println(true);
+            }
+        }
+        for(j = 0; j < 18; ++j) {
+            if ((this.blockYMask & 1 << j) != 0) {
+                System.out.println(false);
+            }
         }
     }
 
