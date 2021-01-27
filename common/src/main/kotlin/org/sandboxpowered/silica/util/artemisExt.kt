@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica
+package org.sandboxpowered.silica.util
 
 import com.artemis.Component
 import com.artemis.ComponentMapper
@@ -21,4 +21,5 @@ operator fun <T> Bag<in T>.plusAssign(e: T) = this.add(e)
 
 operator fun IntBag.plusAssign(e: Int) = this.add(e)
 
-inline fun <reified T> WorldConfiguration.registerAs(it: T): WorldConfiguration = this.register(T::class.qualifiedName, it)
+inline fun <reified T> WorldConfiguration.registerAs(it: T): WorldConfiguration =
+    this.register(T::class.qualifiedName, it)

@@ -7,6 +7,6 @@ class PlayerComponent : PooledComponent() {
     var profile: GameProfile? = null
 
     override fun reset() {
-        profile = null;
+        profile = null
     }
 }

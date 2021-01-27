@@ -10,7 +10,7 @@ import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
 import org.sandboxpowered.api.client.Client
 import org.sandboxpowered.api.client.GraphicsMode
-import org.sandboxpowered.silica.notExists
+import org.sandboxpowered.silica.util.notExists
 import org.sandboxpowered.silica.resources.ClasspathResourceLoader
 import org.sandboxpowered.silica.resources.DirectoryResourceLoader
 import org.sandboxpowered.silica.resources.ResourceManager
@@ -20,7 +20,6 @@ import org.sandboxpowered.silica.util.FileFilters
 import java.io.File
 import java.io.IOException
 import java.util.*
-import java.util.function.Consumer
 
 class Silica(args: Args) : Runnable, Client {
     private val logger: Logger = LogManager.getLogger()

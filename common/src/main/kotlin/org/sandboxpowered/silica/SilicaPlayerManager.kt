@@ -17,8 +17,9 @@ import java.net.SocketAddress
 import java.util.*
 
 @One(PlayerComponent::class)
-class SilicaPlayerManager (var maxPlayers: Int, var playerArchetype: Archetype) : BaseEntitySystem() {
-    private val uuidToEntityId: Object2IntFunction<UUID> = Object2IntOpenHashMap<UUID>().apply { defaultReturnValue(-1) }
+class SilicaPlayerManager(var maxPlayers: Int, var playerArchetype: Archetype) : BaseEntitySystem() {
+    private val uuidToEntityId: Object2IntFunction<UUID> =
+        Object2IntOpenHashMap<UUID>().apply { defaultReturnValue(-1) }
     private val entityToUuid: Int2ObjectFunction<UUID> = Int2ObjectOpenHashMap()
     private val entitiesToDelete = IntBag()
 

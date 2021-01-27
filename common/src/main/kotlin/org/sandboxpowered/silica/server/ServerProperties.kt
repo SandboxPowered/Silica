@@ -30,11 +30,16 @@ class ServerProperties(private val properties: Properties) {
         return get(string, { s: String -> Integer.valueOf(s) }, i)
     }
 
-    private operator fun <V> get(name: String, stringToValue: (String) -> V, valueToString: (V) -> String, defaultValue: V): V {
+    private operator fun <V> get(
+        name: String,
+        stringToValue: (String) -> V,
+        valueToString: (V) -> String,
+        defaultValue: V
+    ): V {
         return (getStringRaw(name)
-                ?.let(stringToValue)
-                ?: defaultValue)
-                .also { properties[name] = valueToString(it) }
+            ?.let(stringToValue)
+            ?: defaultValue)
+            .also { properties[name] = valueToString(it) }
     }
 
     private fun save(path: Path) {

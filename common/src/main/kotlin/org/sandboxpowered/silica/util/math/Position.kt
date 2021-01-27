@@ -21,7 +21,7 @@ class Position(
     }
 
     override fun toMutable(): Position.Mutable {
-        TODO("Not yet implemented")
+        return Position.Mutable.create(x, y, z)
     }
 
     override fun toImmutable(): Position {
@@ -48,5 +48,52 @@ class Position(
         result = 31 * result + y
         result = 31 * result + z
         return result
+    }
+
+    class Mutable(
+        private var x: Int,
+        private var y: Int,
+        private var z: Int
+    ) : Position.Mutable {
+        override fun getX() = x
+        override fun getY() = y
+        override fun getZ() = z
+
+        override fun add(x: Int, y: Int, z: Int): Position.Mutable {
+            this.x += x
+            this.y += y
+            this.z += z
+            return this
+        }
+
+        override fun sub(x: Int, y: Int, z: Int): Position.Mutable {
+            this.x -= x
+            this.y -= y
+            this.z -= z
+            return this
+        }
+
+        override fun toMutable(): Position.Mutable {
+            return this
+        }
+
+        override fun toImmutable(): Position {
+            return Position.create(x, y, z)
+        }
+
+        override fun offset(direction: Direction, amount: Int): Position {
+            return add(
+                amount * direction.offsetX,
+                amount * direction.offsetY,
+                amount * direction.offsetZ,
+            )
+        }
+
+        override fun set(x: Int, y: Int, z: Int): Position.Mutable {
+            this.x = x
+            this.y = y
+            this.z = z
+            return this
+        }
     }
 }
