@@ -1,11 +1,8 @@
 package org.sandboxpowered.silica.client
 
 import org.lwjgl.glfw.GLFW
-import org.lwjgl.system.MemoryUtil
-import org.lwjgl.glfw.GLFWKeyCallbackI
-import org.lwjgl.glfw.GLFWWindowSizeCallbackI
 import org.lwjgl.system.MemoryStack
-import org.lwjgl.glfw.GLFWVidMode
+import org.lwjgl.system.MemoryUtil
 
 class Window(private var windowName: String, private var width: Int, private var height: Int) {
     private val internalPointer: Long
@@ -13,6 +10,7 @@ class Window(private var windowName: String, private var width: Int, private var
         private set
     private var fpsCounter = 0
     private var nextDebugInfoUpdateTime = System.currentTimeMillis()
+
     fun cleanup() {
         GLFW.glfwDestroyWindow(internalPointer)
         GLFW.glfwTerminate()
@@ -65,26 +63,26 @@ class Window(private var windowName: String, private var width: Int, private var
         GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE)
         internalPointer = GLFW.glfwCreateWindow(width, height, windowName, MemoryUtil.NULL, MemoryUtil.NULL)
         if (internalPointer == MemoryUtil.NULL) throw UnknownError("Failed to create the GLFW window")
-        GLFW.glfwSetKeyCallback(internalPointer) { window: Long, key: Int, scancode: Int, action: Int, mods: Int ->
-            if (key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_RELEASE) GLFW.glfwSetWindowShouldClose(
-                window,
-                true
-            )
+        GLFW.glfwSetKeyCallback(internalPointer) { window, key, scancode, action, mods ->
+            if (key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_RELEASE)
+                GLFW.glfwSetWindowShouldClose(window, true)
         }
-        GLFW.glfwSetWindowSizeCallback(internalPointer) { window: Long, newWidth: Int, newHeight: Int ->
-            width = newWidth
-            height = newHeight
+        GLFW.glfwSetWindowSizeCallback(internalPointer) { window, newWidth, newHeight ->
+            if(window == internalPointer) {
+                width = newWidth
+                height = newHeight
+            }
         }
-        MemoryStack.stackPush().use { stack ->
-            val pWidth = stack.mallocInt(1)
-            val pHeight = stack.mallocInt(1)
+        MemoryStack.stackPush().use {
+            val pWidth = it.mallocInt(1)
+            val pHeight = it.mallocInt(1)
             GLFW.glfwGetWindowSize(internalPointer, pWidth, pHeight)
-            val vidmode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor())
+            val vidmode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor())!!
             width = pWidth[0]
             height = pHeight[0]
             GLFW.glfwSetWindowPos(
                 internalPointer,
-                (vidmode!!.width() - width) / 2,
+                (vidmode.width() - width) / 2,
                 (vidmode.height() - height) / 2
             )
         }
