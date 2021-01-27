@@ -3,8 +3,7 @@ package org.sandboxpowered.silica.content.blocks;
 import org.sandboxpowered.api.block.BaseBlock;
 import org.sandboxpowered.api.block.Block;
 import org.sandboxpowered.api.block.FluidLoggable;
-import org.sandboxpowered.api.entity.player.Hand;
-import org.sandboxpowered.api.entity.player.PlayerEntity;
+import org.sandboxpowered.api.ecs.Entity;
 import org.sandboxpowered.api.fluid.Fluids;
 import org.sandboxpowered.api.item.ItemStack;
 import org.sandboxpowered.api.state.BlockState;
@@ -13,6 +12,7 @@ import org.sandboxpowered.api.state.StateFactory;
 import org.sandboxpowered.api.tags.BlockTags;
 import org.sandboxpowered.api.util.Direction;
 import org.sandboxpowered.api.util.Half;
+import org.sandboxpowered.api.util.Hand;
 import org.sandboxpowered.api.util.StairShape;
 import org.sandboxpowered.api.util.math.Position;
 import org.sandboxpowered.api.util.math.Vec3d;
@@ -39,11 +39,11 @@ public class StairsBlock extends BaseBlock implements FluidLoggable {
     }
 
     @Override
-    public BlockState getStateForPlacement(WorldReader reader, Position pos, PlayerEntity player, Hand hand, ItemStack stack, Direction side, Vec3d hitPos) {
+    public BlockState getStateForPlacement(WorldReader reader, Position pos, Entity player, Hand hand, ItemStack stack, Direction side, Vec3d hitPos) {
         FluidState fluidState = reader.getFluidState(pos);
         BlockState state = getBaseState()
                 .with(WATERLOGGED, Fluids.WATER.matches(fluidState.getFluid()))
-                .with(HORIZONTAL_FACING, player.getHorizontalFacing())
+                .with(HORIZONTAL_FACING, Direction.NORTH) //TODO
                 .with(HALF, side == Direction.DOWN || (side != Direction.UP && hitPos.getY() - pos.getY() > 0.5f) ? Half.TOP : Half.BOTTOM);
         return state.with(STAIR_SHAPE, getStairShape(state, reader, pos));
     }

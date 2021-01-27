@@ -4,7 +4,7 @@ group 'org.sandboxpowered'
 version '1.0-SNAPSHOT'
 
 dependencies {
-    api platform('org.sandboxpowered.api:api:coded-tweaks-SNAPSHOT')
+    api platform('org.sandboxpowered.api:api:rework-SNAPSHOT')
     api 'org.sandboxpowered.api:base'
     api 'org.sandboxpowered.api:rendering'
     api 'org.sandboxpowered.api:resources'
@@ -17,6 +17,7 @@ dependencies {
     api 'commons-io:commons-io:2.8.0'
     api 'org.apache.commons:commons-lang3:3.11'
     api 'com.google.code.gson:gson:2.8.6'
+    api 'com.google.inject:guice:5.0.0-BETA-1'
 
     api 'com.mojang:brigadier:1.0.17'
 

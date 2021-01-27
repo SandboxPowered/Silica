@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -121,27 +122,28 @@ public class SandboxLoader {
         return addonToClassLoader.computeIfAbsent(spec.getId(), addonId -> new AddonClassLoader(this, Addon.class.getClassLoader(), url, spec));
     }
 
-    private void loadFromURLs(Collection<URL> urls) {
+    private void loadFromURLs(Collection<URI> urls) {
         if (urls.isEmpty()) {
             log.info("Loaded 0 addons");
         } else {
             log.info("Loading {} addons", urls.size());
             TomlParser parser = new TomlParser();
-            for (URL url : urls) {
+            for (URI uri : urls) {
                 InputStream configStream = null;
                 JarFile jarFile = null;
                 try {
-                    if (url.toString().endsWith(".jar")) {
-                        jarFile = new JarFile(new File(url.toURI()));
+                    if (uri.toString().endsWith(".jar")) {
+                        jarFile = new JarFile(new File(uri));
                         ZipEntry ze = jarFile.getEntry(SANDBOX_TOML);
                         if (ze != null)
                             configStream = jarFile.getInputStream(ze);
                     } else {
-                        configStream = url.toURI().resolve(SANDBOX_TOML).toURL().openStream();
+                        configStream = uri.resolve(SANDBOX_TOML).toURL().openStream();
                     }
                     if (configStream == null)
                         continue;
                     Config config = parser.parse(configStream);
+                    URL url = uri.toURL();
                     AddonSpec spec = AddonSpec.from(config, url);
                     AddonClassLoader loader = getClassLoader(spec, url);
                     Class<?> mainClass = loader.loadClass(spec.getMainClass());
@@ -151,7 +153,7 @@ public class SandboxLoader {
                     } else {
                         log.error("Unable to load addon '{}', main class not instance of Addon", spec.getId());
                     }
-                } catch (IOException | NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException | URISyntaxException e) {
+                } catch (IOException | NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
                     log.error("Unknown Error", e);
                     //TODO: Split these up to provide unique messages per error.
                 } finally {

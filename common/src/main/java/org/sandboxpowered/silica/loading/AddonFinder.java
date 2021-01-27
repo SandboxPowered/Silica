@@ -3,10 +3,7 @@ package org.sandboxpowered.silica.loading;
 import com.google.common.collect.Sets;
 
 import java.io.IOException;
-import java.net.JarURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -16,7 +13,7 @@ import java.util.stream.Stream;
 public interface AddonFinder {
     String SANDBOX_TOML = "sandbox.toml";
 
-    Collection<URL> findAddons() throws IOException;
+    Collection<URI> findAddons() throws IOException;
 
     class MergedFinder implements AddonFinder {
         private final Set<AddonFinder> finders;
@@ -34,8 +31,8 @@ public interface AddonFinder {
         }
 
         @Override
-        public Collection<URL> findAddons() throws IOException {
-            Set<URL> addons = new HashSet<>();
+        public Collection<URI> findAddons() throws IOException {
+            Set<URI> addons = new HashSet<>();
             for (AddonFinder finder : finders) {
                 addons.addAll(finder.findAddons());
             }
@@ -51,46 +48,40 @@ public interface AddonFinder {
         }
 
         @Override
-        public Collection<URL> findAddons() throws IOException {
+        public Collection<URI> findAddons() throws IOException {
             if (Files.notExists(addonPath)) Files.createDirectories(addonPath);
             try (Stream<Path> stream = Files.walk(addonPath, 1)) {
                 return stream.filter(path -> path.toString().endsWith(".jar"))
-                        .map(path -> {
-                            try {
-                                return path.toUri().toURL();
-                            } catch (MalformedURLException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }).collect(Collectors.toSet());
+                        .map(Path::toUri).collect(Collectors.toSet());
             }
         }
     }
 
     class ClasspathFinder implements AddonFinder {
-        public static URL getSource(String filename, URL resourceURL) {
+        public static URI getSource(String filename, URL resourceURL) {
             try {
                 URLConnection connection = resourceURL.openConnection();
                 if (connection instanceof JarURLConnection) {
-                    return ((JarURLConnection) connection).getJarFileURL();
+                    return ((JarURLConnection) connection).getJarFileURL().toURI();
                 } else {
                     String path = resourceURL.getPath();
                     if (!path.endsWith(filename)) {
                         throw new RuntimeException(String.format("Could not find code source for file '%s' and URL '%s'!", filename, resourceURL));
                     }
 
-                    return new URL(resourceURL.getProtocol(), resourceURL.getHost(), resourceURL.getPort(), path.substring(0, path.length() - filename.length()));
+                    return new URL(resourceURL.getProtocol(), resourceURL.getHost(), resourceURL.getPort(), path.substring(0, path.length() - filename.length())).toURI();
                 }
-            } catch (Exception var5) {
-                throw new RuntimeException(var5);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
 
         @Override
-        public Collection<URL> findAddons() throws IOException {
-            Set<URL> addons = new HashSet<>();
+        public Collection<URI> findAddons() throws IOException {
+            Set<URI> addons = new HashSet<>();
             Enumeration<URL> enumeration = getClass().getClassLoader().getResources(SANDBOX_TOML);
             while (enumeration.hasMoreElements()) {
-                URL url = getSource(SANDBOX_TOML, enumeration.nextElement());
+                URI url = getSource(SANDBOX_TOML, enumeration.nextElement());
                 addons.add(url);
             }
             return addons;

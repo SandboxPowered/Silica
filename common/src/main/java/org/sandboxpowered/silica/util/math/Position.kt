@@ -13,11 +13,11 @@ class Position(
     override fun getZ() = z
 
     override fun add(x: Int, y: Int, z: Int): Position {
-        TODO("Not yet implemented")
+        return Position(this.x + x, this.y + y, this.z + z)
     }
 
     override fun sub(x: Int, y: Int, z: Int): Position {
-        TODO("Not yet implemented")
+        return add(-x, -y, -z)
     }
 
     override fun toMutable(): Position.Mutable {
@@ -25,11 +25,11 @@ class Position(
     }
 
     override fun toImmutable(): Position {
-        TODO("Not yet implemented")
+        return this
     }
 
-    override fun offset(direction: Direction?, amount: Int): Position {
-        TODO("Not yet implemented")
+    override fun offset(direction: Direction, amount: Int): Position {
+        return add(amount * direction.offsetX, amount * direction.offsetY, amount * direction.offsetZ)
     }
 
     override fun equals(other: Any?): Boolean {

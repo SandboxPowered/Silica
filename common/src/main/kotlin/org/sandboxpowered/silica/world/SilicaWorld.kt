@@ -7,10 +7,11 @@ import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import org.sandboxpowered.api.block.Blocks
-import org.sandboxpowered.api.block.entity.BlockEntity
-import org.sandboxpowered.api.entity.Entity
+import org.sandboxpowered.api.ecs.CapabilityManager
+import org.sandboxpowered.api.ecs.ComponentMapper
+import org.sandboxpowered.api.ecs.EntityBlueprint
+import org.sandboxpowered.api.ecs.component.Component
 import org.sandboxpowered.api.item.ItemStack
-import org.sandboxpowered.api.shape.Box
 import org.sandboxpowered.api.state.BlockState
 import org.sandboxpowered.api.state.FluidState
 import org.sandboxpowered.api.tags.TagManager
@@ -22,7 +23,6 @@ import org.sandboxpowered.api.world.WorldReader
 import org.sandboxpowered.silica.util.onMessage
 import org.sandboxpowered.silica.world.util.BlocTree
 import java.util.*
-import java.util.stream.Stream
 
 class SilicaWorld(private val side: Side) : World {
     private val blocks: BlocTree = BlocTree(WORLD_MIN, WORLD_MIN, WORLD_MIN, WORLD_SIZE, Blocks.AIR.get().baseState)
@@ -33,38 +33,53 @@ class SilicaWorld(private val side: Side) : World {
         return blocks[position.x, position.y, position.z]
     }
 
+    override fun getBlockEntity(position: Position): Int {
+        TODO("Not yet implemented")
+    }
+
     override fun setBlockState(position: Position, state: BlockState, vararg flags: BlockFlag): Boolean {
         blocks[position.x, position.y, position.z] = state
         return true
-    }
-
-    override fun getBlockEntity(position: Position): BlockEntity? {
-        return null
     }
 
     override fun getFluidState(position: Position): FluidState {
         return getBlockState(position).fluidState
     }
 
-    override fun getEntitiesWithin(box: Box): Stream<Entity> {
-        return Stream.empty()
-    }
-
-    override fun <T : Entity?> getEntitiesWithin(box: Box, filter: Class<T>): Stream<T> {
-        return Stream.empty()
-    }
 
     override fun getWorldTime(): Long {
         return worldTicks
     }
 
     override fun getTagManager(): TagManager? {
-        return null
+        TODO("Not yet implemented")
+    }
+
+    override fun <T : Component?> getMapper(type: Class<T>): ComponentMapper<T> {
+        TODO("Not yet implemented")
+    }
+
+    override fun createEntity(): Int {
+        TODO("Not yet implemented")
+    }
+
+    override fun createEntity(blueprint: EntityBlueprint): Int {
+        TODO("Not yet implemented")
+    }
+
+    override fun removeEntity(entity: Int) {
+        TODO("Not yet implemented")
+    }
+
+    override fun getCapabilityManager(): CapabilityManager {
+        TODO("Not yet implemented")
     }
 
     override fun getSide(): Side = this.side
 
-    override fun spawnItem(x: Double, y: Double, z: Double, stack: ItemStack) {}
+    override fun spawnItem(x: Double, y: Double, z: Double, stack: ItemStack) {
+        TODO("Not yet implemented")
+    }
 
     companion object {
         private const val WORLD_MIN = -1 shl 25 // -2^25
