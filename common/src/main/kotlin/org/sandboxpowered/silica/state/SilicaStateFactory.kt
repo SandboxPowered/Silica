@@ -3,12 +3,10 @@ package org.sandboxpowered.silica.state
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSortedMap
-import org.apache.commons.lang3.tuple.Pair
 import org.sandboxpowered.api.state.StateFactory
 import org.sandboxpowered.api.state.property.Property
 import org.sandboxpowered.api.state.property.PropertyContainer
 import java.util.*
-import java.util.function.Consumer
 import kotlin.collections.ArrayList
 
 class SilicaStateFactory<A, B : PropertyContainer<B>?>(
@@ -41,7 +39,7 @@ class SilicaStateFactory<A, B : PropertyContainer<B>?>(
         propertiesByName.forEach { (_, property) ->
             sequence = sequence.flatMap { list ->
                 property.values.map { comparable ->
-                    list + Pair.of(property, comparable)
+                    list + (property to comparable)
                 }
             }
         }
@@ -53,8 +51,8 @@ class SilicaStateFactory<A, B : PropertyContainer<B>?>(
         sequence.forEach { list ->
             val propertyValues = list.stream()
                 .collect(ImmutableMap.toImmutableMap(
-                    { obj: Pair<Property<*>, Comparable<*>> -> obj.key },
-                    { obj: Pair<Property<*>, Comparable<*>> -> obj.value }
+                    { obj: Pair<Property<*>, Comparable<*>> -> obj.first },
+                    { obj: Pair<Property<*>, Comparable<*>> -> obj.second }
                 ))
             val state = stateCreator.create(base, propertyValues)
             propertyToState[propertyValues] = state
