@@ -53,7 +53,7 @@ class VanillaChunkSection(
     }
 
     private companion object {
-        const val BITS = 14
+        const val BITS = 15
 
         const val AIR = 0
         const val STONE = 1
