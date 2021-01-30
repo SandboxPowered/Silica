@@ -47,9 +47,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Packet> {
         if (this.channel.eventLoop().inEventLoop()) {
             sendPacketInternal(packet, wantedProtocol, currentProtocol);
         } else {
-            channel.eventLoop().execute(() -> {
-                sendPacketInternal(packet, wantedProtocol, currentProtocol);
-            });
+            channel.eventLoop().execute(() -> sendPacketInternal(packet, wantedProtocol, currentProtocol));
         }
     }
 
