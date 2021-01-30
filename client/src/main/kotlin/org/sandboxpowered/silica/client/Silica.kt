@@ -2,21 +2,20 @@ package org.sandboxpowered.silica.client
 
 import com.google.common.base.Joiner
 import org.apache.commons.io.FileUtils
-import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.lwjgl.glfw.GLFW
-import org.lwjgl.opengl.GL
-import org.lwjgl.opengl.GL11
 import org.sandboxpowered.api.client.Client
 import org.sandboxpowered.api.client.GraphicsMode
-import org.sandboxpowered.silica.util.notExists
+import org.sandboxpowered.silica.client.opengl.OpenGLRenderer
 import org.sandboxpowered.silica.resources.ClasspathResourceLoader
 import org.sandboxpowered.silica.resources.DirectoryResourceLoader
 import org.sandboxpowered.silica.resources.ResourceManager
 import org.sandboxpowered.silica.resources.ZIPResourceLoader
 import org.sandboxpowered.silica.util.EmptyIOFilter
 import org.sandboxpowered.silica.util.FileFilters
+import org.sandboxpowered.silica.util.join
+import org.sandboxpowered.silica.util.notExists
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -25,14 +24,14 @@ class Silica(args: Args) : Runnable, Client {
     private val logger: Logger = LogManager.getLogger()
     private val window: Window
     private val manager: ResourceManager
+    private val renderer: Renderer = OpenGLRenderer()
     private fun close() {
         window.cleanup()
     }
 
     override fun run() {
-        GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
         while (!window.shouldClose()) {
-            GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT)
+            renderer.frame()
             window.update()
         }
         close()
@@ -58,7 +57,7 @@ class Silica(args: Args) : Runnable, Client {
         val resourcePacks = File("resourcepacks").apply {
             if (notExists()) {
                 mkdirs()
-            } else if(isFile) {
+            } else if (isFile) {
                 delete()
                 mkdirs()
             }
@@ -74,8 +73,10 @@ class Silica(args: Args) : Runnable, Client {
                 logger.error("Failed loading resource source {}", file.name)
             }
         }
-        logger.debug("Loaded namespaces: [{}]", StringUtils.join(manager.namespaces, ","))
-        window = Window("Sandbox Silica", args.width, args.height)
-        GL.createCapabilities()
+
+        logger.debug("Loaded namespaces: [${manager.getNamespaces().join(",")}]")
+        logger.debug("Using Renderer: ${renderer.getName()}")
+        window = Window("Sandbox Silica", args.width, args.height, renderer)
+        renderer.init()
     }
 }

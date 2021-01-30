@@ -24,7 +24,7 @@ public class ModelLoader {
 
             Logger logger = LogManager.getLogger(ModelLoader.class);
 
-            logger.info("Loading model " + file.getPath() + "...");
+            logger.info("Loading model {}...", file.getPath());
 
             if (scene == null || scene.mRootNode() == null) {
                 throw new RuntimeException("Could not load model: " + aiGetErrorString());

@@ -2,16 +2,15 @@ import org.gradle.internal.os.OperatingSystem
 
 plugins {
     id 'application'
-    id 'java'
-    id 'org.jetbrains.kotlin.jvm' version '1.4.30-M1'
+    id 'org.jetbrains.kotlin.jvm' version '1.4.30-M1' apply false
 }
 
 allprojects {
     repositories {
+        maven { url 'https://nexus.sandboxpowered.org/repository/maven-public/' }
         mavenCentral()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         maven { url 'https://jitpack.io' }
-        maven { url 'https://nexus.sandboxpowered.org/repository/maven-public/' }
         maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
         maven { url 'https://libraries.minecraft.net/' }
     }
@@ -20,8 +19,11 @@ allprojects {
 subprojects {
     apply plugin: 'java'
     apply plugin: 'org.jetbrains.kotlin.jvm'
-
-    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_14
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(14))
+        }
+    }
 
     compileKotlin {
         kotlinOptions {
@@ -70,8 +72,6 @@ switch (OperatingSystem.current()) {
         project.ext.lwjglNatives = "natives-windows"
         break
 }
-
-sourceCompatibility = targetCompatibility = JavaVersion.VERSION_14
 
 group 'org.sandboxpowered'
 version '1.0-SNAPSHOT'
