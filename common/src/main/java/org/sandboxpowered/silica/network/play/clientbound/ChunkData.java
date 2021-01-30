@@ -6,6 +6,7 @@ import org.sandboxpowered.silica.network.Connection;
 import org.sandboxpowered.silica.network.Packet;
 import org.sandboxpowered.silica.network.PacketByteBuf;
 import org.sandboxpowered.silica.network.PacketHandler;
+import org.sandboxpowered.silica.network.play.clientbound.world.VanillaChunkSection;
 import org.sandboxpowered.silica.world.util.BlocTree;
 
 public class ChunkData implements Packet {
@@ -26,21 +27,13 @@ public class ChunkData implements Packet {
 
         this.buffer = new byte[calculateSize(cX, cZ, blocTree)];
         bitMask = extractData(new PacketByteBuf(getWriteBuffer()), cX, cZ, blocTree);
-
-        for (int l = 16; k < l; ++k) {
-            bitMask |= 1 << k;
-        }
     }
 
     private int extractData(PacketByteBuf packetByteBuf, int cX, int cZ, BlocTree blocTree) {
         int j = 0;
-        int k = 0;
-        for (int l = 16; k < l; ++k) {
-            packetByteBuf.writeShort(0);
-            packetByteBuf.writeByte(4);
-            packetByteBuf.writeVarInt(1);
-            packetByteBuf.writeVarIntArray(new int[]{0});
-            j |= 1 << k;
+        for (int k = 0; k < 16; ++k) {
+            new VanillaChunkSection(blocTree, cX * 16, k * 16, cZ * 16).write(packetByteBuf);
+            j |= 1 << k; // TODO: only write non-empty
         }
         return j;
     }

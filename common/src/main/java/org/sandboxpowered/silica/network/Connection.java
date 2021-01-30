@@ -7,6 +7,7 @@ import org.sandboxpowered.silica.network.login.clientbound.LoginSuccess;
 import org.sandboxpowered.silica.network.login.serverbound.EncryptionResponse;
 import org.sandboxpowered.silica.network.play.clientbound.*;
 import org.sandboxpowered.silica.server.SilicaServer;
+import org.sandboxpowered.silica.world.util.BlocTree;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -152,6 +153,8 @@ public class Connection {
         packetHandler.sendPacket(new PlayerInfo(0));
         packetHandler.sendPacket(new PlayerInfo(2));
         packetHandler.sendPacket(new UpdateChunkPosition(0, 0));
+
+        packetHandler.sendPacket(new ChunkData(0, 0, new BlocTree(/*TODO !!!*/)));
 
         for (int x = -2; x < 3; x++) {
             for (int z = -2; z < 3; z++) {

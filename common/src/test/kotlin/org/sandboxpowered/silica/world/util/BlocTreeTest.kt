@@ -33,7 +33,7 @@ internal class BlocTreeTest {
             Assertions.assertEquals(state, tree[x, y, z])
         }
 
-        Assertions.assertEquals(count, tree.nonAirBlockStates)
+        Assertions.assertEquals(count, tree.nonAirInChunk(-8, 0, -8))
     }
 
     @Suppress("unused")
@@ -121,7 +121,7 @@ internal class BlocTreeTest {
         val subsection = tree[0, 0, 0, 1, 1, 1]
         Assertions.assertEquals(0, subsection.treeDepth)
         Assertions.assertEquals(tree, subsection)
-        Assertions.assertEquals(16 * 16 * 16, tree.nonAirBlockStates)
+        Assertions.assertEquals(16 * 16 * 16, tree.nonAirInChunk(-8, 0, -8))
     }
 
     @MethodSource("illegal pos")

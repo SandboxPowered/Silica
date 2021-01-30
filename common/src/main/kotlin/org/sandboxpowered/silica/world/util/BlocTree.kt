@@ -34,8 +34,7 @@ class BlocTree private constructor(
     var treeDepth = 0
         private set
     private var parent: BlocTree? = null
-    var nonAirBlockStates = 0
-        private set
+    private var nonAirBlockStates = 0
 
     /**
      * Internal constructor for [ObjectPool] use only
@@ -246,6 +245,17 @@ class BlocTree private constructor(
         val index = indexOf(x, y, z, width, height, depth)
         return if (index == OUTSIDE || this.nodes[index] == null) this
         else this.nodes[index]!!
+    }
+
+    fun nonAirInChunk(x: Int, y: Int, z: Int): Int {
+        require(bounds.contains(x, y, z)) { "Position $x, $y, $z outside of $bounds" }
+        require((bounds.x - x) % 16 == 0 && (bounds.z - z) % 16 == 0 && (bounds.z - z) % 16 == 0) { "Position $x, $y, $z is not a chunk origin" }
+        return if (bounds.size <= 16) this.nonAirBlockStates
+        else {
+            val index = indexOf(x, y, z, 16, 16, 16)
+            val n = nodes[index]
+            n?.nonAirInChunk(x, y, z) ?: if ((containers[index] ?: default).isAir) 0 else 16 * 16 * 16
+        }
     }
 
     /**

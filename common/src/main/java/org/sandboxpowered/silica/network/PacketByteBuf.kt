@@ -826,9 +826,13 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
 
     fun writeVarIntArray(array: IntArray): ByteBuf {
         writeVarInt(array.size)
-        for (element in array) {
-            writeVarInt(element)
-        }
+        array.forEach(this::writeVarInt)
+        return this
+    }
+
+    fun writeLongArray(array: LongArray): ByteBuf {
+        writeVarInt(array.size)
+        array.forEach(this::writeLong)
         return this
     }
 
