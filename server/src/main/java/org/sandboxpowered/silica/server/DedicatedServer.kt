@@ -17,6 +17,7 @@ import io.netty.handler.timeout.ReadTimeoutHandler
 import it.unimi.dsi.fastutil.objects.Object2LongMap
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap
 import mu.toKLogger
+import org.apache.logging.log4j.LogManager
 import org.sandboxpowered.api.util.Side
 import org.sandboxpowered.silica.StateManager
 import org.sandboxpowered.silica.inject.SilicaImplementationModule
@@ -30,14 +31,21 @@ import java.nio.file.Paths
 import java.time.Duration
 
 class DedicatedServer : SilicaServer() {
+    var log = LogManager.getLogger()
     private var loader: SandboxLoader? = null
     private val stateManager = StateManager()
+    private val acceptVanillaConnections: Boolean
 
     init {
         Guice.createInjector(SilicaImplementationModule())
         loader = SandboxLoader()
         loader!!.load()
-        stateManager.load()
+        acceptVanillaConnections = !stateManager.load()
+        if (acceptVanillaConnections) {
+            log.info("Accepting vanilla connections")
+        } else {
+            log.info("Found modded BlockStates, rejecting vanilla connections")
+        }
     }
 
     fun oldRun() {

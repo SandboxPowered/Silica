@@ -18,8 +18,7 @@ class StateManager {
     val stateMap: Object2IntMap<BlockState> = Object2IntArrayMap()
     val idMap: Int2ObjectMap<BlockState> = Int2ObjectArrayMap()
 
-    fun load() {
-
+    fun load(): Boolean {
         val string = javaClass.getResourceAsString("/data/silica/states.json")
         val gson = Gson()
         val json = gson.fromJson<JsonArray>(string)
@@ -66,7 +65,7 @@ class StateManager {
                 }
             }
         }
-        print("done, Successful: ${!encountedAnyProblem}")
+        return encountedAnyProblem
     }
 
     fun toVanillaId(state: BlockState): Int = stateMap.getInt(state)
