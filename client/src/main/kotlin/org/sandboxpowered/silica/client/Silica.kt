@@ -22,9 +22,9 @@ import java.util.*
 
 class Silica(args: Args) : Runnable, Client {
     private val logger: Logger = LogManager.getLogger()
-    private val window: Window
+    val window: Window
     private val manager: ResourceManager
-    private val renderer: Renderer = OpenGLRenderer()
+    private val renderer: Renderer = OpenGLRenderer(this)
     private fun close() {
         window.cleanup()
     }

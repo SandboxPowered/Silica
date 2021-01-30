@@ -10,6 +10,7 @@ class Window(private var windowName: String, var width: Int, var height: Int, va
         private set
     private var fpsCounter = 0
     private var nextDebugInfoUpdateTime = System.currentTimeMillis()
+    var resized = false
 
     fun cleanup() {
         glfwDestroyWindow(internalPointer)
@@ -73,21 +74,10 @@ class Window(private var windowName: String, var width: Int, var height: Int, va
             if(window == internalPointer) {
                 width = newWidth
                 height = newHeight
+                resized=true
             }
         }
-        MemoryStack.stackPush().use {
-            val pWidth = it.mallocInt(1)
-            val pHeight = it.mallocInt(1)
-            glfwGetWindowSize(internalPointer, pWidth, pHeight)
-            val vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor())!!
-            width = pWidth[0]
-            height = pHeight[0]
-            glfwSetWindowPos(
-                internalPointer,
-                (vidmode.width() - width) / 2,
-                (vidmode.height() - height) / 2
-            )
-        }
+        MemoryStack.stackPush()
         glfwMakeContextCurrent(internalPointer)
         glfwSwapInterval(1)
         glfwShowWindow(internalPointer)

@@ -2,7 +2,8 @@ import org.gradle.internal.os.OperatingSystem
 
 plugins {
     id 'application'
-    id 'org.jetbrains.kotlin.jvm' version '1.4.30-M1' apply false
+    id 'java'
+    id 'org.jetbrains.kotlin.jvm' version '1.4.30-M1'
 }
 
 allprojects {
@@ -19,6 +20,7 @@ allprojects {
 subprojects {
     apply plugin: 'java'
     apply plugin: 'org.jetbrains.kotlin.jvm'
+
     java {
         toolchain {
             languageVersion.set(JavaLanguageVersion.of(14))
@@ -59,19 +61,6 @@ application {
 
 project.ext.lwjglVersion = "3.2.4-SNAPSHOT"
 project.ext.jomlVersion = "1.9.25"
-
-switch (OperatingSystem.current()) {
-    case OperatingSystem.LINUX:
-        def osArch = System.getProperty("os.arch")
-        project.ext.lwjglNatives = osArch.startsWith("arm") || osArch.startsWith("aarch64") ? "natives-linux-arm64" : "natives-linux"
-        break
-    case OperatingSystem.MAC_OS:
-        project.ext.lwjglNatives = "natives-macos"
-        break
-    case OperatingSystem.WINDOWS:
-        project.ext.lwjglNatives = "natives-windows"
-        break
-}
 
 group 'org.sandboxpowered'
 version '1.0-SNAPSHOT'
