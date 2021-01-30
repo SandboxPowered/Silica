@@ -16,7 +16,9 @@ object TestData {
         every { Registry.getRegistryFromType(Block::class.java) } returns blocks
     }
 
-    fun block(name: String): Block = mockk(name, relaxed = true)
+    fun block(name: String, isAir: Boolean = false): Block = mockk(name, relaxed = true) {
+        every { isAir(any()) } returns isAir
+    }
 
-    fun state(blockName: String) = SilicaBlockState(block(blockName), ImmutableMap.of())
+    fun state(blockName: String, isAir: Boolean = false) = SilicaBlockState(block(blockName, isAir), ImmutableMap.of())
 }

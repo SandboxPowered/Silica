@@ -10,26 +10,30 @@ import java.util.stream.Stream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BlocTreeTest {
-    private val air = TestData.state("air")
+    private val air = TestData.state("air", true)
     private val bedrock = TestData.state("bedrock")
     private val stone = TestData.state("stone")
     private val dirt = TestData.state("dirt")
     private val grass = TestData.state("grass")
 
     @MethodSource("world layers")
-    @ParameterizedTest
+    @ParameterizedTest(name = "[${ParameterizedTest.INDEX_PLACEHOLDER}] ${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER}")
     fun `A tree filled with layers should store correct info`(blocks: Sequence<Pair<Triple<Int, Int, Int>, BlockState>>) {
         val tree = BlocTree(-8, 0, -8, 16, air)
+        var count = 0
 
         for ((pos, state) in blocks) {
             val (x, y, z) = pos
             tree[x, y, z] = state
+            if (!state.isAir) ++count
         }
 
         for ((pos, state) in blocks) {
             val (x, y, z) = pos
             Assertions.assertEquals(state, tree[x, y, z])
         }
+
+        Assertions.assertEquals(count, tree.nonAirBlockStates)
     }
 
     @Suppress("unused")
@@ -117,10 +121,11 @@ internal class BlocTreeTest {
         val subsection = tree[0, 0, 0, 1, 1, 1]
         Assertions.assertEquals(0, subsection.treeDepth)
         Assertions.assertEquals(tree, subsection)
+        Assertions.assertEquals(16 * 16 * 16, tree.nonAirBlockStates)
     }
 
     @MethodSource("illegal pos")
-    @ParameterizedTest
+    @ParameterizedTest(name = "[${ParameterizedTest.INDEX_PLACEHOLDER}] ${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER} ${ParameterizedTest.ARGUMENTS_PLACEHOLDER}")
     fun `Trying to set a block outside of the tree's bounds should throw an ISE`(pos: Triple<Int, Int, Int>) {
         val tree = BlocTree(-8, 0, -8, 16, air)
         val (x, y, z) = pos

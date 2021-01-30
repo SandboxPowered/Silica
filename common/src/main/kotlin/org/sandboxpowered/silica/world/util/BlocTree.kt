@@ -4,6 +4,7 @@ import net.mostlyoriginal.api.utils.pooling.ObjectPool
 import net.mostlyoriginal.api.utils.pooling.Poolable
 import org.sandboxpowered.api.state.BlockState
 import org.sandboxpowered.silica.util.getPool
+import kotlin.math.pow
 
 /**
  * Octree for optimized queries in 3d space, but for BlockStates
@@ -33,6 +34,8 @@ class BlocTree private constructor(
     var treeDepth = 0
         private set
     private var parent: BlocTree? = null
+    var nonAirBlockStates = 0
+        private set
 
     /**
      * Internal constructor for [ObjectPool] use only
@@ -50,6 +53,7 @@ class BlocTree private constructor(
         this.bounds.set(x, y, z, size)
         this.parent = parent
         this.default = default
+        this.nonAirBlockStates = if (default.isAir) 0 else size.toDouble().pow(3).toInt()
 
         return this
     }
@@ -122,29 +126,38 @@ class BlocTree private constructor(
         internalSet(x, y, z, state)
     }
 
+    /**
+     * @return the previous state at given position
+     */
     private fun internalSet(
         x: Int, y: Int, z: Int,
         state: BlockState
-    ) {
+    ): BlockState {
         val index = indexOf(x, y, z)
         val n = nodes[index]
-        if (n != null) {
-            n.internalSet(x, y, z, state)
+        val old = if (n != null) {
+            val old = n.internalSet(x, y, z, state)
             if (n.shouldShrink()) {
                 containers[index] = n.default
                 nodes[index] = null
                 otPool.free(n)
             }
+            old
         } else {
             if (bounds.size > 2) {
                 if ((containers[index] ?: default) != state) {
                     this.split(index)
                     nodes[index]!!.internalSet(x, y, z, state)
-                }
+                } else state
             } else {
+                val old = this.containers[index] ?: this.default
                 this.containers[index] = if (state != this.default) state else null
+                old
             }
         }
+        if (old.isAir && !state.isAir) ++nonAirBlockStates
+        else if (!old.isAir && state.isAir) --nonAirBlockStates
+        return old
     }
 
     /**
@@ -217,13 +230,11 @@ class BlocTree private constructor(
     /**
      * Returns the state at given position
      */
-    operator fun get(x: Int, y: Int, z: Int): BlockState {
+    operator fun get(x: Int, y: Int, z: Int): BlockState =
         if (bounds.contains(x, y, z)) {
             val index = indexOf(x, y, z)
-            return nodes[index]?.get(x, y, z) ?: containers[index] ?: default
-        }
-        return default
-    }
+            nodes[index]?.get(x, y, z) ?: containers[index] ?: default
+        } else default
 
     /**
      * Returns the smallest [BlocTree] containing the selected region
