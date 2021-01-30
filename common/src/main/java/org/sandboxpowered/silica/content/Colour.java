@@ -14,7 +14,7 @@ public enum Colour {
     LIGHT_GRAY,
     CYAN,
     PURPLE,
-    DARK_BLUE,
+    BLUE,
     BROWN,
     GREEN,
     RED,

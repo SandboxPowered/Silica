@@ -5,6 +5,7 @@ dependencies {
 
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.4")
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    api 'com.google.code.gson:gson:2.8.6'
 }
 repositories {
     maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }

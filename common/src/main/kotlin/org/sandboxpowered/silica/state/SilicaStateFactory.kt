@@ -30,7 +30,7 @@ class SilicaStateFactory<A, B : PropertyContainer<B>?>(
     }
 
     override fun getValidStates(): Collection<B> {
-        return emptySet()
+        return states
     }
 
     init {

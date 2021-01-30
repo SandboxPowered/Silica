@@ -1,6 +1,7 @@
 package org.sandboxpowered.silica.server;
 
 import org.sandboxpowered.api.server.Server;
+import org.sandboxpowered.silica.StateManager;
 import org.sandboxpowered.silica.command.Commands;
 import org.sandboxpowered.silica.world.SilicaWorld;
 

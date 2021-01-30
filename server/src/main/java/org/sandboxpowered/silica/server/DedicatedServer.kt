@@ -18,6 +18,7 @@ import it.unimi.dsi.fastutil.objects.Object2LongMap
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap
 import mu.toKLogger
 import org.sandboxpowered.api.util.Side
+import org.sandboxpowered.silica.StateManager
 import org.sandboxpowered.silica.inject.SilicaImplementationModule
 import org.sandboxpowered.silica.loading.SandboxLoader
 import org.sandboxpowered.silica.network.*
@@ -30,11 +31,13 @@ import java.time.Duration
 
 class DedicatedServer : SilicaServer() {
     private var loader: SandboxLoader? = null
+    private val stateManager = StateManager()
 
     init {
         Guice.createInjector(SilicaImplementationModule())
         loader = SandboxLoader()
         loader!!.load()
+        stateManager.load()
     }
 
     fun oldRun() {

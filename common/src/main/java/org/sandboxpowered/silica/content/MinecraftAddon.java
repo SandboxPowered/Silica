@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import org.sandboxpowered.api.SandboxAPI;
 import org.sandboxpowered.api.addon.Addon;
 import org.sandboxpowered.api.block.BaseBlock;
+import org.sandboxpowered.api.block.Block;
 import org.sandboxpowered.api.block.Materials;
 import org.sandboxpowered.api.block.SlabBlock;
 import org.sandboxpowered.api.item.BaseItem;
@@ -55,14 +56,15 @@ public class MinecraftAddon implements Addon {
 
             registrar.register(String.format("%s_concrete", colour.getName()), new BaseBlock(builder(Materials.STONE).build()));
             registrar.register(String.format("%s_concrete_powder", colour.getName()), new BaseBlock(builder(Materials.SAND).build()));
-            registrar.register(String.format("%s_terracotta", colour.getName()), new BaseBlock(builder(Materials.SAND).build()));
-            registrar.register(String.format("%s_stained_glass", colour.getName()), new BaseBlock(builder(Materials.SAND).build()));
-            registrar.register(String.format("%s_stained_glass_pane", colour.getName()), new BaseBlock(builder(Materials.SAND).build()));
+            registrar.register(String.format("%s_terracotta", colour.getName()), new BaseBlock(builder(Materials.STONE).build()));
+            registrar.register(String.format("%s_stained_glass", colour.getName()), new BaseBlock(builder(Materials.GLASS).build()));
+            registrar.register(String.format("%s_stained_glass_pane", colour.getName()), new GlassPaneBlock(builder(Materials.GLASS).build()));
         }
 
         for (Sandstone sandstone : Sandstone.values()) {
-            registerWithExtra(registrar, sandstone.formatted("sandstone"), new BaseBlock(builder(Materials.SAND).build()), sandstone != Sandstone.CHISELED ? baseExtras : null);
-            registerWithExtra(registrar, sandstone.formatted("red_sandstone"), new BaseBlock(builder(Materials.SAND).build()), sandstone != Sandstone.CHISELED ? baseExtras : null);
+            Extra[] extras = sandstone == Sandstone.CUT ? new Extra[]{Extra.SLAB} : sandstone != Sandstone.CHISELED ? baseExtras : null;
+            registerWithExtra(registrar, sandstone.formatted("sandstone"), new BaseBlock(builder(Materials.SAND).build()), extras);
+            registerWithExtra(registrar, sandstone.formatted("red_sandstone"), new BaseBlock(builder(Materials.SAND).build()), extras);
         }
 
         for (Wood wood : Wood.values()) {
@@ -72,7 +74,10 @@ public class MinecraftAddon implements Addon {
             registrar.register(String.format("%s_wood", wood.getPrefix()), new AxisBlock(builder(Materials.WOOD).build()));
             registrar.register(String.format("stripped_%s_wood", wood.getPrefix()), new AxisBlock(builder(Materials.WOOD).build()));
 
-            registerWithExtra(registrar, String.format("%s_planks", wood.getPrefix()), new BaseBlock(builder(Materials.WOOD).build()), baseExtras);
+            BaseBlock plank = new BaseBlock(builder(Materials.WOOD).build());
+            registerWithExtra(registrar, String.format("%s_planks", wood.getPrefix()), plank);
+            registerWithExtra(registrar, String.format("%s_slab", wood.getPrefix()), new SlabBlock(builder(plank).build()));
+            registerWithExtra(registrar, String.format("%s_stairs", wood.getPrefix()), new StairsBlock(builder(plank).build()));
         }
     }
 

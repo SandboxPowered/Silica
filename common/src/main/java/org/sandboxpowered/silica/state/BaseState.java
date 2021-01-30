@@ -22,6 +22,10 @@ public class BaseState<B, S> implements PropertyContainer<S> {
         this.properties = properties;
     }
 
+    public ImmutableMap<Property<?>, Comparable<?>> getProperties() {
+        return properties;
+    }
+
     protected static <T> T findNextInCollection(Collection<T> collection, T object) {
         Iterator<T> iterator = collection.iterator();
 
