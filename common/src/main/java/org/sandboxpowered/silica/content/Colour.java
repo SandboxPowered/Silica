@@ -20,7 +20,7 @@ public enum Colour {
     RED,
     BLACK;
 
-    private String name;
+    private final String name;
 
     Colour() {
         this.name = name().toLowerCase(Locale.ENGLISH);

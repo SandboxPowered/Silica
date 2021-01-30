@@ -7,12 +7,11 @@ import org.sandboxpowered.api.util.math.Position;
 import org.sandboxpowered.api.world.WorldReader;
 
 public class CarpetBlock extends BaseBlock {
+    private static final Shape CARPET_SHAPE = Shape.cuboid(0, 0, 0, 16, 1, 16);
+    private static final Shape CARPET_COLLISION_SHAPE = Shape.cuboid(0, -1, 0, 16, 0, 16);
     public CarpetBlock(Settings settings) {
         super(settings);
     }
-
-    private static final Shape CARPET_SHAPE = Shape.cuboid(0, 0, 0, 16, 1, 16);
-    private static final Shape CARPET_COLLISION_SHAPE = Shape.cuboid(0, -1, 0, 16, 0, 16);
 
     @Override
     public Shape getShape(WorldReader reader, Position position, BlockState state) {

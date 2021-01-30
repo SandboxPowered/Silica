@@ -10,7 +10,7 @@ public class TeleportConfirmation implements Packet {
 
     @Override
     public void read(PacketByteBuf buf) {
-        tpId=buf.readVarInt();
+        tpId = buf.readVarInt();
     }
 
     @Override

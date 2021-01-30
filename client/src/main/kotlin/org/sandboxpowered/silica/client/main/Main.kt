@@ -13,13 +13,16 @@ import kotlin.reflect.KClass
 
 object Main {
     val LOG = LogManager.getLogger(Main::class.java)
+
     @JvmStatic
     fun main(args: Array<String>) {
         val optionSpec = OptionParser()
         optionSpec.allowsUnrecognizedOptions()
         val injector: Injector = Guice.createInjector(SilicaImplementationModule())
-        val widthSpec: OptionSpec<Int> = optionSpec.accepts("width").withRequiredArg().ofType(Int::class).defaultsTo(1000)
-        val heightSpec: OptionSpec<Int> = optionSpec.accepts("height").withRequiredArg().ofType(Int::class).defaultsTo(563)
+        val widthSpec: OptionSpec<Int> =
+            optionSpec.accepts("width").withRequiredArg().ofType(Int::class).defaultsTo(1000)
+        val heightSpec: OptionSpec<Int> =
+            optionSpec.accepts("height").withRequiredArg().ofType(Int::class).defaultsTo(563)
         val unknownOptionsSpec: OptionSpec<String> = optionSpec.nonOptions()
         val options = optionSpec.parse(*args)
         val unknownOptions = options.valuesOf(unknownOptionsSpec)

@@ -2,18 +2,11 @@ package org.sandboxpowered.silica.network.play.clientbound;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import org.apache.commons.lang3.ArrayUtils;
 import org.sandboxpowered.silica.network.Connection;
 import org.sandboxpowered.silica.network.Packet;
 import org.sandboxpowered.silica.network.PacketByteBuf;
 import org.sandboxpowered.silica.network.PacketHandler;
 import org.sandboxpowered.silica.world.util.BlocTree;
-
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class ChunkData implements Packet {
     private int cX, cZ;
@@ -34,15 +27,15 @@ public class ChunkData implements Packet {
         this.buffer = new byte[calculateSize(cX, cZ, blocTree)];
         bitMask = extractData(new PacketByteBuf(getWriteBuffer()), cX, cZ, blocTree);
 
-        for(int l = 16; k < l; ++k) {
-            bitMask |= 1<< k;
+        for (int l = 16; k < l; ++k) {
+            bitMask |= 1 << k;
         }
     }
 
     private int extractData(PacketByteBuf packetByteBuf, int cX, int cZ, BlocTree blocTree) {
         int j = 0;
         int k = 0;
-        for(int l = 16; k < l; ++k) {
+        for (int l = 16; k < l; ++k) {
             packetByteBuf.writeShort(0);
             packetByteBuf.writeByte(4);
             packetByteBuf.writeVarInt(1);

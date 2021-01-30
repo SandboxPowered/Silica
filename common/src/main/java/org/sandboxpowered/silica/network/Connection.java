@@ -153,9 +153,9 @@ public class Connection {
         packetHandler.sendPacket(new PlayerInfo(2));
         packetHandler.sendPacket(new UpdateChunkPosition(0, 0));
 
-        for(int x = -2; x < 3; x++) {
-            for(int z = -2; z < 3; z++) {
-                packetHandler.sendPacket(new UpdateLight(x,z, true));
+        for (int x = -2; x < 3; x++) {
+            for (int z = -2; z < 3; z++) {
+                packetHandler.sendPacket(new UpdateLight(x, z, true));
             }
         }
 

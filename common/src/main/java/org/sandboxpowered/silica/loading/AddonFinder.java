@@ -3,7 +3,10 @@ package org.sandboxpowered.silica.loading;
 import com.google.common.collect.Sets;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.JarURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;

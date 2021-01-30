@@ -1,7 +1,6 @@
 package org.sandboxpowered.silica.client
 
 import org.lwjgl.opengl.GL20.*
-import java.lang.Exception
 
 class ShaderProgram {
     private var programId: Int = glCreateProgram()

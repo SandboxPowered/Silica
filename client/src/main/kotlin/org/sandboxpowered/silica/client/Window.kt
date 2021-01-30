@@ -71,10 +71,10 @@ class Window(private var windowName: String, var width: Int, var height: Int, va
                 glfwSetWindowShouldClose(window, true)
         }
         glfwSetWindowSizeCallback(internalPointer) { window, newWidth, newHeight ->
-            if(window == internalPointer) {
+            if (window == internalPointer) {
                 width = newWidth
                 height = newHeight
-                resized=true
+                resized = true
             }
         }
         MemoryStack.stackPush()

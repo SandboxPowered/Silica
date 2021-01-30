@@ -2,7 +2,8 @@
 <Configuration status="WARN" packages="org.sandboxpowered.silica">
     <Appenders>
         <Console name="SysOut" target="SYSTEM_OUT">
-            <PatternLayout disableAnsi="false" pattern="%highlight{[%d{HH:mm:ss}] %notEmpty{[%marker] }(%c{1}) [%t/%level{WARN=Warning, DEBUG=Debug, ERROR=Error, TRACE=Trace, INFO=Info}]}: %msg%n" />
+            <PatternLayout disableAnsi="false"
+                           pattern="%highlight{[%d{HH:mm:ss}] %notEmpty{[%marker] }(%c{1}) [%t/%level{WARN=Warning, DEBUG=Debug, ERROR=Error, TRACE=Trace, INFO=Info}]}: %msg%n"/>
         </Console>
     </Appenders>
     <Loggers>

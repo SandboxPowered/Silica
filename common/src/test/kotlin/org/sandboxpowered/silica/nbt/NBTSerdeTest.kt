@@ -83,10 +83,12 @@ internal class NBTSerdeTest {
         Arguments.of("CgAACwAMc29tZUludEFycmF5AAAABQAAAAAAAAABAAAAAgAAAAMAAAAEAA==", CompoundTag().apply {
             setIntArray("someIntArray", IntArray(5) { it })
         }),
-        Arguments.of("CgAADAANc29tZUxvbmdBcnJheQAAAAUAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAIAAAAAAAAAAwAAAAAAAAAEAA==", CompoundTag().apply {
+        Arguments.of(
+            "CgAADAANc29tZUxvbmdBcnJheQAAAAUAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAIAAAAAAAAAAwAAAAAAAAAEAA==",
+            CompoundTag().apply {
 //            setLongArray("someLongArray", LongArray(5) { it.toLong() })
-            tags["someLongArray"] = CompoundTag.Entry.longArray(LongArray(5) { it.toLong() })
-        }), // No support for LongArray in the api so setting it manually for now
+                tags["someLongArray"] = CompoundTag.Entry.longArray(LongArray(5) { it.toLong() })
+            }), // No support for LongArray in the api so setting it manually for now
         Arguments.of("CgAACgAIc29tZVVVSUQEAAFMtiUPhz6kNtEEAAFNg2D0rLzXR20AAA==", CompoundTag().apply {
             setUUID("someUUID", UUID.fromString("8360f4ac-bcd7-476d-b625-0f873ea436d1"))
         }),

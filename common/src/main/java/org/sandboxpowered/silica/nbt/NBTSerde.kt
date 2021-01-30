@@ -49,14 +49,14 @@ private enum class NbtType(
     }),
     STRING(DataInput::readUTF, { writeUTF(it as String) }),
     LIST({
-        val type = readByte();
+        val type = readByte()
         val s = readInt()
         List<Entry>(s) {
             read(type.toInt(), this)
         }
     }, {
         it as List<org.sandboxpowered.silica.nbt.CompoundTag>
-        val type = if(it.isEmpty()) {
+        val type = if (it.isEmpty()) {
             0
         } else {
             TAG.vanillaId
@@ -113,6 +113,7 @@ private enum class NbtType(
             getNbtType(what.type).write(output, what.value)
         }
 
-        private fun getNbtType(type: Int) = values().getOrElse(type - 1) { throw IllegalArgumentException("Type $type is invalid") }
+        private fun getNbtType(type: Int) =
+            values().getOrElse(type - 1) { throw IllegalArgumentException("Type $type is invalid") }
     }
 }

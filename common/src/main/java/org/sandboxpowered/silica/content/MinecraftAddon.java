@@ -49,7 +49,7 @@ public class MinecraftAddon implements Addon {
         registrar.register("netherrack", new BaseBlock(builder(Materials.STONE).build()));
         registrar.register("glowstone", new BaseBlock(builder(Materials.GLASS).setLuminance(15).build()));
 
-        for(Colour colour : Colour.values()) {
+        for (Colour colour : Colour.values()) {
             registrar.register(String.format("%s_wool", colour.getName()), new BaseBlock(builder(Materials.WOOL).build()));
             registrar.register(String.format("%s_carpet", colour.getName()), new CarpetBlock(builder(Materials.WOOL).build()));
 

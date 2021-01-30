@@ -6,8 +6,8 @@ import org.sandboxpowered.silica.network.PacketByteBuf;
 import org.sandboxpowered.silica.network.PacketHandler;
 
 public class SetPlayerPositionAndLook implements Packet {
-    private double x,y,z;
-    private float yaw,pitch;
+    private double x, y, z;
+    private float yaw, pitch;
     private byte flags;
     private int id;
 

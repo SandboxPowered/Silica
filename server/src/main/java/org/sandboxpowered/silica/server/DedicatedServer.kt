@@ -76,11 +76,16 @@ class DedicatedServer : SilicaServer() {
         class Tock(val done: ActorRef<*>) : Command()
     }
 
-    private class DedicatedServerGuardian private constructor(context: ActorContext<Command>, timerScheduler: TimerScheduler<Command>) : AbstractBehavior<Command>(context) {
+    private class DedicatedServerGuardian private constructor(
+        context: ActorContext<Command>,
+        timerScheduler: TimerScheduler<Command>
+    ) : AbstractBehavior<Command>(context) {
         companion object {
-            fun create(): Behavior<Command> = Behaviors.withTimers { timerScheduler -> Behaviors.setup {
-                DedicatedServerGuardian(it, timerScheduler)
-            } }
+            fun create(): Behavior<Command> = Behaviors.withTimers { timerScheduler ->
+                Behaviors.setup {
+                    DedicatedServerGuardian(it, timerScheduler)
+                }
+            }
         }
 
         private val logger = context.log.toKLogger()

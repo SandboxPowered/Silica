@@ -2,8 +2,6 @@ package org.sandboxpowered.silica.network
 
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufAllocator
-import kotlin.Throws
-import kotlin.jvm.JvmOverloads
 import io.netty.buffer.ByteBufInputStream
 import io.netty.buffer.ByteBufOutputStream
 import io.netty.handler.codec.DecoderException
@@ -16,7 +14,6 @@ import org.sandboxpowered.silica.nbt.write
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-import java.lang.RuntimeException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.channels.FileChannel
@@ -914,10 +911,10 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
     }
 
     fun writeNBT(tag: CompoundTag?) {
-        if(tag==null)
+        if (tag == null)
             writeByte(0)
         else {
-            val out = ByteBufOutputStream(this);
+            val out = ByteBufOutputStream(this)
             out.write(tag)
         }
     }

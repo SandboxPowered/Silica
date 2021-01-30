@@ -33,12 +33,12 @@ public class UpdateLight implements Packet {
             this.emptyBlockYMask |= 1 << i;
         }
         int j;
-        for(j = 0; j < 18; ++j) {
+        for (j = 0; j < 18; ++j) {
             if ((this.skyYMask & 1 << j) != 0) {
                 System.out.println(true);
             }
         }
-        for(j = 0; j < 18; ++j) {
+        for (j = 0; j < 18; ++j) {
             if ((this.blockYMask & 1 << j) != 0) {
                 System.out.println(false);
             }

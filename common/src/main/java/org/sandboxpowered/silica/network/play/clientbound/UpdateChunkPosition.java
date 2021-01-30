@@ -6,7 +6,7 @@ import org.sandboxpowered.silica.network.PacketByteBuf;
 import org.sandboxpowered.silica.network.PacketHandler;
 
 public class UpdateChunkPosition implements Packet {
-    private int x,y;
+    private int x, y;
 
     public UpdateChunkPosition() {
     }

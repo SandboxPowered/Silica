@@ -14,7 +14,7 @@ public class SilicaServer implements Server {
     private final byte[] verificationArray = new byte[4];
     private final Random serverRandom = new Random();
     private SilicaWorld world;
-    private Commands commands;
+    private final Commands commands;
 
     public SilicaServer() {
         try {
@@ -39,7 +39,6 @@ public class SilicaServer implements Server {
     public KeyPair getKeyPair() {
         return encryptionKeyPair;
     }
-
 
 
 }

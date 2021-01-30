@@ -56,7 +56,7 @@ class OpenGLRenderer(val silica: Silica) : Renderer {
 
         if (window.resized) {
             glViewport(0, 0, window.width, window.height)
-            window.resized=false
+            window.resized = false
         }
 
         shaderProgram.bind()
