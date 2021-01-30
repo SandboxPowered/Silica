@@ -18,7 +18,7 @@ object Main {
     fun main(args: Array<String>) {
         val optionSpec = OptionParser()
         optionSpec.allowsUnrecognizedOptions()
-        val injector: Injector = Guice.createInjector(SilicaImplementationModule())
+        Guice.createInjector(SilicaImplementationModule())
         val widthSpec: OptionSpec<Int> =
             optionSpec.accepts("width").withRequiredArg().ofType(Int::class).defaultsTo(1000)
         val heightSpec: OptionSpec<Int> =

@@ -5,6 +5,7 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.Behavior
 import akka.actor.typed.Terminated
 import akka.actor.typed.javadsl.*
+import com.google.inject.Guice
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.ChannelOption
@@ -17,6 +18,7 @@ import it.unimi.dsi.fastutil.objects.Object2LongMap
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap
 import mu.toKLogger
 import org.sandboxpowered.api.util.Side
+import org.sandboxpowered.silica.inject.SilicaImplementationModule
 import org.sandboxpowered.silica.loading.SandboxLoader
 import org.sandboxpowered.silica.network.*
 import org.sandboxpowered.silica.util.messageAdapter
@@ -30,6 +32,7 @@ class DedicatedServer : SilicaServer() {
     private var loader: SandboxLoader? = null
 
     init {
+        Guice.createInjector(SilicaImplementationModule())
         loader = SandboxLoader()
         loader!!.load()
     }
