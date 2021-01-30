@@ -141,6 +141,10 @@ enum class Protocol(private val id: Int, builder: Builder) {
         val idToConstructor: Int2ObjectMap<Supplier<out Packet>> = Int2ObjectOpenHashMap()
         private val ignoredIds: IntList = IntArrayList()
 
+        init {
+            classToId.defaultReturnValue(-1)
+        }
+
         inline fun <reified P : Packet> addPacket(targetId: Int, supplier: Supplier<P>): Packets {
             val id = classToId.put(P::class.java, targetId)
             return if (id != -1) {
