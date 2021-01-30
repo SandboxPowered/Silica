@@ -8,7 +8,7 @@ import io.netty.handler.codec.DecoderException
 import io.netty.handler.codec.EncoderException
 import io.netty.util.ByteProcessor
 import org.sandboxpowered.api.util.Identity
-import org.sandboxpowered.silica.nbt.CompoundTag
+import org.sandboxpowered.api.util.nbt.CompoundTag
 import org.sandboxpowered.silica.nbt.readNbt
 import org.sandboxpowered.silica.nbt.write
 import java.io.IOException
@@ -815,12 +815,12 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
     }
 
     fun writeVarInt(i: Int): ByteBuf {
-        var i = i
-        while (i and -128 != 0) {
-            writeByte(i and 127 or 128)
-            i = i ushr 7
+        var ii = i
+        while (ii and -128 != 0) {
+            writeByte(ii and 127 or 128)
+            ii = ii ushr 7
         }
-        writeByte(i)
+        writeByte(ii)
         return this
     }
 
@@ -910,7 +910,7 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         } else {
             readerIndex(i)
             val stream = ByteBufInputStream(this)
-            stream.readNbt() as CompoundTag
+            stream.readNbt()
         }
     }
 
@@ -932,5 +932,16 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
 
         writeByte(l.toInt())
         return this
+    }
+
+    companion object {
+        fun getVarIntSize(i: Int): Int {
+            for (j in 1..4) {
+                if (i and -1 shl j * 7 == 0) {
+                    return j
+                }
+            }
+            return 5
+        }
     }
 }

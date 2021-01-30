@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.network.play.clientbound;
 
 import org.sandboxpowered.api.util.Identity;
-import org.sandboxpowered.silica.nbt.CompoundTag;
+import org.sandboxpowered.api.util.nbt.CompoundTag;
 import org.sandboxpowered.silica.network.Connection;
 import org.sandboxpowered.silica.network.Packet;
 import org.sandboxpowered.silica.network.PacketByteBuf;

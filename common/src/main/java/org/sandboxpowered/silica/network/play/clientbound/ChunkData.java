@@ -2,11 +2,13 @@ package org.sandboxpowered.silica.network.play.clientbound;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.sandboxpowered.silica.nbt.CompoundTag;
 import org.sandboxpowered.silica.network.Connection;
 import org.sandboxpowered.silica.network.Packet;
 import org.sandboxpowered.silica.network.PacketByteBuf;
 import org.sandboxpowered.silica.network.PacketHandler;
 import org.sandboxpowered.silica.network.play.clientbound.world.VanillaChunkSection;
+import org.sandboxpowered.silica.network.util.BitPackedLongArray;
 import org.sandboxpowered.silica.world.util.BlocTree;
 
 public class ChunkData implements Packet {
@@ -14,6 +16,7 @@ public class ChunkData implements Packet {
     private int bitMask;
     private byte[] buffer;
     private int[] biomes;
+    private VanillaChunkSection[] sections = new VanillaChunkSection[16];
 
     public ChunkData() {
     }
@@ -21,19 +24,21 @@ public class ChunkData implements Packet {
     public ChunkData(int cX, int cZ, BlocTree blocTree) {
         this.cX = cX;
         this.cZ = cZ;
-        int k = 0;
 
         this.biomes = new int[1024];
 
-        this.buffer = new byte[calculateSize(cX, cZ, blocTree)];
+        for (int i = 0; i < 16; ++i) {
+            sections[i] = new VanillaChunkSection(blocTree, cX * 16, i * 16, cZ * 16);
+        }
+        this.buffer = new byte[calculateSize(cX, cZ)];
         bitMask = extractData(new PacketByteBuf(getWriteBuffer()), cX, cZ, blocTree);
     }
 
     private int extractData(PacketByteBuf packetByteBuf, int cX, int cZ, BlocTree blocTree) {
         int j = 0;
-        for (int k = 0; k < 16; ++k) {
-            new VanillaChunkSection(blocTree, cX * 16, k * 16, cZ * 16).write(packetByteBuf);
-            j |= 1 << k; // TODO: only write non-empty
+        for (int i = 0; i < 16; ++i) {
+            sections[i].write(packetByteBuf);
+            j |= 1 << i; // TODO: only write non-empty
         }
         return j;
     }
@@ -48,9 +53,12 @@ public class ChunkData implements Packet {
         return byteBuf;
     }
 
-
-    private int calculateSize(int cX, int cZ, BlocTree blocTree) {
-        return 0;
+    private int calculateSize(int cX, int cZ) {
+        int r = 0;
+        for (int i = 0; i < 16; i++) {
+            r += sections[i].getSerializedSize();
+        }
+        return r;
     }
 
     @Override
@@ -60,11 +68,16 @@ public class ChunkData implements Packet {
 
     @Override
     public void write(PacketByteBuf buf) {
-        buf.writeVarInt(cX);
-        buf.writeVarInt(cZ);
+        buf.writeInt(cX);
+        buf.writeInt(cZ);
         buf.writeBoolean(true);
         buf.writeVarInt(bitMask);
-        // hightmap
+        final CompoundTag heightmap = new CompoundTag();
+        final BitPackedLongArray heightmapData = new BitPackedLongArray(256, 9);
+        for (int i = 0; i < 256; i++) heightmapData.set(i, 7);
+        heightmap.setLongArray("MOTION_BLOCKING", heightmapData.getData());
+        heightmap.setLongArray("WORLD_SURFACE", heightmapData.getData());
+        buf.writeNBT(heightmap);
         buf.writeVarIntArray(biomes);
         buf.writeVarInt(buffer.length);
         buf.writeBytes(buffer);

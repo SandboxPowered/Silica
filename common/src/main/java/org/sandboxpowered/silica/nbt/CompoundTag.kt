@@ -11,6 +11,7 @@ import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.float
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.int
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.intArray
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.long
+import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.longArray
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.string
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.tag
 import java.util.*
@@ -75,6 +76,10 @@ class CompoundTag : CompoundTag {
 
     override fun setIntArray(key: String, i: IntArray) {
         tags[key] = intArray(i)
+    }
+
+    /*override*/ fun setLongArray(key: String, i: LongArray) {
+        tags[key] = longArray(i)
     }
 
     override fun setString(key: String, s: String) {

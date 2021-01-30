@@ -248,6 +248,7 @@ class BlocTree private constructor(
     }
 
     fun nonAirInChunk(x: Int, y: Int, z: Int): Int {
+        return 4096
         require(bounds.contains(x, y, z)) { "Position $x, $y, $z outside of $bounds" }
         require((bounds.x - x) % 16 == 0 && (bounds.z - z) % 16 == 0 && (bounds.z - z) % 16 == 0) { "Position $x, $y, $z is not a chunk origin" }
         return if (bounds.size <= 16) this.nonAirBlockStates

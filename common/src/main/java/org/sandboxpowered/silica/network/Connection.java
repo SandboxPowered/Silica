@@ -1,6 +1,7 @@
 package org.sandboxpowered.silica.network;
 
 import com.mojang.authlib.GameProfile;
+import org.sandboxpowered.api.block.Blocks;
 import org.sandboxpowered.api.util.Identity;
 import org.sandboxpowered.silica.nbt.CompoundTag;
 import org.sandboxpowered.silica.network.login.clientbound.LoginSuccess;
@@ -154,10 +155,10 @@ public class Connection {
         packetHandler.sendPacket(new PlayerInfo(2));
         packetHandler.sendPacket(new UpdateChunkPosition(0, 0));
 
-        packetHandler.sendPacket(new ChunkData(0, 0, new BlocTree(/*TODO !!!*/)));
-
+        BlocTree bt = BlocTree.Companion.invoke(-32, 0, -32, 64, Blocks.AIR.get().getBaseState());
         for (int x = -2; x < 3; x++) {
             for (int z = -2; z < 3; z++) {
+                packetHandler.sendPacket(new ChunkData(x, z, bt));
                 packetHandler.sendPacket(new UpdateLight(x, z, true));
             }
         }
