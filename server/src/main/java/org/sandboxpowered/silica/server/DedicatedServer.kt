@@ -40,11 +40,16 @@ class DedicatedServer : SilicaServer() {
         Guice.createInjector(SilicaImplementationModule())
         loader = SandboxLoader()
         loader!!.load()
-        acceptVanillaConnections = !stateManager.load()
+        val errors = stateManager.load()
+        acceptVanillaConnections = errors.size == 0
         if (acceptVanillaConnections) {
             log.info("Accepting vanilla connections")
         } else {
             log.info("Found modded BlockStates, rejecting vanilla connections")
+            log.info("Errors:")
+            errors.forEach {
+                log.info("   $it")
+            }
         }
     }
 

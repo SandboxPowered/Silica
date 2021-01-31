@@ -11,14 +11,13 @@ import org.sandboxpowered.api.state.property.Property
 import org.sandboxpowered.silica.block.SilicaBlockState
 import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.util.getResourceAsString
-import java.lang.StringBuilder
 
 class StateManager {
-    val rawMap: MutableMap<String, Object2IntMap<String>> = LinkedHashMap()
-    val stateMap: Object2IntMap<BlockState> = Object2IntArrayMap()
-    val idMap: Int2ObjectMap<BlockState> = Int2ObjectArrayMap()
+    private val rawMap: MutableMap<String, Object2IntMap<String>> = LinkedHashMap()
+    private val stateMap: Object2IntMap<BlockState> = Object2IntArrayMap()
+    private val idMap: Int2ObjectMap<BlockState> = Int2ObjectArrayMap()
 
-    fun load(): Boolean {
+    fun load(): ArrayList<String> {
         val string = javaClass.getResourceAsString("/data/silica/states.json")
         val gson = Gson()
         val json = gson.fromJson<JsonArray>(string)
@@ -36,13 +35,12 @@ class StateManager {
             }
         }
 
-        var encountedAnyProblem: Boolean = false
+        val errors = ArrayList<String>()
 
         SilicaRegistries.BLOCK_REGISTRY.internalMap.forEach { (id, block) ->
-            val blockMap = rawMap.get(id.toString())
+            val blockMap = rawMap[id.toString()]
             if(blockMap==null) {
-                println("Vanilla seems to not know this block $id")
-                encountedAnyProblem = true
+                errors.add(id.toString())
             } else {
                 block.stateFactory.validStates.map { it as SilicaBlockState }.forEach { state ->
                     val builder = StringBuilder()
@@ -56,8 +54,7 @@ class StateManager {
                     val intId = blockMap.getInt(builder.toString())
 
                     if (intId == -1) {
-                        println("Vanilla seems to not know this state $id[$builder]")
-                        encountedAnyProblem = true
+                        errors.add("$id[$builder]")
                     } else {
                         stateMap[state] = intId
                         idMap[intId] = state
@@ -65,7 +62,7 @@ class StateManager {
                 }
             }
         }
-        return encountedAnyProblem
+        return errors
     }
 
     fun toVanillaId(state: BlockState): Int = stateMap.getInt(state)
