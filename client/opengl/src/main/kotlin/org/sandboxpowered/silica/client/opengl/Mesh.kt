@@ -1,7 +1,5 @@
-package org.sandboxpowered.silica.client
+package org.sandboxpowered.silica.client.opengl
 
-import org.lwjgl.opengl.GL15
-import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30.*
 import org.lwjgl.system.MemoryStack.stackPush
 

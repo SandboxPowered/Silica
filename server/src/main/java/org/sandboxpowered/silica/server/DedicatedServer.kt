@@ -84,7 +84,7 @@ class DedicatedServer : SilicaServer() {
         }
     }
 
-    fun runActors() {
+    fun run() {
         val system = ActorSystem.create(DedicatedServerGuardian.create(), "dedicatedServerGuardian")
         oldRun()
         system.terminate()

@@ -6,4 +6,5 @@ interface Renderer {
     fun frame() = Unit
     fun cleanup() = Unit
     fun getName(): String
+
 }

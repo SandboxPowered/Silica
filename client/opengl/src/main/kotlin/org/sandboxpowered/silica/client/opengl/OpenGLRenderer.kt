@@ -7,7 +7,6 @@ import org.lwjgl.opengl.GL30.*
 import org.sandboxpowered.silica.client.*
 import org.sandboxpowered.silica.util.getResourceAsString
 
-
 class OpenGLRenderer(val silica: Silica) : Renderer {
     private val fov = Math.toRadians(60.0).toFloat()
 
@@ -30,10 +29,10 @@ class OpenGLRenderer(val silica: Silica) : Renderer {
         GL.createCapabilities()
 
         val positions = floatArrayOf(
-            -0.5f,  0.5f, 0f,
+            -0.5f, 0.5f, 0f,
             -0.5f, -0.5f, 0f,
             0.5f, -0.5f, 0f,
-            0.5f,  0.5f, 0f,
+            0.5f, 0.5f, 0f,
         )
         val colours = floatArrayOf(
             0.5f, 0.0f, 0.0f,
@@ -56,21 +55,26 @@ class OpenGLRenderer(val silica: Silica) : Renderer {
         GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
     }
 
-    var pos = Vector3f(0f,0f,-1f)
-    var rot = Vector3f()
+    private var pos = Vector3f(0f, 0f, -2f)
+    private var rot = Vector3f()
 
     override fun frame() {
-        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT)
+        window.setTitle("Sandbox Silica ${window.currentFps}")
 
         if (window.resized) {
             glViewport(0, 0, window.width, window.height)
             window.resized = false
         }
 
-        rot.y+=0.1f
+        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT)
+
+        rot.y += 0.1f
 
         shaderProgram.bind()
-        shaderProgram.setUniform("projectionMatrix", transforms.getProjectionMatrix(fov, window.width.toFloat(), window.height.toFloat(), zNear, zFar))
+        shaderProgram.setUniform(
+            "projectionMatrix",
+            transforms.getProjectionMatrix(fov, window.width.toFloat(), window.height.toFloat(), zNear, zFar)
+        )
         shaderProgram.setUniform("worldMatrix", transforms.getWorldMatrix(pos, rot, 1f))
 
         glBindVertexArray(mesh.vaoId)
@@ -85,5 +89,11 @@ class OpenGLRenderer(val silica: Silica) : Renderer {
         shaderProgram.cleanup()
 
         mesh.cleanup()
+    }
+
+    class OpenGLRenderingFactory : org.sandboxpowered.silica.client.RenderingFactory {
+        override fun getPriority(): Int = 600
+        override fun getId(): String = "opengl"
+        override fun createRenderer(silica: Silica): Renderer = OpenGLRenderer(silica)
     }
 }

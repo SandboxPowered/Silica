@@ -7,7 +7,7 @@ import org.apache.logging.log4j.Logger
 import org.lwjgl.glfw.GLFW
 import org.sandboxpowered.api.client.Client
 import org.sandboxpowered.api.client.GraphicsMode
-import org.sandboxpowered.silica.client.opengl.OpenGLRenderer
+import org.sandboxpowered.silica.client.server.IntegratedServer
 import org.sandboxpowered.silica.resources.ClasspathResourceLoader
 import org.sandboxpowered.silica.resources.DirectoryResourceLoader
 import org.sandboxpowered.silica.resources.ResourceManager
@@ -18,13 +18,17 @@ import org.sandboxpowered.silica.util.join
 import org.sandboxpowered.silica.util.notExists
 import java.io.File
 import java.io.IOException
+import java.lang.RuntimeException
 import java.util.*
 
 class Silica(args: Args) : Runnable, Client {
     private val logger: Logger = LogManager.getLogger()
     val window: Window
     private val manager: ResourceManager
-    private val renderer: Renderer = OpenGLRenderer(this)
+    val renderer: Renderer
+
+    val server = IntegratedServer()
+
     private fun close() {
         window.cleanup()
     }
@@ -37,13 +41,31 @@ class Silica(args: Args) : Runnable, Client {
         close()
     }
 
-    class Args(val width: Int, val height: Int)
+    class Args(val width: Int, val height: Int, val renderer: String)
 
     override fun getGraphicsMode(): GraphicsMode {
         return GraphicsMode.FABULOUS
     }
 
+    class InvalidRendererException(message: String) : RuntimeException(message)
+
     init {
+        val serviceLoader= ServiceLoader.load(RenderingFactory::class.java)
+        val renderers = serviceLoader.toList()
+
+        renderer = when {
+            args.renderer.isNotEmpty() -> {
+                val factory = renderers.find { it.getId() == args.renderer }
+                factory?.createRenderer(this) ?: throw InvalidRendererException("${args.renderer} renderer is not supported")
+            }
+            renderers.isEmpty() -> throw UnknownError("No renderers defined")
+            renderers.size == 1 -> renderers[0].createRenderer(this)
+            else -> {
+                val sorted = renderers.sortedBy { it.getPriority() }
+                sorted[0].createRenderer(this)
+            }
+        }
+        logger.debug("Using Renderer: ${renderer.getName()}")
         val list: MutableList<String?> = ArrayList()
         GLFW.glfwSetErrorCallback { i: Int, l: Long ->
             list.add(String.format("GLFW error during init: [0x%X]%s", i, l))
@@ -75,7 +97,6 @@ class Silica(args: Args) : Runnable, Client {
         }
 
         logger.debug("Loaded namespaces: [${manager.getNamespaces().join(",")}]")
-        logger.debug("Using Renderer: ${renderer.getName()}")
         window = Window("Sandbox Silica", args.width, args.height, renderer)
         renderer.init()
     }

@@ -19,10 +19,18 @@ object Main {
         val optionSpec = OptionParser()
         optionSpec.allowsUnrecognizedOptions()
         Guice.createInjector(SilicaImplementationModule())
-        val widthSpec: OptionSpec<Int> =
-            optionSpec.accepts("width").withRequiredArg().ofType(Int::class).defaultsTo(1000)
-        val heightSpec: OptionSpec<Int> =
-            optionSpec.accepts("height").withRequiredArg().ofType(Int::class).defaultsTo(563)
+        val widthSpec = optionSpec.accepts("width")
+            .withRequiredArg()
+            .ofType(Int::class)
+            .defaultsTo(1000)
+        val heightSpec = optionSpec.accepts("height")
+            .withRequiredArg()
+            .ofType(Int::class)
+            .defaultsTo(563)
+        val rendererSpec = optionSpec.accepts("renderer")
+            .withRequiredArg()
+            .ofType(String::class)
+            .defaultsTo("")
         val unknownOptionsSpec: OptionSpec<String> = optionSpec.nonOptions()
         val options = optionSpec.parse(*args)
         val unknownOptions = options.valuesOf(unknownOptionsSpec)
@@ -30,7 +38,7 @@ object Main {
             LOG.warn("Ignoring arguments: {}", unknownOptions)
         }
         try {
-            Silica(Args(options.valueOf(widthSpec), options.valueOf(heightSpec))).run()
+            Silica(Args(options.valueOf(widthSpec), options.valueOf(heightSpec), options.valueOf(rendererSpec))).run()
         } catch (e: Exception) {
             e.printStackTrace()
         }

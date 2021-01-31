@@ -1,0 +1,4 @@
+dependencies {
+    implementation "org.lwjgl:lwjgl-vulkan"
+    if (lwjglNatives == "natives-macos") runtimeOnly "org.lwjgl:lwjgl-vulkan::$lwjglNatives"
+}

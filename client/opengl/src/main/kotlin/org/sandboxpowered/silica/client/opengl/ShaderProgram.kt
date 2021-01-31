@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.client
+package org.sandboxpowered.silica.client.opengl
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
