@@ -8,13 +8,15 @@ project.ext.jomlVersion = "1.9.25"
 switch (OperatingSystem.current()) {
     case OperatingSystem.LINUX:
         def osArch = System.getProperty("os.arch")
-        project.ext.lwjglNatives = osArch.startsWith("arm") || osArch.startsWith("aarch64") ? "natives-linux-arm64" : "natives-linux"
+        project.ext.lwjglNatives = osArch.startsWith("arm") || osArch.startsWith("aarch64")
+                ? "natives-linux-${osArch.contains("64") || osArch.startsWith("armv8") ? "arm64" : "arm32"}"
+                : "natives-linux"
         break
     case OperatingSystem.MAC_OS:
         project.ext.lwjglNatives = "natives-macos"
         break
     case OperatingSystem.WINDOWS:
-        project.ext.lwjglNatives = "natives-windows"
+        project.ext.lwjglNatives = System.getProperty("os.arch").contains("64") ? "natives-windows" : "natives-windows-x86"
         break
 }
 
