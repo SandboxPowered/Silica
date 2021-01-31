@@ -1,6 +1,10 @@
 package org.sandboxpowered.silica.client
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
+import org.joml.Matrix4f
 import org.lwjgl.opengl.GL20.*
+import org.lwjgl.system.MemoryStack
 
 class ShaderProgram {
     private var programId: Int = glCreateProgram()
@@ -8,6 +12,8 @@ class ShaderProgram {
     private var vertexShaderId = 0
 
     private var fragmentShaderId = 0
+
+    private val uniforms: Object2IntMap<String> = Object2IntOpenHashMap()
 
     init {
         if (programId == 0) {
@@ -21,6 +27,20 @@ class ShaderProgram {
 
     fun createFragmentShader(shaderCode: String) {
         fragmentShaderId = createShader(shaderCode, GL_FRAGMENT_SHADER)
+    }
+
+    fun createUniform(uniformName: String) {
+        val uniformLocation = glGetUniformLocation(programId, uniformName)
+        if (uniformLocation < 0) {
+            throw java.lang.Exception("Could not find uniform:$uniformName")
+        }
+        uniforms[uniformName] = uniformLocation
+    }
+
+    fun setUniform(uniformName: String, value: Matrix4f) {
+        MemoryStack.stackPush().use { stack ->
+            glUniformMatrix4fv(uniforms.getInt(uniformName), false, value.get(stack.mallocFloat(16)))
+        }
     }
 
     fun link() {

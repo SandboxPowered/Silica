@@ -1,5 +1,6 @@
 package org.sandboxpowered.silica.client.opengl
 
+import org.joml.Vector3f
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL30.*
@@ -8,6 +9,14 @@ import org.sandboxpowered.silica.util.getResourceAsString
 
 
 class OpenGLRenderer(val silica: Silica) : Renderer {
+    private val fov = Math.toRadians(60.0).toFloat()
+
+    private val zNear = 0.01f
+
+    private val zFar = 1000f
+
+    private val transforms = Transforms()
+
     private lateinit var shaderProgram: ShaderProgram
     private lateinit var mesh: Mesh
     private val window: Window
@@ -21,10 +30,10 @@ class OpenGLRenderer(val silica: Silica) : Renderer {
         GL.createCapabilities()
 
         val positions = floatArrayOf(
-            -0.5f, 0.5f, 0.0f,
-            -0.5f, -0.5f, 0.0f,
-            0.5f, -0.5f, 0.0f,
-            0.5f, 0.5f, 0.0f
+            -0.5f,  0.5f, 0f,
+            -0.5f, -0.5f, 0f,
+            0.5f, -0.5f, 0f,
+            0.5f,  0.5f, 0f,
         )
         val colours = floatArrayOf(
             0.5f, 0.0f, 0.0f,
@@ -41,9 +50,14 @@ class OpenGLRenderer(val silica: Silica) : Renderer {
         shaderProgram.createVertexShader(javaClass.getResourceAsString("/assets/silica/shaders/vertex.glsl"))
         shaderProgram.createFragmentShader(javaClass.getResourceAsString("/assets/silica/shaders/fragment.glsl"))
         shaderProgram.link()
+        shaderProgram.createUniform("projectionMatrix")
+        shaderProgram.createUniform("worldMatrix")
 
         GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
     }
+
+    var pos = Vector3f(0f,0f,-1f)
+    var rot = Vector3f()
 
     override fun frame() {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT)
@@ -53,10 +67,14 @@ class OpenGLRenderer(val silica: Silica) : Renderer {
             window.resized = false
         }
 
+        rot.y+=0.1f
+
         shaderProgram.bind()
+        shaderProgram.setUniform("projectionMatrix", transforms.getProjectionMatrix(fov, window.width.toFloat(), window.height.toFloat(), zNear, zFar))
+        shaderProgram.setUniform("worldMatrix", transforms.getWorldMatrix(pos, rot, 1f))
 
         glBindVertexArray(mesh.vaoId)
-        glDrawElements(GL_TRIANGLES, mesh.vertexCount, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, mesh.vertexCount, GL_UNSIGNED_INT, 0)
 
         glBindVertexArray(0)
 
