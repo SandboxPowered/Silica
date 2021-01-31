@@ -91,7 +91,7 @@ class OpenGLRenderer(val silica: Silica) : Renderer {
         mesh.cleanup()
     }
 
-    class OpenGLRenderingFactory : org.sandboxpowered.silica.client.RenderingFactory {
+    class OpenGLRenderingFactory : RenderingFactory {
         override fun getPriority(): Int = 600
         override fun getId(): String = "opengl"
         override fun createRenderer(silica: Silica): Renderer = OpenGLRenderer(silica)
