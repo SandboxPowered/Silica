@@ -7,7 +7,7 @@ import org.lwjgl.opengl.GL30.*
 import org.sandboxpowered.silica.client.*
 import org.sandboxpowered.silica.util.getResourceAsString
 
-class OpenGLRenderer(val silica: Silica) : Renderer {
+class OpenGLRenderer(private val silica: Silica) : Renderer {
     private val fov = Math.toRadians(60.0).toFloat()
 
     private val zNear = 0.01f
