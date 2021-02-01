@@ -1,11 +1,8 @@
 package org.sandboxpowered.silica.network.play.serverbound;
 
-import org.sandboxpowered.silica.network.Connection;
-import org.sandboxpowered.silica.network.Packet;
-import org.sandboxpowered.silica.network.PacketByteBuf;
-import org.sandboxpowered.silica.network.PacketHandler;
+import org.sandboxpowered.silica.network.*;
 
-public class ClientSettings implements Packet {
+public class ClientSettings implements PacketPlay {
     private String language;
     private byte renderDistance;
     private int chatMode;
@@ -29,6 +26,6 @@ public class ClientSettings implements Packet {
     }
 
     @Override
-    public void handle(PacketHandler packetHandler, Connection connection) {
+    public void handle(PacketHandler packetHandler, PlayConnection connection) {
     }
 }

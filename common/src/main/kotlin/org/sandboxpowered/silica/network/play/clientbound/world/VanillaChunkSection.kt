@@ -1,41 +1,20 @@
 package org.sandboxpowered.silica.network.play.clientbound.world
 
+import org.sandboxpowered.api.state.BlockState
+import org.sandboxpowered.silica.StateManager
 import org.sandboxpowered.silica.network.PacketByteBuf
 import org.sandboxpowered.silica.network.util.BitPackedLongArray
 import org.sandboxpowered.silica.world.util.BlocTree
+import org.sandboxpowered.silica.world.util.iterateCube
 
 class VanillaChunkSection(
-    blocTree: BlocTree, private val x: Int, private val y: Int, private val z: Int
+    blocTree: BlocTree, private val x: Int, private val y: Int, private val z: Int, private val stateToId: (BlockState) -> Int
 ) {
 
     private val blocTree = blocTree[x, y, z, 16, 16, 16]
     private val bitPacked = BitPackedLongArray(4096, BITS).apply {
-        repeat(16) { x ->
-            repeat(8) { y ->
-                repeat(16) { z ->
-                    if (x % 2 == 0) this[index(x, y, z)] = when (y) {
-                        0, 1, 2 -> STONE
-                        3 -> COBBLESTONE
-                        4, 5 -> DIRT
-                        6 -> GRASS_NO_SNOW
-                        else -> AIR
-                    }
-                }
-            }
-        }
-    }
-
-    fun t(map: Map<String, Int>) {
-        for (e in map.entries) {
-            val k = e.key
-            val v = e.value
-            println("$k -> $v")
-        }
-        for ((k, v) in map.entries) {
-            println("$k -> $v")
-        }
-        map.forEach { (k, v) ->
-            println("$k -> $v")
+        iterateCube(0, 0, 0, 16) { dx, dy, dz ->
+            this[index(dx, dy, dz)] = stateToId(this@VanillaChunkSection.blocTree[x + dx, y + dy, z + dz])
         }
     }
 
@@ -54,11 +33,5 @@ class VanillaChunkSection(
 
     private companion object {
         const val BITS = 15
-
-        const val AIR = 0
-        const val STONE = 1
-        const val GRASS_NO_SNOW = 9
-        const val DIRT = 10
-        const val COBBLESTONE = 14
     }
 }

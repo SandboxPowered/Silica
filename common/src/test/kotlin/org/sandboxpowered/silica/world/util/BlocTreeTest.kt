@@ -39,70 +39,37 @@ internal class BlocTreeTest {
     @Suppress("unused")
     private fun `world layers`(): Stream<Sequence<Pair<Triple<Int, Int, Int>, BlockState>>> = Stream.of(sequence {
         var dy = 0
-        repeat(1) { y ->
-            repeat(16) { x ->
-                repeat(16) { z ->
-                    yield(Triple(x - 8, y + dy, z - 8) to bedrock)
-                }
-            }
+        iterateCube(-8, dy, -8, w = 16, h = 1) { x, y, z ->
+            yield(Triple(x, y, z) to bedrock)
         }
         ++dy
-        repeat(3) { y ->
-            repeat(8) { x ->
-                repeat(16) { z ->
-                    yield(Triple(x * 2 - 8 + (y % 2), y + dy, z - 8) to stone)
-                    yield(Triple(x * 2 - 7 - (y % 2), y + dy, z - 8) to dirt)
-                }
-            }
+        iterateCube(0, dy, 0, w = 16, h = 3, d = 16) { x, y, z ->
+            yield(Triple(x, y, z - 8) to if (x % 2 == z % 2) stone else dirt)
         }
         dy += 3
-        repeat(1) { y ->
-            repeat(16) { x ->
-                repeat(16) { z ->
-                    yield(Triple(x - 8, y + dy, z - 8) to dirt)
-                }
-            }
+        iterateCube(-8, dy, -8, w = 16, h = 1) { x, y, z ->
+            yield(Triple(x - 8, y, z - 8) to dirt)
         }
         ++dy
-        repeat(1) { y ->
-            repeat(16) { x ->
-                repeat(16) { z ->
-                    yield(Triple(x - 8, y + dy, z - 8) to grass)
-                }
-            }
+        iterateCube(-8, dy, -8, w = 16, h = 1) { x, y, z ->
+            yield(Triple(x - 8, y, z - 8) to grass)
         }
     }, sequence {
         var dy = 0
-        repeat(1) { y ->
-            repeat(16) { x ->
-                repeat(16) { z ->
-                    yield(Triple(x - 8, y + dy, z - 8) to bedrock)
-                }
-            }
+        iterateCube(-8, dy, -8, w = 16, h = 1) { x, y, z ->
+            yield(Triple(x - 8, y, z - 8) to bedrock)
         }
         ++dy
-        repeat(3) { y ->
-            repeat(16) { x ->
-                repeat(16) { z ->
-                    yield(Triple(x - 8, y + dy, z - 8) to stone)
-                }
-            }
+        iterateCube(-8, dy, -8, w = 16, h = 3) { x, y, z ->
+            yield(Triple(x - 8, y, z - 8) to stone)
         }
         dy += 3
-        repeat(1) { y ->
-            repeat(16) { x ->
-                repeat(16) { z ->
-                    yield(Triple(x - 8, y + dy, z - 8) to dirt)
-                }
-            }
+        iterateCube(-8, dy, -8, w = 16, h = 1) { x, y, z ->
+            yield(Triple(x - 8, y, z - 8) to dirt)
         }
         ++dy
-        repeat(1) { y ->
-            repeat(16) { x ->
-                repeat(16) { z ->
-                    yield(Triple(x - 8, y + dy, z - 8) to grass)
-                }
-            }
+        iterateCube(-8, dy, -8, w = 16, h = 1) { x, y, z ->
+            yield(Triple(x - 8, y, z - 8) to grass)
         }
     })
 
@@ -110,12 +77,8 @@ internal class BlocTreeTest {
     fun `A tree filled with the same BlockState should have no nodes`() {
         val tree = BlocTree(-8, 0, -8, 16, air)
 
-        repeat(16) { y ->
-            repeat(16) { x ->
-                repeat(16) { z ->
-                    tree[x - 8, y, z - 8] = bedrock
-                }
-            }
+        iterateCube(-8, 0, -8, 16) { x, y, z ->
+            tree[x - 8, y, z - 8] = bedrock
         }
 
         val subsection = tree[0, 0, 0, 1, 1, 1]

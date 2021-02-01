@@ -20,11 +20,16 @@ import org.sandboxpowered.api.util.math.Position
 import org.sandboxpowered.api.world.BlockFlag
 import org.sandboxpowered.api.world.World
 import org.sandboxpowered.api.world.WorldReader
+import org.sandboxpowered.silica.util.messageAdapter
 import org.sandboxpowered.silica.util.onMessage
+import org.sandboxpowered.silica.world.gen.TerrainGenerator
 import org.sandboxpowered.silica.world.util.BlocTree
+import org.sandboxpowered.silica.world.util.iterateCube
 import java.util.*
+import org.sandboxpowered.silica.world.gen.TerrainGenerator.Command.Generate as CommandGenerate
 
-class SilicaWorld(private val side: Side) : World {
+class SilicaWorld private constructor(private val side: Side) : World {
+
     private val blocks: BlocTree = BlocTree(WORLD_MIN, WORLD_MIN, WORLD_MIN, WORLD_SIZE, Blocks.AIR.get().baseState)
     private val artemisWorld: com.artemis.World? = null
     private var worldTicks = 0L
@@ -81,13 +86,16 @@ class SilicaWorld(private val side: Side) : World {
         TODO("Not yet implemented")
     }
 
+    // TODO: Tmp. Should be read-only, and network should be actorized
+    fun getTerrain(): BlocTree = this.blocks
+
     companion object {
         private const val WORLD_MIN = -1 shl 25 // -2^25
         private const val WORLD_MAX = (1 shl 25) - 1 // (2^25)-1
         private const val WORLD_SIZE = -WORLD_MIN + WORLD_MAX + 1 // 2^26
 
         fun actor(side: Side): Behavior<Command> = Behaviors.setup {
-            SilicaWorldActor(SilicaWorld(side), it)
+            Actor(SilicaWorld(side), it)
         }
     }
 
@@ -100,10 +108,12 @@ class SilicaWorld(private val side: Side) : World {
         class Ask<T>(val body: (WorldReader) -> T, val replyTo: ActorRef<T>) : Command()
     }
 
-    private class SilicaWorldActor(private val world: SilicaWorld, context: ActorContext<Command>?) :
+    private class Actor(private val world: SilicaWorld, context: ActorContext<Command>) :
         AbstractBehavior<Command>(context) {
 
         private val commandQueue: Deque<Command> = LinkedList()
+        private val generator: ActorRef<TerrainGenerator.Command> = context.spawn(TerrainGenerator.actor(), "terrain_generator")
+        private var generated = false
 
         override fun createReceive(): Receive<Command> = newReceiveBuilder()
             .onMessage(this::handleTick)
@@ -112,6 +122,10 @@ class SilicaWorld(private val side: Side) : World {
             .build()
 
         private fun handleTick(tick: Command.Tick): Behavior<Command> {
+            if (!generated) {
+                enqueueGeneration(generator)
+                generated = true
+            }
             this.processCommandQueue()
 
             val w = world.artemisWorld
@@ -144,6 +158,15 @@ class SilicaWorld(private val side: Side) : World {
         private fun handleAsk(ask: Command.Ask<Any>): Behavior<Command> {
             ask.replyTo.tell(ask.body(world))
             return Behaviors.same()
+        }
+
+        // TODO: TMP !!
+        private fun enqueueGeneration(to: ActorRef<in CommandGenerate>) {
+            iterateCube(-3, 0, -3, w = 6, h = 1) { dx, dy, dz ->
+                val x = dx * 16
+                val z = dz * 16
+                to.tell(CommandGenerate(x, dy, z, world.blocks[x, dy, z, 16, 16, 16], context.system.ignoreRef()))
+            }
         }
     }
 

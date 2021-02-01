@@ -6,7 +6,7 @@ import io.netty.handler.codec.MessageToByteEncoder;
 
 import java.io.IOException;
 
-public class PacketEncoder extends MessageToByteEncoder<Packet> {
+public class PacketEncoder extends MessageToByteEncoder<PacketBase> {
     private final Flow flow;
 
     public PacketEncoder(Flow flow) {
@@ -14,7 +14,7 @@ public class PacketEncoder extends MessageToByteEncoder<Packet> {
     }
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, Packet msg, ByteBuf out) throws Exception {
+    protected void encode(ChannelHandlerContext ctx, PacketBase msg, ByteBuf out) throws Exception {
         Protocol protocol = ctx.channel().attr(Protocol.PROTOCOL_ATTRIBUTE_KEY).get();
         int id = protocol.getPacketId(this.flow, msg);
         if (id == -1) {

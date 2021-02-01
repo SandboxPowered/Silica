@@ -2,16 +2,15 @@ package org.sandboxpowered.silica.network.play.clientbound;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import kotlin.jvm.functions.Function1;
+import org.sandboxpowered.api.state.BlockState;
 import org.sandboxpowered.silica.nbt.CompoundTag;
-import org.sandboxpowered.silica.network.Connection;
-import org.sandboxpowered.silica.network.Packet;
-import org.sandboxpowered.silica.network.PacketByteBuf;
-import org.sandboxpowered.silica.network.PacketHandler;
+import org.sandboxpowered.silica.network.*;
 import org.sandboxpowered.silica.network.play.clientbound.world.VanillaChunkSection;
 import org.sandboxpowered.silica.network.util.BitPackedLongArray;
 import org.sandboxpowered.silica.world.util.BlocTree;
 
-public class ChunkData implements Packet {
+public class ChunkData implements PacketPlay {
     private int cX, cZ;
     private int bitMask;
     private byte[] buffer;
@@ -21,14 +20,14 @@ public class ChunkData implements Packet {
     public ChunkData() {
     }
 
-    public ChunkData(int cX, int cZ, BlocTree blocTree) {
+    public ChunkData(int cX, int cZ, BlocTree blocTree, Function1<BlockState, Integer> stateToId) {
         this.cX = cX;
         this.cZ = cZ;
 
         this.biomes = new int[1024];
 
         for (int i = 0; i < 16; ++i) {
-            sections[i] = new VanillaChunkSection(blocTree, cX * 16, i * 16, cZ * 16);
+            sections[i] = new VanillaChunkSection(blocTree, cX * 16, i * 16, cZ * 16, stateToId);
         }
         this.buffer = new byte[calculateSize(cX, cZ)];
         bitMask = extractData(new PacketByteBuf(getWriteBuffer()), cX, cZ, blocTree);
@@ -85,7 +84,7 @@ public class ChunkData implements Packet {
     }
 
     @Override
-    public void handle(PacketHandler packetHandler, Connection connection) {
+    public void handle(PacketHandler packetHandler, PlayConnection connection) {
 
     }
 }

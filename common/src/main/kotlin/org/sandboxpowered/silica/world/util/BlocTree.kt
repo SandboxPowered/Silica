@@ -93,20 +93,20 @@ class BlocTree private constructor(
 
         var res = 0
         res = res or when {
-            x > midX -> E
-            x < midX && x + width < midX -> W
+            x >= midX -> E
+            x < midX && x + width <= midX -> W
             else -> return OUTSIDE
         }
 
         res = res or when {
-            y > midY -> U
-            y < midY && y + height < midY -> D
+            y >= midY -> U
+            y < midY && y + height <= midY -> D
             else -> return OUTSIDE
         }
 
         res = res or when {
-            z > midZ -> S
-            z < midZ && z + depth < midZ -> N
+            z >= midZ -> S
+            z < midZ && z + depth <= midZ -> N
             else -> return OUTSIDE
         }
 
@@ -244,18 +244,19 @@ class BlocTree private constructor(
     ): BlocTree {
         val index = indexOf(x, y, z, width, height, depth)
         return if (index == OUTSIDE || this.nodes[index] == null) this
-        else this.nodes[index]!!
+        else this.nodes[index]!![x, y, z, width, height, depth]
     }
 
     fun nonAirInChunk(x: Int, y: Int, z: Int): Int {
         return 4096
+        // FIXME: probably has to do with the lighting packet
         require(bounds.contains(x, y, z)) { "Position $x, $y, $z outside of $bounds" }
         require((bounds.x - x) % 16 == 0 && (bounds.z - z) % 16 == 0 && (bounds.z - z) % 16 == 0) { "Position $x, $y, $z is not a chunk origin" }
         return if (bounds.size <= 16) this.nonAirBlockStates
         else {
             val index = indexOf(x, y, z, 16, 16, 16)
             val n = nodes[index]
-            n?.nonAirInChunk(x, y, z) ?: if ((containers[index] ?: default).isAir) 0 else 16 * 16 * 16
+            n?.nonAirInChunk(x, y, z) ?: if ((containers[index] ?: default).isAir) 0 else 4096
         }
     }
 
@@ -333,6 +334,16 @@ class BlocTree private constructor(
             size: Int, default: BlockState
         ): BlocTree {
             return BlocTree(x, y, z, size).apply { this.default = default }
+        }
+    }
+}
+
+inline fun iterateCube(x: Int, y: Int, z: Int, w: Int, h: Int = w, d: Int = w, iter: (x: Int, y: Int, z: Int) -> Unit) {
+    repeat(w) { dx ->
+        repeat(h) { dy ->
+            repeat(d) { dz ->
+                iter(x + dx, y + dy, z + dz)
+            }
         }
     }
 }

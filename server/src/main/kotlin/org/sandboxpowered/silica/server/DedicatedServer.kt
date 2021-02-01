@@ -35,6 +35,7 @@ class DedicatedServer : SilicaServer() {
     private var loader: SandboxLoader? = null
     private val stateManager = StateManager()
     private val acceptVanillaConnections: Boolean
+    private lateinit var world: ActorRef<SilicaWorld.Command>
 
     init {
         Guice.createInjector(SilicaImplementationModule())
@@ -54,41 +55,16 @@ class DedicatedServer : SilicaServer() {
     }
 
     fun oldRun() {
-        val properties = ServerProperties.fromFile(Paths.get("server.properties"))
-        val bossGroup: EventLoopGroup = NioEventLoopGroup()
-        val workerGroup: EventLoopGroup = NioEventLoopGroup()
-        try {
-            val bootstrap = ServerBootstrap()
-            bootstrap.group(bossGroup, workerGroup)
-                .channel(NioServerSocketChannel::class.java)
-                .childHandler(object : ChannelInitializer<SocketChannel>() {
-                    override fun initChannel(ch: SocketChannel) {
-                        ch.pipeline()
-                            .addLast(ReadTimeoutHandler(30))
-                            .addLast(LengthSplitter())
-                            .addLast(PacketDecoder(Flow.SERVERBOUND))
-                            .addLast(LengthPrepender())
-                            .addLast(PacketEncoder(Flow.CLIENTBOUND))
-                            .addLast(PacketHandler(Connection(this@DedicatedServer)))
-                    }
-                })
-                .option(ChannelOption.SO_BACKLOG, 128)
-                .childOption(ChannelOption.SO_KEEPALIVE, true)
-            val future = bootstrap.bind(properties.serverIp.ifEmpty { "0.0.0.0" }, properties.serverPort).sync()
-            future.channel().closeFuture().sync()
-        } catch (e: InterruptedException) {
-            e.printStackTrace()
-        } finally {
-            workerGroup.shutdownGracefully()
-            bossGroup.shutdownGracefully()
-        }
+
     }
 
     fun run() {
-        val system = ActorSystem.create(DedicatedServerGuardian.create(), "dedicatedServerGuardian")
+        val system = ActorSystem.create(DedicatedServerGuardian.create(this, this::world::set), "dedicatedServerGuardian")
         oldRun()
-        system.terminate()
+//        system.terminate()
     }
+
+    override fun getWorld() = this.world
 
     sealed class Command {
         class Tick(val delta: Float) : Command()
@@ -96,26 +72,32 @@ class DedicatedServer : SilicaServer() {
     }
 
     private class DedicatedServerGuardian private constructor(
+        server: SilicaServer, // don't like this
         context: ActorContext<Command>,
-        timerScheduler: TimerScheduler<Command>
+        timerScheduler: TimerScheduler<Command>,
+        worldInit: (ActorRef<SilicaWorld.Command>) -> Unit
     ) : AbstractBehavior<Command>(context) {
         companion object {
-            fun create(): Behavior<Command> = Behaviors.withTimers { timerScheduler ->
+            fun create(server: SilicaServer, worldInit: (ActorRef<SilicaWorld.Command>) -> Unit): Behavior<Command> = Behaviors.withTimers { timerScheduler ->
                 Behaviors.setup {
-                    DedicatedServerGuardian(it, timerScheduler)
+                    DedicatedServerGuardian(server, it, timerScheduler, worldInit)
                 }
             }
         }
 
         private val logger = context.log.toKLogger()
         private var skippedTicks = 0
-        private val world: ActorRef<SilicaWorld.Command> = context.spawn(SilicaWorld.actor(Side.SERVER), "world")
+        private val world: ActorRef<in SilicaWorld.Command> = context.spawn(SilicaWorld.actor(Side.SERVER), "world").apply(worldInit)
+        private val network: ActorRef<in NetworkActor.Command> = context.spawn(NetworkActor.actor(server), "network")
         private val currentlyTicking: Object2LongMap<ActorRef<*>> = Object2LongOpenHashMap(3)
 
         init {
             context.watch(world)
             // TODO: compare to startTimerAtFixedRate
             timerScheduler.startTimerWithFixedDelay("serverTick", Command.Tick(50f), Duration.ofMillis(50))
+
+            // TODO: wait for everything to be ready
+            network.tell(NetworkActor.Command.Start(context.system.ignoreRef()))
         }
 
         override fun createReceive(): Receive<Command> = newReceiveBuilder()
@@ -153,4 +135,6 @@ class DedicatedServer : SilicaServer() {
             return Behaviors.stopped()
         }
     }
+
+    override fun getStateManager() = stateManager
 }

@@ -3,13 +3,14 @@ package org.sandboxpowered.silica.state
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSortedMap
+import org.sandboxpowered.api.content.Content
 import org.sandboxpowered.api.state.StateFactory
 import org.sandboxpowered.api.state.property.Property
 import org.sandboxpowered.api.state.property.PropertyContainer
 import java.util.*
 import kotlin.collections.ArrayList
 
-class SilicaStateFactory<A, B : PropertyContainer<B>?>(
+class SilicaStateFactory<A: Content<A>, B : PropertyContainer<B>?>(
     private val base: A,
     map: Map<String, Property<*>>,
     stateCreator: Factory<A, B>

@@ -1,13 +1,10 @@
 package org.sandboxpowered.silica.network.play.clientbound;
 
-import org.sandboxpowered.silica.network.Connection;
-import org.sandboxpowered.silica.network.Packet;
-import org.sandboxpowered.silica.network.PacketByteBuf;
-import org.sandboxpowered.silica.network.PacketHandler;
+import org.sandboxpowered.silica.network.*;
 
 import java.util.UUID;
 
-public class PlayerInfo implements Packet {
+public class PlayerInfo implements PacketPlay {
     private int action;
 
     public PlayerInfo() {
@@ -43,7 +40,7 @@ public class PlayerInfo implements Packet {
     }
 
     @Override
-    public void handle(PacketHandler packetHandler, Connection connection) {
+    public void handle(PacketHandler packetHandler, PlayConnection connection) {
 
     }
 }

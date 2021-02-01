@@ -1,11 +1,8 @@
 package org.sandboxpowered.silica.network.play.clientbound;
 
-import org.sandboxpowered.silica.network.Connection;
-import org.sandboxpowered.silica.network.Packet;
-import org.sandboxpowered.silica.network.PacketByteBuf;
-import org.sandboxpowered.silica.network.PacketHandler;
+import org.sandboxpowered.silica.network.*;
 
-public class EntityStatus implements Packet {
+public class EntityStatus implements PacketPlay {
     @Override
     public void read(PacketByteBuf buf) {
 
@@ -18,7 +15,7 @@ public class EntityStatus implements Packet {
     }
 
     @Override
-    public void handle(PacketHandler packetHandler, Connection connection) {
+    public void handle(PacketHandler packetHandler, PlayConnection connection) {
 
     }
 }

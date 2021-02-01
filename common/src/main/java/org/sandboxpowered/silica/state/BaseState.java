@@ -4,6 +4,7 @@ import com.google.common.collect.ArrayTable;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
+import org.sandboxpowered.api.content.Content;
 import org.sandboxpowered.api.state.property.Property;
 import org.sandboxpowered.api.state.property.PropertyContainer;
 
@@ -12,7 +13,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class BaseState<B, S> implements PropertyContainer<S> {
+public class BaseState<B extends Content<B>, S> implements PropertyContainer<S> {
     protected final B base;
     private final ImmutableMap<Property<?>, Comparable<?>> properties;
     private Table<Property<?>, Comparable<?>, S> possibleStates;
@@ -112,7 +113,7 @@ public class BaseState<B, S> implements PropertyContainer<S> {
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "{" +
-                "base=" + base +
+                "base=" + base.getIdentity() +
                 ", properties=" + properties +
                 '}';
     }

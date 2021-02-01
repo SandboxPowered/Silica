@@ -1,20 +1,26 @@
 package org.sandboxpowered.silica.network;
 
+import akka.actor.typed.ActorRef;
 import io.netty.channel.*;
-import org.sandboxpowered.silica.server.SilicaServer;
 
 import java.net.SocketAddress;
+import java.util.LinkedList;
+import java.util.Queue;
 
-public class PacketHandler extends SimpleChannelInboundHandler<Packet> {
-    private final SilicaServer server;
+public class PacketHandler extends SimpleChannelInboundHandler<PacketBase> {
     private final Connection connection;
+    private ActorRef<PlayConnection.Command> playConnection;
     private Channel channel;
     private SocketAddress address;
+    private final Queue<PacketPlay> waiting = new LinkedList<>();
 
     public PacketHandler(Connection connection) {
         this.connection = connection;
-        this.server = connection.getServer();
         connection.setPacketHandler(this);
+    }
+
+    public void setPlayConnection(ActorRef<PlayConnection.Command> playConnection) {
+        this.playConnection = playConnection;
     }
 
     @Override
@@ -32,13 +38,22 @@ public class PacketHandler extends SimpleChannelInboundHandler<Packet> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Packet msg) {
+    protected void channelRead0(ChannelHandlerContext ctx, PacketBase msg) {
         if (this.channel.isOpen()) {
-            msg.handle(this, connection);
+            if (msg instanceof PacketPlay) {
+                if (connection == null) waiting.add((PacketPlay) msg);
+                else {
+                    if (waiting.size() > 0) {
+                        PacketPlay read;
+                        while ((read = waiting.poll()) != null) playConnection.tell(new PlayConnection.Command.ReceivePacket(read));
+                    }
+                    playConnection.tell(new PlayConnection.Command.ReceivePacket((PacketPlay) msg));
+                }
+            } else ((Packet) msg).handle(this, connection);
         }
     }
 
-    public void sendPacket(Packet packet) {
+    public void sendPacket(PacketBase packet) {
         Protocol wantedProtocol = Protocol.getProtocolForPacket(packet);
         Protocol currentProtocol = channel.attr(Protocol.PROTOCOL_ATTRIBUTE_KEY).get();
         if (wantedProtocol != currentProtocol) {
@@ -51,7 +66,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Packet> {
         }
     }
 
-    private void sendPacketInternal(Packet packet, Protocol wantedProtocol, Protocol currentProtocol) {
+    private void sendPacketInternal(PacketBase packet, Protocol wantedProtocol, Protocol currentProtocol) {
         if (wantedProtocol != currentProtocol) {
             setProtocol(wantedProtocol);
         }

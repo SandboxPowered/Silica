@@ -1,11 +1,8 @@
 package org.sandboxpowered.silica.network.play.serverbound;
 
-import org.sandboxpowered.silica.network.Connection;
-import org.sandboxpowered.silica.network.Packet;
-import org.sandboxpowered.silica.network.PacketByteBuf;
-import org.sandboxpowered.silica.network.PacketHandler;
+import org.sandboxpowered.silica.network.*;
 
-public class TeleportConfirmation implements Packet {
+public class TeleportConfirmation implements PacketPlay {
     private int tpId;
 
     @Override
@@ -19,7 +16,7 @@ public class TeleportConfirmation implements Packet {
     }
 
     @Override
-    public void handle(PacketHandler packetHandler, Connection connection) {
+    public void handle(PacketHandler packetHandler, PlayConnection connection) {
 
     }
 }

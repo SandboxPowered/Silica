@@ -1,12 +1,9 @@
 package org.sandboxpowered.silica.network.play.serverbound;
 
 import org.sandboxpowered.api.util.Identity;
-import org.sandboxpowered.silica.network.Connection;
-import org.sandboxpowered.silica.network.Packet;
-import org.sandboxpowered.silica.network.PacketByteBuf;
-import org.sandboxpowered.silica.network.PacketHandler;
+import org.sandboxpowered.silica.network.*;
 
-public class ClientPluginChannel implements Packet {
+public class ClientPluginChannel implements PacketPlay {
     private Identity channel;
     private byte[] data;
 
@@ -22,7 +19,7 @@ public class ClientPluginChannel implements Packet {
     }
 
     @Override
-    public void handle(PacketHandler packetHandler, Connection connection) {
+    public void handle(PacketHandler packetHandler, PlayConnection connection) {
 
     }
 }

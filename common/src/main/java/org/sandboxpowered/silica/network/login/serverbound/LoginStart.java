@@ -1,10 +1,6 @@
 package org.sandboxpowered.silica.network.login.serverbound;
 
-import org.sandboxpowered.silica.network.Connection;
-import org.sandboxpowered.silica.network.Packet;
-import org.sandboxpowered.silica.network.PacketByteBuf;
-import org.sandboxpowered.silica.network.PacketHandler;
-import org.sandboxpowered.silica.server.SilicaServer;
+import org.sandboxpowered.silica.network.*;
 
 public class LoginStart implements Packet {
     private String username;
@@ -21,7 +17,6 @@ public class LoginStart implements Packet {
 
     @Override
     public void handle(PacketHandler packetHandler, Connection connection) {
-        SilicaServer server = connection.getServer();
         connection.handleLoginStart(username);
     }
 }

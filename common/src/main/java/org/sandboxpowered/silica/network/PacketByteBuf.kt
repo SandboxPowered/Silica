@@ -935,6 +935,7 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
     }
 
     companion object {
+        @JvmStatic
         fun getVarIntSize(i: Int): Int {
             for (j in 1..4) {
                 if (i and -1 shl j * 7 == 0) {
@@ -942,6 +943,21 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
                 }
             }
             return 5
+        }
+
+        @JvmStatic
+        inline fun readVarInt(next: () -> Byte): Int {
+            var i = 0
+            var j = 0
+            var b: Int
+            do {
+                b = next().toInt()
+                i = i or ((b and 127) shl j++ * 7)
+                if (j > 5) {
+                    throw RuntimeException("VarInt too big")
+                }
+            } while ((b and 128) == 128)
+            return i
         }
     }
 }
