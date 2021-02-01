@@ -77,7 +77,6 @@ class Window(private var windowName: String, var width: Int, var height: Int, va
                 resized = true
             }
         }
-        MemoryStack.stackPush()
         glfwMakeContextCurrent(internalPointer)
         glfwSwapInterval(1)
         glfwShowWindow(internalPointer)

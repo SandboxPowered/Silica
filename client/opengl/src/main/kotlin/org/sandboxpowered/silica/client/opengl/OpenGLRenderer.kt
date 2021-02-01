@@ -19,9 +19,7 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
     private lateinit var shaderProgram: ShaderProgram
     private lateinit var mesh: Mesh
     private val window: Window
-        get() {
-            return silica.window
-        }
+        get() = silica.window
 
     override fun getName(): String = "OpenGL"
 
