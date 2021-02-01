@@ -1,11 +1,8 @@
 package org.sandboxpowered.silica.network.play.clientbound;
 
-import org.sandboxpowered.silica.network.Connection;
-import org.sandboxpowered.silica.network.Packet;
-import org.sandboxpowered.silica.network.PacketByteBuf;
-import org.sandboxpowered.silica.network.PacketHandler;
+import org.sandboxpowered.silica.network.*;
 
-public class UpdateChunkPosition implements Packet {
+public class UpdateChunkPosition implements PacketPlay {
     private int x, y;
 
     public UpdateChunkPosition() {
@@ -28,7 +25,7 @@ public class UpdateChunkPosition implements Packet {
     }
 
     @Override
-    public void handle(PacketHandler packetHandler, Connection connection) {
+    public void handle(PacketHandler packetHandler, PlayConnection connection) {
 
     }
 }

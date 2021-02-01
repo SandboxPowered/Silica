@@ -1,14 +1,11 @@
 package org.sandboxpowered.silica.network.play.clientbound;
 
-import org.sandboxpowered.silica.network.Connection;
-import org.sandboxpowered.silica.network.Packet;
-import org.sandboxpowered.silica.network.PacketByteBuf;
-import org.sandboxpowered.silica.network.PacketHandler;
+import org.sandboxpowered.silica.network.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class UpdateLight implements Packet {
+public class UpdateLight implements PacketPlay {
     private int cX, cZ;
     private int skyYMask;
     private int blockYMask;
@@ -70,7 +67,7 @@ public class UpdateLight implements Packet {
     }
 
     @Override
-    public void handle(PacketHandler packetHandler, Connection connection) {
+    public void handle(PacketHandler packetHandler, PlayConnection connection) {
 
     }
 }

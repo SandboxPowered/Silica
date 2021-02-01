@@ -1,11 +1,8 @@
 package org.sandboxpowered.silica.network.play.clientbound;
 
-import org.sandboxpowered.silica.network.Connection;
-import org.sandboxpowered.silica.network.Packet;
-import org.sandboxpowered.silica.network.PacketByteBuf;
-import org.sandboxpowered.silica.network.PacketHandler;
+import org.sandboxpowered.silica.network.*;
 
-public class WorldBorder implements Packet {
+public class WorldBorder implements PacketPlay {
     @Override
     public void read(PacketByteBuf buf) {
 
@@ -25,7 +22,7 @@ public class WorldBorder implements Packet {
     }
 
     @Override
-    public void handle(PacketHandler packetHandler, Connection connection) {
+    public void handle(PacketHandler packetHandler, PlayConnection connection) {
 
     }
 }

@@ -1,11 +1,8 @@
 package org.sandboxpowered.silica.network.play.serverbound;
 
-import org.sandboxpowered.silica.network.Connection;
-import org.sandboxpowered.silica.network.Packet;
-import org.sandboxpowered.silica.network.PacketByteBuf;
-import org.sandboxpowered.silica.network.PacketHandler;
+import org.sandboxpowered.silica.network.*;
 
-public class KeepAliveServer implements Packet {
+public class KeepAliveServer implements PacketPlay {
     private long id;
 
     public KeepAliveServer() {
@@ -26,7 +23,7 @@ public class KeepAliveServer implements Packet {
     }
 
     @Override
-    public void handle(PacketHandler packetHandler, Connection connection) {
+    public void handle(PacketHandler packetHandler, PlayConnection connection) {
 
     }
 }

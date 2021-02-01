@@ -86,11 +86,11 @@ enum class Protocol(private val id: Int, builder: Builder) {
     companion object {
         @JvmField
         val PROTOCOL_ATTRIBUTE_KEY: AttributeKey<Protocol> = AttributeKey.valueOf("protocol")
-        private val PROTOCOL_BY_PACKET: MutableMap<Class<out Packet>, Protocol> = Maps.newHashMap()
+        private val PROTOCOL_BY_PACKET: MutableMap<Class<out PacketBase>, Protocol> = Maps.newHashMap()
         private val ID_2_PROTOCOL: Int2ObjectMap<Protocol> = Int2ObjectOpenHashMap()
 
         @JvmStatic
-        fun getProtocolForPacket(packet: Packet): Protocol {
+        fun getProtocolForPacket(packet: PacketBase): Protocol {
             return PROTOCOL_BY_PACKET[packet.javaClass]
                 ?: throw NullPointerException("No protocol found for " + packet.javaClass)
         }
@@ -103,7 +103,7 @@ enum class Protocol(private val id: Int, builder: Builder) {
         init {
             for (protocol in values()) {
                 protocol.packets.forEach { (_: Flow, packetSet: Packets) ->
-                    packetSet.allPackets.forEach { packetClass: Class<out Packet> ->
+                    packetSet.allPackets.forEach { packetClass: Class<out PacketBase> ->
                         PROTOCOL_BY_PACKET[packetClass] = protocol
                     }
                 }
@@ -113,11 +113,11 @@ enum class Protocol(private val id: Int, builder: Builder) {
     }
 
     private val packets: Map<Flow, Packets>
-    fun getPacketId(flow: Flow, msg: Packet): Int {
+    fun getPacketId(flow: Flow, msg: PacketBase): Int {
         return packets[flow]?.getId(msg.javaClass) ?: -1
     }
 
-    fun createPacket(flow: Flow, packetId: Int): Packet? {
+    fun createPacket(flow: Flow, packetId: Int): PacketBase? {
         return packets[flow]?.createPacket(packetId)
     }
 
@@ -137,15 +137,15 @@ enum class Protocol(private val id: Int, builder: Builder) {
     }
 
     class Packets {
-        val classToId: Object2IntMap<Class<out Packet>> = Object2IntOpenHashMap()
-        val idToConstructor: Int2ObjectMap<Supplier<out Packet>> = Int2ObjectOpenHashMap()
+        val classToId: Object2IntMap<Class<out PacketBase>> = Object2IntOpenHashMap()
+        val idToConstructor: Int2ObjectMap<Supplier<out PacketBase>> = Int2ObjectOpenHashMap()
         private val ignoredIds: IntList = IntArrayList()
 
         init {
             classToId.defaultReturnValue(-1)
         }
 
-        inline fun <reified P : Packet> addPacket(targetId: Int, supplier: Supplier<P>): Packets {
+        inline fun <reified P : PacketBase> addPacket(targetId: Int, supplier: Supplier<P>): Packets {
             val id = classToId.put(P::class.java, targetId)
             return if (id != -1) {
                 val string = "Packet ${P::class.java} is already registered to ID $id"
@@ -164,14 +164,14 @@ enum class Protocol(private val id: Int, builder: Builder) {
             return this
         }
 
-        fun getId(aClass: Class<out Packet?>?): Int {
+        fun getId(aClass: Class<out PacketBase?>?): Int {
             return classToId.getInt(aClass)
         }
 
-        val allPackets: Iterable<Class<out Packet>>
+        val allPackets: Iterable<Class<out PacketBase>>
             get() = Iterables.unmodifiableIterable(classToId.keys)
 
-        fun createPacket(packetId: Int): Packet? {
+        fun createPacket(packetId: Int): PacketBase? {
             return if (ignoredIds.contains(packetId) || !idToConstructor.containsKey(packetId)) null else idToConstructor[packetId].get()
         }
     }

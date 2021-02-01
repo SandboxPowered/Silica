@@ -1,11 +1,8 @@
 package org.sandboxpowered.silica.network.play.clientbound;
 
-import org.sandboxpowered.silica.network.Connection;
-import org.sandboxpowered.silica.network.Packet;
-import org.sandboxpowered.silica.network.PacketByteBuf;
-import org.sandboxpowered.silica.network.PacketHandler;
+import org.sandboxpowered.silica.network.*;
 
-public class SetPlayerPositionAndLook implements Packet {
+public class SetPlayerPositionAndLook implements PacketPlay {
     private double x, y, z;
     private float yaw, pitch;
     private byte flags;
@@ -47,7 +44,7 @@ public class SetPlayerPositionAndLook implements Packet {
     }
 
     @Override
-    public void handle(PacketHandler packetHandler, Connection connection) {
+    public void handle(PacketHandler packetHandler, PlayConnection connection) {
 
     }
 }

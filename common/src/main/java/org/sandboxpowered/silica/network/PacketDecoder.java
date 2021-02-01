@@ -20,7 +20,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
             PacketByteBuf buf = new PacketByteBuf(in);
             int packetId = buf.readVarInt();
             Protocol protocol = ctx.channel().attr(Protocol.PROTOCOL_ATTRIBUTE_KEY).get();
-            Packet packet = protocol.createPacket(flow, packetId);
+            PacketBase packet = protocol.createPacket(flow, packetId);
             if (packet != null) {
                 packet.read(buf);
                 out.add(packet);

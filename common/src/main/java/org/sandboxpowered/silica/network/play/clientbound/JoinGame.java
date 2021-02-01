@@ -2,12 +2,9 @@ package org.sandboxpowered.silica.network.play.clientbound;
 
 import org.sandboxpowered.api.util.Identity;
 import org.sandboxpowered.api.util.nbt.CompoundTag;
-import org.sandboxpowered.silica.network.Connection;
-import org.sandboxpowered.silica.network.Packet;
-import org.sandboxpowered.silica.network.PacketByteBuf;
-import org.sandboxpowered.silica.network.PacketHandler;
+import org.sandboxpowered.silica.network.*;
 
-public class JoinGame implements Packet {
+public class JoinGame implements PacketPlay {
     private int playerId;
     private boolean hardcore;
     private short gamemode;
@@ -88,7 +85,7 @@ public class JoinGame implements Packet {
     }
 
     @Override
-    public void handle(PacketHandler packetHandler, Connection connection) {
+    public void handle(PacketHandler packetHandler, PlayConnection connection) {
 
     }
 }
