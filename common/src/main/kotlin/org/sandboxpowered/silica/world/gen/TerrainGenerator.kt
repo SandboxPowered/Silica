@@ -17,7 +17,7 @@ class TerrainGenerator private constructor() {
     private val bedrock by lazy { Blocks.BEDROCK.get().baseState }
     private val stone by lazy { Blocks.STONE.get().baseState }
     private val dirt by lazy { Blocks.DIRT.get().baseState }
-    private val grass by lazy { Blocks.GRASS.get().baseState } // not implemented yet it seems
+    private val grass by lazy { Blocks.GRASS_BLOCK.get().baseState }
 
     fun fill(sx: Int, sy: Int, sz: Int, chunk: BlocTree) {
         if (sy > 0) return
@@ -26,7 +26,7 @@ class TerrainGenerator private constructor() {
                 0 -> bedrock
                 1, 2, 3 -> stone
                 4, 5 -> dirt
-//                6 -> grass
+                6 -> grass
                 else -> air
             }
         }
