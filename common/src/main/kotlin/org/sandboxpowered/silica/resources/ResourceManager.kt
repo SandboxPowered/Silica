@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.resources
 
-class ResourceManager {
+class ResourceManager(private val resourceType: ResourceType) {
     private val loaders: ArrayList<ResourceLoader> = arrayListOf()
 
     fun add(loader: ResourceLoader) {
@@ -10,8 +10,8 @@ class ResourceManager {
     fun getNamespaces(): Set<String> {
         return when (loaders.size) {
             0 -> emptySet()
-            1 -> loaders.first().namespaces
-            else -> loaders.flatMap { it.namespaces }.toSet()
+            1 -> loaders.first().getNamespaces(resourceType)
+            else -> loaders.flatMap { it.getNamespaces(resourceType) }.toSet()
         }
     }
 }

@@ -23,22 +23,22 @@ public class DirectoryResourceLoader implements ResourceLoader {
     }
 
     @Override
-    public boolean containsFile(String path) {
+    public boolean containsFile(ResourceType type, String path) {
         return false;
     }
 
     @Override
-    public InputStream openFile(String path) throws IOException {
+    public InputStream openFile(ResourceType type, String path) throws IOException {
         return null;
     }
 
     @Override
-    public Set<String> findResources(String namespace, String path, int depth, Predicate<String> filter) {
+    public Set<String> findResources(ResourceType type, String namespace, String path, int depth, Predicate<String> filter) {
         return null;
     }
 
     @Override
-    public Set<String> getNamespaces() {
+    public Set<String> getNamespaces(ResourceType type) {
         if (namespaces == null) {
             Set<String> set = Sets.newHashSet();
             File file = new File(this.directory, "assets");

@@ -12,10 +12,10 @@ public class DeclareTags implements PacketPlay {
 
     @Override
     public void write(PacketByteBuf buf) {
-        writeEmpty(buf, Hardcoding.BLOCKTAGS);
-        writeEmpty(buf, Hardcoding.ITEMTAGS);
-        writeEmpty(buf, Hardcoding.FLUIDTAGS);
-        writeEmpty(buf, Hardcoding.ENTITYTAGS);
+        writeEmpty(buf, Hardcoding.BLOCK_TAGS);
+        writeEmpty(buf, Hardcoding.ITEM_TAGS);
+        writeEmpty(buf, Hardcoding.FLUID_TAGS);
+        writeEmpty(buf, Hardcoding.ENTITY_TAGS);
     }
 
     public void writeEmpty(PacketByteBuf buf, Identity[] arr) {

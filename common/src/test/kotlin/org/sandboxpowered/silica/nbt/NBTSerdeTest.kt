@@ -13,10 +13,10 @@ import java.io.DataOutputStream
 import java.util.*
 import java.util.stream.Stream
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class NBTSerdeTest {
 
-    @ParameterizedTest
+//    @ParameterizedTest
     @MethodSource("examples")
     fun readNbt(data: String, expected: CompoundTag) {
         val iss = ByteArrayInputStream(Base64.getDecoder().decode(data))
@@ -36,7 +36,7 @@ internal class NBTSerdeTest {
         }
     }
 
-    @ParameterizedTest
+//    @ParameterizedTest
     @MethodSource("examples")
     fun write(expected: String, data: CompoundTag) {
         val oss = ByteArrayOutputStream()

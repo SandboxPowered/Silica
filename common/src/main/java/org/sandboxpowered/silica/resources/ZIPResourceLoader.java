@@ -13,7 +13,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class ZIPResourceLoader implements ResourceLoader {
-    public static Pattern pattern = Pattern.compile("assets\\/([a-z]*)\\/");
+    public static Pattern pattern = Pattern.compile("(assets|data)\\/([a-z]*)\\/");
     private final File file;
     private final ZipFile zip;
     private Set<String> namespaces;
@@ -24,22 +24,22 @@ public class ZIPResourceLoader implements ResourceLoader {
     }
 
     @Override
-    public boolean containsFile(String path) {
+    public boolean containsFile(ResourceType type, String path) {
         return false;
     }
 
     @Override
-    public InputStream openFile(String path) throws IOException {
+    public InputStream openFile(ResourceType type, String path) throws IOException {
         return null;
     }
 
     @Override
-    public Set<String> findResources(String namespace, String path, int depth, Predicate<String> filter) {
+    public Set<String> findResources(ResourceType type, String namespace, String path, int depth, Predicate<String> filter) {
         return null;
     }
 
     @Override
-    public Set<String> getNamespaces() {
+    public Set<String> getNamespaces(ResourceType type) {
         if (namespaces == null) {
             Enumeration<? extends ZipEntry> enumeration = zip.entries();
             HashSet<String> namespaces = new HashSet<>();
@@ -47,10 +47,10 @@ public class ZIPResourceLoader implements ResourceLoader {
             while (enumeration.hasMoreElements()) {
                 ZipEntry zipEntry = enumeration.nextElement();
                 String string = zipEntry.getName();
-                if (string.startsWith("assets/")) {
+                if (string.startsWith(type.getFolder() + '/')) {
                     Matcher matcher = pattern.matcher(string);
                     if (matcher.find()) {
-                        namespaces.add(matcher.group(1));
+                        namespaces.add(matcher.group(2));
                     }
                 }
             }

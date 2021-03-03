@@ -61,8 +61,6 @@ class Window(private var windowName: String, var width: Int, var height: Int, va
     init {
         glfwDefaultWindowHints()
 
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE)
         renderer.initWindowHints()
         internalPointer = glfwCreateWindow(width, height, windowName, MemoryUtil.NULL, MemoryUtil.NULL)
         if (internalPointer == MemoryUtil.NULL) throw UnknownError("Failed to create the GLFW window")

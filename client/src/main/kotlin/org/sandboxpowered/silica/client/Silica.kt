@@ -1,30 +1,25 @@
 package org.sandboxpowered.silica.client
 
 import com.google.common.base.Joiner
-import org.apache.commons.io.FileUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.lwjgl.glfw.GLFW
 import org.sandboxpowered.api.client.Client
 import org.sandboxpowered.api.client.GraphicsMode
 import org.sandboxpowered.silica.client.server.IntegratedServer
-import org.sandboxpowered.silica.resources.ClasspathResourceLoader
-import org.sandboxpowered.silica.resources.DirectoryResourceLoader
-import org.sandboxpowered.silica.resources.ResourceManager
-import org.sandboxpowered.silica.resources.ZIPResourceLoader
-import org.sandboxpowered.silica.util.EmptyIOFilter
+import org.sandboxpowered.silica.resources.*
 import org.sandboxpowered.silica.util.FileFilters
 import org.sandboxpowered.silica.util.join
+import org.sandboxpowered.silica.util.listFiles
 import org.sandboxpowered.silica.util.notExists
 import java.io.File
 import java.io.IOException
-import java.lang.RuntimeException
 import java.util.*
 
 class Silica(args: Args) : Runnable, Client {
     private val logger: Logger = LogManager.getLogger()
     val window: Window
-    private val manager: ResourceManager
+    private val assetManager: ResourceManager
     val renderer: Renderer
 
     val server = IntegratedServer()
@@ -74,8 +69,8 @@ class Silica(args: Args) : Runnable, Client {
         for (string in list) {
             logger.error("GLFW error collected during initialization: {}", string)
         }
-        manager = ResourceManager()
-        manager.add(ClasspathResourceLoader())
+        assetManager = ResourceManager(ResourceType.ASSETS)
+        assetManager.add(ClasspathResourceLoader())
         val resourcePacks = File("resourcepacks").apply {
             if (notExists()) {
                 mkdirs()
@@ -83,20 +78,19 @@ class Silica(args: Args) : Runnable, Client {
                 delete()
                 mkdirs()
             }
-        }
-        FileUtils.listFiles(resourcePacks, FileFilters.ZIP.or(FileFilters.JAR), EmptyIOFilter()).onEach { file: File ->
+        }.listFiles(FileFilters.ZIP.or(FileFilters.JAR)) { file ->
             try {
                 if (file.isDirectory) {
-                    manager.add(DirectoryResourceLoader(file))
+                    assetManager.add(DirectoryResourceLoader(file))
                 } else {
-                    manager.add(ZIPResourceLoader(file))
+                    assetManager.add(ZIPResourceLoader(file))
                 }
             } catch (e: IOException) {
                 logger.error("Failed loading resource source {}", file.name)
             }
         }
 
-        logger.debug("Loaded namespaces: [${manager.getNamespaces().join(",")}]")
+        logger.debug("Loaded namespaces: [${assetManager.getNamespaces().join(",")}]")
         window = Window("Sandbox Silica", args.width, args.height, renderer)
         renderer.init()
     }

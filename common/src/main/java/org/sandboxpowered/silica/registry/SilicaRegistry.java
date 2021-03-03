@@ -101,7 +101,10 @@ public class SilicaRegistry<T extends Content<T>> implements Registry<T> {
 
         @Override
         public T get() {
-            return getInternal();
+            T internal = getInternal();
+            if(internal == null)
+                throw new NullPointerException();
+            return internal;
         }
 
         @Override
@@ -113,6 +116,12 @@ public class SilicaRegistry<T extends Content<T>> implements Registry<T> {
         public T orElse(T other) {
             T val = getInternal();
             return val == null ? other : val;
+        }
+
+        @Nullable
+        @Override
+        public T orNull() {
+            return getInternal();
         }
 
         @Override
