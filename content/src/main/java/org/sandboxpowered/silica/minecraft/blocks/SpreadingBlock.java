@@ -1,11 +1,11 @@
-package org.sandboxpowered.silica.content.blocks;
+package org.sandboxpowered.silica.minecraft.blocks;
 
 import org.sandboxpowered.api.block.Blocks;
 import org.sandboxpowered.api.state.BlockState;
 import org.sandboxpowered.api.state.Properties;
 import org.sandboxpowered.api.util.math.Position;
 import org.sandboxpowered.api.world.World;
-import org.sandboxpowered.silica.content.SilicaTags;
+import org.sandboxpowered.silica.minecraft.SilicaTags;
 
 import java.util.Random;
 

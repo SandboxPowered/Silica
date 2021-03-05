@@ -1,17 +1,16 @@
-package org.sandboxpowered.silica.content;
+package org.sandboxpowered.silica.minecraft;
 
 import com.google.common.collect.Sets;
 import org.sandboxpowered.api.SandboxAPI;
 import org.sandboxpowered.api.addon.Addon;
 import org.sandboxpowered.api.block.BaseBlock;
-import org.sandboxpowered.api.block.Block;
 import org.sandboxpowered.api.block.Materials;
 import org.sandboxpowered.api.block.SlabBlock;
 import org.sandboxpowered.api.item.BaseItem;
 import org.sandboxpowered.api.item.Item;
 import org.sandboxpowered.api.registry.Registrar;
-import org.sandboxpowered.silica.content.blocks.*;
-import org.sandboxpowered.silica.content.fluid.EmptyFluid;
+import org.sandboxpowered.silica.minecraft.blocks.*;
+import org.sandboxpowered.silica.minecraft.fluid.EmptyFluid;
 
 import java.util.Collections;
 import java.util.Set;
@@ -21,7 +20,7 @@ import static org.sandboxpowered.api.block.Block.Settings.builder;
 public class MinecraftAddon implements Addon {
     @Override
     public void init(SandboxAPI api) {
-        api.getLog().info("Loading Minecraft Content - 1.16.4");
+        api.getLog().info("Loading Minecraft Content - 1.16.5");
     }
 
     @Override

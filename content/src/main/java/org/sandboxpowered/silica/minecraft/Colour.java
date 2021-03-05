@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.content;
+package org.sandboxpowered.silica.minecraft;
 
 import java.util.Locale;
 

@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.content;
+package org.sandboxpowered.silica.minecraft;
 
 import org.sandboxpowered.api.block.Block;
 import org.sandboxpowered.api.item.Item;

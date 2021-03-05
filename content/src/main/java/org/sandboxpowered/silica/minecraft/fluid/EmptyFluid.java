@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.content.fluid;
+package org.sandboxpowered.silica.minecraft.fluid;
 
 import org.sandboxpowered.api.block.Blocks;
 import org.sandboxpowered.api.fluid.Fluid;

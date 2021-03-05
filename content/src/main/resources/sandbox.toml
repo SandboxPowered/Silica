@@ -4,7 +4,7 @@ title="Minecraft" # optional DEFAULT: modid
 description="""
 Multiline Description
 """  # optional DEFAULT: ""
-entrypoint="org.sandboxpowered.silica.content.MinecraftAddon" # required
+entrypoint="org.sandboxpowered.silica.minecraft.MinecraftAddon" # required
 authors = [ # required 1
     "SandboxPowered",
 ]

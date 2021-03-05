@@ -4,6 +4,8 @@ group 'org.sandboxpowered'
 version '1.0-SNAPSHOT'
 
 dependencies {
+    runtime(project(':content'))
+
     api platform('org.sandboxpowered.api:api:rework-SNAPSHOT')
     api 'org.sandboxpowered.api:base'
     api 'org.sandboxpowered.api:rendering'

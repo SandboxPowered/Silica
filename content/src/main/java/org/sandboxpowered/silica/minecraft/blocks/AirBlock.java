@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.content.blocks;
+package org.sandboxpowered.silica.minecraft.blocks;
 
 import org.sandboxpowered.api.block.BaseBlock;
 import org.sandboxpowered.api.shape.Shape;
