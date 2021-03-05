@@ -40,7 +40,7 @@ fun File.listFiles(filter: IOFileFilter, function: (File) -> Unit) {
 fun File.listFiles(filter: IOFileFilter): Array<out File>? = listFiles(filter as FileFilter)
 
 fun <T> T?.ifPresent(consumer: (T) -> Unit) {
-    if(this != null)
+    if (this != null)
         consumer.invoke(this)
 }
 

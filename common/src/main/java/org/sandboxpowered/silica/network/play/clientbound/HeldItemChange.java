@@ -1,6 +1,9 @@
 package org.sandboxpowered.silica.network.play.clientbound;
 
-import org.sandboxpowered.silica.network.*;
+import org.sandboxpowered.silica.network.PacketByteBuf;
+import org.sandboxpowered.silica.network.PacketHandler;
+import org.sandboxpowered.silica.network.PacketPlay;
+import org.sandboxpowered.silica.network.PlayConnection;
 
 public class HeldItemChange implements PacketPlay {
     private byte slot;

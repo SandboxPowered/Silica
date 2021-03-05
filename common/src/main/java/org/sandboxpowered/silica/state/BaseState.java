@@ -23,10 +23,6 @@ public class BaseState<B extends Content<B>, S> implements PropertyContainer<S> 
         this.properties = properties;
     }
 
-    public ImmutableMap<Property<?>, Comparable<?>> getProperties() {
-        return properties;
-    }
-
     protected static <T> T findNextInCollection(Collection<T> collection, T object) {
         Iterator<T> iterator = collection.iterator();
 
@@ -37,6 +33,10 @@ public class BaseState<B extends Content<B>, S> implements PropertyContainer<S> 
         } while (!iterator.next().equals(object));
 
         return iterator.hasNext() ? iterator.next() : collection.iterator().next();
+    }
+
+    public ImmutableMap<Property<?>, Comparable<?>> getProperties() {
+        return properties;
     }
 
     @Override

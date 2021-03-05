@@ -1,6 +1,9 @@
 package org.sandboxpowered.silica.network.login.serverbound;
 
-import org.sandboxpowered.silica.network.*;
+import org.sandboxpowered.silica.network.Connection;
+import org.sandboxpowered.silica.network.Packet;
+import org.sandboxpowered.silica.network.PacketByteBuf;
+import org.sandboxpowered.silica.network.PacketHandler;
 
 public class LoginStart implements Packet {
     private String username;

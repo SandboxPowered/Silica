@@ -1,7 +1,6 @@
 package org.sandboxpowered.silica.network;
 
 import akka.actor.typed.ActorRef;
-import akka.actor.typed.ActorSystem;
 import akka.actor.typed.Scheduler;
 import akka.actor.typed.javadsl.AskPattern;
 import com.mojang.authlib.GameProfile;

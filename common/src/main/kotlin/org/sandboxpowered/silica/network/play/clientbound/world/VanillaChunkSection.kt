@@ -1,14 +1,17 @@
 package org.sandboxpowered.silica.network.play.clientbound.world
 
 import org.sandboxpowered.api.state.BlockState
-import org.sandboxpowered.silica.StateManager
 import org.sandboxpowered.silica.network.PacketByteBuf
 import org.sandboxpowered.silica.network.util.BitPackedLongArray
 import org.sandboxpowered.silica.world.util.BlocTree
 import org.sandboxpowered.silica.world.util.iterateCube
 
 class VanillaChunkSection(
-    blocTree: BlocTree, private val x: Int, private val y: Int, private val z: Int, private val stateToId: (BlockState) -> Int
+    blocTree: BlocTree,
+    private val x: Int,
+    private val y: Int,
+    private val z: Int,
+    private val stateToId: (BlockState) -> Int
 ) {
 
     private val blocTree = blocTree[x, y, z, 16, 16, 16]

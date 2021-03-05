@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import org.sandboxpowered.api.block.Block
 import org.sandboxpowered.api.registry.Registry
-import org.sandboxpowered.silica.block.SilicaBlockState
+import org.sandboxpowered.silica.state.block.SilicaBlockState
 
 object TestData {
 
@@ -20,5 +20,9 @@ object TestData {
         every { isAir(any()) } returns isAir
     }
 
-    fun state(blockName: String, isAir: Boolean = false) = SilicaBlockState(block(blockName, isAir), ImmutableMap.of())
+    fun state(blockName: String, isAir: Boolean = false) =
+        SilicaBlockState(
+            block(blockName, isAir),
+            ImmutableMap.of()
+        )
 }

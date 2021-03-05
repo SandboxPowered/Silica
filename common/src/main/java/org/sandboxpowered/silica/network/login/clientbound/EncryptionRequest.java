@@ -1,6 +1,9 @@
 package org.sandboxpowered.silica.network.login.clientbound;
 
-import org.sandboxpowered.silica.network.*;
+import org.sandboxpowered.silica.network.Connection;
+import org.sandboxpowered.silica.network.Packet;
+import org.sandboxpowered.silica.network.PacketByteBuf;
+import org.sandboxpowered.silica.network.PacketHandler;
 
 public class EncryptionRequest implements Packet {
     private String serverId;

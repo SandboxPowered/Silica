@@ -31,56 +31,62 @@ import java.util.*
 import java.util.function.Supplier
 
 enum class Protocol(private val id: Int, builder: Builder) {
-    HANDSHAKE(-1, newProtocol().addFlow(
-        Flow.SERVERBOUND, Packets()
-            .addPacket(0x00, ::HandshakeRequest)
-    )),
-    PLAY(0, newProtocol()
-        .addFlow(
+    HANDSHAKE(
+        -1, newProtocol().addFlow(
             Flow.SERVERBOUND, Packets()
-                .addPacket(0x05, ::ClientSettings)
-                .addPacket(0x0B, ::ClientPluginChannel)
-                .addPacket(0x00, ::TeleportConfirmation)
-                .addPacket(0x10, ::KeepAliveServer)
-        ).addFlow(
-            Flow.CLIENTBOUND, Packets()
-                .addPacket(0x24, ::JoinGame)
-                .addPacket(0x3F, ::HeldItemChange)
-                .addPacket(0x5A, ::DeclareRecipes)
-                .addPacket(0x5B, ::DeclareTags)
-                .addPacket(0x1A, ::EntityStatus)
-                .addPacket(0x10, ::DeclareCommands)
-                .addPacket(0x34, ::SetPlayerPositionAndLook)
-                .addPacket(0x35, ::UnlockRecipes)
-                .addPacket(0x32, ::PlayerInfo)
-                .addPacket(0x40, ::UpdateChunkPosition)
-                .addPacket(0x20, ::ChunkData)
-                .addPacket(0x23, ::UpdateLight)
-                .addPacket(0x3D, ::WorldBorder)
-                .addPacket(0x1F, ::KeepAliveClient)
+                .addPacket(0x00, ::HandshakeRequest)
         )
     ),
-    STATUS(1, newProtocol()
-        .addFlow(
-            Flow.SERVERBOUND, Packets()
-                .addPacket(0x00, ::StatusRequest)
-                .addPacket(0x01, ::PingRequest)
-        ).addFlow(
-            Flow.CLIENTBOUND, Packets()
-                .addPacket(0x00, ::StatusResponse)
-                .addPacket(0x01, ::PongResponse)
-        )),
-    LOGIN(2, newProtocol()
-        .addFlow(
-            Flow.SERVERBOUND, Packets()
-                .addPacket(0x00, ::LoginStart)
-                .addPacket(0x01, ::EncryptionResponse)
-        ).addFlow(
-            Flow.CLIENTBOUND, Packets()
-                .addPacket(0x00, ::Disconnect)
-                .addPacket(0x01, ::EncryptionRequest)
-                .addPacket(0x02, ::LoginSuccess)
-        )
+    PLAY(
+        0, newProtocol()
+            .addFlow(
+                Flow.SERVERBOUND, Packets()
+                    .addPacket(0x05, ::ClientSettings)
+                    .addPacket(0x0B, ::ClientPluginChannel)
+                    .addPacket(0x00, ::TeleportConfirmation)
+                    .addPacket(0x10, ::KeepAliveServer)
+            ).addFlow(
+                Flow.CLIENTBOUND, Packets()
+                    .addPacket(0x24, ::JoinGame)
+                    .addPacket(0x3F, ::HeldItemChange)
+                    .addPacket(0x5A, ::DeclareRecipes)
+                    .addPacket(0x5B, ::DeclareTags)
+                    .addPacket(0x1A, ::EntityStatus)
+                    .addPacket(0x10, ::DeclareCommands)
+                    .addPacket(0x34, ::SetPlayerPositionAndLook)
+                    .addPacket(0x35, ::UnlockRecipes)
+                    .addPacket(0x32, ::PlayerInfo)
+                    .addPacket(0x40, ::UpdateChunkPosition)
+                    .addPacket(0x20, ::ChunkData)
+                    .addPacket(0x23, ::UpdateLight)
+                    .addPacket(0x3D, ::WorldBorder)
+                    .addPacket(0x1F, ::KeepAliveClient)
+            )
+    ),
+    STATUS(
+        1, newProtocol()
+            .addFlow(
+                Flow.SERVERBOUND, Packets()
+                    .addPacket(0x00, ::StatusRequest)
+                    .addPacket(0x01, ::PingRequest)
+            ).addFlow(
+                Flow.CLIENTBOUND, Packets()
+                    .addPacket(0x00, ::StatusResponse)
+                    .addPacket(0x01, ::PongResponse)
+            )
+    ),
+    LOGIN(
+        2, newProtocol()
+            .addFlow(
+                Flow.SERVERBOUND, Packets()
+                    .addPacket(0x00, ::LoginStart)
+                    .addPacket(0x01, ::EncryptionResponse)
+            ).addFlow(
+                Flow.CLIENTBOUND, Packets()
+                    .addPacket(0x00, ::Disconnect)
+                    .addPacket(0x01, ::EncryptionRequest)
+                    .addPacket(0x02, ::LoginSuccess)
+            )
     );
 
     companion object {

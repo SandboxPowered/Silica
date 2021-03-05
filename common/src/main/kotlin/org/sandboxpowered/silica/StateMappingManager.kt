@@ -8,8 +8,8 @@ import it.unimi.dsi.fastutil.objects.Object2IntArrayMap
 import it.unimi.dsi.fastutil.objects.Object2IntMap
 import org.sandboxpowered.api.state.BlockState
 import org.sandboxpowered.api.state.property.Property
-import org.sandboxpowered.silica.block.SilicaBlockState
 import org.sandboxpowered.silica.registry.SilicaRegistries
+import org.sandboxpowered.silica.state.block.SilicaBlockState
 import org.sandboxpowered.silica.util.getResourceAsString
 
 class StateManager {
@@ -39,7 +39,7 @@ class StateManager {
 
         SilicaRegistries.BLOCK_REGISTRY.internalMap.forEach { (id, block) ->
             val blockMap = rawMap[id.toString()]
-            if(blockMap==null) {
+            if (blockMap == null) {
                 errors.add(id.toString())
             } else {
                 block.stateFactory.validStates.map { it as SilicaBlockState }.forEach { state ->

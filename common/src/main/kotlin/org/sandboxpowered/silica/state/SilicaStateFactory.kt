@@ -10,27 +10,37 @@ import org.sandboxpowered.api.state.property.PropertyContainer
 import java.util.*
 import kotlin.collections.ArrayList
 
-class SilicaStateFactory<A: Content<A>, B : PropertyContainer<B>?>(
-    private val base: A,
+class SilicaStateFactory<B : Content<B>, S : PropertyContainer<S>>(
+    private val base: B,
     map: Map<String, Property<*>>,
-    stateCreator: Factory<A, B>
-) : StateFactory<A, B> {
+    stateCreator: Factory<B, S>
+) : StateFactory<B, S> {
     private val propertiesByName: ImmutableSortedMap<String, Property<*>> = ImmutableSortedMap.copyOf(map)
-    private val states: ImmutableList<B>
+    private val states: ImmutableList<S>
 
-    interface Factory<A, B : PropertyContainer<B>?> {
-        fun create(base: A, values: ImmutableMap<Property<*>?, Comparable<*>?>?): B
+    interface Factory<B : Content<B>, S : PropertyContainer<S>> {
+        fun create(base: B, values: ImmutableMap<Property<*>, Comparable<*>>): S
+
+        companion object {
+            fun <B : Content<B>, S : PropertyContainer<S>> of(factory: (base: B, properties: ImmutableMap<Property<*>, Comparable<*>>) -> S): Factory<B, S> {
+                return object : Factory<B, S> {
+                    override fun create(base: B, values: ImmutableMap<Property<*>, Comparable<*>>): S {
+                        return factory.invoke(base, values)
+                    }
+                }
+            }
+        }
     }
 
-    override fun getBaseState(): B {
+    override fun getBaseState(): S {
         return states[0]
     }
 
-    override fun getBaseObject(): A {
+    override fun getBaseObject(): B {
         return base
     }
 
-    override fun getValidStates(): Collection<B> {
+    override fun getValidStates(): Collection<S> {
         return states
     }
 
@@ -45,8 +55,8 @@ class SilicaStateFactory<A: Content<A>, B : PropertyContainer<B>?>(
             }
         }
 
-        val propertyToState: MutableMap<Map<Property<*>, Comparable<*>>, B> = LinkedHashMap()
-        val allStates: MutableList<B> = ArrayList()
+        val propertyToState: MutableMap<Map<Property<*>, Comparable<*>>, S> = LinkedHashMap()
+        val allStates: MutableList<S> = ArrayList()
 
         // Generate combined states with all possible values
         sequence.forEach { list ->
@@ -63,7 +73,7 @@ class SilicaStateFactory<A: Content<A>, B : PropertyContainer<B>?>(
         // Initialize the tables within each state allowing them to know other state values
         allStates.forEach { state ->
             if (state is BaseState<*, *>) {
-                (state as BaseState<A, B>).initTable(propertyToState)
+                (state as BaseState<B, S>).initTable(propertyToState)
             }
         }
         states = ImmutableList.copyOf(allStates)

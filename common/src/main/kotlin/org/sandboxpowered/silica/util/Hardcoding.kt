@@ -103,11 +103,13 @@ object Hardcoding {
         Identity.of("minecraft", "infiniburn_end"),
         Identity.of("minecraft", "unstable_bottom_center")
     )
+
     @JvmField
     var FLUID_TAGS = arrayOf(
         Identity.of("minecraft", "lava"),
         Identity.of("minecraft", "water")
     )
+
     @JvmField
     var ENTITY_TAGS = arrayOf(
         Identity.of("minecraft", "skeletons"),
@@ -116,6 +118,7 @@ object Hardcoding {
         Identity.of("minecraft", "beehive_inhabitors"),
         Identity.of("minecraft", "impact_projectiles")
     )
+
     @JvmField
     var ITEM_TAGS = arrayOf(
         Identity.of("minecraft", "enderman_holdable"),

@@ -35,7 +35,11 @@ class NetworkActor(
     sealed class Command {
         class Start(val replyTo: ActorRef<in Boolean>) : Command()
         class Disconnected(val ref: String /*TODO*/) : Command()
-        class CreateConnection(val profile: GameProfile, val handler: PacketHandler, val replyTo: ActorRef<in Boolean>) : Command()
+        class CreateConnection(
+            val profile: GameProfile,
+            val handler: PacketHandler,
+            val replyTo: ActorRef<in Boolean>
+        ) : Command()
     }
 
     override fun createReceive(): Receive<Command> = newReceiveBuilder()
@@ -86,7 +90,10 @@ class NetworkActor(
     private fun handleCreateConnection(createConnection: Command.CreateConnection): Behavior<Command> {
         // TODO: store ref & dispose of the actor
         logger.info("Creating connection")
-        context.spawn(PlayConnection.actor(server, createConnection.handler), "connection-${createConnection.profile.id}")
+        context.spawn(
+            PlayConnection.actor(server, createConnection.handler),
+            "connection-${createConnection.profile.id}"
+        )
             .tell(PlayConnection.Command.Login)
         createConnection.replyTo.tell(true)
 

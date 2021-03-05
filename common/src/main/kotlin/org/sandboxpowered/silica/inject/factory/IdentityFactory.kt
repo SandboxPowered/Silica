@@ -3,7 +3,7 @@ package org.sandboxpowered.silica.inject.factory
 import org.sandboxpowered.api.util.Identity
 import org.sandboxpowered.silica.util.SilicaIdentity
 
-class IdentityFactory :Identity.Factory {
+class IdentityFactory : Identity.Factory {
     override fun create(namespace: String, path: String): Identity {
         return SilicaIdentity(namespace, path)
     }

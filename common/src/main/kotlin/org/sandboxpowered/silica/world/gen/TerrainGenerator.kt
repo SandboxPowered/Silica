@@ -40,7 +40,8 @@ class TerrainGenerator private constructor() {
     }
 
     sealed class Command {
-        data class Generate(val x: Int, val y: Int, val z: Int, val chunk: BlocTree, val replyTo: ActorRef<Generate>) : Command()
+        data class Generate(val x: Int, val y: Int, val z: Int, val chunk: BlocTree, val replyTo: ActorRef<Generate>) :
+            Command()
     }
 
     private class Actor(private val terrainGenerator: TerrainGenerator, context: ActorContext<Command>?) :
@@ -52,7 +53,7 @@ class TerrainGenerator private constructor() {
 
         private fun handleGenerate(generate: Command.Generate): Behavior<Command> {
             val (x, y, z, chunk, replyTo) = generate
-            terrainGenerator.fill(x,  y, z, chunk)
+            terrainGenerator.fill(x, y, z, chunk)
             replyTo.tell(generate)
 
             return Behaviors.same()

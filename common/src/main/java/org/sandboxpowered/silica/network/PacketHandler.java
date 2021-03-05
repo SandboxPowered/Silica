@@ -9,10 +9,10 @@ import java.util.Queue;
 
 public class PacketHandler extends SimpleChannelInboundHandler<PacketBase> {
     private final Connection connection;
+    private final Queue<PacketPlay> waiting = new LinkedList<>();
     private ActorRef<PlayConnection.Command> playConnection;
     private Channel channel;
     private SocketAddress address;
-    private final Queue<PacketPlay> waiting = new LinkedList<>();
 
     public PacketHandler(Connection connection) {
         this.connection = connection;
@@ -45,7 +45,8 @@ public class PacketHandler extends SimpleChannelInboundHandler<PacketBase> {
                 else {
                     if (waiting.size() > 0) {
                         PacketPlay read;
-                        while ((read = waiting.poll()) != null) playConnection.tell(new PlayConnection.Command.ReceivePacket(read));
+                        while ((read = waiting.poll()) != null)
+                            playConnection.tell(new PlayConnection.Command.ReceivePacket(read));
                     }
                     playConnection.tell(new PlayConnection.Command.ReceivePacket((PacketPlay) msg));
                 }

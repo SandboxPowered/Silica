@@ -2,7 +2,10 @@ package org.sandboxpowered.silica.network.play.clientbound;
 
 import org.sandboxpowered.api.util.Identity;
 import org.sandboxpowered.api.util.nbt.CompoundTag;
-import org.sandboxpowered.silica.network.*;
+import org.sandboxpowered.silica.network.PacketByteBuf;
+import org.sandboxpowered.silica.network.PacketHandler;
+import org.sandboxpowered.silica.network.PacketPlay;
+import org.sandboxpowered.silica.network.PlayConnection;
 
 public class JoinGame implements PacketPlay {
     private int playerId;

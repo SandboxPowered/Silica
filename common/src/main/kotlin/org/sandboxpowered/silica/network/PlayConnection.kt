@@ -5,7 +5,6 @@ import akka.actor.typed.javadsl.AbstractBehavior
 import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
-import org.sandboxpowered.api.state.BlockState
 import org.sandboxpowered.api.util.Identity
 import org.sandboxpowered.silica.nbt.CompoundTag
 import org.sandboxpowered.silica.network.play.clientbound.*
@@ -97,24 +96,26 @@ class PlayConnection private constructor(
         biomeReg.setList("value", listOf(plainsBiomeEntry))
         codec.setTag("minecraft:dimension_type", dimReg)
         codec.setTag("minecraft:worldgen/biome", biomeReg)
-        packetHandler.sendPacket(JoinGame(
-            0,
-            false,
-            1.toShort(),
-            (-1).toShort(),
-            1,
-            arrayOf(overworld),
-            codec,
-            overworldType,
-            overworld,
-            0,
-            20,
-            4,
-            false,
-            true,
-            false,
-            true
-        ))
+        packetHandler.sendPacket(
+            JoinGame(
+                0,
+                false,
+                1.toShort(),
+                (-1).toShort(),
+                1,
+                arrayOf(overworld),
+                codec,
+                overworldType,
+                overworld,
+                0,
+                20,
+                4,
+                false,
+                true,
+                false,
+                true
+            )
+        )
         packetHandler.sendPacket(HeldItemChange(0.toByte()))
         packetHandler.sendPacket(DeclareRecipes())
         packetHandler.sendPacket(DeclareTags())
@@ -126,7 +127,12 @@ class PlayConnection private constructor(
         packetHandler.sendPacket(PlayerInfo(2))
         packetHandler.sendPacket(UpdateChunkPosition(0, 0))
 
-        server.world.tell(SilicaWorld.Command.Ask({ Command.ReceiveWorld((it as SilicaWorld).getTerrain()) }, context.self))
+        server.world.tell(
+            SilicaWorld.Command.Ask(
+                { Command.ReceiveWorld((it as SilicaWorld).getTerrain()) },
+                context.self
+            )
+        )
 
         return Behaviors.same()
     }

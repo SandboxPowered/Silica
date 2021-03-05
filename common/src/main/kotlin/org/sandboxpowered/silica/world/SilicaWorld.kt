@@ -20,7 +20,6 @@ import org.sandboxpowered.api.util.math.Position
 import org.sandboxpowered.api.world.BlockFlag
 import org.sandboxpowered.api.world.World
 import org.sandboxpowered.api.world.WorldReader
-import org.sandboxpowered.silica.util.messageAdapter
 import org.sandboxpowered.silica.util.onMessage
 import org.sandboxpowered.silica.world.gen.TerrainGenerator
 import org.sandboxpowered.silica.world.util.BlocTree
@@ -112,7 +111,8 @@ class SilicaWorld private constructor(private val side: Side) : World {
         AbstractBehavior<Command>(context) {
 
         private val commandQueue: Deque<Command> = LinkedList()
-        private val generator: ActorRef<TerrainGenerator.Command> = context.spawn(TerrainGenerator.actor(), "terrain_generator")
+        private val generator: ActorRef<TerrainGenerator.Command> =
+            context.spawn(TerrainGenerator.actor(), "terrain_generator")
         private var generated = false
 
         override fun createReceive(): Receive<Command> = newReceiveBuilder()
