@@ -67,6 +67,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     private var currentFrame: Int = 0
 
     override fun cleanup() {
+        cleanupSwapchain()
         inFlightFrames.forEach {
             vkDestroySemaphore(device, it.renderFinishedSemaphore, null)
             vkDestroySemaphore(device, it.imageAvailableSemaphore, null)
@@ -74,18 +75,22 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         }
         inFlightFrames.clear()
         vkDestroyCommandPool(device, commandPool, null)
-        swapChainFramebuffers.forEach { vkDestroyFramebuffer(device, it, null) }
-        vkDestroyPipeline(device, graphicsPipeline, null)
-        vkDestroyPipelineLayout(device, pipelineLayout, null)
-        vkDestroyRenderPass(device, renderPass, null)
-        swapChainImageViews.forEach { vkDestroyImageView(device, it, null) }
-        vkDestroySwapchainKHR(device, swapChain, null)
         vkDestroyDevice(device, null)
         if (enableValidationLayers) {
             vkDestroyDebugUtilsMessengerEXT(instance, debugMessenger, null)
         }
         vkDestroySurfaceKHR(instance, surface, null)
         vkDestroyInstance(instance, null)
+    }
+
+    private fun cleanupSwapchain() {
+        swapChainFramebuffers.forEach { vkDestroyFramebuffer(device, it, null) }
+        vkFreeCommandBuffers(device, commandPool, asPointerBuffer(commandBuffers))
+        vkDestroyPipeline(device, graphicsPipeline, null)
+        vkDestroyPipelineLayout(device, pipelineLayout, null)
+        vkDestroyRenderPass(device, renderPass, null)
+        swapChainImageViews.forEach { vkDestroyImageView(device, it, null) }
+        vkDestroySwapchainKHR(device, swapChain, null)
     }
 
     override fun frame() {
@@ -96,14 +101,20 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
 
             val pImageIndex = it.mallocInt(1)
 
-            vkAcquireNextImageKHR(
-                device,
-                swapChain,
-                Long.MAX_VALUE,
-                frame.imageAvailableSemaphore,
-                VK_NULL_HANDLE,
-                pImageIndex
-            )
+            if (checkOutOfDate(
+                    vkAcquireNextImageKHR(
+                        device,
+                        swapChain,
+                        Long.MAX_VALUE,
+                        frame.imageAvailableSemaphore,
+                        VK_NULL_HANDLE,
+                        pImageIndex
+                    )
+                )
+            ) {
+                recreateSwapChain()
+                return
+            }
             val imageIndex = pImageIndex[0]
 
             if (imagesInFlight.containsKey(imageIndex)) {
@@ -131,9 +142,17 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
             presentInfo.swapchainCount(1)
             presentInfo.pSwapchains(it.longs(swapChain))
             presentInfo.pImageIndices(pImageIndex)
-            vkQueuePresentKHR(presentQueue, presentInfo)
+            val result = vkQueuePresentKHR(presentQueue, presentInfo)
+            if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || silica.window.resized) {
+                silica.window.resized = false
+                recreateSwapChain()
+            } else checkError("Failed to present swap chain image", result)
             currentFrame = (currentFrame + 1) % maxFramesInFlight
         }
+    }
+
+    private fun checkOutOfDate(vkResult: Int): Boolean {
+        return vkResult == VK_ERROR_OUT_OF_DATE_KHR
     }
 
     override fun init() {
@@ -145,14 +164,26 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         createSurface()
         pickPhysicalDevice()
         createLogicalDevice()
+        createCommandPool()
+        createSwapChainObjects()
+        createSyncObjects()
+    }
+
+    private fun createSwapChainObjects() {
         createSwapChain()
         createImageViews()
         createRenderPass()
         createGraphicsPipeline()
         createFramebuffers()
-        createCommandPool()
         createCommandBuffers()
-        createSyncObjects()
+    }
+
+    private fun recreateSwapChain() {
+        vkDeviceWaitIdle(device)
+
+        cleanupSwapchain()
+
+        createSwapChainObjects()
     }
 
     private fun createSyncObjects() {
@@ -356,6 +387,8 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
 
             val vertexInputInfo = VkPipelineVertexInputStateCreateInfo.callocStack(it)
             vertexInputInfo.sType(VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO)
+            vertexInputInfo.pVertexBindingDescriptions(Vertex.getBindingDescription())
+            vertexInputInfo.pVertexAttributeDescriptions(Vertex.getAttributeDescriptions())
 
             val inputAssembly = VkPipelineInputAssemblyStateCreateInfo.callocStack(it)
             inputAssembly.sType(VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO)
@@ -864,6 +897,13 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         }
     }
 
+    private fun asPointerBuffer(set: List<Pointer>): PointerBuffer {
+        val stack = stackGet()
+        val buffer = stack.mallocPointer(set.size)
+        set.forEach(buffer::put)
+        return buffer.rewind()
+    }
+
     private fun asPointerBuffer(set: Set<String>): PointerBuffer {
         val stack = stackGet()
         val buffer = stack.mallocPointer(set.size)
@@ -877,7 +917,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         if (!GLFWVulkan.glfwVulkanSupported())
             throw VkError("Cant use Vulkan")
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API)
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE)
     }
 
     override fun getName(): String = "Vulkan"
