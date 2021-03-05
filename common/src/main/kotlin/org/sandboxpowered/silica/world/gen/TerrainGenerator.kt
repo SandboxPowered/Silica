@@ -22,7 +22,7 @@ class TerrainGenerator private constructor() {
     fun fill(sx: Int, sy: Int, sz: Int, chunk: BlocTree) {
         if (sy > 0) return
         iterateCube(sx, sy, sz, w = 16, h = 7) { x, y, z ->
-            if (x % 2 == z % 2) chunk[x, y, z] = when (y) {
+            chunk[x, y, z] = when (y) {
                 0 -> bedrock
                 1, 2, 3 -> stone
                 4, 5 -> dirt
