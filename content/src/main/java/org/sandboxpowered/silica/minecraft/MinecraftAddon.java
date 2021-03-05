@@ -25,12 +25,12 @@ public class MinecraftAddon implements Addon {
 
     @Override
     public void register(SandboxAPI api, Registrar registrar) {
-        registerBlocks(api, registrar);
-        registerItems(api, registrar);
-        registerFluids(api, registrar);
+        registerBlocks(registrar);
+        registerItems(registrar);
+        registerFluids(registrar);
     }
 
-    public void registerBlocks(SandboxAPI api, Registrar registrar) {
+    public void registerBlocks(Registrar registrar) {
         Extra[] baseExtras = new Extra[]{Extra.SLAB, Extra.STAIRS};
 
         registrar.register("air", new AirBlock(builder(Materials.AIR).removeItemBlock().build()));
@@ -61,7 +61,11 @@ public class MinecraftAddon implements Addon {
         }
 
         for (Sandstone sandstone : Sandstone.values()) {
-            Extra[] extras = sandstone == Sandstone.CUT ? new Extra[]{Extra.SLAB} : sandstone != Sandstone.CHISELED ? baseExtras : null;
+            Extra[] extras = switch (sandstone) {
+                case CUT -> new Extra[]{Extra.SLAB};
+                case CHISELED -> null;
+                default -> baseExtras;
+            };
             registerWithExtra(registrar, sandstone.formatted("sandstone"), new BaseBlock(builder(Materials.SAND).build()), extras);
             registerWithExtra(registrar, sandstone.formatted("red_sandstone"), new BaseBlock(builder(Materials.SAND).build()), extras);
         }
@@ -80,11 +84,11 @@ public class MinecraftAddon implements Addon {
         }
     }
 
-    public void registerItems(SandboxAPI api, Registrar registrar) {
+    public void registerItems(Registrar registrar) {
         registrar.register("air", new BaseItem(new Item.Settings()));
     }
 
-    public void registerFluids(SandboxAPI api, Registrar registrar) {
+    public void registerFluids(Registrar registrar) {
         registrar.register("empty", new EmptyFluid());
     }
 
