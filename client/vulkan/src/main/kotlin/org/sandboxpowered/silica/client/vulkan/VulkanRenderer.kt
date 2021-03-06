@@ -2,6 +2,8 @@ package org.sandboxpowered.silica.client.vulkan
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
+import org.joml.Matrix4f
+import org.joml.Matrix4fc
 import org.joml.Vector2f
 import org.joml.Vector3f
 import org.lwjgl.PointerBuffer
@@ -37,6 +39,7 @@ import java.nio.LongBuffer
 import java.util.*
 import java.util.stream.Collectors.toSet
 import java.util.stream.IntStream
+import kotlin.collections.ArrayList
 
 
 class VulkanRenderer(private val silica: Silica) : Renderer {
@@ -65,6 +68,10 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     private var renderPass: Long = -1
     private var pipelineLayout: Long = -1
     private var graphicsPipeline: Long = -1
+    private var descriptorSetLayout: Long = -1
+    private var descriptorPool: Long = -1
+    private lateinit var descriptorSets: ArrayList<Long>
+
 
     private var commandPool: Long = -1
     private var transferCommandPool: Long = -1
@@ -76,6 +83,9 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
 
     private var indexBuffer: Long = -1
     private var indexBufferMemory: Long = -1
+
+    private lateinit var uniformBuffers: ArrayList<Long>
+    private lateinit var uniformBuffersMemory: ArrayList<Long>
 
     private lateinit var inFlightFrames: ArrayList<Frame>
     private lateinit var imagesInFlight: Int2ObjectMap<Frame>
@@ -95,6 +105,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
 
     override fun cleanup() {
         cleanupSwapchain()
+        vkDestroyDescriptorSetLayout(device, descriptorSetLayout, null)
         vkFreeCommandBuffers(device, transferCommandPool, stackGet().pointers(transferCommandBuffer))
         vkDestroyCommandPool(device, transferCommandPool, null)
         vkDestroyBuffer(device, indexBuffer, null)
@@ -117,6 +128,11 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     }
 
     private fun cleanupSwapchain() {
+        uniformBuffers.forEach { vkDestroyBuffer(device, it, null) }
+        uniformBuffersMemory.forEach { vkFreeMemory(device, it, null) }
+
+        vkDestroyDescriptorPool(device, descriptorPool, null)
+
         swapChainFramebuffers.forEach { vkDestroyFramebuffer(device, it, null) }
         vkFreeCommandBuffers(device, commandPool, asPointerBuffer(commandBuffers))
         vkDestroyPipeline(device, graphicsPipeline, null)
@@ -147,6 +163,8 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
                 return
             } else checkError("Cannot get image", result)
             val imageIndex = pImageIndex[0]
+
+            updateUniformBuffer(imageIndex)
 
             if (imagesInFlight.containsKey(imageIndex)) {
                 vkWaitForFences(device, imagesInFlight[imageIndex].fence, true, Long.MAX_VALUE)
@@ -187,6 +205,25 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         }
     }
 
+    private fun updateUniformBuffer(imageIndex: Int) {
+        stackPush().use {
+            val ubo = UniformBufferObject()
+
+            ubo.model.rotate((glfwGetTime() * Math.toRadians(90.0)).toFloat(), 0f, 0f, 1f)
+            ubo.view.lookAt(2f,2f,2f,0f,0f,0f,0f,0f,1f)
+            ubo.projection.perspective(Math.toRadians(45.0).toFloat(), swapChainExtent.width().toFloat()/swapChainExtent.height().toFloat(), 0.1f, 10f)
+            ubo.projection.m11(-ubo.projection.m11())
+
+            val data = it.mallocPointer(1)
+
+            vkMapMemory(device, uniformBuffersMemory[imageIndex], 0, UniformBufferObject.sizeOf, 0, data)
+
+            memcpy(data.getByteBuffer(0, UniformBufferObject.sizeOf.toInt()), ubo)
+
+            vkUnmapMemory(device, uniformBuffersMemory[imageIndex])
+        }
+    }
+
     override fun init() {
         if (enableValidationLayers && !checkValidationLayerSupport()) {
             throw VkError("Validation requested but not supported")
@@ -199,6 +236,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         createCommandPool()
         createVertexBuffer()
         createIndexBuffer()
+        createDescriptorSetLayout()
         createSwapChainObjects()
         createSyncObjects()
     }
@@ -209,7 +247,71 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         createRenderPass()
         createGraphicsPipeline()
         createFramebuffers()
+        createUniformBuffers()
+        createDescriptorPool()
+        createDescriptorSets()
         createCommandBuffers()
+    }
+
+    private fun createDescriptorPool() {
+        stackPush().use {
+            val poolSize = VkDescriptorPoolSize.callocStack(1, it)
+            poolSize.type(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+            poolSize.descriptorCount(swapChainImages.size)
+
+            val poolInfo = VkDescriptorPoolCreateInfo.callocStack(it)
+            poolInfo.sType(VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO)
+            poolInfo.pPoolSizes(poolSize)
+            poolInfo.maxSets(swapChainImages.size)
+
+            val pDescriptorPool = it.mallocLong(1)
+
+            checkError("Failed to create descriptor pool", vkCreateDescriptorPool(device, poolInfo, null, pDescriptorPool))
+
+            descriptorPool= pDescriptorPool[0]
+        }
+    }
+    private fun createDescriptorSets() {
+        stackPush().use {
+            val layouts = it.mallocLong(swapChainImages.size)
+            for(i in 0 until layouts.capacity()) {
+                layouts[i] = descriptorSetLayout
+            }
+
+            val allocInfo = VkDescriptorSetAllocateInfo.callocStack(it)
+            allocInfo.sType(VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO)
+            allocInfo.descriptorPool(descriptorPool)
+            allocInfo.pSetLayouts(layouts)
+
+            val pDescriptorSets = it.mallocLong(swapChainImages.size)
+
+            checkError("Failed to allocate descriptor sets", vkAllocateDescriptorSets(device, allocInfo, pDescriptorSets))
+
+            descriptorSets = ArrayList(pDescriptorSets.capacity())
+
+            val bufferInfo = VkDescriptorBufferInfo.callocStack(1, it)
+            bufferInfo.offset(0)
+            bufferInfo.range(UniformBufferObject.sizeOf)
+
+            val descriptorWrite = VkWriteDescriptorSet.callocStack(1, it)
+            descriptorWrite.sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
+            descriptorWrite.dstBinding(0)
+            descriptorWrite.dstArrayElement(0)
+            descriptorWrite.descriptorType(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+            descriptorWrite.descriptorCount(1)
+            descriptorWrite.pBufferInfo(bufferInfo)
+
+            for(i in 0 until pDescriptorSets.capacity()) {
+                val set = pDescriptorSets[i]
+                bufferInfo.buffer(uniformBuffers[i])
+
+                descriptorWrite.dstSet(set)
+
+                vkUpdateDescriptorSets(device, descriptorWrite, null)
+
+                descriptorSets.add(set)
+            }
+        }
     }
 
     private fun recreateSwapChain() {
@@ -218,6 +320,52 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         cleanupSwapchain()
 
         createSwapChainObjects()
+    }
+
+    private fun createDescriptorSetLayout() {
+        stackPush().use {
+            val uboLayoutBinding = VkDescriptorSetLayoutBinding.callocStack(1, it)
+
+            uboLayoutBinding.binding(0)
+            uboLayoutBinding.descriptorCount(1)
+            uboLayoutBinding.descriptorType(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+            uboLayoutBinding.pImmutableSamplers(null)
+            uboLayoutBinding.stageFlags(VK_SHADER_STAGE_VERTEX_BIT)
+
+            val layoutInfo = VkDescriptorSetLayoutCreateInfo.callocStack(it)
+            layoutInfo.sType(VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO)
+            layoutInfo.pBindings(uboLayoutBinding)
+
+            val pLayout = it.mallocLong(1)
+
+            checkError(
+                "Failed to create descriptor set layout",
+                vkCreateDescriptorSetLayout(device, layoutInfo, null, pLayout)
+            )
+
+            descriptorSetLayout = pLayout[0]
+        }
+    }
+
+    private fun createUniformBuffers() {
+        uniformBuffers = ArrayList(swapChainImages.size)
+        uniformBuffersMemory = ArrayList(swapChainImages.size)
+        stackPush().use {
+            val pBuffer = it.mallocLong(1)
+            val pBufferMemory = it.mallocLong(1)
+
+            for (i in swapChainImages.indices) {
+                createBuffer(
+                    UniformBufferObject.sizeOf,
+                    VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT or VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                    pBuffer, pBufferMemory
+                )
+
+                uniformBuffers.add(pBuffer[0])
+                uniformBuffersMemory.add(pBufferMemory[0])
+            }
+        }
     }
 
     private fun createIndexBuffer() {
@@ -379,6 +527,16 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         }
     }
 
+    private fun memcpy(byteBuffer: ByteBuffer, ubo: UniformBufferObject) {
+        val mat4Size = 16 * Float.SIZE_BYTES
+
+        ubo.model.get(0, byteBuffer)
+        ubo.view.get(alignas(mat4Size, 4 * Float.SIZE_BYTES), byteBuffer)
+        ubo.projection.get(alignas(mat4Size*2, 4 * Float.SIZE_BYTES), byteBuffer)
+    }
+
+    private fun alignas(offset: Int, alignment: Int): Int = if (offset % alignment == 0) offset else (offset - 1 or alignment - 1) + 1
+
     private fun findMemoryType(memoryTypeBits: Int, properties: Int): Int {
         val memProperties = VkPhysicalDeviceMemoryProperties.mallocStack()
         vkGetPhysicalDeviceMemoryProperties(physicalDevice, memProperties)
@@ -477,6 +635,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
                 val offsets = it.longs(0)
                 vkCmdBindVertexBuffers(buffer, 0, vertexBuffers, offsets)
                 vkCmdBindIndexBuffer(buffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16)
+                vkCmdBindDescriptorSets(buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, it.longs(descriptorSets[i]), null)
                 vkCmdDrawIndexed(buffer, indices.size, 1, 0,0,0)
                 vkCmdEndRenderPass(buffer)
 
@@ -674,6 +833,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
 
             val pipelineLayoutInfo = VkPipelineLayoutCreateInfo.callocStack(it)
             pipelineLayoutInfo.sType(VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO)
+            pipelineLayoutInfo.pSetLayouts(it.longs(descriptorSetLayout))
 
             val pLayoutInfo = it.longs(VK_NULL_HANDLE)
 
@@ -1023,6 +1183,15 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         lateinit var capabilities: VkSurfaceCapabilitiesKHR
         lateinit var formats: VkSurfaceFormatKHR.Buffer
         lateinit var presentModes: IntBuffer
+    }
+
+    private class UniformBufferObject {
+        val model = Matrix4f()
+        val view = Matrix4f()
+        val projection = Matrix4f()
+        companion object {
+            const val sizeOf: Long = 3 * 16 * Float.SIZE_BYTES.toLong()
+        }
     }
 
     private fun isDeviceSuitable(device: VkPhysicalDevice): Boolean {
