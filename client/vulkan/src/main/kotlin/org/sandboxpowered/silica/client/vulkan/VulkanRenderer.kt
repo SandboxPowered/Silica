@@ -2,6 +2,8 @@ package org.sandboxpowered.silica.client.vulkan
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
+import org.joml.Vector2f
+import org.joml.Vector3f
 import org.lwjgl.PointerBuffer
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.glfw.GLFWVulkan
@@ -11,6 +13,7 @@ import org.lwjgl.system.Configuration.DEBUG
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryStack.stackGet
 import org.lwjgl.system.MemoryStack.stackPush
+import org.lwjgl.system.Pointer
 import org.lwjgl.vulkan.*
 import org.lwjgl.vulkan.EXTDebugUtils.*
 import org.lwjgl.vulkan.KHRSurface.*
@@ -25,7 +28,9 @@ import org.sandboxpowered.silica.client.vulkan.SPIRVUtil.Companion.compileShader
 import org.sandboxpowered.silica.client.vulkan.SPIRVUtil.ShaderKind.FRAGMENT_SHADER
 import org.sandboxpowered.silica.client.vulkan.SPIRVUtil.ShaderKind.VERTEX_SHADER
 import org.sandboxpowered.silica.client.vulkan.VkError.Companion.checkError
+import org.sandboxpowered.silica.client.vulkan.VkError.Companion.checkErrorRun
 import org.sandboxpowered.silica.util.set
+import java.nio.ByteBuffer
 import java.nio.IntBuffer
 import java.nio.LongBuffer
 import java.util.*
@@ -35,7 +40,7 @@ import java.util.stream.IntStream
 
 class VulkanRenderer(private val silica: Silica) : Renderer {
     private val deviceExtensions: Set<String> = setOf(VK_KHR_SWAPCHAIN_EXTENSION_NAME)
-    private val enableValidationLayers: Boolean = DEBUG[false]
+    private val enableValidationLayers: Boolean = DEBUG.get(false)
     private val validationLayers: Set<String> = setOf("VK_LAYER_KHRONOS_validation")
     private val maxFramesInFlight = 2
 
@@ -47,6 +52,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     private lateinit var device: VkDevice
     private lateinit var graphicsQueue: VkQueue
     private lateinit var presentQueue: VkQueue
+    private lateinit var transferQueue: VkQueue
 
     private var swapChain: Long = -1
     private lateinit var swapChainImages: LongArray
@@ -60,14 +66,29 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     private var graphicsPipeline: Long = -1
 
     private var commandPool: Long = -1
+    private var transferCommandPool: Long = -1
     private lateinit var commandBuffers: ArrayList<VkCommandBuffer>
+    private lateinit var transferCommandBuffer: VkCommandBuffer
+
+    private var vertexBuffer: Long = -1
+    private var vertexBufferMemory: Long = -1
 
     private lateinit var inFlightFrames: ArrayList<Frame>
     private lateinit var imagesInFlight: Int2ObjectMap<Frame>
     private var currentFrame: Int = 0
 
+    private val vertices = arrayOf(
+        Vertex(Vector2f(0.0f, -0.5f), Vector3f(1.0f, 0.0f, 0.0f)),
+        Vertex(Vector2f(0.5f, 0.5f), Vector3f(0.0f, 1.0f, 0.0f)),
+        Vertex(Vector2f(-0.5f, 0.5f), Vector3f(0.0f, 0.0f, 1.0f))
+    )
+
     override fun cleanup() {
         cleanupSwapchain()
+        vkFreeCommandBuffers(device, transferCommandPool, stackGet().pointers(transferCommandBuffer))
+        vkDestroyCommandPool(device, transferCommandPool, null)
+        vkDestroyBuffer(device, vertexBuffer, null)
+        vkFreeMemory(device, vertexBufferMemory, null)
         inFlightFrames.forEach {
             vkDestroySemaphore(device, it.renderFinishedSemaphore, null)
             vkDestroySemaphore(device, it.imageAvailableSemaphore, null)
@@ -101,20 +122,18 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
 
             val pImageIndex = it.mallocInt(1)
 
-            if (checkOutOfDate(
-                    vkAcquireNextImageKHR(
-                        device,
-                        swapChain,
-                        Long.MAX_VALUE,
-                        frame.imageAvailableSemaphore,
-                        VK_NULL_HANDLE,
-                        pImageIndex
-                    )
-                )
-            ) {
+            var result = vkAcquireNextImageKHR(
+                device,
+                swapChain,
+                Long.MAX_VALUE,
+                frame.imageAvailableSemaphore,
+                VK_NULL_HANDLE,
+                pImageIndex
+            )
+            if (result == VK_ERROR_OUT_OF_DATE_KHR) {
                 recreateSwapChain()
                 return
-            }
+            } else checkError("Cannot get image", result)
             val imageIndex = pImageIndex[0]
 
             if (imagesInFlight.containsKey(imageIndex)) {
@@ -134,7 +153,9 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
 
             vkResetFences(device, frame.pFence())
 
-            checkError("Failed to submit draw command buffer", vkQueueSubmit(graphicsQueue, submitInfo, frame.fence))
+            checkErrorRun("Failed to submit draw command buffer", vkQueueSubmit(graphicsQueue, submitInfo, frame.fence)) {
+                vkResetFences(device, frame.pFence())
+            }
 
             val presentInfo = VkPresentInfoKHR.callocStack(it)
             presentInfo.sType(VK_STRUCTURE_TYPE_PRESENT_INFO_KHR)
@@ -142,17 +163,13 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
             presentInfo.swapchainCount(1)
             presentInfo.pSwapchains(it.longs(swapChain))
             presentInfo.pImageIndices(pImageIndex)
-            val result = vkQueuePresentKHR(presentQueue, presentInfo)
+            result = vkQueuePresentKHR(presentQueue, presentInfo)
             if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || silica.window.resized) {
                 silica.window.resized = false
                 recreateSwapChain()
             } else checkError("Failed to present swap chain image", result)
             currentFrame = (currentFrame + 1) % maxFramesInFlight
         }
-    }
-
-    private fun checkOutOfDate(vkResult: Int): Boolean {
-        return vkResult == VK_ERROR_OUT_OF_DATE_KHR
     }
 
     override fun init() {
@@ -165,6 +182,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         pickPhysicalDevice()
         createLogicalDevice()
         createCommandPool()
+        createVertexBuffer()
         createSwapChainObjects()
         createSyncObjects()
     }
@@ -184,6 +202,133 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         cleanupSwapchain()
 
         createSwapChainObjects()
+    }
+
+    private fun createVertexBuffer() {
+        stackPush().use {
+            val bufferSize = Vertex.sizeOf.toLong() * vertices.size
+
+            val pBuffer = it.mallocLong(1)
+            val pBufferMemory = it.mallocLong(1)
+            createBuffer(
+                bufferSize,
+                    VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT or VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                pBuffer,
+                pBufferMemory
+            )
+
+            val stagingBuffer = pBuffer[0]
+            val stagingBufferMemory = pBufferMemory[0]
+
+            val data = it.mallocPointer(1)
+            vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, data)
+            memcpy(data.getByteBuffer(0, bufferSize.toInt()), vertices)
+            vkUnmapMemory(device, stagingBufferMemory)
+
+            createBuffer(
+                bufferSize,
+                VK_BUFFER_USAGE_TRANSFER_DST_BIT or VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                VK_MEMORY_HEAP_DEVICE_LOCAL_BIT,
+                pBuffer,
+                pBufferMemory
+            )
+
+            vertexBuffer = pBuffer[0]
+            vertexBufferMemory = pBufferMemory[0]
+
+            copyBuffer(stagingBuffer, vertexBuffer, bufferSize)
+
+            vkDestroyBuffer(device, stagingBuffer, null)
+            vkFreeMemory(device, stagingBufferMemory, null)
+        }
+    }
+
+    private fun copyBuffer(srcBuffer: Long, dstBuffer: Long, size: Long) {
+        stackPush().use {
+
+            val beginInfo = VkCommandBufferBeginInfo.callocStack(it)
+            beginInfo.sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO)
+            beginInfo.flags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT)
+
+            vkBeginCommandBuffer(transferCommandBuffer, beginInfo)
+
+            val copyRegion = VkBufferCopy.callocStack(1, it)
+            copyRegion.size(size)
+            vkCmdCopyBuffer(transferCommandBuffer, srcBuffer, dstBuffer, copyRegion)
+
+            vkEndCommandBuffer(transferCommandBuffer)
+
+            val submitInfo = VkSubmitInfo.callocStack(it)
+            submitInfo.sType(VK_STRUCTURE_TYPE_SUBMIT_INFO)
+            submitInfo.pCommandBuffers(it.pointers(transferCommandBuffer))
+
+            checkError("Failed to submit copy command buffer", vkQueueSubmit(transferQueue, submitInfo, VK_NULL_HANDLE))
+
+            vkQueueWaitIdle(transferQueue)
+        }
+    }
+
+    private fun createBuffer(
+        size: Long,
+        usage: Int,
+        properties: Int,
+        pBuffer: LongBuffer,
+        pBufferMemory: LongBuffer
+    ) {
+        stackPush().use {
+            val bufferInfo = VkBufferCreateInfo.callocStack(it)
+            bufferInfo.sType(VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO)
+            bufferInfo.size(size)
+            bufferInfo.usage(usage)
+
+            val indices = findQueueFamilies(physicalDevice)
+            bufferInfo.pQueueFamilyIndices(it.ints(indices.graphicsFamily!!, indices.transferFamily!!))
+
+            bufferInfo.sharingMode(VK_SHARING_MODE_CONCURRENT)
+
+            checkError("Failed to create vertex buffer", vkCreateBuffer(device, bufferInfo, null, pBuffer))
+
+            val memoryRequirements = VkMemoryRequirements.mallocStack(it)
+            vkGetBufferMemoryRequirements(device, pBuffer[0], memoryRequirements)
+
+            val allocationInfo = VkMemoryAllocateInfo.callocStack(it)
+            allocationInfo.sType(VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO)
+            allocationInfo.allocationSize(memoryRequirements.size())
+            allocationInfo.memoryTypeIndex(findMemoryType(memoryRequirements.memoryTypeBits(), properties))
+
+            checkError(
+                "Failed to allocate vertex buffer memory",
+                vkAllocateMemory(device, allocationInfo, null, pBufferMemory)
+            )
+            vkBindBufferMemory(device, pBuffer[0], pBufferMemory[0], 0)
+
+        }
+    }
+
+    private fun memcpy(byteBuffer: ByteBuffer, vertices: Array<Vertex>) {
+        vertices.forEach {
+            byteBuffer.putFloat(it.pos.x())
+            byteBuffer.putFloat(it.pos.y())
+
+            byteBuffer.putFloat(it.color.x())
+            byteBuffer.putFloat(it.color.y())
+            byteBuffer.putFloat(it.color.z())
+        }
+    }
+
+    private fun findMemoryType(memoryTypeBits: Int, properties: Int): Int {
+        val memProperties = VkPhysicalDeviceMemoryProperties.mallocStack()
+        vkGetPhysicalDeviceMemoryProperties(physicalDevice, memProperties)
+
+        for (i in 0 until memProperties.memoryTypeCount()) {
+            if (memoryTypeBits and (1 shl i) != 0 && memProperties.memoryTypes(i)
+                    .propertyFlags() and properties == properties
+            ) {
+                return i
+            }
+        }
+        throw VkError("Failed to find suitable memory type")
     }
 
     private fun createSyncObjects() {
@@ -266,7 +411,10 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
                 vkCmdBeginRenderPass(buffer, renderPassInfo, VK_SUBPASS_CONTENTS_INLINE)
                 vkCmdBindPipeline(buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline)
 
-                vkCmdDraw(buffer, 3, 1, 0, 0)
+                val vertexBuffers = it.longs(vertexBuffer)
+                val offsets = it.longs(0)
+                vkCmdBindVertexBuffers(buffer, 0, vertexBuffers, offsets)
+                vkCmdDraw(buffer, vertices.size, 1, 0, 0)
                 vkCmdEndRenderPass(buffer)
 
                 checkError("Failed to record command buffer", vkEndCommandBuffer(buffer))
@@ -287,6 +435,26 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
             checkError("Failed to create command pool", vkCreateCommandPool(device, poolInfo, null, pCommandPool))
 
             commandPool = pCommandPool[0]
+
+            poolInfo.queueFamilyIndex(indices.transferFamily!!)
+            poolInfo.flags(VK_COMMAND_POOL_CREATE_TRANSIENT_BIT)
+            checkError("Failed to create transfer command pool", vkCreateCommandPool(device, poolInfo, null, pCommandPool))
+            transferCommandPool = pCommandPool[0]
+            allocateTransferCommandBuffer()
+        }
+    }
+
+    private fun allocateTransferCommandBuffer() {
+        stackPush().use {
+            val allocInfo = VkCommandBufferAllocateInfo.callocStack(it)
+            allocInfo.sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO)
+            allocInfo.level(VK_COMMAND_BUFFER_LEVEL_PRIMARY)
+            allocInfo.commandPool(transferCommandPool)
+            allocInfo.commandBufferCount(1)
+
+            val pCommandBuffer = it.mallocPointer(1)
+            vkAllocateCommandBuffers(device, allocInfo, pCommandBuffer)
+            transferCommandBuffer = VkCommandBuffer(pCommandBuffer[0], device)
         }
     }
 
@@ -387,8 +555,8 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
 
             val vertexInputInfo = VkPipelineVertexInputStateCreateInfo.callocStack(it)
             vertexInputInfo.sType(VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO)
-            vertexInputInfo.pVertexBindingDescriptions(Vertex.getBindingDescription())
-            vertexInputInfo.pVertexAttributeDescriptions(Vertex.getAttributeDescriptions())
+            vertexInputInfo.pVertexBindingDescriptions(Vertex.getBindingDescription(it))
+            vertexInputInfo.pVertexAttributeDescriptions(Vertex.getAttributeDescriptions(it))
 
             val inputAssembly = VkPipelineInputAssemblyStateCreateInfo.callocStack(it)
             inputAssembly.sType(VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO)
@@ -699,6 +867,9 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
 
             vkGetDeviceQueue(device, indices.presentFamily!!, 0, pQueue)
             presentQueue = VkQueue(pQueue[0], device)
+
+            vkGetDeviceQueue(device, indices.transferFamily!!, 0, pQueue)
+            transferQueue = VkQueue(pQueue[0], device)
         }
     }
 
@@ -768,15 +939,17 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         // We use Integer to use null as the empty value
         var graphicsFamily: Int? = null
         var presentFamily: Int? = null
+        var transferFamily: Int? = null
+
         val isComplete: Boolean
-            get() = graphicsFamily != null && presentFamily != null
+            get() = graphicsFamily != null && presentFamily != null && transferFamily != null
 
         fun unique(): IntArray {
-            return IntStream.of(graphicsFamily!!, presentFamily!!).distinct().toArray()
+            return IntStream.of(graphicsFamily!!, presentFamily!!, transferFamily!!).distinct().toArray()
         }
 
         fun array(): IntArray {
-            return intArrayOf(graphicsFamily!!, presentFamily!!)
+            return intArrayOf(graphicsFamily!!, presentFamily!!, transferFamily!!)
         }
     }
 
@@ -833,6 +1006,8 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
             while (i < queueFamilies.capacity() || !indices.isComplete) {
                 if (queueFamilies[i].queueFlags() and VK_QUEUE_GRAPHICS_BIT != 0) {
                     indices.graphicsFamily = i
+                } else if (queueFamilies[i].queueFlags() and VK_QUEUE_TRANSFER_BIT != 0) {
+                    indices.transferFamily = i
                 }
                 vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, presentSupport)
                 if (presentSupport.get(0) == VK_TRUE) {

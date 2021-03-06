@@ -19,5 +19,12 @@ class VkError(message: String) : RuntimeException(message) {
                 throw VkError(error)
             }
         }
+
+        fun checkErrorRun(error: String, value: Int, onError: (Int) -> Unit) {
+            if (value != VK10.VK_SUCCESS) {
+                onError.invoke(value)
+                throw VkError(error)
+            }
+        }
     }
 }
