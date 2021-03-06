@@ -30,6 +30,7 @@ import org.sandboxpowered.silica.client.vulkan.SPIRVUtil.ShaderKind.VERTEX_SHADE
 import org.sandboxpowered.silica.client.vulkan.VkError.Companion.checkError
 import org.sandboxpowered.silica.client.vulkan.VkError.Companion.checkErrorRun
 import org.sandboxpowered.silica.util.set
+import java.io.PrintStream
 import java.nio.ByteBuffer
 import java.nio.IntBuffer
 import java.nio.LongBuffer
@@ -73,20 +74,31 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     private var vertexBuffer: Long = -1
     private var vertexBufferMemory: Long = -1
 
+    private var indexBuffer: Long = -1
+    private var indexBufferMemory: Long = -1
+
     private lateinit var inFlightFrames: ArrayList<Frame>
     private lateinit var imagesInFlight: Int2ObjectMap<Frame>
     private var currentFrame: Int = 0
 
     private val vertices = arrayOf(
-        Vertex(Vector2f(0.0f, -0.5f), Vector3f(1.0f, 0.0f, 0.0f)),
-        Vertex(Vector2f(0.5f, 0.5f), Vector3f(0.0f, 1.0f, 0.0f)),
-        Vertex(Vector2f(-0.5f, 0.5f), Vector3f(0.0f, 0.0f, 1.0f))
+        Vertex(Vector2f(-0.5f, -0.5f), Vector3f(1.0f, 0.0f, 0.0f)),
+        Vertex(Vector2f(0.5f, -0.5f), Vector3f(0.0f, 1.0f, 0.0f)),
+        Vertex(Vector2f(0.5f, 0.5f), Vector3f(0.0f, 0.0f, 1.0f)),
+        Vertex(Vector2f(-0.5f, 0.5f), Vector3f(1.0f, 1.0f, 1.0f))
+    )
+
+    private val indices = shortArrayOf(
+        0, 1, 2,
+        2, 3, 0
     )
 
     override fun cleanup() {
         cleanupSwapchain()
         vkFreeCommandBuffers(device, transferCommandPool, stackGet().pointers(transferCommandBuffer))
         vkDestroyCommandPool(device, transferCommandPool, null)
+        vkDestroyBuffer(device, indexBuffer, null)
+        vkFreeMemory(device, indexBufferMemory, null)
         vkDestroyBuffer(device, vertexBuffer, null)
         vkFreeMemory(device, vertexBufferMemory, null)
         inFlightFrames.forEach {
@@ -153,7 +165,10 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
 
             vkResetFences(device, frame.pFence())
 
-            checkErrorRun("Failed to submit draw command buffer", vkQueueSubmit(graphicsQueue, submitInfo, frame.fence)) {
+            checkErrorRun(
+                "Failed to submit draw command buffer",
+                vkQueueSubmit(graphicsQueue, submitInfo, frame.fence)
+            ) {
                 vkResetFences(device, frame.pFence())
             }
 
@@ -183,6 +198,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         createLogicalDevice()
         createCommandPool()
         createVertexBuffer()
+        createIndexBuffer()
         createSwapChainObjects()
         createSyncObjects()
     }
@@ -204,6 +220,46 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         createSwapChainObjects()
     }
 
+    private fun createIndexBuffer() {
+        stackPush().use {
+            val bufferSize = Short.SIZE_BYTES.toLong() * indices.size
+
+            val pBuffer = it.mallocLong(1)
+            val pBufferMemory = it.mallocLong(1)
+            createBuffer(
+                bufferSize,
+                VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT or VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                pBuffer,
+                pBufferMemory
+            )
+
+            val stagingBuffer = pBuffer[0]
+            val stagingBufferMemory = pBufferMemory[0]
+
+            val data = it.mallocPointer(1)
+            vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, data)
+            memcpy(data.getByteBuffer(0, bufferSize.toInt()), indices)
+            vkUnmapMemory(device, stagingBufferMemory)
+
+            createBuffer(
+                bufferSize,
+                VK_BUFFER_USAGE_TRANSFER_DST_BIT or VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                VK_MEMORY_HEAP_DEVICE_LOCAL_BIT,
+                pBuffer,
+                pBufferMemory
+            )
+
+            indexBuffer = pBuffer[0]
+            indexBufferMemory = pBufferMemory[0]
+
+            copyBuffer(stagingBuffer, indexBuffer, bufferSize)
+
+            vkDestroyBuffer(device, stagingBuffer, null)
+            vkFreeMemory(device, stagingBufferMemory, null)
+        }
+    }
+
     private fun createVertexBuffer() {
         stackPush().use {
             val bufferSize = Vertex.sizeOf.toLong() * vertices.size
@@ -212,7 +268,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
             val pBufferMemory = it.mallocLong(1)
             createBuffer(
                 bufferSize,
-                    VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT or VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                 pBuffer,
                 pBufferMemory
@@ -317,6 +373,12 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         }
     }
 
+    private fun memcpy(byteBuffer: ByteBuffer, indices: ShortArray) {
+        indices.forEach {
+            byteBuffer.putShort(it)
+        }
+    }
+
     private fun findMemoryType(memoryTypeBits: Int, properties: Int): Int {
         val memProperties = VkPhysicalDeviceMemoryProperties.mallocStack()
         vkGetPhysicalDeviceMemoryProperties(physicalDevice, memProperties)
@@ -414,7 +476,8 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
                 val vertexBuffers = it.longs(vertexBuffer)
                 val offsets = it.longs(0)
                 vkCmdBindVertexBuffers(buffer, 0, vertexBuffers, offsets)
-                vkCmdDraw(buffer, vertices.size, 1, 0, 0)
+                vkCmdBindIndexBuffer(buffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16)
+                vkCmdDrawIndexed(buffer, indices.size, 1, 0,0,0)
                 vkCmdEndRenderPass(buffer)
 
                 checkError("Failed to record command buffer", vkEndCommandBuffer(buffer))
@@ -438,7 +501,10 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
 
             poolInfo.queueFamilyIndex(indices.transferFamily!!)
             poolInfo.flags(VK_COMMAND_POOL_CREATE_TRANSIENT_BIT)
-            checkError("Failed to create transfer command pool", vkCreateCommandPool(device, poolInfo, null, pCommandPool))
+            checkError(
+                "Failed to create transfer command pool",
+                vkCreateCommandPool(device, poolInfo, null, pCommandPool)
+            )
             transferCommandPool = pCommandPool[0]
             allocateTransferCommandBuffer()
         }
@@ -1022,7 +1088,10 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
 
     private fun debugCallback(messageSeverity: Int, messageType: Int, pCallbackData: Long, pUserData: Long): Int {
         val callbackData = VkDebugUtilsMessengerCallbackDataEXT.create(pCallbackData)
-        System.err.println("Validation layer: " + callbackData.pMessageString())
+        var printStream: PrintStream = System.out
+        if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+            printStream = System.err;
+        printStream.println("Validation layer: " + callbackData.pMessageString())
         return VK_FALSE
     }
 

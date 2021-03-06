@@ -1,6 +1,5 @@
 package org.sandboxpowered.silica.client.vulkan
 
-import org.apache.commons.io.FileUtils.sizeOf
 import org.joml.Vector2fc
 import org.joml.Vector3fc
 import org.lwjgl.system.MemoryStack
