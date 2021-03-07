@@ -16,10 +16,10 @@ public class WorldBorder implements PacketPlay {
         buf.writeVarInt(3);
         buf.writeDouble(0);
         buf.writeDouble(0);
-        buf.writeDouble(100);
-        buf.writeDouble(100);
+        buf.writeDouble(1000);
+        buf.writeDouble(1000);
         buf.writeVarLong(1);
-        buf.writeVarInt(1);
+        buf.writeVarInt(29999984);
         buf.writeVarInt(2);
         buf.writeVarInt(3);
     }
