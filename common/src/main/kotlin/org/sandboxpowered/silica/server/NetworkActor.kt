@@ -16,8 +16,12 @@ import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.handler.timeout.ReadTimeoutHandler
 import org.sandboxpowered.silica.network.*
+import org.sandboxpowered.silica.network.play.clientbound.KeepAliveClient
 import org.sandboxpowered.silica.util.onMessage
+import org.sandboxpowered.silica.world.SilicaWorld
 import java.nio.file.Paths
+import java.util.*
+import kotlin.collections.HashMap
 
 // TODO: clean shutdown
 class NetworkActor(
@@ -25,6 +29,7 @@ class NetworkActor(
     context: ActorContext<Command>
 ) : AbstractBehavior<NetworkActor.Command>(context) {
     private val logger = context.log
+    private val connections: HashMap<UUID, ActorRef<PlayConnection.Command>> = HashMap()
 
     companion object {
         fun actor(server: SilicaServer): Behavior<in Command> = Behaviors.setup {
@@ -33,6 +38,9 @@ class NetworkActor(
     }
 
     sealed class Command {
+        class Tick(val delta: Float, val replyTo: ActorRef<Tock>) : Command() {
+            class Tock(val done: ActorRef<Command>)
+        }
         class Start(val replyTo: ActorRef<in Boolean>) : Command()
         class Disconnected(val ref: String /*TODO*/) : Command()
         class CreateConnection(
@@ -43,9 +51,16 @@ class NetworkActor(
     }
 
     override fun createReceive(): Receive<Command> = newReceiveBuilder()
+        .onMessage(this::handleTick)
         .onMessage(this::handleStart)
         .onMessage(this::handleCreateConnection)
         .build()
+
+    private fun handleTick(tick: Command.Tick): Behavior<Command> {
+        connections.values.forEach { it.tell(PlayConnection.Command.SendPacket(KeepAliveClient())) }
+        tick.replyTo.tell(Command.Tick.Tock(context.self))
+        return Behaviors.same()
+    }
 
     private fun handleStart(start: Command.Start): Behavior<Command> {
         val properties = ServerProperties.fromFile(Paths.get("server.properties"))
@@ -90,11 +105,14 @@ class NetworkActor(
     private fun handleCreateConnection(createConnection: Command.CreateConnection): Behavior<Command> {
         // TODO: store ref & dispose of the actor
         logger.info("Creating connection")
-        context.spawn(
+
+        val ref = context.spawn(
             PlayConnection.actor(server, createConnection.handler),
             "connection-${createConnection.profile.id}"
         )
-            .tell(PlayConnection.Command.Login)
+        ref.tell(PlayConnection.Command.Login)
+
+        connections[createConnection.profile.id] = ref
         createConnection.replyTo.tell(true)
 
         return Behaviors.same()

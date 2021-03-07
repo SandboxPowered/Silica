@@ -27,12 +27,14 @@ class PlayConnection private constructor(
 
     sealed class Command {
         class ReceivePacket(val packet: PacketPlay) : Command()
+        class SendPacket(val packet: PacketPlay) : Command()
         class ReceiveWorld(val blocks: BlocTree) : Command()
         object Login : Command()
     }
 
     override fun createReceive(): Receive<Command> = newReceiveBuilder()
         .onMessage(this::handleLoginStart)
+        .onMessage(this::handleSend)
         .onMessage(this::handleReceive)
         .onMessage(this::handleReceiveWorld)
         .build()
@@ -45,6 +47,12 @@ class PlayConnection private constructor(
 
     private fun handleReceive(receive: Command.ReceivePacket): Behavior<Command> {
         receive.packet.handle(this.packetHandler, this)
+
+        return Behaviors.same()
+    }
+
+    private fun handleSend(receive: Command.SendPacket): Behavior<Command> {
+        packetHandler.sendPacket(receive.packet)
 
         return Behaviors.same()
     }

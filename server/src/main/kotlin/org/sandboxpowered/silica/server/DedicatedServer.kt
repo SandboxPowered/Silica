@@ -111,7 +111,9 @@ class DedicatedServer : SilicaServer() {
 
                 @Suppress("ReplacePutWithAssignment") // boxing
                 currentlyTicking.put(world, System.nanoTime())
+                currentlyTicking.put(network, System.nanoTime())
                 world.tell(SilicaWorld.Command.Tick(tick.delta, context.messageAdapter { Command.Tock(it.done) }))
+                network.tell(NetworkActor.Command.Tick(tick.delta, context.messageAdapter { Command.Tock(it.done) }))
             }
 
             return Behaviors.same()
