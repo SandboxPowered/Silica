@@ -7,9 +7,9 @@ import org.sandboxpowered.api.state.Properties;
 import org.sandboxpowered.api.state.StateFactory;
 import org.sandboxpowered.api.state.property.EnumProperty;
 
-public class BlockBed extends BaseBlock {
+public class BedBlock extends BaseBlock {
     private static final EnumProperty<BedPart> BED_PART = EnumProperty.of("part", BedPart.class);
-    public BlockBed(Settings settings) {
+    public BedBlock(Settings settings) {
         super(settings);
     }
 
