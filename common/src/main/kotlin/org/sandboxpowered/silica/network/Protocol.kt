@@ -23,10 +23,7 @@ import org.sandboxpowered.silica.network.login.serverbound.EncryptionResponse
 import org.sandboxpowered.silica.network.login.serverbound.HandshakeRequest
 import org.sandboxpowered.silica.network.login.serverbound.LoginStart
 import org.sandboxpowered.silica.network.play.clientbound.*
-import org.sandboxpowered.silica.network.play.serverbound.ClientPluginChannel
-import org.sandboxpowered.silica.network.play.serverbound.ClientSettings
-import org.sandboxpowered.silica.network.play.serverbound.KeepAliveServer
-import org.sandboxpowered.silica.network.play.serverbound.TeleportConfirmation
+import org.sandboxpowered.silica.network.play.serverbound.*
 import java.util.*
 import java.util.function.Supplier
 
@@ -45,6 +42,8 @@ enum class Protocol(private val id: Int, builder: Builder) {
                     .addPacket(0x0B, ::ClientPluginChannel)
                     .addPacket(0x00, ::TeleportConfirmation)
                     .addPacket(0x10, ::KeepAliveServer)
+                    .addPacket(0x12, ::PlayerPosition)
+                    .addPacket(0x13, ::PlayerPositionAndRotation)
             ).addFlow(
                 Flow.CLIENTBOUND, Packets()
                     .addPacket(0x24, ::JoinGame)

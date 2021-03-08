@@ -18,7 +18,6 @@ import io.netty.handler.timeout.ReadTimeoutHandler
 import org.sandboxpowered.silica.network.*
 import org.sandboxpowered.silica.network.play.clientbound.KeepAliveClient
 import org.sandboxpowered.silica.util.onMessage
-import org.sandboxpowered.silica.world.SilicaWorld
 import java.nio.file.Paths
 import java.util.*
 import kotlin.collections.HashMap
@@ -42,7 +41,7 @@ class NetworkActor(
             class Tock(val done: ActorRef<Command>)
         }
         class Start(val replyTo: ActorRef<in Boolean>) : Command()
-        class Disconnected(val ref: String /*TODO*/) : Command()
+        class Disconnected(val user: UUID) : Command()
         class CreateConnection(
             val profile: GameProfile,
             val handler: PacketHandler,
@@ -54,16 +53,18 @@ class NetworkActor(
         .onMessage(this::handleTick)
         .onMessage(this::handleStart)
         .onMessage(this::handleCreateConnection)
+        .onMessage(this::handleDisconnected)
         .build()
 
     private fun handleTick(tick: Command.Tick): Behavior<Command> {
-        connections.values.forEach { it.tell(PlayConnection.Command.SendPacket(KeepAliveClient())) }
+        connections.values.forEach { it.tell(PlayConnection.Command.SendPacket(KeepAliveClient(System.currentTimeMillis()))) }
+
         tick.replyTo.tell(Command.Tick.Tock(context.self))
         return Behaviors.same()
     }
 
     private fun handleStart(start: Command.Start): Behavior<Command> {
-        val properties = ServerProperties.fromFile(Paths.get("server.properties"))
+        val properties = server.properties
         val bossGroup: EventLoopGroup = NioEventLoopGroup()
         val workerGroup: EventLoopGroup = NioEventLoopGroup()
         try {
@@ -73,12 +74,12 @@ class NetworkActor(
                 .childHandler(object : ChannelInitializer<SocketChannel>() {
                     override fun initChannel(ch: SocketChannel) {
                         ch.pipeline()
-                            .addLast(ReadTimeoutHandler(30))
-                            .addLast(LengthSplitter())
-                            .addLast(PacketDecoder(Flow.SERVERBOUND))
-                            .addLast(LengthPrepender())
-                            .addLast(PacketEncoder(Flow.CLIENTBOUND))
-                            .addLast(PacketHandler(Connection(server, context.self, context.system.scheduler())))
+                            .addLast("timeout",ReadTimeoutHandler(30))
+                            .addLast("splitter",LengthSplitter())
+                            .addLast("decoder", PacketDecoder(Flow.SERVERBOUND))
+                            .addLast("prepender",LengthPrepender())
+                            .addLast("encoder",PacketEncoder(Flow.CLIENTBOUND))
+                            .addLast("handler",PacketHandler(Connection(server, context.self, context.system.scheduler())))
                     }
                 })
                 .option(ChannelOption.SO_BACKLOG, 128)
@@ -115,6 +116,11 @@ class NetworkActor(
         connections[createConnection.profile.id] = ref
         createConnection.replyTo.tell(true)
 
+        return Behaviors.same()
+    }
+
+    private fun handleDisconnected(disconnected: Command.Disconnected): Behavior<Command> {
+        connections.remove(disconnected.user)
         return Behaviors.same()
     }
 }

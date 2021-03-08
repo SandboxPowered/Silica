@@ -14,7 +14,7 @@ import org.sandboxpowered.silica.world.SilicaWorld
 import org.sandboxpowered.silica.world.util.BlocTree
 
 class PlayConnection private constructor(
-    private val server: SilicaServer,
+    val server: SilicaServer,
     private val packetHandler: PacketHandler,
     context: ActorContext<Command>
 ) : AbstractBehavior<PlayConnection.Command>(context) {
