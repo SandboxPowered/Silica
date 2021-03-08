@@ -24,12 +24,12 @@ public class LengthSplitter extends ByteToMessageDecoder {
                 PacketByteBuf packetBuf = new PacketByteBuf(Unpooled.wrappedBuffer(bs));
                 try {
                     int length = packetBuf.readVarInt();
-                    if (buf.readableBytes() >= length) {
-                        out.add(buf.readBytes(length));
+                    if (buf.readableBytes() < length) {
+                        buf.resetReaderIndex();
                         return;
                     }
 
-                    buf.resetReaderIndex();
+                    out.add(buf.readBytes(length));
                 } finally {
                     packetBuf.release();
                 }
