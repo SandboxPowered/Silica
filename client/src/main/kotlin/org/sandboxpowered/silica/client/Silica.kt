@@ -80,24 +80,6 @@ class Silica(private val args: Args) : Runnable, Client {
             return true
         assetManager = ResourceManager(ResourceType.ASSETS)
         assetManager.add(ClasspathResourceLoader())
-        File("resourcepacks").apply {
-            if (notExists()) {
-                mkdirs()
-            } else if (isFile) {
-                delete()
-                mkdirs()
-            }
-        }.listFiles(FileFilters.ZIP) { file ->
-            try {
-                if (file.isDirectory) {
-                    assetManager.add(DirectoryResourceLoader(file))
-                } else {
-                    assetManager.add(ZIPResourceLoader(file))
-                }
-            } catch (e: IOException) {
-                logger.error("Failed loading resource source {}", file.name)
-            }
-        }
         when {
             args.minecraftPath != null -> {
                 if(Files.notExists(args.minecraftPath)) {
@@ -121,6 +103,24 @@ class Silica(private val args: Args) : Runnable, Client {
             else -> {
                 logger.error("Silica supports automatically searching for Minecraft on windows only. use the --minecraft argument on other operating systems")
                 return true
+            }
+        }
+        File("resourcepacks").apply {
+            if (notExists()) {
+                mkdirs()
+            } else if (isFile) {
+                delete()
+                mkdirs()
+            }
+        }.listFiles(FileFilters.ZIP) { file ->
+            try {
+                if (file.isDirectory) {
+                    assetManager.add(DirectoryResourceLoader(file))
+                } else {
+                    assetManager.add(ZIPResourceLoader(file))
+                }
+            } catch (e: IOException) {
+                logger.error("Failed loading resource source {}", file.name)
             }
         }
 
