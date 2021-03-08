@@ -9,10 +9,10 @@ import org.sandboxpowered.api.state.StateFactory;
 import org.sandboxpowered.api.state.property.EnumProperty;
 
 public class WallBlock extends BaseBlock implements FluidLoggable {
-    private static EnumProperty<WallType> NORTH = EnumProperty.of("north", WallType.class);
-    private static EnumProperty<WallType> EAST = EnumProperty.of("east", WallType.class);
-    private static EnumProperty<WallType> SOUTH = EnumProperty.of("south", WallType.class);
-    private static EnumProperty<WallType> WEST = EnumProperty.of("west", WallType.class);
+    private static final EnumProperty<WallType> NORTH = EnumProperty.of("north", WallType.class);
+    private static final EnumProperty<WallType> EAST = EnumProperty.of("east", WallType.class);
+    private static final EnumProperty<WallType> SOUTH = EnumProperty.of("south", WallType.class);
+    private static final EnumProperty<WallType> WEST = EnumProperty.of("west", WallType.class);
 
     public WallBlock(Settings settings) {
         super(settings);
@@ -24,7 +24,7 @@ public class WallBlock extends BaseBlock implements FluidLoggable {
         builder.add(NORTH, EAST, SOUTH, WEST, Properties.UP);
     }
 
-    public static enum WallType {
+    public enum WallType {
         LOW,
         TALL,
         NONE

@@ -71,7 +71,7 @@ public class MinecraftAddon implements Addon {
             registrar.register(String.format("%s_wool", colour.getName()), new BaseBlock(builder(Materials.WOOL).build()));
             registrar.register(String.format("%s_carpet", colour.getName()), new CarpetBlock(builder(Materials.WOOL).build()));
 
-            registrar.register(String.format("%s_bed", colour.getName()), new BlockBed(builder(Materials.WOOD).build()));
+            registrar.register(String.format("%s_bed", colour.getName()), new BedBlock(builder(Materials.WOOD).build()));
             registrar.register(String.format("%s_banner", colour.getName()), new BannerBlock(builder(Materials.WOOD).build()));
 
             registrar.register(String.format("%s_concrete_powder", colour.getName()), new BaseBlock(builder(Materials.SAND).build()));
@@ -107,13 +107,15 @@ public class MinecraftAddon implements Addon {
 
             registrar.register(String.format("%s_button", wood.getPrefix()), new ButtonBlock(builder(plank).build()));
             registrar.register(String.format("%s_sign", wood.getPrefix()), new SignBlock(builder(plank).build()));
-            registrar.register(String.format("%s_wall_sign", wood.getPrefix()), new WallSignBlock(builder(plank).build()));
+            registrar.register(String.format("%s_wall_sign", wood.getPrefix()), new WallSignBlock(builder(plank).removeItemBlock().build()));
             registrar.register(String.format("%s_slab", wood.getPrefix()), new SlabBlock(builder(plank).build()));
             registrar.register(String.format("%s_stairs", wood.getPrefix()), new StairsBlock(builder(plank).build()));
         }
 
         registrar.register("note_block", new NoteBlock(builder(Materials.WOOD).build()));
-        registrar.register("redstone_wire", new RedstoneWireBlock(builder(Materials.PART).build()));
+        registrar.register("redstone_wire", new RedstoneWireBlock(builder(Materials.PART).removeItemBlock().build()));
+        registrar.register("redstone_lamp", new RedstoneLightBlock(builder(Materials.GLASS).build()));
+        registrar.register("fire", new FireBlock(builder(Materials.FIRE).removeItemBlock().build()));
     }
 
     public void registerItems(Registrar registrar) {
