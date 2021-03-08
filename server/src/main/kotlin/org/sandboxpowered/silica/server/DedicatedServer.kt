@@ -62,7 +62,7 @@ class DedicatedServer : SilicaServer() {
                     log.info("   $it")
                 }
             }
-            val missing = stateManagerErrors[StateManager.ErrorType.UNKNOWN]
+            val missing = stateManagerErrors[StateManager.ErrorType.MISSING]
             if (missing != null && missing.isNotEmpty()) {
                 log.info("Missing vanilla BlockStates, rejecting vanilla connections")
                 log.info("Errors:")
