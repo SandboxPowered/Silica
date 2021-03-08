@@ -9,6 +9,8 @@ import org.apache.logging.log4j.LogManager
 import org.sandboxpowered.silica.client.Silica
 import org.sandboxpowered.silica.client.Silica.Args
 import org.sandboxpowered.silica.inject.SilicaImplementationModule
+import java.nio.file.Path
+import java.nio.file.Paths
 import kotlin.reflect.KClass
 
 object Main {
@@ -31,14 +33,26 @@ object Main {
             .withRequiredArg()
             .ofType(String::class)
             .defaultsTo("")
+        val minecraftPath = optionSpec.accepts("minecraft")
+            .withRequiredArg()
+            .ofType(String::class)
+            .defaultsTo("")
         val unknownOptionsSpec: OptionSpec<String> = optionSpec.nonOptions()
         val options = optionSpec.parse(*args)
         val unknownOptions = options.valuesOf(unknownOptionsSpec)
         if (unknownOptions.isNotEmpty()) {
             LOG.warn("Ignoring arguments: {}", unknownOptions)
         }
+        val path = options.valueOf(minecraftPath)
         try {
-            Silica(Args(options.valueOf(widthSpec), options.valueOf(heightSpec), options.valueOf(rendererSpec))).run()
+            Silica(
+                Args(
+                    options.valueOf(widthSpec),
+                    options.valueOf(heightSpec),
+                    options.valueOf(rendererSpec),
+                    if (path.isEmpty()) null else Paths.get(path)
+                )
+            ).run()
         } catch (e: Exception) {
             e.printStackTrace()
         }

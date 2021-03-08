@@ -1,6 +1,7 @@
 package org.sandboxpowered.silica.client
 
 import com.google.common.base.Joiner
+import org.apache.commons.lang3.SystemUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.lwjgl.glfw.GLFW
@@ -14,13 +15,16 @@ import org.sandboxpowered.silica.util.listFiles
 import org.sandboxpowered.silica.util.notExists
 import java.io.File
 import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.*
 
-class Silica(args: Args) : Runnable, Client {
+class Silica(private val args: Args) : Runnable, Client {
     private val logger: Logger = LogManager.getLogger()
-    val window: Window
-    private val assetManager: ResourceManager
-    val renderer: Renderer
+    lateinit var window: Window
+    private lateinit var assetManager: ResourceManager
+    lateinit var renderer: Renderer
 
     val server = IntegratedServer()
 
@@ -29,6 +33,8 @@ class Silica(args: Args) : Runnable, Client {
     }
 
     override fun run() {
+        if(init())
+            return
         while (!window.shouldClose()) {
             renderer.frame()
             window.update()
@@ -36,7 +42,7 @@ class Silica(args: Args) : Runnable, Client {
         close()
     }
 
-    class Args(val width: Int, val height: Int, val renderer: String)
+    class Args(val width: Int, val height: Int, val renderer: String, val minecraftPath: Path?)
 
     override fun getGraphicsMode(): GraphicsMode {
         return GraphicsMode.FABULOUS
@@ -44,14 +50,15 @@ class Silica(args: Args) : Runnable, Client {
 
     class InvalidRendererException(message: String) : RuntimeException(message)
 
-    init {
-        val serviceLoader= ServiceLoader.load(RenderingFactory::class.java)
+    private fun init(): Boolean {
+        val serviceLoader = ServiceLoader.load(RenderingFactory::class.java)
         val renderers = serviceLoader.toList()
 
         renderer = when {
             args.renderer.isNotEmpty() -> {
                 val factory = renderers.find { it.getId() == args.renderer }
-                factory?.createRenderer(this) ?: throw InvalidRendererException("${args.renderer} renderer is not supported")
+                factory?.createRenderer(this)
+                    ?: throw InvalidRendererException("${args.renderer} renderer is not supported")
             }
             renderers.isEmpty() -> throw UnknownError("No renderers defined")
             renderers.size == 1 -> renderers[0].createRenderer(this)
@@ -69,16 +76,18 @@ class Silica(args: Args) : Runnable, Client {
         for (string in list) {
             logger.error("GLFW error collected during initialization: {}", string)
         }
+        if(list.isNotEmpty())
+            return true
         assetManager = ResourceManager(ResourceType.ASSETS)
         assetManager.add(ClasspathResourceLoader())
-        val resourcePacks = File("resourcepacks").apply {
+        File("resourcepacks").apply {
             if (notExists()) {
                 mkdirs()
             } else if (isFile) {
                 delete()
                 mkdirs()
             }
-        }.listFiles(FileFilters.ZIP.or(FileFilters.JAR)) { file ->
+        }.listFiles(FileFilters.ZIP) { file ->
             try {
                 if (file.isDirectory) {
                     assetManager.add(DirectoryResourceLoader(file))
@@ -89,9 +98,35 @@ class Silica(args: Args) : Runnable, Client {
                 logger.error("Failed loading resource source {}", file.name)
             }
         }
+        when {
+            args.minecraftPath != null -> {
+                if(Files.notExists(args.minecraftPath)) {
+                    logger.error("The specified path of {} does not exist, please make sure this is targeting a Minecraft 1.16.5 jar file", args.minecraftPath)
+                    return true
+                }
+                assetManager.add(ZIPResourceLoader(args.minecraftPath.toFile()))
+            }
+            SystemUtils.IS_OS_WINDOWS -> {
+                val appdataEnv = System.getenv("APPDATA")
+                val asPath = Paths.get(appdataEnv, ".minecraft", "versions", "1.16.5", "1.16.5.jar")
+                if (Files.notExists(asPath)) {
+                    logger.error(
+                        "Unable to find Minecraft 1.16.5 installation at {}, please install minecraft or use the --minecraft argument to point to a specific jar",
+                        asPath
+                    )
+                    return true
+                }
+                assetManager.add(ZIPResourceLoader(asPath.toFile()))
+            }
+            else -> {
+                logger.error("Silica supports automatically searching for Minecraft on windows only. use the --minecraft argument on other operating systems")
+                return true
+            }
+        }
 
         logger.debug("Loaded namespaces: [${assetManager.getNamespaces().join(",")}]")
         window = Window("Sandbox Silica", args.width, args.height, renderer)
         renderer.init()
+        return false
     }
 }
