@@ -57,7 +57,7 @@ class DedicatedServer : SilicaServer() {
             val unknown = stateManagerErrors[StateManager.ErrorType.UNKNOWN]
             if (unknown != null && unknown.isNotEmpty()) {
                 log.info("Found custom BlockStates, rejecting vanilla connections")
-                log.info("Errors:")
+                log.info("Errors (${unknown.size}):")
                 unknown.forEach {
                     log.info("   $it")
                 }
@@ -65,7 +65,7 @@ class DedicatedServer : SilicaServer() {
             val missing = stateManagerErrors[StateManager.ErrorType.MISSING]
             if (missing != null && missing.isNotEmpty()) {
                 log.info("Missing vanilla BlockStates, rejecting vanilla connections")
-                log.info("Errors:")
+                log.info("Errors (${missing.size}):")
                 missing.forEach {
                     log.info("   $it")
                 }
