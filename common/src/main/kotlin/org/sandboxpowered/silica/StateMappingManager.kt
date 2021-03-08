@@ -17,7 +17,7 @@ class StateManager {
     private val stateMap: Object2IntMap<BlockState> = Object2IntArrayMap()
     private val idMap: Int2ObjectMap<BlockState> = Int2ObjectArrayMap()
 
-    fun load(): Pair<List<String>, List<String>> {
+    fun load(): Map<ErrorType, Set<String>> {
         val string = javaClass.getResourceAsString("/data/silica/states.json")
         val gson = Gson()
         val json = gson.fromJson<JsonArray>(string)
@@ -35,7 +35,7 @@ class StateManager {
             }
         }
 
-        val errors = ArrayList<String>()
+        val errors = HashSet<String>()
 
         SilicaRegistries.BLOCK_REGISTRY.internalMap.forEach { (id, block) ->
             val blockMap = rawMap[id.toString()]
@@ -68,7 +68,7 @@ class StateManager {
             }
         }
 
-        val missing = ArrayList<String>()
+        val missing = HashSet<String>()
 
         rawMap.forEach { (block, u) ->
             run {
@@ -81,11 +81,21 @@ class StateManager {
             }
         }
 
-        return errors to missing
+        val map = HashMap<ErrorType, Set<String>>()
+        if(errors.isNotEmpty())
+            map[ErrorType.UNKNOWN] = errors
+        if(missing.isNotEmpty())
+            map[ErrorType.MISSING] = missing
+        return map
     }
 
     fun toVanillaId(state: BlockState): Int = stateMap.getInt(state)
     fun fromVanillaId(id: Int): BlockState = idMap.getOrElse(id) { idMap.get(0) }
+
+    public enum class ErrorType {
+        MISSING,
+        UNKNOWN
+    }
 }
 
 private inline fun <reified T> Gson.fromJson(s: String): T {

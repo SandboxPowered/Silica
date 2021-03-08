@@ -35,7 +35,7 @@ class DedicatedServer : SilicaServer() {
     private val stateManager = StateManager()
     private val acceptVanillaConnections: Boolean
     private lateinit var world: ActorRef<SilicaWorld.Command>
-    private val stateManagerErrors: Pair<List<String>, List<String>>
+    private val stateManagerErrors: Map<StateManager.ErrorType, Set<String>>
 
     init {
         Guice.createInjector(SilicaImplementationModule())
@@ -43,7 +43,7 @@ class DedicatedServer : SilicaServer() {
         loader = SandboxLoader()
         loader!!.load()
         stateManagerErrors = stateManager.load()
-        acceptVanillaConnections = stateManagerErrors.first.isEmpty() && stateManagerErrors.second.isEmpty()
+        acceptVanillaConnections = stateManagerErrors.isEmpty()
     }
 
     private fun createAddonPack(spec: AddonSpec, file: File): ResourceLoader {
@@ -54,17 +54,19 @@ class DedicatedServer : SilicaServer() {
         if (acceptVanillaConnections) {
             log.info("Accepting vanilla connections")
         } else {
-            if(stateManagerErrors.first.isNotEmpty()) {
+            val unknown = stateManagerErrors[StateManager.ErrorType.UNKNOWN]
+            if (unknown != null && unknown.isNotEmpty()) {
                 log.info("Found custom BlockStates, rejecting vanilla connections")
                 log.info("Errors:")
-                stateManagerErrors.first.forEach {
+                unknown.forEach {
                     log.info("   $it")
                 }
             }
-            if(stateManagerErrors.second.isNotEmpty()) {
+            val missing = stateManagerErrors[StateManager.ErrorType.UNKNOWN]
+            if (missing != null && missing.isNotEmpty()) {
                 log.info("Missing vanilla BlockStates, rejecting vanilla connections")
                 log.info("Errors:")
-                stateManagerErrors.second.forEach {
+                missing.forEach {
                     log.info("   $it")
                 }
             }
@@ -73,7 +75,8 @@ class DedicatedServer : SilicaServer() {
             dataManager.add(createAddonPack(it, File(it.path.toURI())))
         }
         log.debug("Loaded namespaces: [${dataManager.getNamespaces().join(",")}]")
-        val system = ActorSystem.create(DedicatedServerGuardian.create(this, this::world::set), "dedicatedServerGuardian")
+        val system =
+            ActorSystem.create(DedicatedServerGuardian.create(this, this::world::set), "dedicatedServerGuardian")
 //        system.terminate()
     }
 
