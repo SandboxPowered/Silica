@@ -35,14 +35,15 @@ class DedicatedServer : SilicaServer() {
     private val stateManager = StateManager()
     private val acceptVanillaConnections: Boolean
     private lateinit var world: ActorRef<SilicaWorld.Command>
-    private val stateManagerErrors: List<String>
+    private val stateManagerErrors: Pair<List<String>, List<String>>
 
     init {
         Guice.createInjector(SilicaImplementationModule())
         properties = ServerProperties.fromFile(Paths.get("server.properties"))
         loader = SandboxLoader()
+        loader!!.load()
         stateManagerErrors = stateManager.load()
-        acceptVanillaConnections = stateManagerErrors.isEmpty()
+        acceptVanillaConnections = stateManagerErrors.first.isEmpty() && stateManagerErrors.second.isEmpty()
     }
 
     private fun createAddonPack(spec: AddonSpec, file: File): ResourceLoader {
@@ -53,13 +54,21 @@ class DedicatedServer : SilicaServer() {
         if (acceptVanillaConnections) {
             log.info("Accepting vanilla connections")
         } else {
-            log.info("Found modded BlockStates, rejecting vanilla connections")
-            log.info("Errors:")
-            stateManagerErrors.forEach {
-                log.info("   $it")
+            if(stateManagerErrors.first.isNotEmpty()) {
+                log.info("Found custom BlockStates, rejecting vanilla connections")
+                log.info("Errors:")
+                stateManagerErrors.first.forEach {
+                    log.info("   $it")
+                }
+            }
+            if(stateManagerErrors.second.isNotEmpty()) {
+                log.info("Missing vanilla BlockStates, rejecting vanilla connections")
+                log.info("Errors:")
+                stateManagerErrors.second.forEach {
+                    log.info("   $it")
+                }
             }
         }
-        loader!!.load()
         loader!!.allAddons.keys.forEach {
             dataManager.add(createAddonPack(it, File(it.path.toURI())))
         }

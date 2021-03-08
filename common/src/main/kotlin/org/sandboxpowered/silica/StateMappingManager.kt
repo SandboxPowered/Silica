@@ -17,7 +17,7 @@ class StateManager {
     private val stateMap: Object2IntMap<BlockState> = Object2IntArrayMap()
     private val idMap: Int2ObjectMap<BlockState> = Int2ObjectArrayMap()
 
-    fun load(): ArrayList<String> {
+    fun load(): Pair<List<String>, List<String>> {
         val string = javaClass.getResourceAsString("/data/silica/states.json")
         val gson = Gson()
         val json = gson.fromJson<JsonArray>(string)
@@ -51,18 +51,37 @@ class StateManager {
                         builder.append(prop.name).append("@").append(prop.getName(value))
                     }
 
-                    val intId = blockMap.getInt(builder.toString())
+                    val stateString = builder.toString()
+
+                    val intId = blockMap.getInt(stateString)
 
                     if (intId == -1) {
                         errors.add("$id[$builder]")
                     } else {
                         stateMap[state] = intId
                         idMap[intId] = state
+                        blockMap.remove(stateString)
+                        if (blockMap.isEmpty())
+                            rawMap.remove(id.toString())
                     }
                 }
             }
         }
-        return errors
+
+        val missing = ArrayList<String>()
+
+        rawMap.forEach { (block, u) ->
+            run {
+                u.forEach { (state, u) ->
+                    if (state.isEmpty())
+                        missing.add(block)
+                    else
+                        missing.add("$block[$state]")
+                }
+            }
+        }
+
+        return errors to missing
     }
 
     fun toVanillaId(state: BlockState): Int = stateMap.getInt(state)
