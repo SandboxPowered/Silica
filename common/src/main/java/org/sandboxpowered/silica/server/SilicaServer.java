@@ -4,6 +4,9 @@ import akka.actor.typed.ActorRef;
 import org.sandboxpowered.api.server.Server;
 import org.sandboxpowered.silica.StateManager;
 import org.sandboxpowered.silica.command.Commands;
+import org.sandboxpowered.silica.resources.ClasspathResourceLoader;
+import org.sandboxpowered.silica.resources.ResourceManager;
+import org.sandboxpowered.silica.resources.ResourceType;
 import org.sandboxpowered.silica.world.SilicaWorld;
 
 import java.security.KeyPair;
@@ -16,6 +19,8 @@ public abstract class SilicaServer implements Server {
     private final byte[] verificationArray = new byte[4];
     private final Random serverRandom = new Random();
     private final Commands commands;
+    public ServerProperties properties;
+    public ResourceManager dataManager;
 
     public SilicaServer() {
         try {
@@ -27,6 +32,8 @@ public abstract class SilicaServer implements Server {
         }
         serverRandom.nextBytes(verificationArray);
         commands = new Commands();
+        dataManager = new ResourceManager(ResourceType.DATA);
+        dataManager.add(new ClasspathResourceLoader());
     }
 
     public Commands getCommands() {

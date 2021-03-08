@@ -6,55 +6,64 @@ import akka.actor.typed.Behavior
 import akka.actor.typed.Terminated
 import akka.actor.typed.javadsl.*
 import com.google.inject.Guice
-import io.netty.bootstrap.ServerBootstrap
-import io.netty.channel.ChannelInitializer
-import io.netty.channel.ChannelOption
-import io.netty.channel.EventLoopGroup
-import io.netty.channel.nio.NioEventLoopGroup
-import io.netty.channel.socket.SocketChannel
-import io.netty.channel.socket.nio.NioServerSocketChannel
-import io.netty.handler.timeout.ReadTimeoutHandler
 import it.unimi.dsi.fastutil.objects.Object2LongMap
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap
 import mu.toKLogger
 import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import org.sandboxpowered.api.util.Side
+import org.sandboxpowered.internal.AddonSpec
 import org.sandboxpowered.silica.StateManager
 import org.sandboxpowered.silica.inject.SilicaImplementationModule
 import org.sandboxpowered.silica.loading.SandboxLoader
-import org.sandboxpowered.silica.network.*
+import org.sandboxpowered.silica.resources.DirectoryResourceLoader
+import org.sandboxpowered.silica.resources.ResourceLoader
+import org.sandboxpowered.silica.resources.ZIPResourceLoader
+import org.sandboxpowered.silica.util.join
 import org.sandboxpowered.silica.util.messageAdapter
 import org.sandboxpowered.silica.util.onMessage
 import org.sandboxpowered.silica.util.onSignal
 import org.sandboxpowered.silica.world.SilicaWorld
+import java.io.File
+import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.Duration
 
 class DedicatedServer : SilicaServer() {
-    var log = LogManager.getLogger()
+    private var log: Logger = LogManager.getLogger()
     private var loader: SandboxLoader? = null
     private val stateManager = StateManager()
     private val acceptVanillaConnections: Boolean
     private lateinit var world: ActorRef<SilicaWorld.Command>
+    private val stateManagerErrors: List<String>
 
     init {
         Guice.createInjector(SilicaImplementationModule())
+        properties = ServerProperties.fromFile(Paths.get("server.properties"))
         loader = SandboxLoader()
-        loader!!.load()
-        val errors = stateManager.load()
-        acceptVanillaConnections = errors.size == 0
+        stateManagerErrors = stateManager.load()
+        acceptVanillaConnections = stateManagerErrors.isEmpty()
+    }
+
+    private fun createAddonPack(spec: AddonSpec, file: File): ResourceLoader {
+        return if (file.isDirectory) DirectoryResourceLoader(file) else ZIPResourceLoader(file)
+    }
+
+    fun run() {
         if (acceptVanillaConnections) {
             log.info("Accepting vanilla connections")
         } else {
             log.info("Found modded BlockStates, rejecting vanilla connections")
             log.info("Errors:")
-            errors.forEach {
+            stateManagerErrors.forEach {
                 log.info("   $it")
             }
         }
-    }
-
-    fun run() {
+        loader!!.load()
+        loader!!.allAddons.keys.forEach {
+            dataManager.add(createAddonPack(it, File(it.path.toURI())))
+        }
+        log.debug("Loaded namespaces: [${dataManager.getNamespaces().join(",")}]")
         val system = ActorSystem.create(DedicatedServerGuardian.create(this, this::world::set), "dedicatedServerGuardian")
 //        system.terminate()
     }
@@ -67,7 +76,7 @@ class DedicatedServer : SilicaServer() {
     }
 
     private class DedicatedServerGuardian private constructor(
-        server: SilicaServer, // don't like this
+        val server: SilicaServer, // don't like this
         context: ActorContext<Command>,
         timerScheduler: TimerScheduler<Command>,
         worldInit: (ActorRef<SilicaWorld.Command>) -> Unit
@@ -82,12 +91,14 @@ class DedicatedServer : SilicaServer() {
 
         private val logger = context.log.toKLogger()
         private var skippedTicks = 0
+        private var lastTickTime: Long = -1
         private val world: ActorRef<in SilicaWorld.Command> = context.spawn(SilicaWorld.actor(Side.SERVER), "world").apply(worldInit)
         private val network: ActorRef<in NetworkActor.Command> = context.spawn(NetworkActor.actor(server), "network")
         private val currentlyTicking: Object2LongMap<ActorRef<*>> = Object2LongOpenHashMap(3)
 
         init {
             context.watch(world)
+            context.watch(network)
             // TODO: compare to startTimerAtFixedRate
             timerScheduler.startTimerWithFixedDelay("serverTick", Command.Tick(50f), Duration.ofMillis(50))
 
@@ -102,16 +113,24 @@ class DedicatedServer : SilicaServer() {
             .build()
 
         private fun handleTick(tick: Command.Tick): Behavior<Command> {
-            if (currentlyTicking.isNotEmpty()) ++skippedTicks
-            else {
+            if (currentlyTicking.isNotEmpty()) // boxing
+            {
+                val lastTickOffset = System.currentTimeMillis() - lastTickTime
+                if (server.properties.maxTickTime != -1 && lastTickOffset >= server.properties.maxTickTime) {
+                    TODO("Terminate server after taking too long")
+                }
+                ++skippedTicks
+            } else {
                 if (skippedTicks > 0) {
-                    logger.warn { "Skipped $skippedTicks ticks !" }
+                    val lastTickOffset = System.currentTimeMillis() - lastTickTime
+                    logger.warn("Skipped $skippedTicks ticks! took {}ms", lastTickOffset)
                     skippedTicks = 0
                 }
 
                 @Suppress("ReplacePutWithAssignment") // boxing
                 currentlyTicking.put(world, System.nanoTime())
                 currentlyTicking.put(network, System.nanoTime())
+                lastTickTime = System.currentTimeMillis()
                 world.tell(SilicaWorld.Command.Tick(tick.delta, context.messageAdapter { Command.Tock(it.done) }))
                 network.tell(NetworkActor.Command.Tick(tick.delta, context.messageAdapter { Command.Tock(it.done) }))
             }

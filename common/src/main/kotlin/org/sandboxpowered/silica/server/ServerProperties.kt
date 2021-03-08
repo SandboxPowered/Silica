@@ -9,6 +9,7 @@ class ServerProperties(private val properties: Properties) {
     val motd = get("motd", "A Sandbox Silica Server")
     val serverPort = get("server-port", 25565)
     val serverIp = get("server-ip", "")
+    val maxTickTime = get("max-tick-time", 60000)
 
     private fun getStringRaw(string: String): String? {
         return properties[string] as String?
@@ -58,11 +59,11 @@ class ServerProperties(private val properties: Properties) {
             if (Files.notExists(path))
                 Files.createFile(path)
 
-            val inputStream = Files.newInputStream(path)
 
-            properties.load(inputStream)
+            Files.newInputStream(path).use {
+                properties.load(it)
+            }
 
-            inputStream.close()
 
             val props = ServerProperties(properties)
 
