@@ -4,6 +4,7 @@ import com.google.common.collect.ArrayTable;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
+import org.jetbrains.annotations.NotNull;
 import org.sandboxpowered.api.content.Content;
 import org.sandboxpowered.api.state.property.Property;
 import org.sandboxpowered.api.state.property.PropertyContainer;
@@ -13,7 +14,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class BaseState<B extends Content<B>, S> implements PropertyContainer<S> {
+public class BaseState<B extends Content<B>, S> implements PropertyContainer<S>, Comparable<S> {
     protected final B base;
     private final ImmutableMap<Property<?>, Comparable<?>> properties;
     private Table<Property<?>, Comparable<?>, S> possibleStates;
@@ -21,6 +22,13 @@ public class BaseState<B extends Content<B>, S> implements PropertyContainer<S> 
     public BaseState(B base, ImmutableMap<Property<?>, Comparable<?>> properties) {
         this.base = base;
         this.properties = properties;
+    }
+
+    @Override
+    public int compareTo(@NotNull S o) {
+        if(o instanceof BaseState)
+            return base.getIdentity().toString().compareTo(((BaseState<?, ?>) o).base.getIdentity().toString());
+        return 1;
     }
 
     protected static <T> T findNextInCollection(Collection<T> collection, T object) {

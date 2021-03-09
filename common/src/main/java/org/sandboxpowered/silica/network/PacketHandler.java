@@ -8,7 +8,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class PacketHandler extends SimpleChannelInboundHandler<PacketBase> {
-    private final Connection connection;
+    public final Connection connection;
     private final Queue<PacketPlay> waiting = new LinkedList<>();
     private ActorRef<PlayConnection.Command> playConnection;
     private Channel channel;

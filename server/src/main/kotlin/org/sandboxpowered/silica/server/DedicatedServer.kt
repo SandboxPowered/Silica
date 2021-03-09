@@ -56,20 +56,19 @@ class DedicatedServer : SilicaServer() {
         } else {
             val unknown = stateManagerErrors[StateManager.ErrorType.UNKNOWN]
             if (unknown != null && unknown.isNotEmpty()) {
-                log.info("Found custom BlockStates, rejecting vanilla connections")
-                log.info("Errors (${unknown.size}):")
+                log.info("Found ${unknown.size} custom BlockStates")
                 unknown.forEach {
-                    log.info("   $it")
+//                    log.info("   $it")
                 }
             }
             val missing = stateManagerErrors[StateManager.ErrorType.MISSING]
             if (missing != null && missing.isNotEmpty()) {
-                log.info("Missing vanilla BlockStates, rejecting vanilla connections")
-                log.info("Errors (${missing.size}):")
+                log.info("Missing ${missing.size} vanilla BlockStates")
                 missing.forEach {
-                    log.info("   $it")
+//                    log.info("   $it")
                 }
             }
+            log.info("Rejecting vanilla connections")
         }
         loader!!.allAddons.keys.forEach {
             dataManager.add(createAddonPack(it, File(it.path.toURI())))

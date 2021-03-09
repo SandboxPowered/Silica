@@ -1,9 +1,14 @@
 package org.sandboxpowered.silica.network.play.serverbound;
 
+import kotlin.jvm.functions.Function1;
+import org.sandboxpowered.api.ecs.ComponentMapper;
+import org.sandboxpowered.api.world.World;
+import org.sandboxpowered.silica.component.PositionComponent;
 import org.sandboxpowered.silica.network.PacketByteBuf;
 import org.sandboxpowered.silica.network.PacketHandler;
 import org.sandboxpowered.silica.network.PacketPlay;
 import org.sandboxpowered.silica.network.PlayConnection;
+import org.sandboxpowered.silica.world.SilicaWorld;
 
 public class PlayerPosition implements PacketPlay {
     private double x;
@@ -39,6 +44,15 @@ public class PlayerPosition implements PacketPlay {
 
     @Override
     public void handle(PacketHandler packetHandler, PlayConnection connection) {
-
+        connection.getServer().getWorld().tell(new SilicaWorld.Command.PerformSilica(
+                silicaWorld -> {
+                    Integer id = silicaWorld.getPlayerMap().get(packetHandler.connection.getProfile().getId());
+                    if(id!=null) {
+                        PositionComponent component = silicaWorld.getArtemisWorld().getEntity(id).getComponent(PositionComponent.class);
+                        component.getPos().set(x,y,z);
+                    }
+                    return null;
+                }
+        ));
     }
 }

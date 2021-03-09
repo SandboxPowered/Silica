@@ -5,13 +5,20 @@ import akka.actor.typed.javadsl.AbstractBehavior
 import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
+import com.artemis.Component
+import com.artemis.EntityEdit
+import org.joml.Vector3f
 import org.sandboxpowered.api.util.Identity
+import org.sandboxpowered.silica.component.PlayerComponent
+import org.sandboxpowered.silica.component.PositionComponent
 import org.sandboxpowered.silica.nbt.CompoundTag
 import org.sandboxpowered.silica.network.play.clientbound.*
 import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.util.onMessage
 import org.sandboxpowered.silica.world.SilicaWorld
 import org.sandboxpowered.silica.world.util.BlocTree
+import kotlin.reflect.KClass
+import com.artemis.World as ArtemisWorld
 
 class PlayConnection private constructor(
     val server: SilicaServer,
@@ -29,6 +36,7 @@ class PlayConnection private constructor(
         class ReceivePacket(val packet: PacketPlay) : Command()
         class SendPacket(val packet: PacketPlay) : Command()
         class ReceiveWorld(val blocks: BlocTree) : Command()
+        class ReceivePlayer(val entity: Int, val world: SilicaWorld) : Command()
         object Login : Command()
     }
 
@@ -36,6 +44,7 @@ class PlayConnection private constructor(
         .onMessage(this::handleLoginStart)
         .onMessage(this::handleSend)
         .onMessage(this::handleReceive)
+        .onMessage(this::handleReceivePlayer)
         .onMessage(this::handleReceiveWorld)
         .build()
 
@@ -59,6 +68,20 @@ class PlayConnection private constructor(
 
     @Suppress("UNUSED_PARAMETER")
     private fun handleLoginStart(login: Command.Login): Behavior<Command> {
+        server.world.tell(SilicaWorld.Command.AskSilica({
+            val entity = it.artemisWorld.create()
+            it.artemisWorld.edit(entity)
+                .add(PlayerComponent(packetHandler.connection.profile))
+                .create(PositionComponent::class)
+
+            it.playerMap[packetHandler.connection.profile.id] = entity
+
+            Command.ReceivePlayer(entity, it)
+        }, context.self))
+        return Behaviors.same()
+    }
+
+    private fun handleReceivePlayer(player: Command.ReceivePlayer): Behavior<Command> {
         val overworld = Identity.of("minecraft", "overworld")
         val codec = CompoundTag()
         val dimReg = CompoundTag()
@@ -144,12 +167,13 @@ class PlayConnection private constructor(
 
         return Behaviors.same()
     }
-
     private fun handleReceiveWorld(world: Command.ReceiveWorld): Behavior<Command> {
         logger.info("Sending world")
         for (x in -2..2) {
             for (z in -2..2) {
+                val time = System.currentTimeMillis()
                 packetHandler.sendPacket(ChunkData(x, z, world.blocks, server.stateManager::toVanillaId))
+                logger.info("Took {}ms to create Chunk Data for {} {}", System.currentTimeMillis()-time, x, z)
                 packetHandler.sendPacket(UpdateLight(x, z, true))
             }
         }
@@ -158,4 +182,8 @@ class PlayConnection private constructor(
         return Behaviors.same()
     }
 
+}
+
+private fun <T : Component> EntityEdit.create(kClass: KClass<T>) : T {
+    return create(kClass.java)
 }

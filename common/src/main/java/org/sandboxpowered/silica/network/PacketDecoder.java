@@ -25,7 +25,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
                 packet.read(buf);
                 out.add(packet);
             } else {
-                throw new IOException("Unknown packet " + packetId);
+//                throw new IOException("Unknown packet " + packetId);
             }
         }
     }

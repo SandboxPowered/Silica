@@ -52,7 +52,6 @@ class SilicaPlayerManager(var maxPlayers: Int, var playerArchetype: Archetype) :
 
         val id = world.create(playerArchetype)
         val player = playerComponentMapper.get(id)!!
-        player.profile = profile
 
         uuidToEntityId[profile.id] = id
         entityToUuid[id] = profile.id

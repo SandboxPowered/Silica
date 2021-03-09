@@ -20,15 +20,15 @@ public class SnowBlock extends BaseBlock {
         return baseState.with(Properties.SNOWY, false);
     }
 
-    @Override
-    public BlockState updateOnNeighborChanged(BlockState state, Direction direction, BlockState otherState, World world, Position position, Position otherPosition) {
-        if (direction != Direction.UP) {
-            return super.updateOnNeighborChanged(state, direction, otherState, world, position, otherPosition);
-        } else {
-            Block block = otherState.getBlock();
-            return state.with(Properties.SNOWY, Blocks.SNOW_BLOCK.matches(block) || Blocks.SNOW.matches(block)); //TODO: Replace with snow tag
-        }
-    }
+//    @Override
+//    public BlockState updateOnNeighborChanged(BlockState state, Direction direction, BlockState otherState, World world, Position position, Position otherPosition) {
+//        if (direction != Direction.UP) {
+//            return super.updateOnNeighborChanged(state, direction, otherState, world, position, otherPosition);
+//        } else {
+//            Block block = otherState.getBlock();
+//            return state.with(Properties.SNOWY, Blocks.SNOW_BLOCK.matches(block) || Blocks.SNOW.matches(block)); //TODO: Replace with snow tag
+//        }
+//    }
 
     @Override
     public void appendProperties(StateFactory.Builder<Block, BlockState> builder) {

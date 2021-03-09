@@ -5,28 +5,28 @@ import org.sandboxpowered.silica.network.PacketHandler;
 import org.sandboxpowered.silica.network.PacketPlay;
 import org.sandboxpowered.silica.network.PlayConnection;
 
-public class KeepAliveServer implements PacketPlay {
-    private long id;
+public class PlayerMovement implements PacketPlay {
+    private boolean onGround;
 
-    public KeepAliveServer() {
+    public PlayerMovement() {
     }
 
-    public KeepAliveServer(long id) {
-        this.id = id;
+    public PlayerMovement(boolean onGround) {
+        this.onGround = onGround;
     }
 
     @Override
     public void read(PacketByteBuf buf) {
-        id = buf.readLong();
+        onGround = buf.readBoolean();
     }
 
     @Override
     public void write(PacketByteBuf buf) {
-        buf.writeLong(id);
+        buf.writeBoolean(onGround);
     }
 
     @Override
     public void handle(PacketHandler packetHandler, PlayConnection connection) {
-        packetHandler.connection.calculatePing(id);
+
     }
 }

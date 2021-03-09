@@ -23,6 +23,7 @@ public class Connection {
     private GameProfile profile;
     private SecretKey secretKey;
     private PacketHandler packetHandler;
+    private int ping;
 
     public Connection(SilicaServer server, ActorRef<? super NetworkActor.Command.CreateConnection> network, Scheduler scheduler) {
         this.server = server;
@@ -75,5 +76,9 @@ public class Connection {
                 System.out.println("Created connection: " + result);
             }
         });
+    }
+
+    public void calculatePing(long id) {
+        ping = (int) (System.currentTimeMillis() - id);
     }
 }

@@ -5,28 +5,36 @@ import org.sandboxpowered.silica.network.PacketHandler;
 import org.sandboxpowered.silica.network.PacketPlay;
 import org.sandboxpowered.silica.network.PlayConnection;
 
-public class KeepAliveServer implements PacketPlay {
-    private long id;
+public class PlayerRotation implements PacketPlay {
+    private float yaw;
+    private float pitch;
+    private boolean onGround;
 
-    public KeepAliveServer() {
+    public PlayerRotation() {
     }
 
-    public KeepAliveServer(long id) {
-        this.id = id;
+    public PlayerRotation(float yaw, float pitch, boolean onGround) {
+        this.yaw = yaw;
+        this.pitch = pitch;
+        this.onGround = onGround;
     }
 
     @Override
     public void read(PacketByteBuf buf) {
-        id = buf.readLong();
+        yaw = buf.readFloat();
+        pitch = buf.readFloat();
+        onGround = buf.readBoolean();
     }
 
     @Override
     public void write(PacketByteBuf buf) {
-        buf.writeLong(id);
+        buf.writeFloat(yaw);
+        buf.writeFloat(pitch);
+        buf.writeBoolean(onGround);
     }
 
     @Override
     public void handle(PacketHandler packetHandler, PlayConnection connection) {
-        packetHandler.connection.calculatePing(id);
+
     }
 }

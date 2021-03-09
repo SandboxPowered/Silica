@@ -2,9 +2,11 @@ package org.sandboxpowered.silica.network.play.clientbound.world
 
 import org.sandboxpowered.api.state.BlockState
 import org.sandboxpowered.silica.network.PacketByteBuf
+import org.sandboxpowered.silica.network.play.clientbound.ChunkData
 import org.sandboxpowered.silica.network.util.BitPackedLongArray
 import org.sandboxpowered.silica.world.util.BlocTree
 import org.sandboxpowered.silica.world.util.iterateCube
+import kotlin.system.measureNanoTime
 
 class VanillaChunkSection(
     blocTree: BlocTree,
@@ -17,7 +19,8 @@ class VanillaChunkSection(
     private val blocTree = blocTree[x, y, z, 16, 16, 16]
     private val bitPacked = BitPackedLongArray(4096, BITS).apply {
         iterateCube(0, 0, 0, 16) { dx, dy, dz ->
-            this[index(dx, dy, dz)] = stateToId(this@VanillaChunkSection.blocTree[x + dx, y + dy, z + dz])
+            val state = this@VanillaChunkSection.blocTree[x + dx, y + dy, z + dz]
+            this[index(dx, dy, dz)] = stateToId(state)
         }
     }
 

@@ -25,13 +25,20 @@ import org.sandboxpowered.silica.world.gen.TerrainGenerator
 import org.sandboxpowered.silica.world.util.BlocTree
 import org.sandboxpowered.silica.world.util.iterateCube
 import java.util.*
+import kotlin.collections.HashMap
+import com.artemis.World as ArtemisWorld
 import org.sandboxpowered.silica.world.gen.TerrainGenerator.Command.Generate as CommandGenerate
 
 class SilicaWorld private constructor(private val side: Side) : World {
 
     private val blocks: BlocTree = BlocTree(WORLD_MIN, WORLD_MIN, WORLD_MIN, WORLD_SIZE, Blocks.AIR.get().baseState)
-    private val artemisWorld: com.artemis.World? = null
+    val artemisWorld: ArtemisWorld = ArtemisWorld()
     private var worldTicks = 0L
+    val playerMap: HashMap<UUID, Int> = HashMap()
+
+    init {
+
+    }
 
     override fun getBlockState(position: Position): BlockState {
         return blocks[position.x, position.y, position.z]
@@ -85,6 +92,10 @@ class SilicaWorld private constructor(private val side: Side) : World {
         TODO("Not yet implemented")
     }
 
+    override fun hasNeighborSignal(position: Position): Boolean {
+        return false
+    }
+
     // TODO: Tmp. Should be read-only, and network should be actorized
     fun getTerrain(): BlocTree = this.blocks
 
@@ -104,6 +115,8 @@ class SilicaWorld private constructor(private val side: Side) : World {
         }
 
         class Perform(val body: (World) -> Unit) : Command()
+        class PerformSilica(val body: (SilicaWorld) -> Unit) : Command()
+        class AskSilica<T>(val body: (SilicaWorld) -> T, val replyTo: ActorRef<T>) : Command()
         class Ask<T>(val body: (WorldReader) -> T, val replyTo: ActorRef<T>) : Command()
     }
 
@@ -118,6 +131,7 @@ class SilicaWorld private constructor(private val side: Side) : World {
         override fun createReceive(): Receive<Command> = newReceiveBuilder()
             .onMessage(this::handleTick)
             .onMessage(this::handleAsk)
+            .onMessage(this::handleAskSilica)
             .onMessage(this::handleDelayedCommand)
             .build()
 
@@ -144,6 +158,7 @@ class SilicaWorld private constructor(private val side: Side) : World {
             while (next != null) {
                 when (next) {
                     is Command.Perform -> next.body(world)
+                    is Command.PerformSilica -> next.body(world)
                     else -> error("Unhandled command in queue : $next")
                 }
                 next = commandQueue.pollFirst()
@@ -155,6 +170,10 @@ class SilicaWorld private constructor(private val side: Side) : World {
             return Behaviors.same()
         }
 
+        private fun handleAskSilica(ask: Command.AskSilica<Any>): Behavior<Command> {
+            ask.replyTo.tell(ask.body(world))
+            return Behaviors.same()
+        }
         private fun handleAsk(ask: Command.Ask<Any>): Behavior<Command> {
             ask.replyTo.tell(ask.body(world))
             return Behaviors.same()

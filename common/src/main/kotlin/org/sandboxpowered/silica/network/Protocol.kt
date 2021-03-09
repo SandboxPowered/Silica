@@ -44,6 +44,8 @@ enum class Protocol(private val id: Int, builder: Builder) {
                     .addPacket(0x10, ::KeepAliveServer)
                     .addPacket(0x12, ::PlayerPosition)
                     .addPacket(0x13, ::PlayerPositionAndRotation)
+                    .addPacket(0x14, ::PlayerRotation)
+                    .addPacket(0x15, ::PlayerMovement)
             ).addFlow(
                 Flow.CLIENTBOUND, Packets()
                     .addPacket(0x24, ::JoinGame)

@@ -1,12 +1,9 @@
 package org.sandboxpowered.silica.component
 
+import com.artemis.Component
 import com.artemis.PooledComponent
 import com.mojang.authlib.GameProfile
 
-class PlayerComponent : PooledComponent() {
-    var profile: GameProfile? = null
+class PlayerComponent(var profile: GameProfile? = null) : Component() {
 
-    override fun reset() {
-        profile = null
-    }
 }
