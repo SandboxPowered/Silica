@@ -18,7 +18,6 @@ import io.netty.handler.timeout.ReadTimeoutHandler
 import org.sandboxpowered.silica.network.*
 import org.sandboxpowered.silica.network.play.clientbound.KeepAliveClient
 import org.sandboxpowered.silica.util.onMessage
-import java.nio.file.Paths
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -31,7 +30,7 @@ class NetworkActor(
     private val connections: HashMap<UUID, ActorRef<PlayConnection.Command>> = HashMap()
 
     companion object {
-        fun actor(server: SilicaServer): Behavior<in Command> = Behaviors.setup {
+        fun actor(server: SilicaServer): Behavior<Command> = Behaviors.setup {
             NetworkActor(server, it)
         }
     }
@@ -41,7 +40,7 @@ class NetworkActor(
             class Tock(val done: ActorRef<Command>)
         }
         class Start(val replyTo: ActorRef<in Boolean>) : Command()
-        class Disconnected(val user: UUID) : Command()
+        class Disconnected(val user: GameProfile) : Command()
         class CreateConnection(
             val profile: GameProfile,
             val handler: PacketHandler,
@@ -120,7 +119,7 @@ class NetworkActor(
     }
 
     private fun handleDisconnected(disconnected: Command.Disconnected): Behavior<Command> {
-        connections.remove(disconnected.user)
+        connections.remove(disconnected.user.id)
         return Behaviors.same()
     }
 }

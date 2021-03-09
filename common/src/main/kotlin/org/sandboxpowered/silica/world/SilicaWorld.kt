@@ -6,6 +6,8 @@ import akka.actor.typed.javadsl.AbstractBehavior
 import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
+import com.artemis.WorldConfiguration
+import com.artemis.WorldConfigurationBuilder
 import org.sandboxpowered.api.block.Blocks
 import org.sandboxpowered.api.ecs.CapabilityManager
 import org.sandboxpowered.api.ecs.ComponentMapper
@@ -20,6 +22,7 @@ import org.sandboxpowered.api.util.math.Position
 import org.sandboxpowered.api.world.BlockFlag
 import org.sandboxpowered.api.world.World
 import org.sandboxpowered.api.world.WorldReader
+import org.sandboxpowered.silica.SilicaPlayerManager
 import org.sandboxpowered.silica.util.onMessage
 import org.sandboxpowered.silica.world.gen.TerrainGenerator
 import org.sandboxpowered.silica.world.util.BlocTree
@@ -32,12 +35,13 @@ import org.sandboxpowered.silica.world.gen.TerrainGenerator.Command.Generate as 
 class SilicaWorld private constructor(private val side: Side) : World {
 
     private val blocks: BlocTree = BlocTree(WORLD_MIN, WORLD_MIN, WORLD_MIN, WORLD_SIZE, Blocks.AIR.get().baseState)
-    val artemisWorld: ArtemisWorld = ArtemisWorld()
+    val artemisWorld: ArtemisWorld
     private var worldTicks = 0L
-    val playerMap: HashMap<UUID, Int> = HashMap()
 
     init {
-
+        val config = WorldConfigurationBuilder()
+        config.with(SilicaPlayerManager(10, ))
+        artemisWorld = ArtemisWorld(config.build())
     }
 
     override fun getBlockState(position: Position): BlockState {

@@ -1,8 +1,7 @@
 package org.sandboxpowered.silica
 
-import com.artemis.Archetype
-import com.artemis.BaseEntitySystem
-import com.artemis.ComponentMapper
+import com.artemis.*
+import com.artemis.annotations.All
 import com.artemis.annotations.One
 import com.artemis.annotations.Wire
 import com.artemis.utils.IntBag
@@ -13,11 +12,13 @@ import it.unimi.dsi.fastutil.objects.Object2IntFunction
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import org.sandboxpowered.api.util.text.Text
 import org.sandboxpowered.silica.component.PlayerComponent
+import org.sandboxpowered.silica.component.PositionComponent
 import java.net.SocketAddress
 import java.util.*
+import kotlin.reflect.KClass
 
-@One(PlayerComponent::class)
-class SilicaPlayerManager(var maxPlayers: Int, var playerArchetype: Archetype) : BaseEntitySystem() {
+@All(PlayerComponent::class, PositionComponent::class)
+class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
     private val uuidToEntityId: Object2IntFunction<UUID> =
         Object2IntOpenHashMap<UUID>().apply { defaultReturnValue(-1) }
     private val entityToUuid: Int2ObjectFunction<UUID> = Int2ObjectOpenHashMap()
@@ -25,6 +26,8 @@ class SilicaPlayerManager(var maxPlayers: Int, var playerArchetype: Archetype) :
 
     @Wire
     lateinit var playerComponentMapper: ComponentMapper<PlayerComponent>
+    @Wire
+    lateinit var positionComponentMapper: ComponentMapper<PositionComponent>
 
     fun checkDisconnectReason(address: SocketAddress, profile: GameProfile): Text? {
         if (profile.isLegacy)
@@ -46,17 +49,47 @@ class SilicaPlayerManager(var maxPlayers: Int, var playerArchetype: Archetype) :
         return getPlayerId(profile.id)
     }
 
+    private lateinit var playerArchetype: Archetype
+
+    override fun initialize() {
+        super.initialize()
+
+        val builder = ArchetypeBuilder()
+
+        builder.add<PlayerComponent>()
+        builder.add<PositionComponent>()
+
+        playerArchetype = builder.build(world, "player")
+    }
+
+    fun disconnect(profile: GameProfile) {
+        onlinePlayers--
+
+        entityToUuid.remove(uuidToEntityId.removeInt(profile.id))
+    }
+
     fun create(profile: GameProfile): Int {
         val existing = uuidToEntityId.getInt(profile.id)
         if (existing != -1) return existing
 
         val id = world.create(playerArchetype)
         val player = playerComponentMapper.get(id)!!
+        player.profile = profile
+
+        onlinePlayers++
 
         uuidToEntityId[profile.id] = id
         entityToUuid[id] = profile.id
         return id
     }
+
+    fun getPosition(ent: Int): PositionComponent {
+        return positionComponentMapper.get(ent)
+    }
+}
+
+private inline fun <reified T : Component> ArchetypeBuilder.add() {
+    add(T::class.java)
 }
 
 private operator fun <V> Int2ObjectFunction<V>.set(key: Int, value: V) {

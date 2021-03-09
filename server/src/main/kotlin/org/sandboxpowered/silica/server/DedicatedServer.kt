@@ -25,7 +25,6 @@ import org.sandboxpowered.silica.util.onMessage
 import org.sandboxpowered.silica.util.onSignal
 import org.sandboxpowered.silica.world.SilicaWorld
 import java.io.File
-import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.Duration
 
@@ -35,6 +34,7 @@ class DedicatedServer : SilicaServer() {
     private val stateManager = StateManager()
     private val acceptVanillaConnections: Boolean
     private lateinit var world: ActorRef<SilicaWorld.Command>
+    private lateinit var network: ActorRef<NetworkActor.Command>
     private val stateManagerErrors: Map<StateManager.ErrorType, Set<String>>
 
     init {
@@ -74,12 +74,13 @@ class DedicatedServer : SilicaServer() {
             dataManager.add(createAddonPack(it, File(it.path.toURI())))
         }
         log.debug("Loaded namespaces: [${dataManager.getNamespaces().join(",")}]")
-        val system =
-            ActorSystem.create(DedicatedServerGuardian.create(this, this::world::set), "dedicatedServerGuardian")
+        val system = ActorSystem.create(DedicatedServerGuardian.create(this, this::world::set, this::network::set), "dedicatedServerGuardian")
 //        system.terminate()
     }
 
     override fun getWorld() = this.world
+
+    override fun getNetwork() = this.network
 
     sealed class Command {
         class Tick(val delta: Float) : Command()
@@ -90,12 +91,13 @@ class DedicatedServer : SilicaServer() {
         val server: SilicaServer, // don't like this
         context: ActorContext<Command>,
         timerScheduler: TimerScheduler<Command>,
-        worldInit: (ActorRef<SilicaWorld.Command>) -> Unit
+        worldInit: (ActorRef<SilicaWorld.Command>) -> Unit,
+        networkInit: (ActorRef<NetworkActor.Command>) -> Unit
     ) : AbstractBehavior<Command>(context) {
         companion object {
-            fun create(server: SilicaServer, worldInit: (ActorRef<SilicaWorld.Command>) -> Unit): Behavior<Command> = Behaviors.withTimers { timerScheduler ->
+            fun create(server: SilicaServer, worldInit: (ActorRef<SilicaWorld.Command>) -> Unit, networkInit: (ActorRef<NetworkActor.Command>) -> Unit): Behavior<Command> = Behaviors.withTimers { timerScheduler ->
                 Behaviors.setup {
-                    DedicatedServerGuardian(server, it, timerScheduler, worldInit)
+                    DedicatedServerGuardian(server, it, timerScheduler, worldInit, networkInit)
                 }
             }
         }
@@ -104,7 +106,7 @@ class DedicatedServer : SilicaServer() {
         private var skippedTicks = 0
         private var lastTickTime: Long = -1
         private val world: ActorRef<in SilicaWorld.Command> = context.spawn(SilicaWorld.actor(Side.SERVER), "world").apply(worldInit)
-        private val network: ActorRef<in NetworkActor.Command> = context.spawn(NetworkActor.actor(server), "network")
+        private val network: ActorRef<in NetworkActor.Command> = context.spawn(NetworkActor.actor(server), "network").apply(networkInit)
         private val currentlyTicking: Object2LongMap<ActorRef<*>> = Object2LongOpenHashMap(3)
 
         init {

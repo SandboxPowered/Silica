@@ -2,6 +2,7 @@ package org.sandboxpowered.silica.network;
 
 import akka.actor.typed.ActorRef;
 import io.netty.channel.*;
+import org.sandboxpowered.silica.server.NetworkActor;
 
 import java.net.SocketAddress;
 import java.util.LinkedList;
@@ -30,6 +31,14 @@ public class PacketHandler extends SimpleChannelInboundHandler<PacketBase> {
         this.address = this.channel.remoteAddress();
 
         setProtocol(Protocol.HANDSHAKE);
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        Protocol protocol = this.channel.attr(Protocol.PROTOCOL_ATTRIBUTE_KEY).get();
+        if (protocol == Protocol.PLAY)
+            playConnection.tell(new PlayConnection.Command.Disconnected(connection.getProfile()));
+        super.channelInactive(ctx);
     }
 
     public void setProtocol(Protocol connectionProtocol) {
