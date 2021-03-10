@@ -9,6 +9,7 @@ import com.google.inject.Guice
 import it.unimi.dsi.fastutil.objects.Object2LongMap
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap
 import mu.toKLogger
+import org.apache.commons.io.FileUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.sandboxpowered.api.util.Side
@@ -25,6 +26,8 @@ import org.sandboxpowered.silica.util.onMessage
 import org.sandboxpowered.silica.util.onSignal
 import org.sandboxpowered.silica.world.SilicaWorld
 import java.io.File
+import java.lang.StringBuilder
+import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.time.Duration
 
@@ -63,10 +66,12 @@ class DedicatedServer : SilicaServer() {
             }
             val missing = stateManagerErrors[StateManager.ErrorType.MISSING]
             if (missing != null && missing.isNotEmpty()) {
-                log.info("Missing ${missing.size} vanilla BlockStates")
+                log.info("Missing ${missing.size} vanilla BlockStates. Exported to missing.txt")
+                val builder = StringBuilder()
                 missing.forEach {
-//                    log.info("   $it")
+                    builder.append(it).append("\n")
                 }
+                FileUtils.writeStringToFile(File("missing.txt"), builder.toString(), StandardCharsets.UTF_8)
             }
             log.info("Rejecting vanilla connections")
         }

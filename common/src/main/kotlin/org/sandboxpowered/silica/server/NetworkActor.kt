@@ -15,9 +15,14 @@ import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.handler.timeout.ReadTimeoutHandler
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
+import org.sandboxpowered.silica.SilicaPlayerManager
 import org.sandboxpowered.silica.network.*
 import org.sandboxpowered.silica.network.play.clientbound.KeepAliveClient
+import org.sandboxpowered.silica.network.play.clientbound.PlayerInfo
 import org.sandboxpowered.silica.util.onMessage
+import org.sandboxpowered.silica.world.SilicaWorld
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -27,7 +32,7 @@ class NetworkActor(
     context: ActorContext<Command>
 ) : AbstractBehavior<NetworkActor.Command>(context) {
     private val logger = context.log
-    private val connections: HashMap<UUID, ActorRef<PlayConnection.Command>> = HashMap()
+    private val connections: Object2ObjectMap<UUID, ActorRef<PlayConnection.Command>> = Object2ObjectOpenHashMap()
 
     companion object {
         fun actor(server: SilicaServer): Behavior<Command> = Behaviors.setup {
@@ -46,6 +51,8 @@ class NetworkActor(
             val handler: PacketHandler,
             val replyTo: ActorRef<in Boolean>
         ) : Command()
+
+        class SendToAll(val packet: PacketPlay) : Command()
     }
 
     override fun createReceive(): Receive<Command> = newReceiveBuilder()
@@ -53,15 +60,44 @@ class NetworkActor(
         .onMessage(this::handleStart)
         .onMessage(this::handleCreateConnection)
         .onMessage(this::handleDisconnected)
+        .onMessage(this::handleSendToAll)
         .build()
 
+    private var ticks: Int = 0
+
     private fun handleTick(tick: Command.Tick): Behavior<Command> {
-        connections.values.forEach { it.tell(PlayConnection.Command.SendPacket(KeepAliveClient(System.currentTimeMillis()))) }
+        var latencyPacket: PlayerInfo? = null
+        if (ticks % 20 == 0) {
+            val uuids = connections.keys.toTypedArray()
+            val pings = IntArray(uuids.size)
+            uuids.forEachIndexed { index, uuid ->
+                pings[index] = 1
+            }
+            latencyPacket = PlayerInfo.updateLatency(
+                uuids,
+                pings
+            )
+        }
+        connections.values.forEach {
+            it.tell(PlayConnection.Command.SendPacket(KeepAliveClient(System.currentTimeMillis())))
+            if (ticks % 20 == 0) {
+                it.tell(PlayConnection.Command.SendPacket(latencyPacket!!))
+            }
+        }
+
+        ticks++
 
         tick.replyTo.tell(Command.Tick.Tock(context.self))
         return Behaviors.same()
     }
 
+    private fun handleSendToAll(send: Command.SendToAll): Behavior<Command> {
+        connections.values.forEach {
+            it.tell(PlayConnection.Command.SendPacket(send.packet))
+        }
+
+        return Behaviors.same()
+    }
     private fun handleStart(start: Command.Start): Behavior<Command> {
         val properties = server.properties
         val bossGroup: EventLoopGroup = NioEventLoopGroup()

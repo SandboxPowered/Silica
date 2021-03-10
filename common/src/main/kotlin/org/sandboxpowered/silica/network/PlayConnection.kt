@@ -18,6 +18,7 @@ import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.util.onMessage
 import org.sandboxpowered.silica.world.SilicaWorld
 import org.sandboxpowered.silica.world.util.BlocTree
+import java.util.*
 import kotlin.reflect.KClass
 import com.artemis.World as ArtemisWorld
 
@@ -37,8 +38,9 @@ class PlayConnection private constructor(
         class ReceivePacket(val packet: PacketPlay) : Command()
         class SendPacket(val packet: PacketPlay) : Command()
         class ReceiveWorld(val blocks: BlocTree) : Command()
-        class ReceivePlayer(val entity: Int, val world: SilicaWorld) : Command()
+        class ReceivePlayer(val gameProfiles: Array<GameProfile>, val entity: Int, val world: SilicaWorld) : Command()
         class Disconnected(val profile: GameProfile) : Command()
+
         object Login : Command()
     }
 
@@ -77,7 +79,7 @@ class PlayConnection private constructor(
 
             val entity = playerManager.create(packetHandler.connection.profile)
 
-            Command.ReceivePlayer(entity, it)
+            Command.ReceivePlayer(playerManager.getOnlinePlayerProfiles(), entity, it)
         }, context.self))
         return Behaviors.same()
     }
@@ -155,8 +157,15 @@ class PlayConnection private constructor(
         packetHandler.sendPacket(DeclareCommands())
         packetHandler.sendPacket(UnlockRecipes())
         packetHandler.sendPacket(SetPlayerPositionAndLook(8.0, 8.0, 8.0, 0f, 0f, 0.toByte(), 0))
-        packetHandler.sendPacket(PlayerInfo(0))
-        packetHandler.sendPacket(PlayerInfo(2))
+        val gamemodes = IntArray(player.gameProfiles.size)
+        val pings = IntArray(player.gameProfiles.size)
+        player.gameProfiles.forEachIndexed { index, uuid ->
+            gamemodes[index] = 1
+            pings[index] = 1
+        }
+        server.network.tell(NetworkActor.Command.SendToAll(PlayerInfo.addPlayer(
+            player.gameProfiles,gamemodes,pings
+        )))
         packetHandler.sendPacket(UpdateChunkPosition(0, 0))
 
         server.world.tell(
@@ -192,7 +201,7 @@ class PlayConnection private constructor(
 
 }
 
-private inline fun <reified T : BaseSystem> ArtemisWorld.getSystem(): T {
+inline fun <reified T : BaseSystem> ArtemisWorld.getSystem(): T {
     return getSystem(T::class.java)
 }
 

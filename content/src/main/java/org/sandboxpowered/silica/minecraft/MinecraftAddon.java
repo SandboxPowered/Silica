@@ -9,8 +9,10 @@ import org.sandboxpowered.api.block.SlabBlock;
 import org.sandboxpowered.api.item.BaseItem;
 import org.sandboxpowered.api.item.Item;
 import org.sandboxpowered.api.registry.Registrar;
+import org.sandboxpowered.api.resources.ResourceService;
 import org.sandboxpowered.silica.minecraft.blocks.*;
 import org.sandboxpowered.silica.minecraft.fluid.EmptyFluid;
+import org.sandboxpowered.silica.minecraft.items.RedstoneDustItem;
 
 import java.util.Collections;
 import java.util.Locale;
@@ -18,6 +20,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static org.sandboxpowered.api.block.Block.Settings.builder;
+import static org.sandboxpowered.api.resources.ResourceConstants.*;
 
 public class MinecraftAddon implements Addon {
     @Override
@@ -30,6 +33,41 @@ public class MinecraftAddon implements Addon {
         registerBlocks(registrar);
         registerItems(registrar);
         registerFluids(registrar);
+        registrar.useRegistrarService(ResourceService.class,
+                this::registerResources,
+                () -> api.getLog().error("Resource Service unavailable, no resources will exist.")
+        );
+    }
+
+
+    public void registerResources(ResourceService service) {
+        service.add(IRON,
+                ORE,
+                BLOCK,
+                INGOT,
+                NUGGET
+        );
+        service.add(GOLD,
+                ORE,
+                BLOCK,
+                INGOT,
+                NUGGET
+        );
+        service.add(EMERALD,
+                ORE,
+                BLOCK,
+                GEM
+        );
+        service.add(DIAMOND,
+                ORE,
+                BLOCK,
+                GEM
+        );
+        service.add(REDSTONE,
+                ORE,
+                BLOCK
+        );
+        service.add(REDSTONE, DUST, new RedstoneDustItem(new Item.Settings()));
     }
 
     public void registerBlocks(Registrar registrar) {
@@ -59,6 +97,8 @@ public class MinecraftAddon implements Addon {
         registrar.register("netherrack", new BaseBlock(builder(Materials.STONE).build()));
         registrar.register("glowstone", new BaseBlock(builder(Materials.GLASS).setLuminance(15).build()));
         registerWithExtra(registrar, "blackstone", new BaseBlock(builder(Materials.STONE).build()), extrasWithWall);
+        registerWithExtra(registrar, "quartz", new BaseBlock(builder(Materials.STONE).build()), baseExtras);
+        registerWithExtra(registrar, "smooth_quartz", new BaseBlock(builder(Materials.STONE).build()), baseExtras);
         registerWithExtra(registrar, "polished_blackstone", new BaseBlock(builder(Materials.STONE).build()), extrasWithWall);
         registerWithExtraPluraliseNormal(registrar, "polished_blackstone_brick", new BaseBlock(builder(Materials.STONE).build()), extrasWithWall);
         registerWithExtraPluraliseNormal(registrar, "nether_brick", new BaseBlock(builder(Materials.STONE).build()), extrasWithWall);

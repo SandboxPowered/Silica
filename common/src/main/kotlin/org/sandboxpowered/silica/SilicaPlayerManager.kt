@@ -8,8 +8,7 @@ import com.artemis.utils.IntBag
 import com.mojang.authlib.GameProfile
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
-import it.unimi.dsi.fastutil.objects.Object2IntFunction
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
+import it.unimi.dsi.fastutil.objects.*
 import org.sandboxpowered.api.util.text.Text
 import org.sandboxpowered.silica.component.PlayerComponent
 import org.sandboxpowered.silica.component.PositionComponent
@@ -22,6 +21,8 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
     private val uuidToEntityId: Object2IntFunction<UUID> =
         Object2IntOpenHashMap<UUID>().apply { defaultReturnValue(-1) }
     private val entityToUuid: Int2ObjectFunction<UUID> = Int2ObjectOpenHashMap()
+    val onlinePlayers: ObjectSet<UUID> = ObjectOpenHashSet()
+    val onlinePlayerProfiles: Object2ObjectMap<UUID,GameProfile> = Object2ObjectOpenHashMap()
     private val entitiesToDelete = IntBag()
 
     @Wire
@@ -35,10 +36,8 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
         return null
     }
 
-    var onlinePlayers: Int = 0
-
     override fun processSystem() {
-        onlinePlayers = 1
+
     }
 
     fun getPlayerId(uuid: UUID): Int {
@@ -63,7 +62,8 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
     }
 
     fun disconnect(profile: GameProfile) {
-        onlinePlayers--
+        onlinePlayers.remove(profile.id)
+        onlinePlayerProfiles.remove(profile.id)
 
         entityToUuid.remove(uuidToEntityId.removeInt(profile.id))
     }
@@ -76,7 +76,8 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
         val player = playerComponentMapper.get(id)!!
         player.profile = profile
 
-        onlinePlayers++
+        onlinePlayers.add(profile.id)
+        onlinePlayerProfiles.put(profile.id, profile)
 
         uuidToEntityId[profile.id] = id
         entityToUuid[id] = profile.id
@@ -85,6 +86,14 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
 
     fun getPosition(ent: Int): PositionComponent {
         return positionComponentMapper.get(ent)
+    }
+
+    fun getOnlinePlayers(): Array<UUID> {
+        return onlinePlayers.toTypedArray()
+    }
+
+    fun getOnlinePlayerProfiles(): Array<GameProfile> {
+        return onlinePlayerProfiles.values.toTypedArray()
     }
 }
 
