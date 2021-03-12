@@ -11,6 +11,7 @@ import com.artemis.EntityEdit
 import com.mojang.authlib.GameProfile
 import org.sandboxpowered.api.util.Identity
 import org.sandboxpowered.silica.SilicaPlayerManager
+import org.sandboxpowered.silica.component.VanillaPlayerInput
 import org.sandboxpowered.silica.nbt.CompoundTag
 import org.sandboxpowered.silica.network.play.clientbound.*
 import org.sandboxpowered.silica.server.NetworkActor
@@ -18,7 +19,7 @@ import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.util.onMessage
 import org.sandboxpowered.silica.world.SilicaWorld
 import org.sandboxpowered.silica.world.util.BlocTree
-import java.util.*
+import java.time.Duration
 import kotlin.reflect.KClass
 import com.artemis.World as ArtemisWorld
 
@@ -38,8 +39,10 @@ class PlayConnection private constructor(
         class ReceivePacket(val packet: PacketPlay) : Command()
         class SendPacket(val packet: PacketPlay) : Command()
         class ReceiveWorld(val blocks: BlocTree) : Command()
-        class ReceivePlayer(val gameProfiles: Array<GameProfile>, val entity: Int, val world: SilicaWorld) : Command()
+        class ReceivePlayer(val gameProfiles: Array<GameProfile>, val input: VanillaPlayerInput) : Command()
         class Disconnected(val profile: GameProfile) : Command()
+
+        class FailedPlayerCreation(val reason: String) : Command()
 
         object Login : Command()
     }
@@ -49,11 +52,14 @@ class PlayConnection private constructor(
         .onMessage(this::handleSend)
         .onMessage(this::handleReceive)
         .onMessage(this::handleReceivePlayer)
+        .onMessage(this::handleFailedToCreatePlayer)
         .onMessage(this::handleReceiveWorld)
         .onMessage(this::handleDisconnected)
         .build()
 
     private val logger = context.log
+    // TODO: apply at the right time + unsafe to keep a ref to a component
+    lateinit var playerInput: VanillaPlayerInput
 
     init {
         this.packetHandler.setPlayConnection(context.self)
@@ -73,18 +79,25 @@ class PlayConnection private constructor(
 
     @Suppress("UNUSED_PARAMETER")
     private fun handleLoginStart(login: Command.Login): Behavior<Command> {
-        server.world.tell(SilicaWorld.Command.AskSilica({
-
-            val playerManager = it.artemisWorld.getSystem<SilicaPlayerManager>()
-
-            val entity = playerManager.create(packetHandler.connection.profile)
-
-            Command.ReceivePlayer(playerManager.getOnlinePlayerProfiles(), entity, it)
-        }, context.self))
+        context.ask(Command.ReceivePlayer::class.java, server.world, Duration.ofSeconds(1),
+            {
+                SilicaWorld.Command.DelayedCommand.createPlayer(
+                    packetHandler.connection.profile,
+                    it
+                ) { input, profiles ->
+                    Command.ReceivePlayer(profiles, input)
+                }
+            },
+            { receive, throwable ->
+                if (throwable != null) Command.FailedPlayerCreation("${throwable.javaClass.name}: ${throwable.message}")
+                else receive
+            }
+        )
         return Behaviors.same()
     }
 
     private fun handleReceivePlayer(player: Command.ReceivePlayer): Behavior<Command> {
+        this.playerInput = player.input
         val overworld = Identity.of("minecraft", "overworld")
         val codec = CompoundTag()
         val dimReg = CompoundTag()
@@ -156,7 +169,8 @@ class PlayConnection private constructor(
         packetHandler.sendPacket(EntityStatus())
         packetHandler.sendPacket(DeclareCommands())
         packetHandler.sendPacket(UnlockRecipes())
-        packetHandler.sendPacket(SetPlayerPositionAndLook(8.0, 8.0, 8.0, 0f, 0f, 0.toByte(), 0))
+        val currentPos = player.input.wantedPosition
+        packetHandler.sendPacket(SetPlayerPositionAndLook(currentPos.x, currentPos.y, currentPos.z, 0f, 0f, 0.toByte(), 0))
         val gamemodes = IntArray(player.gameProfiles.size)
         val pings = IntArray(player.gameProfiles.size)
         player.gameProfiles.forEachIndexed { index, uuid ->
@@ -177,20 +191,28 @@ class PlayConnection private constructor(
 
         return Behaviors.same()
     }
+
     private fun handleDisconnected(disconnected: Command.Disconnected): Behavior<Command> {
         server.network.tell(NetworkActor.Command.Disconnected(disconnected.profile))
-        server.world.tell(SilicaWorld.Command.PerformSilica {
+        server.world.tell(SilicaWorld.Command.DelayedCommand.PerformSilica {
             it.artemisWorld.getSystem<SilicaPlayerManager>().disconnect(disconnected.profile)
         })
+        return Behaviors.stopped()
+    }
+
+    private fun handleFailedToCreatePlayer(failure: Command.FailedPlayerCreation): Behavior<Command> {
+        // TODO: disconnect
+        logger.error("Could not create player: ${failure.reason}")
         return Behaviors.same()
     }
+
     private fun handleReceiveWorld(world: Command.ReceiveWorld): Behavior<Command> {
         logger.info("Sending world")
         for (x in -2..2) {
             for (z in -2..2) {
                 val time = System.currentTimeMillis()
                 packetHandler.sendPacket(ChunkData(x, z, world.blocks, server.stateManager::toVanillaId))
-                logger.info("Took {}ms to create Chunk Data for {} {}", System.currentTimeMillis()-time, x, z)
+                logger.info("Took {}ms to create Chunk Data for {} {}", System.currentTimeMillis() - time, x, z)
                 packetHandler.sendPacket(UpdateLight(x, z, true))
             }
         }
@@ -205,6 +227,6 @@ inline fun <reified T : BaseSystem> ArtemisWorld.getSystem(): T {
     return getSystem(T::class.java)
 }
 
-private fun <T : Component> EntityEdit.create(kClass: KClass<T>) : T {
+private fun <T : Component> EntityEdit.create(kClass: KClass<T>): T {
     return create(kClass.java)
 }

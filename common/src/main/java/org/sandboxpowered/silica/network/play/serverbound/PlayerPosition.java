@@ -41,12 +41,6 @@ public class PlayerPosition implements PacketPlay {
 
     @Override
     public void handle(PacketHandler packetHandler, PlayConnection connection) {
-        connection.getServer().getWorld().tell(new SilicaWorld.Command.PerformSilica(
-                silicaWorld -> {
-                    SilicaPlayerManager manager = silicaWorld.getArtemisWorld().getSystem(SilicaPlayerManager.class);
-                    manager.getPosition(manager.getPlayerId(packetHandler.connection.getProfile())).getPos().set(x, y, z);
-                    return null;
-                }
-        ));
+        connection.playerInput.getWantedPosition().set(x, y, z);
     }
 }

@@ -2,7 +2,6 @@ package org.sandboxpowered.silica
 
 import com.artemis.*
 import com.artemis.annotations.All
-import com.artemis.annotations.One
 import com.artemis.annotations.Wire
 import com.artemis.utils.IntBag
 import com.mojang.authlib.GameProfile
@@ -11,24 +10,26 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.*
 import org.sandboxpowered.api.util.text.Text
 import org.sandboxpowered.silica.component.PlayerComponent
+import org.sandboxpowered.silica.component.VanillaPlayerInput
 import org.sandboxpowered.silica.component.PositionComponent
 import java.net.SocketAddress
 import java.util.*
-import kotlin.reflect.KClass
 
 @All(PlayerComponent::class, PositionComponent::class)
 class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
-    private val uuidToEntityId: Object2IntFunction<UUID> =
-        Object2IntOpenHashMap<UUID>().apply { defaultReturnValue(-1) }
+    private val uuidToEntityId: Object2IntFunction<UUID> = Object2IntOpenHashMap<UUID>()
+        .apply { defaultReturnValue(UNKNOWN_ID) }
     private val entityToUuid: Int2ObjectFunction<UUID> = Int2ObjectOpenHashMap()
     val onlinePlayers: ObjectSet<UUID> = ObjectOpenHashSet()
     val onlinePlayerProfiles: Object2ObjectMap<UUID,GameProfile> = Object2ObjectOpenHashMap()
     private val entitiesToDelete = IntBag()
 
     @Wire
-    lateinit var playerComponentMapper: ComponentMapper<PlayerComponent>
+    private lateinit var playerMapper: ComponentMapper<PlayerComponent>
     @Wire
-    lateinit var positionComponentMapper: ComponentMapper<PositionComponent>
+    private lateinit var positionMapper: ComponentMapper<PositionComponent>
+    @Wire
+    private lateinit var playerInputMapper: ComponentMapper<VanillaPlayerInput>
 
     fun checkDisconnectReason(address: SocketAddress, profile: GameProfile): Text? {
         if (profile.isLegacy)
@@ -57,6 +58,7 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
 
         builder.add<PlayerComponent>()
         builder.add<PositionComponent>()
+        builder.add<VanillaPlayerInput>()
 
         playerArchetype = builder.build(world, "player")
     }
@@ -68,24 +70,32 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
         entityToUuid.remove(uuidToEntityId.removeInt(profile.id))
     }
 
-    fun create(profile: GameProfile): Int {
+    fun create(profile: GameProfile): VanillaPlayerInput {
         val existing = uuidToEntityId.getInt(profile.id)
-        if (existing != -1) return existing
+        if (existing != UNKNOWN_ID) return playerInputMapper[existing]
 
         val id = world.create(playerArchetype)
-        val player = playerComponentMapper.get(id)!!
+        val player = playerMapper.get(id)!!
         player.profile = profile
 
         onlinePlayers.add(profile.id)
-        onlinePlayerProfiles.put(profile.id, profile)
+        onlinePlayerProfiles[profile.id] = profile
 
         uuidToEntityId[profile.id] = id
         entityToUuid[id] = profile.id
-        return id
+
+        val playerPosition = positionMapper[id]
+        playerPosition.pos.set(8.0, 8.0, 8.0)
+
+        val playerInput = playerInputMapper[id]
+        playerInput.initialize(id, profile)
+        playerInput.wantedPosition.set(playerPosition.pos)
+
+        return playerInput
     }
 
-    fun getPosition(ent: Int): PositionComponent {
-        return positionComponentMapper.get(ent)
+    fun getVanillaInput(ent: Int): VanillaPlayerInput {
+        return playerInputMapper.get(ent)
     }
 
     fun getOnlinePlayers(): Array<UUID> {
@@ -94,6 +104,10 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
 
     fun getOnlinePlayerProfiles(): Array<GameProfile> {
         return onlinePlayerProfiles.values.toTypedArray()
+    }
+
+    private companion object {
+        private const val UNKNOWN_ID = -1
     }
 }
 

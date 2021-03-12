@@ -2,7 +2,6 @@ package org.sandboxpowered.silica.network;
 
 import akka.actor.typed.ActorRef;
 import io.netty.channel.*;
-import org.sandboxpowered.silica.server.NetworkActor;
 
 import java.net.SocketAddress;
 import java.util.LinkedList;

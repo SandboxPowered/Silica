@@ -1,7 +1,6 @@
 package org.sandboxpowered.silica.network.play.serverbound;
 
 import org.sandboxpowered.silica.SilicaPlayerManager;
-import org.sandboxpowered.silica.component.PositionComponent;
 import org.sandboxpowered.silica.network.PacketByteBuf;
 import org.sandboxpowered.silica.network.PacketHandler;
 import org.sandboxpowered.silica.network.PacketPlay;
@@ -50,12 +49,9 @@ public class PlayerPositionAndRotation implements PacketPlay {
 
     @Override
     public void handle(PacketHandler packetHandler, PlayConnection connection) {
-        connection.getServer().getWorld().tell(new SilicaWorld.Command.PerformSilica(
-                silicaWorld -> {
-                    SilicaPlayerManager manager = silicaWorld.getArtemisWorld().getSystem(SilicaPlayerManager.class);
-                    manager.getPosition(manager.getPlayerId(packetHandler.connection.getProfile())).getPos().set(x, y, z);
-                    return null;
-                }
-        ));
+        final var input = connection.playerInput;
+        input.getWantedPosition().set(x, y, z);
+        input.setWantedYaw(this.yaw);
+        input.setWantedPitch(this.pitch);
     }
 }

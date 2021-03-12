@@ -6,8 +6,8 @@ import akka.actor.typed.javadsl.AbstractBehavior
 import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
-import com.artemis.WorldConfiguration
 import com.artemis.WorldConfigurationBuilder
+import com.mojang.authlib.GameProfile
 import org.sandboxpowered.api.block.Blocks
 import org.sandboxpowered.api.ecs.CapabilityManager
 import org.sandboxpowered.api.ecs.ComponentMapper
@@ -23,12 +23,14 @@ import org.sandboxpowered.api.world.BlockFlag
 import org.sandboxpowered.api.world.World
 import org.sandboxpowered.api.world.WorldReader
 import org.sandboxpowered.silica.SilicaPlayerManager
+import org.sandboxpowered.silica.component.VanillaPlayerInput
+import org.sandboxpowered.silica.network.getSystem
+import org.sandboxpowered.silica.system.VanillaInputSystem
 import org.sandboxpowered.silica.util.onMessage
 import org.sandboxpowered.silica.world.gen.TerrainGenerator
 import org.sandboxpowered.silica.world.util.BlocTree
 import org.sandboxpowered.silica.world.util.iterateCube
 import java.util.*
-import kotlin.collections.HashMap
 import com.artemis.World as ArtemisWorld
 import org.sandboxpowered.silica.world.gen.TerrainGenerator.Command.Generate as CommandGenerate
 
@@ -40,7 +42,8 @@ class SilicaWorld private constructor(private val side: Side) : World {
 
     init {
         val config = WorldConfigurationBuilder()
-        config.with(SilicaPlayerManager(10, ))
+        config.with(VanillaInputSystem())
+        config.with(SilicaPlayerManager(10))
         artemisWorld = ArtemisWorld(config.build())
     }
 
@@ -100,7 +103,7 @@ class SilicaWorld private constructor(private val side: Side) : World {
         return false
     }
 
-    // TODO: Tmp. Should be read-only, and network should be actorized
+    // TODO: Tmp. Should be read-only
     fun getTerrain(): BlocTree = this.blocks
 
     companion object {
@@ -118,16 +121,48 @@ class SilicaWorld private constructor(private val side: Side) : World {
             class Tock(val done: ActorRef<Command>)
         }
 
-        class Perform(val body: (World) -> Unit) : Command()
-        class PerformSilica(val body: (SilicaWorld) -> Unit) : Command()
-        class AskSilica<T>(val body: (SilicaWorld) -> T, val replyTo: ActorRef<T>) : Command()
+        /**
+         * Only to be used for reading data !
+         */
         class Ask<T>(val body: (WorldReader) -> T, val replyTo: ActorRef<T>) : Command()
+
+        /**
+         * Will be processed during next tick
+         */
+        sealed class DelayedCommand<F : World, R : Any>(val body: (F) -> R) : Command() {
+            class Perform(body: (World) -> Unit) : DelayedCommand<World, Unit>(body)
+
+            /**
+             * To be avoided when possible
+             */
+            class PerformSilica(body: (SilicaWorld) -> Unit) : DelayedCommand<SilicaWorld, Unit>(body)
+
+            /**
+             * To be avoided when possible
+             */
+            class AskSilica<T : Any>(body: (SilicaWorld) -> T, val replyTo: ActorRef<T>) :
+                DelayedCommand<SilicaWorld, T>(body)
+
+            companion object {
+                inline fun <T : Any> createPlayer(
+                    gameProfile: GameProfile,
+                    replyTo: ActorRef<T>,
+                    crossinline transform: (VanillaPlayerInput, Array<GameProfile>) -> T
+                ) = AskSilica(
+                    {
+                        val playerManager = it.artemisWorld.getSystem<SilicaPlayerManager>()
+                        transform(playerManager.create(gameProfile), playerManager.getOnlinePlayerProfiles())
+                    },
+                    replyTo
+                )
+            }
+        }
     }
 
     private class Actor(private val world: SilicaWorld, context: ActorContext<Command>) :
         AbstractBehavior<Command>(context) {
 
-        private val commandQueue: Deque<Command> = LinkedList()
+        private val commandQueue: Deque<Command.DelayedCommand<*, *>> = LinkedList()
         private val generator: ActorRef<TerrainGenerator.Command> =
             context.spawn(TerrainGenerator.actor(), "terrain_generator")
         private var generated = false
@@ -135,7 +170,6 @@ class SilicaWorld private constructor(private val side: Side) : World {
         override fun createReceive(): Receive<Command> = newReceiveBuilder()
             .onMessage(this::handleTick)
             .onMessage(this::handleAsk)
-            .onMessage(this::handleAskSilica)
             .onMessage(this::handleDelayedCommand)
             .build()
 
@@ -147,10 +181,8 @@ class SilicaWorld private constructor(private val side: Side) : World {
             this.processCommandQueue()
 
             val w = world.artemisWorld
-            if (w != null) {
-                w.delta = tick.delta
-                w.process()
-            }
+            w.delta = tick.delta
+            w.process()
             ++world.worldTicks
 
             tick.replyTo.tell(Command.Tick.Tock(context.self))
@@ -161,23 +193,24 @@ class SilicaWorld private constructor(private val side: Side) : World {
             var next = commandQueue.pollFirst()
             while (next != null) {
                 when (next) {
-                    is Command.Perform -> next.body(world)
-                    is Command.PerformSilica -> next.body(world)
+                    is Command.DelayedCommand.Perform -> next.body(world)
+                    is Command.DelayedCommand.PerformSilica -> next.body(world)
+                    is Command.DelayedCommand.AskSilica<*> -> {
+                        @Suppress("UNCHECKED_CAST")
+                        val replyTo = next.replyTo as ActorRef<Any>
+                        replyTo.tell(next.body(world))
+                    }
                     else -> error("Unhandled command in queue : $next")
                 }
                 next = commandQueue.pollFirst()
             }
         }
 
-        private fun handleDelayedCommand(command: Command): Behavior<Command> {
+        private fun handleDelayedCommand(command: Command.DelayedCommand<*, *>): Behavior<Command> {
             commandQueue += command
             return Behaviors.same()
         }
 
-        private fun handleAskSilica(ask: Command.AskSilica<Any>): Behavior<Command> {
-            ask.replyTo.tell(ask.body(world))
-            return Behaviors.same()
-        }
         private fun handleAsk(ask: Command.Ask<Any>): Behavior<Command> {
             ask.replyTo.tell(ask.body(world))
             return Behaviors.same()
