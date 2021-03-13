@@ -1,10 +1,7 @@
 package org.sandboxpowered.silica.network.play.clientbound;
 
 import org.sandboxpowered.api.util.Identity;
-import org.sandboxpowered.silica.network.PacketByteBuf;
-import org.sandboxpowered.silica.network.PacketHandler;
-import org.sandboxpowered.silica.network.PacketPlay;
-import org.sandboxpowered.silica.network.PlayConnection;
+import org.sandboxpowered.silica.network.*;
 import org.sandboxpowered.silica.util.Hardcoding;
 
 public class DeclareTags implements PacketPlay {
@@ -30,7 +27,7 @@ public class DeclareTags implements PacketPlay {
     }
 
     @Override
-    public void handle(PacketHandler packetHandler, PlayConnection connection) {
+    public void handle(PacketHandler packetHandler, PlayContext context) {
 
     }
 }

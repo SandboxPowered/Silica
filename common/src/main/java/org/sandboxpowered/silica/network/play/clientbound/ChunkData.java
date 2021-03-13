@@ -5,10 +5,7 @@ import io.netty.buffer.Unpooled;
 import kotlin.jvm.functions.Function1;
 import org.sandboxpowered.api.state.BlockState;
 import org.sandboxpowered.silica.nbt.CompoundTag;
-import org.sandboxpowered.silica.network.PacketByteBuf;
-import org.sandboxpowered.silica.network.PacketHandler;
-import org.sandboxpowered.silica.network.PacketPlay;
-import org.sandboxpowered.silica.network.PlayConnection;
+import org.sandboxpowered.silica.network.*;
 import org.sandboxpowered.silica.network.play.clientbound.world.VanillaChunkSection;
 import org.sandboxpowered.silica.network.util.BitPackedLongArray;
 import org.sandboxpowered.silica.world.util.BlocTree;
@@ -87,7 +84,7 @@ public class ChunkData implements PacketPlay {
     }
 
     @Override
-    public void handle(PacketHandler packetHandler, PlayConnection connection) {
+    public void handle(PacketHandler packetHandler, PlayContext context) {
 
     }
 }

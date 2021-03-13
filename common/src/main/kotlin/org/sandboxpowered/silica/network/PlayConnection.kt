@@ -24,7 +24,7 @@ import kotlin.reflect.KClass
 import com.artemis.World as ArtemisWorld
 
 class PlayConnection private constructor(
-    val server: SilicaServer,
+    private val server: SilicaServer,
     private val packetHandler: PacketHandler,
     context: ActorContext<Command>
 ) : AbstractBehavior<PlayConnection.Command>(context) {
@@ -59,14 +59,18 @@ class PlayConnection private constructor(
 
     private val logger = context.log
     // TODO: apply at the right time + unsafe to keep a ref to a component
-    lateinit var playerInput: VanillaPlayerInput
+    private lateinit var playerInput: VanillaPlayerInput
 
     init {
         this.packetHandler.setPlayConnection(context.self)
     }
 
     private fun handleReceive(receive: Command.ReceivePacket): Behavior<Command> {
-        receive.packet.handle(this.packetHandler, this)
+        receive.packet.handle(this.packetHandler, PlayContext {
+            server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { _ ->
+                it(playerInput)
+            })
+        })
 
         return Behaviors.same()
     }

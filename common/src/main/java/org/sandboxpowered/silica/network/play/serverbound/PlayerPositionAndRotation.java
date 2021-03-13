@@ -1,11 +1,6 @@
 package org.sandboxpowered.silica.network.play.serverbound;
 
-import org.sandboxpowered.silica.SilicaPlayerManager;
-import org.sandboxpowered.silica.network.PacketByteBuf;
-import org.sandboxpowered.silica.network.PacketHandler;
-import org.sandboxpowered.silica.network.PacketPlay;
-import org.sandboxpowered.silica.network.PlayConnection;
-import org.sandboxpowered.silica.world.SilicaWorld;
+import org.sandboxpowered.silica.network.*;
 
 public class PlayerPositionAndRotation implements PacketPlay {
     private double x;
@@ -48,10 +43,11 @@ public class PlayerPositionAndRotation implements PacketPlay {
     }
 
     @Override
-    public void handle(PacketHandler packetHandler, PlayConnection connection) {
-        final var input = connection.playerInput;
-        input.getWantedPosition().set(x, y, z);
-        input.setWantedYaw(this.yaw);
-        input.setWantedPitch(this.pitch);
+    public void handle(PacketHandler packetHandler, PlayContext context) {
+        context.mutatePlayerJava(input -> {
+            input.getWantedPosition().set(x, y, z);
+            input.setWantedYaw(this.yaw);
+            input.setWantedPitch(this.pitch);
+        });
     }
 }

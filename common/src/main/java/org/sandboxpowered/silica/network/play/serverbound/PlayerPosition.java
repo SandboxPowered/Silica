@@ -1,11 +1,7 @@
 package org.sandboxpowered.silica.network.play.serverbound;
 
-import org.sandboxpowered.silica.SilicaPlayerManager;
-import org.sandboxpowered.silica.network.PacketByteBuf;
-import org.sandboxpowered.silica.network.PacketHandler;
-import org.sandboxpowered.silica.network.PacketPlay;
-import org.sandboxpowered.silica.network.PlayConnection;
-import org.sandboxpowered.silica.world.SilicaWorld;
+import org.sandboxpowered.silica.component.VanillaPlayerInput;
+import org.sandboxpowered.silica.network.*;
 
 public class PlayerPosition implements PacketPlay {
     private double x;
@@ -40,7 +36,7 @@ public class PlayerPosition implements PacketPlay {
     }
 
     @Override
-    public void handle(PacketHandler packetHandler, PlayConnection connection) {
-        connection.playerInput.getWantedPosition().set(x, y, z);
+    public void handle(PacketHandler packetHandler, PlayContext context) {
+        context.mutatePlayerJava(input -> input.getWantedPosition().set(x, y, z));
     }
 }
