@@ -61,16 +61,16 @@ class PlayConnection private constructor(
     // TODO: apply at the right time + unsafe to keep a ref to a component
     private lateinit var playerInput: VanillaPlayerInput
 
+    private val playContext by lazy { PlayContext {
+        server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { _ -> it(playerInput) })
+    } }
+
     init {
         this.packetHandler.setPlayConnection(context.self)
     }
 
     private fun handleReceive(receive: Command.ReceivePacket): Behavior<Command> {
-        receive.packet.handle(this.packetHandler, PlayContext {
-            server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { _ ->
-                it(playerInput)
-            })
-        })
+        receive.packet.handle(this.packetHandler, this.playContext)
 
         return Behaviors.same()
     }
