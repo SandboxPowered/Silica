@@ -15,14 +15,19 @@ import org.sandboxpowered.silica.util.math.component3
 import org.sandboxpowered.silica.world.util.OcTree
 
 /**
- * Wire this to get spatial lookup for entities
+ * [Wire] this to get spatial lookup for entities
  */
 interface Entity3dMap {
 
     /**
-     * Get an [IntBag] containing the IDs of all entities within [box] at [pos]
+     * Get an [IntBag] containing the IDs of all living entities within [box] at [pos]
      */
     fun getLiving(pos: Vector3fc, box: Vector3fc): IntBag
+
+    /**
+     * Get an [IntBag] containing the IDs of all players within [box] at [pos]
+     */
+    fun getPlayers(pos: Vector3fc, box: Vector3fc): IntBag
 }
 
 @All(PositionComponent::class, HitboxComponent::class)
@@ -69,10 +74,14 @@ class Entity3dMapSystem(
         )
     }
 
-    override fun getLiving(pos: Vector3fc, box: Vector3fc): IntBag {
+    override fun getLiving(pos: Vector3fc, box: Vector3fc) = get(pos, box, livingFlag)
+
+    override fun getPlayers(pos: Vector3fc, box: Vector3fc) = get(pos, box, playerFlag)
+
+    private fun get(pos: Vector3fc, box: Vector3fc, flags: Long): IntBag {
         val (x, y, z) = pos
         val (w, h, d) = box
 
-        return tree.getExact(IntBag(), x, y, z, w,  h, d, livingFlag)
+        return tree.getExact(IntBag(), x, y, z, w, h, d, flags)
     }
 }
