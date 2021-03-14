@@ -25,10 +25,14 @@ import org.sandboxpowered.api.world.WorldReader
 import org.sandboxpowered.silica.SilicaPlayerManager
 import org.sandboxpowered.silica.component.VanillaPlayerInput
 import org.sandboxpowered.silica.network.getSystem
+import org.sandboxpowered.silica.system.Entity3dMap
+import org.sandboxpowered.silica.system.Entity3dMapSystem
 import org.sandboxpowered.silica.system.VanillaInputSystem
 import org.sandboxpowered.silica.util.onMessage
+import org.sandboxpowered.silica.util.registerAs
 import org.sandboxpowered.silica.world.gen.TerrainGenerator
 import org.sandboxpowered.silica.world.util.BlocTree
+import org.sandboxpowered.silica.world.util.OcTree
 import org.sandboxpowered.silica.world.util.iterateCube
 import java.util.*
 import com.artemis.World as ArtemisWorld
@@ -44,7 +48,16 @@ class SilicaWorld private constructor(private val side: Side) : World {
         val config = WorldConfigurationBuilder()
         config.with(VanillaInputSystem())
         config.with(SilicaPlayerManager(10))
-        artemisWorld = ArtemisWorld(config.build())
+        val entityMap = Entity3dMapSystem(
+            OcTree(
+                WORLD_MIN.toFloat(), WORLD_MIN.toFloat(), WORLD_MIN.toFloat(),
+                WORLD_SIZE.toFloat(), WORLD_SIZE.toFloat(), WORLD_SIZE.toFloat()
+            )
+        )
+        config.with(entityMap)
+        artemisWorld = ArtemisWorld(config.build()
+            .registerAs<Entity3dMap>(entityMap)
+        )
     }
 
     override fun getBlockState(position: Position): BlockState {
@@ -63,7 +76,6 @@ class SilicaWorld private constructor(private val side: Side) : World {
     override fun getFluidState(position: Position): FluidState {
         return getBlockState(position).fluidState
     }
-
 
     override fun getWorldTime(): Long {
         return worldTicks

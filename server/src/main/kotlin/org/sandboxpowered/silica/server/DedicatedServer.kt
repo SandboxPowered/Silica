@@ -131,8 +131,7 @@ class DedicatedServer : SilicaServer() {
             .build()
 
         private fun handleTick(tick: Command.Tick): Behavior<Command> {
-            if (currentlyTicking.isNotEmpty()) // boxing
-            {
+            if (currentlyTicking.isNotEmpty()) {
                 val lastTickOffset = System.currentTimeMillis() - lastTickTime
                 if (server.properties.maxTickTime != -1 && lastTickOffset >= server.properties.maxTickTime) {
                     TODO("Terminate server after taking too long")

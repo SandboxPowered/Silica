@@ -9,9 +9,10 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectFunction
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.*
 import org.sandboxpowered.api.util.text.Text
+import org.sandboxpowered.silica.component.HitboxComponent
 import org.sandboxpowered.silica.component.PlayerComponent
-import org.sandboxpowered.silica.component.VanillaPlayerInput
 import org.sandboxpowered.silica.component.PositionComponent
+import org.sandboxpowered.silica.component.VanillaPlayerInput
 import java.net.SocketAddress
 import java.util.*
 
@@ -21,13 +22,18 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
         .apply { defaultReturnValue(UNKNOWN_ID) }
     private val entityToUuid: Int2ObjectFunction<UUID> = Int2ObjectOpenHashMap()
     val onlinePlayers: ObjectSet<UUID> = ObjectOpenHashSet()
-    val onlinePlayerProfiles: Object2ObjectMap<UUID,GameProfile> = Object2ObjectOpenHashMap()
+    val onlinePlayerProfiles: Object2ObjectMap<UUID, GameProfile> = Object2ObjectOpenHashMap()
     private val entitiesToDelete = IntBag()
 
     @Wire
     private lateinit var playerMapper: ComponentMapper<PlayerComponent>
+
     @Wire
     private lateinit var positionMapper: ComponentMapper<PositionComponent>
+
+    @Wire
+    private lateinit var hitboxMapper: ComponentMapper<HitboxComponent>
+
     @Wire
     private lateinit var playerInputMapper: ComponentMapper<VanillaPlayerInput>
 
@@ -58,6 +64,7 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
 
         builder.add<PlayerComponent>()
         builder.add<PositionComponent>()
+        builder.add<HitboxComponent>()
         builder.add<VanillaPlayerInput>()
 
         playerArchetype = builder.build(world, "player")
@@ -86,6 +93,8 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
 
         val playerPosition = positionMapper[id]
         playerPosition.pos.set(8.0, 8.0, 8.0)
+
+        hitboxMapper[id].hitbox.set(0.6, 1.8, 0.6)
 
         val playerInput = playerInputMapper[id]
         playerInput.initialize(id, profile)

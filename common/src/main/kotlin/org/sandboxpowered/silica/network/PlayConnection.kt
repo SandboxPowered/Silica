@@ -100,8 +100,8 @@ class PlayConnection private constructor(
         return Behaviors.same()
     }
 
-    private fun handleReceivePlayer(player: Command.ReceivePlayer): Behavior<Command> {
-        this.playerInput = player.input
+    private fun handleReceivePlayer(receive: Command.ReceivePlayer): Behavior<Command> {
+        this.playerInput = receive.input
         val overworld = Identity.of("minecraft", "overworld")
         val codec = CompoundTag()
         val dimReg = CompoundTag()
@@ -173,16 +173,16 @@ class PlayConnection private constructor(
         packetHandler.sendPacket(EntityStatus())
         packetHandler.sendPacket(DeclareCommands())
         packetHandler.sendPacket(UnlockRecipes())
-        val currentPos = player.input.wantedPosition
+        val currentPos = receive.input.wantedPosition
         packetHandler.sendPacket(SetPlayerPositionAndLook(currentPos.x, currentPos.y, currentPos.z, 0f, 0f, 0.toByte(), 0))
-        val gamemodes = IntArray(player.gameProfiles.size)
-        val pings = IntArray(player.gameProfiles.size)
-        player.gameProfiles.forEachIndexed { index, uuid ->
+        val gamemodes = IntArray(receive.gameProfiles.size)
+        val pings = IntArray(receive.gameProfiles.size)
+        receive.gameProfiles.forEachIndexed { index, uuid ->
             gamemodes[index] = 1
             pings[index] = 1
         }
         server.network.tell(NetworkActor.Command.SendToAll(PlayerInfo.addPlayer(
-            player.gameProfiles,gamemodes,pings
+            receive.gameProfiles,gamemodes,pings
         )))
         packetHandler.sendPacket(UpdateChunkPosition(0, 0))
 

@@ -32,6 +32,9 @@ public class PlayerRotation implements PacketPlay {
 
     @Override
     public void handle(PacketHandler packetHandler, PlayContext context) {
-
+        context.mutatePlayerJava(input -> {
+            input.setWantedYaw(this.yaw);
+            input.setWantedPitch(this.pitch);
+        });
     }
 }
