@@ -10,7 +10,7 @@ import java.util.Queue;
 public class PacketHandler extends SimpleChannelInboundHandler<PacketBase> {
     public final Connection connection;
     private final Queue<PacketPlay> waiting = new LinkedList<>();
-    private ActorRef<PlayConnection.Command> playConnection;
+    private ActorRef<PlayConnection> playConnection;
     private Channel channel;
     private SocketAddress address;
 
@@ -19,7 +19,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<PacketBase> {
         connection.setPacketHandler(this);
     }
 
-    public void setPlayConnection(ActorRef<PlayConnection.Command> playConnection) {
+    public void setPlayConnection(ActorRef<PlayConnection> playConnection) {
         this.playConnection = playConnection;
     }
 
@@ -36,7 +36,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<PacketBase> {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         Protocol protocol = this.channel.attr(Protocol.PROTOCOL_ATTRIBUTE_KEY).get();
         if (protocol == Protocol.PLAY)
-            playConnection.tell(new PlayConnection.Command.Disconnected(connection.getProfile()));
+            playConnection.tell(new PlayConnection.Disconnected(connection.getProfile()));
         super.channelInactive(ctx);
     }
 
@@ -54,9 +54,9 @@ public class PacketHandler extends SimpleChannelInboundHandler<PacketBase> {
                     if (waiting.size() > 0) {
                         PacketPlay read;
                         while ((read = waiting.poll()) != null)
-                            playConnection.tell(new PlayConnection.Command.ReceivePacket(read));
+                            playConnection.tell(new PlayConnection.ReceivePacket(read));
                     }
-                    playConnection.tell(new PlayConnection.Command.ReceivePacket((PacketPlay) msg));
+                    playConnection.tell(new PlayConnection.ReceivePacket((PacketPlay) msg));
                 }
             } else ((Packet) msg).handle(this, connection);
         }

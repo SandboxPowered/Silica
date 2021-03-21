@@ -51,5 +51,5 @@ public abstract class SilicaServer implements Server {
     public abstract StateManager getStateManager();
 
     public abstract ActorRef<SilicaWorld.Command> getWorld();
-    public abstract ActorRef<NetworkActor.Command> getNetwork();
+    public abstract ActorRef<Network> getNetwork();
 }

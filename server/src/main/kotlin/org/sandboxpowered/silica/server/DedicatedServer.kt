@@ -37,7 +37,7 @@ class DedicatedServer : SilicaServer() {
     private val stateManager = StateManager()
     private val acceptVanillaConnections: Boolean
     private lateinit var world: ActorRef<SilicaWorld.Command>
-    private lateinit var network: ActorRef<NetworkActor.Command>
+    private lateinit var network: ActorRef<Network>
     private val stateManagerErrors: Map<StateManager.ErrorType, Set<String>>
 
     init {
@@ -97,10 +97,10 @@ class DedicatedServer : SilicaServer() {
         context: ActorContext<Command>,
         timerScheduler: TimerScheduler<Command>,
         worldInit: (ActorRef<SilicaWorld.Command>) -> Unit,
-        networkInit: (ActorRef<NetworkActor.Command>) -> Unit
+        networkInit: (ActorRef<Network>) -> Unit
     ) : AbstractBehavior<Command>(context) {
         companion object {
-            fun create(server: SilicaServer, worldInit: (ActorRef<SilicaWorld.Command>) -> Unit, networkInit: (ActorRef<NetworkActor.Command>) -> Unit): Behavior<Command> = Behaviors.withTimers { timerScheduler ->
+            fun create(server: SilicaServer, worldInit: (ActorRef<SilicaWorld.Command>) -> Unit, networkInit: (ActorRef<Network>) -> Unit): Behavior<Command> = Behaviors.withTimers { timerScheduler ->
                 Behaviors.setup {
                     DedicatedServerGuardian(server, it, timerScheduler, worldInit, networkInit)
                 }
@@ -111,7 +111,7 @@ class DedicatedServer : SilicaServer() {
         private var skippedTicks = 0
         private var lastTickTime: Long = -1
         private val world: ActorRef<in SilicaWorld.Command> = context.spawn(SilicaWorld.actor(Side.SERVER), "world").apply(worldInit)
-        private val network: ActorRef<in NetworkActor.Command> = context.spawn(NetworkActor.actor(server), "network").apply(networkInit)
+        private val network: ActorRef<in Network> = context.spawn(Network.actor(server), "network").apply(networkInit)
         private val currentlyTicking: Object2LongMap<ActorRef<*>> = Object2LongOpenHashMap(3)
 
         init {
@@ -121,7 +121,7 @@ class DedicatedServer : SilicaServer() {
             timerScheduler.startTimerWithFixedDelay("serverTick", Command.Tick(50f), Duration.ofMillis(50))
 
             // TODO: wait for everything to be ready
-            network.tell(NetworkActor.Command.Start(context.system.ignoreRef()))
+            network.tell(Network.Start(context.system.ignoreRef()))
         }
 
         override fun createReceive(): Receive<Command> = newReceiveBuilder()
@@ -149,7 +149,7 @@ class DedicatedServer : SilicaServer() {
                 currentlyTicking.put(network, System.nanoTime())
                 lastTickTime = System.currentTimeMillis()
                 world.tell(SilicaWorld.Command.Tick(tick.delta, context.messageAdapter { Command.Tock(it.done) }))
-                network.tell(NetworkActor.Command.Tick(tick.delta, context.messageAdapter { Command.Tock(it.done) }))
+                network.tell(Network.Tick(tick.delta, context.messageAdapter { Command.Tock(it.done) }))
             }
 
             return Behaviors.same()

@@ -17,45 +17,42 @@ import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.handler.timeout.ReadTimeoutHandler
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
-import org.sandboxpowered.silica.SilicaPlayerManager
 import org.sandboxpowered.silica.network.*
 import org.sandboxpowered.silica.network.play.clientbound.KeepAliveClient
 import org.sandboxpowered.silica.network.play.clientbound.PlayerInfo
 import org.sandboxpowered.silica.util.onMessage
-import org.sandboxpowered.silica.world.SilicaWorld
 import java.util.*
-import kotlin.collections.HashMap
 
-// TODO: clean shutdown
-class NetworkActor(
-    private val server: SilicaServer, // TODO: remove this one when I can
-    context: ActorContext<Command>
-) : AbstractBehavior<NetworkActor.Command>(context) {
-    private val logger = context.log
-    private val connections: Object2ObjectMap<UUID, ActorRef<PlayConnection.Command>> = Object2ObjectOpenHashMap()
+sealed class Network {
+    class Tick(val delta: Float, val replyTo: ActorRef<Tock>) : Network() {
+        class Tock(val done: ActorRef<Network>)
+    }
+    class Start(val replyTo: ActorRef<in Boolean>) : Network()
+    class Disconnected(val user: GameProfile) : Network()
+    class CreateConnection(
+        val profile: GameProfile,
+        val handler: PacketHandler,
+        val replyTo: ActorRef<in Boolean>
+    ) : Network()
+
+    class SendToAll(val packet: PacketPlay) : Network()
 
     companion object {
-        fun actor(server: SilicaServer): Behavior<Command> = Behaviors.setup {
+        fun actor(server: SilicaServer): Behavior<Network> = Behaviors.setup {
             NetworkActor(server, it)
         }
     }
+}
 
-    sealed class Command {
-        class Tick(val delta: Float, val replyTo: ActorRef<Tock>) : Command() {
-            class Tock(val done: ActorRef<Command>)
-        }
-        class Start(val replyTo: ActorRef<in Boolean>) : Command()
-        class Disconnected(val user: GameProfile) : Command()
-        class CreateConnection(
-            val profile: GameProfile,
-            val handler: PacketHandler,
-            val replyTo: ActorRef<in Boolean>
-        ) : Command()
+// TODO: clean shutdown
+private class NetworkActor(
+    private val server: SilicaServer, // TODO: remove this one when I can
+    context: ActorContext<Network>
+) : AbstractBehavior<Network>(context) {
+    private val logger = context.log
+    private val connections: Object2ObjectMap<UUID, ActorRef<PlayConnection>> = Object2ObjectOpenHashMap()
 
-        class SendToAll(val packet: PacketPlay) : Command()
-    }
-
-    override fun createReceive(): Receive<Command> = newReceiveBuilder()
+    override fun createReceive(): Receive<Network> = newReceiveBuilder()
         .onMessage(this::handleTick)
         .onMessage(this::handleStart)
         .onMessage(this::handleCreateConnection)
@@ -65,7 +62,7 @@ class NetworkActor(
 
     private var ticks: Int = 0
 
-    private fun handleTick(tick: Command.Tick): Behavior<Command> {
+    private fun handleTick(tick: Network.Tick): Behavior<Network> {
         var latencyPacket: PlayerInfo? = null
         if (ticks % 20 == 0) {
             val uuids = connections.keys.toTypedArray()
@@ -79,26 +76,26 @@ class NetworkActor(
             )
         }
         connections.values.forEach {
-            it.tell(PlayConnection.Command.SendPacket(KeepAliveClient(System.currentTimeMillis())))
+            it.tell(PlayConnection.SendPacket(KeepAliveClient(System.currentTimeMillis())))
             if (ticks % 20 == 0) {
-                it.tell(PlayConnection.Command.SendPacket(latencyPacket!!))
+                it.tell(PlayConnection.SendPacket(latencyPacket!!))
             }
         }
 
         ticks++
 
-        tick.replyTo.tell(Command.Tick.Tock(context.self))
+        tick.replyTo.tell(Network.Tick.Tock(context.self))
         return Behaviors.same()
     }
 
-    private fun handleSendToAll(send: Command.SendToAll): Behavior<Command> {
+    private fun handleSendToAll(send: Network.SendToAll): Behavior<Network> {
         connections.values.forEach {
-            it.tell(PlayConnection.Command.SendPacket(send.packet))
+            it.tell(PlayConnection.SendPacket(send.packet))
         }
 
         return Behaviors.same()
     }
-    private fun handleStart(start: Command.Start): Behavior<Command> {
+    private fun handleStart(start: Network.Start): Behavior<Network> {
         val properties = server.properties
         val bossGroup: EventLoopGroup = NioEventLoopGroup()
         val workerGroup: EventLoopGroup = NioEventLoopGroup()
@@ -138,7 +135,7 @@ class NetworkActor(
         return Behaviors.same()
     }
 
-    private fun handleCreateConnection(createConnection: Command.CreateConnection): Behavior<Command> {
+    private fun handleCreateConnection(createConnection: Network.CreateConnection): Behavior<Network> {
         // TODO: store ref & dispose of the actor
         logger.info("Creating connection")
 
@@ -146,7 +143,7 @@ class NetworkActor(
             PlayConnection.actor(server, createConnection.handler),
             "connection-${createConnection.profile.id}"
         )
-        ref.tell(PlayConnection.Command.Login)
+        ref.tell(PlayConnection.Login)
 
         connections[createConnection.profile.id] = ref
         createConnection.replyTo.tell(true)
@@ -154,7 +151,7 @@ class NetworkActor(
         return Behaviors.same()
     }
 
-    private fun handleDisconnected(disconnected: Command.Disconnected): Behavior<Command> {
+    private fun handleDisconnected(disconnected: Network.Disconnected): Behavior<Network> {
         connections.remove(disconnected.user.id)
         return Behaviors.same()
     }

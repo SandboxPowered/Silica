@@ -6,48 +6,45 @@ import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import com.artemis.BaseSystem
-import com.artemis.Component
-import com.artemis.EntityEdit
 import com.mojang.authlib.GameProfile
 import org.sandboxpowered.api.util.Identity
 import org.sandboxpowered.silica.SilicaPlayerManager
 import org.sandboxpowered.silica.component.VanillaPlayerInput
 import org.sandboxpowered.silica.nbt.CompoundTag
 import org.sandboxpowered.silica.network.play.clientbound.*
-import org.sandboxpowered.silica.server.NetworkActor
+import org.sandboxpowered.silica.server.Network
 import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.util.onMessage
 import org.sandboxpowered.silica.world.SilicaWorld
 import org.sandboxpowered.silica.world.util.BlocTree
 import java.time.Duration
-import kotlin.reflect.KClass
 import com.artemis.World as ArtemisWorld
 
-class PlayConnection private constructor(
-    private val server: SilicaServer,
-    private val packetHandler: PacketHandler,
-    context: ActorContext<Command>
-) : AbstractBehavior<PlayConnection.Command>(context) {
+sealed class PlayConnection {
+    class ReceivePacket(val packet: PacketPlay) : PlayConnection()
+    class SendPacket(val packet: PacketPlay) : PlayConnection()
+    class ReceiveWorld(val blocks: BlocTree) : PlayConnection()
+    class ReceivePlayer(val gameProfiles: Array<GameProfile>, val input: VanillaPlayerInput) : PlayConnection()
+    class Disconnected(val profile: GameProfile) : PlayConnection()
+
+    class FailedPlayerCreation(val reason: String) : PlayConnection()
+
+    object Login : PlayConnection()
 
     companion object {
-        fun actor(server: SilicaServer, packetHandler: PacketHandler): Behavior<Command> = Behaviors.setup {
-            PlayConnection(server, packetHandler, it)
+        fun actor(server: SilicaServer, packetHandler: PacketHandler): Behavior<PlayConnection> = Behaviors.setup {
+            PlayConnectionActor(server, packetHandler, it)
         }
     }
+}
 
-    sealed class Command {
-        class ReceivePacket(val packet: PacketPlay) : Command()
-        class SendPacket(val packet: PacketPlay) : Command()
-        class ReceiveWorld(val blocks: BlocTree) : Command()
-        class ReceivePlayer(val gameProfiles: Array<GameProfile>, val input: VanillaPlayerInput) : Command()
-        class Disconnected(val profile: GameProfile) : Command()
+private class PlayConnectionActor(
+    private val server: SilicaServer,
+    private val packetHandler: PacketHandler,
+    context: ActorContext<PlayConnection>
+) : AbstractBehavior<PlayConnection>(context) {
 
-        class FailedPlayerCreation(val reason: String) : Command()
-
-        object Login : Command()
-    }
-
-    override fun createReceive(): Receive<Command> = newReceiveBuilder()
+    override fun createReceive(): Receive<PlayConnection> = newReceiveBuilder()
         .onMessage(this::handleLoginStart)
         .onMessage(this::handleSend)
         .onMessage(this::handleReceive)
@@ -69,38 +66,39 @@ class PlayConnection private constructor(
         this.packetHandler.setPlayConnection(context.self)
     }
 
-    private fun handleReceive(receive: Command.ReceivePacket): Behavior<Command> {
+    private fun handleReceive(receive: PlayConnection.ReceivePacket): Behavior<PlayConnection> {
         receive.packet.handle(this.packetHandler, this.playContext)
 
         return Behaviors.same()
     }
 
-    private fun handleSend(receive: Command.SendPacket): Behavior<Command> {
+    private fun handleSend(receive: PlayConnection.SendPacket): Behavior<PlayConnection> {
         packetHandler.sendPacket(receive.packet)
 
         return Behaviors.same()
     }
 
     @Suppress("UNUSED_PARAMETER")
-    private fun handleLoginStart(login: Command.Login): Behavior<Command> {
-        context.ask(Command.ReceivePlayer::class.java, server.world, Duration.ofSeconds(1),
+    private fun handleLoginStart(login: PlayConnection.Login): Behavior<PlayConnection> {
+        context.ask(
+            PlayConnection.ReceivePlayer::class.java, server.world, Duration.ofSeconds(1),
             {
                 SilicaWorld.Command.DelayedCommand.createPlayer(
                     packetHandler.connection.profile,
                     it
                 ) { input, profiles ->
-                    Command.ReceivePlayer(profiles, input)
+                    PlayConnection.ReceivePlayer(profiles, input)
                 }
             },
             { receive, throwable ->
-                if (throwable != null) Command.FailedPlayerCreation("${throwable.javaClass.name}: ${throwable.message}")
+                if (throwable != null) PlayConnection.FailedPlayerCreation("${throwable.javaClass.name}: ${throwable.message}")
                 else receive
             }
         )
         return Behaviors.same()
     }
 
-    private fun handleReceivePlayer(receive: Command.ReceivePlayer): Behavior<Command> {
+    private fun handleReceivePlayer(receive: PlayConnection.ReceivePlayer): Behavior<PlayConnection> {
         this.playerInput = receive.input
         val overworld = Identity.of("minecraft", "overworld")
         val codec = CompoundTag()
@@ -181,14 +179,15 @@ class PlayConnection private constructor(
             gamemodes[index] = 1
             pings[index] = 1
         }
-        server.network.tell(NetworkActor.Command.SendToAll(PlayerInfo.addPlayer(
+        server.network.tell(
+            Network.SendToAll(PlayerInfo.addPlayer(
             receive.gameProfiles,gamemodes,pings
         )))
         packetHandler.sendPacket(UpdateChunkPosition(0, 0))
 
         server.world.tell(
             SilicaWorld.Command.Ask(
-                { Command.ReceiveWorld((it as SilicaWorld).getTerrain()) },
+                { PlayConnection.ReceiveWorld((it as SilicaWorld).getTerrain()) },
                 context.self
             )
         )
@@ -196,21 +195,21 @@ class PlayConnection private constructor(
         return Behaviors.same()
     }
 
-    private fun handleDisconnected(disconnected: Command.Disconnected): Behavior<Command> {
-        server.network.tell(NetworkActor.Command.Disconnected(disconnected.profile))
+    private fun handleDisconnected(disconnected: PlayConnection.Disconnected): Behavior<PlayConnection> {
+        server.network.tell(Network.Disconnected(disconnected.profile))
         server.world.tell(SilicaWorld.Command.DelayedCommand.PerformSilica {
             it.artemisWorld.getSystem<SilicaPlayerManager>().disconnect(disconnected.profile)
         })
         return Behaviors.stopped()
     }
 
-    private fun handleFailedToCreatePlayer(failure: Command.FailedPlayerCreation): Behavior<Command> {
+    private fun handleFailedToCreatePlayer(failure: PlayConnection.FailedPlayerCreation): Behavior<PlayConnection> {
         // TODO: disconnect
         logger.error("Could not create player: ${failure.reason}")
         return Behaviors.same()
     }
 
-    private fun handleReceiveWorld(world: Command.ReceiveWorld): Behavior<Command> {
+    private fun handleReceiveWorld(world: PlayConnection.ReceiveWorld): Behavior<PlayConnection> {
         logger.info("Sending world")
         for (x in -2..2) {
             for (z in -2..2) {
@@ -229,8 +228,4 @@ class PlayConnection private constructor(
 
 inline fun <reified T : BaseSystem> ArtemisWorld.getSystem(): T {
     return getSystem(T::class.java)
-}
-
-private fun <T : Component> EntityEdit.create(kClass: KClass<T>): T {
-    return create(kClass.java)
 }

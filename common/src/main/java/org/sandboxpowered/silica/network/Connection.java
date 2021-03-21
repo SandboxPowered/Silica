@@ -6,7 +6,7 @@ import akka.actor.typed.javadsl.AskPattern;
 import com.mojang.authlib.GameProfile;
 import org.sandboxpowered.silica.network.login.clientbound.LoginSuccess;
 import org.sandboxpowered.silica.network.login.serverbound.EncryptionResponse;
-import org.sandboxpowered.silica.server.NetworkActor;
+import org.sandboxpowered.silica.server.Network;
 import org.sandboxpowered.silica.server.SilicaServer;
 
 import javax.crypto.Cipher;
@@ -18,14 +18,14 @@ import java.util.UUID;
 
 public class Connection {
     private final SilicaServer server;
-    private final ActorRef<? super NetworkActor.Command.CreateConnection> network;
+    private final ActorRef<? super Network.CreateConnection> network;
     private final Scheduler scheduler;
     private GameProfile profile;
     private SecretKey secretKey;
     private PacketHandler packetHandler;
     public int ping;
 
-    public Connection(SilicaServer server, ActorRef<? super NetworkActor.Command.CreateConnection> network, Scheduler scheduler) {
+    public Connection(SilicaServer server, ActorRef<? super Network.CreateConnection> network, Scheduler scheduler) {
         this.server = server;
         this.network = network;
         this.scheduler = scheduler;
@@ -66,7 +66,7 @@ public class Connection {
         System.out.println("Sending");
         AskPattern.ask(
                 network,
-                ref -> new NetworkActor.Command.CreateConnection(profile, this.packetHandler, ref),
+                ref -> new Network.CreateConnection(profile, this.packetHandler, ref),
                 Duration.ofSeconds(3),
                 scheduler
         ).whenComplete((reply, failure) -> {

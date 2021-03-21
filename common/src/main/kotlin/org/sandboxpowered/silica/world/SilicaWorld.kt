@@ -36,7 +36,7 @@ import org.sandboxpowered.silica.world.util.OcTree
 import org.sandboxpowered.silica.world.util.iterateCube
 import java.util.*
 import com.artemis.World as ArtemisWorld
-import org.sandboxpowered.silica.world.gen.TerrainGenerator.Command.Generate as CommandGenerate
+import org.sandboxpowered.silica.world.gen.TerrainGenerator.Generate as CommandGenerate
 
 class SilicaWorld private constructor(private val side: Side) : World {
 
@@ -175,7 +175,7 @@ class SilicaWorld private constructor(private val side: Side) : World {
         AbstractBehavior<Command>(context) {
 
         private val commandQueue: Deque<Command.DelayedCommand<*, *>> = LinkedList()
-        private val generator: ActorRef<TerrainGenerator.Command> =
+        private val generator: ActorRef<TerrainGenerator> =
             context.spawn(TerrainGenerator.actor(), "terrain_generator")
         private var generated = false
 

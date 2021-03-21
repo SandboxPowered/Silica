@@ -29,9 +29,9 @@ import org.sandboxpowered.silica.util.plusAssign
 class OcTree @JvmOverloads constructor(
     x: Float, y: Float, z: Float,
     width: Float, height: Float, depth: Float,
-    capacity: Int = 16, private var maxDepth: Int = 8,
-    private var parent: OcTree? = null
+    capacity: Int = 16, private var maxDepth: Int = 8
 ) : Poolable {
+    private var parent: OcTree? = null
     private var nextFlag = 1L
     private var idToContainer: Bag<Container> = parent?.idToContainer ?: bag()
     var bounds = Container().set(x, y, z, width, height, depth)
@@ -380,7 +380,7 @@ class OcTree @JvmOverloads constructor(
             for (i in 0 until containers.size()) {
                 val c = containers[i]
                 if (c.overlaps(x, y, z, width, height, depth)) {
-                    fill.add(c.eid)
+                    fill += c.eid
                 }
             }
         }
@@ -416,7 +416,7 @@ class OcTree @JvmOverloads constructor(
             for (i in 0 until containers.size()) {
                 val c = containers[i]
                 if (c.flags and flags > 0 && c.overlaps(x, y, z, width, height, depth)) {
-                    fill.add(c.eid)
+                    fill += c.eid
                 }
             }
         }
