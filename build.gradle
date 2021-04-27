@@ -3,7 +3,7 @@ import org.gradle.internal.os.OperatingSystem
 plugins {
     id 'application'
     id 'java'
-    id 'org.jetbrains.kotlin.jvm' version '1.4.30-M1'
+    id 'org.jetbrains.kotlin.jvm' version '1.5.0-RC'
 }
 
 allprojects {
@@ -53,7 +53,7 @@ subprojects {
 }
 
 application {
-    mainClassName = "org.sandboxpowered.silica.client.main.Main"
+    mainClass = "org.sandboxpowered.silica.client.main.Main"
     if (OperatingSystem.current().isMacOsX()) {
         // Need this to make sure the OS starts our app on thread 0
         applicationDefaultJvmArgs += "-XStartOnFirstThread"
@@ -65,3 +65,10 @@ project.ext.jomlVersion = "1.9.25"
 
 group 'org.sandboxpowered'
 version '1.0-SNAPSHOT'
+
+if (hasProperty('buildScan')) {
+    buildScan {
+        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+        termsOfServiceAgree = 'yes'
+    }
+}

@@ -32,7 +32,10 @@ private class TerrainGeneratorActor(private val filler: ChunkFiller, context: Ac
 
     private fun handleGenerate(generate: TerrainGenerator.Generate): Behavior<TerrainGenerator> {
         val (x, y, z, chunk, replyTo) = generate
-        filler.fill(x, y, z, chunk)
+        val time = measureTimeMillis {
+            filler.fill(x, y, z, chunk)
+        }
+        context.log.info("Generated $x, $y, $z in $time millis")
         replyTo.tell(generate)
 
         return Behaviors.same()
@@ -52,7 +55,7 @@ private class SimpleFiller : ChunkFiller {
 
     override fun fill(sx: Int, sy: Int, sz: Int, chunk: BlocTree) {
         if (sy > 0) return
-        val time = measureTimeMillis {
+
             iterateCube(sx, sy, sz, w = 16, h = 7) { x, y, z ->
                 chunk[x, y, z] = when (y) {
                     0 -> bedrock
@@ -61,8 +64,6 @@ private class SimpleFiller : ChunkFiller {
                     6 -> grass
                     else -> air
                 }
-            }
         }
-        println("Generated $sx, $sy, $sz in $time millis")
     }
 }
