@@ -1,26 +1,24 @@
 import org.gradle.internal.os.OperatingSystem
 
 plugins {
-    id 'application'
-    id 'java'
-    id 'org.jetbrains.kotlin.jvm' version '1.5.0-RC'
+    application
+    kotlin("jvm") version "1.5.0"
 }
 
 allprojects {
     repositories {
-        maven { url 'https://nexus.sandboxpowered.org/repository/maven-snapshots/' }
-        maven { url 'https://nexus.sandboxpowered.org/repository/maven-public/' }
+        maven("https://nexus.sandboxpowered.org/repository/maven-snapshots/")
+        maven("https://nexus.sandboxpowered.org/repository/maven-public/")
         mavenCentral()
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-        maven { url 'https://jitpack.io' }
-        maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
-        maven { url 'https://libraries.minecraft.net/' }
+        maven("https://oss.sonatype.org/content/repositories/snapshots/")
+        maven("https://jitpack.io")
+        maven("https://dl.bintray.com/kotlin/kotlin-eap")
+        maven("https://libraries.minecraft.net/")
     }
 }
 
 subprojects {
-    apply plugin: 'java'
-    apply plugin: 'org.jetbrains.kotlin.jvm'
+    apply(plugin="kotlin")
 
     java {
         toolchain {
