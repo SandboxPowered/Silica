@@ -1,11 +1,16 @@
 package org.sandboxpowered.silica.client.opengl
 
+import com.sun.source.tree.BlockTree
+import it.unimi.dsi.fastutil.floats.FloatArrayList
+import it.unimi.dsi.fastutil.floats.FloatArraySet
+import it.unimi.dsi.fastutil.ints.IntArrayList
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL30.*
 import org.sandboxpowered.silica.client.*
 import org.sandboxpowered.silica.util.getResourceAsString
+import org.sandboxpowered.silica.world.util.iterateCube
 
 class OpenGLRenderer(private val silica: Silica) : Renderer {
     private val fov = Math.toRadians(60.0).toFloat()
@@ -27,19 +32,46 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
         GL.createCapabilities()
 
         val positions = floatArrayOf(
-            -0.5f, 0.5f, 0f,
-            -0.5f, -0.5f, 0f,
-            0.5f, -0.5f, 0f,
-            0.5f, 0.5f, 0f,
+            // VO
+            0.0f,  1.0f,  1.0f,
+            // V1
+            0.0f, 0.0f,  1.0f,
+            // V2
+            1.0f, 0.0f,  1.0f,
+            // V3
+            1.0f,  1.0f,  1.0f,
+            // V4
+            0.0f,  1.0f, 0.0f,
+            // V5
+            1.0f,  1.0f, 0.0f,
+            // V6
+            0.0f, 0.0f, 0.0f,
+            // V7
+            1.0f, 0.0f, 0.0f,
         )
         val colours = floatArrayOf(
             0.5f, 0.0f, 0.0f,
             0.0f, 0.5f, 0.0f,
             0.0f, 0.0f, 0.5f,
-            0.0f, 0.5f, 0.5f
+            0.0f, 0.5f, 0.5f,
+            0.5f, 0.0f, 0.0f,
+            0.0f, 0.5f, 0.0f,
+            0.0f, 0.0f, 0.5f,
+            0.0f, 0.5f, 0.5f,
         )
         val indices = intArrayOf(
-            0, 1, 3, 3, 1, 2
+            // Front face
+            0, 1, 3, 3, 1, 2,
+            // Back face
+            7, 6, 4, 7, 4, 5,
+            // Left face
+            6, 1, 0, 6, 0, 4,
+            // Right face
+            3, 2, 7, 5, 3, 7,
+            // Top Face
+            4, 0, 3, 5, 4, 3,
+            // Bottom face
+            2, 1, 6, 2, 6, 7,
         )
         mesh = Mesh(positions, colours, indices)
 
@@ -57,16 +89,16 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
     private var rot = Vector3f()
 
     override fun frame() {
-        window.setTitle("Sandbox Silica ${window.currentFps}")
-
         if (window.resized) {
             glViewport(0, 0, window.width, window.height)
             window.resized = false
         }
 
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT)
+        GL11.glEnable(GL_DEPTH_TEST)
 
         rot.y += 0.1f
+        rot.x += 0.1f
 
         shaderProgram.bind()
         shaderProgram.setUniform(
