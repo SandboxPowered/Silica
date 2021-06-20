@@ -1,5 +1,8 @@
 package org.sandboxpowered.silica.resources;
 
+import org.jetbrains.annotations.NotNull;
+import org.sandboxpowered.api.util.Identity;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,5 +61,11 @@ public class ZIPResourceLoader implements ResourceLoader {
             this.namespaces = namespaces;
         }
         return this.namespaces;
+    }
+
+    @NotNull
+    @Override
+    public String getFilename(@NotNull ResourceType type, @NotNull Identity identity) {
+        return null;
     }
 }

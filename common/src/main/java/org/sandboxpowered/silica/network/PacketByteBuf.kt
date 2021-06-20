@@ -22,6 +22,7 @@ import java.nio.channels.ScatteringByteChannel
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.util.*
+import kotlin.experimental.and
 
 class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
     override fun capacity(): Int {
@@ -771,14 +772,16 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
     fun readVarInt(): Int {
         var i = 0
         var j = 0
-        var b: Int
+
+        var b: Byte
         do {
-            b = readByte().toInt()
-            i = i or ((b and 127) shl j++ * 7)
+            b = readByte()
+            i = i or ((b and 127).toInt() shl j++ * 7)
             if (j > 5) {
                 throw RuntimeException("VarInt too big")
             }
-        } while ((b and 128) == 128)
+        } while (b.toInt() and 128 == 128)
+
         return i
     }
 

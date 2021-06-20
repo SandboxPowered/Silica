@@ -38,9 +38,9 @@ enum class Protocol(private val id: Int, builder: Builder) {
         0, newProtocol()
             .addFlow(
                 Flow.SERVERBOUND, Packets()
+                    .addPacket(0x00, ::TeleportConfirmation)
                     .addPacket(0x05, ::ClientSettings)
                     .addPacket(0x0B, ::ClientPluginChannel)
-                    .addPacket(0x00, ::TeleportConfirmation)
                     .addPacket(0x10, ::KeepAliveServer)
                     .addPacket(0x12, ::PlayerPosition)
                     .addPacket(0x13, ::PlayerPositionAndRotation)

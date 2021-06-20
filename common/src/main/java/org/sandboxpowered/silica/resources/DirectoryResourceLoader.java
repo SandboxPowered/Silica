@@ -2,11 +2,14 @@ package org.sandboxpowered.silica.resources;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.jetbrains.annotations.NotNull;
+import org.sandboxpowered.api.util.Identity;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -34,7 +37,7 @@ public class DirectoryResourceLoader implements ResourceLoader {
 
     @Override
     public Set<String> findResources(ResourceType type, String namespace, String path, int depth, Predicate<String> filter) {
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
@@ -52,5 +55,11 @@ public class DirectoryResourceLoader implements ResourceLoader {
             namespaces = set;
         }
         return namespaces;
+    }
+
+    @NotNull
+    @Override
+    public String getFilename(@NotNull ResourceType type, @NotNull Identity identity) {
+        return null;
     }
 }
