@@ -5,6 +5,7 @@ import org.apache.commons.lang3.SystemUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.lwjgl.glfw.GLFW
+import org.lwjgl.system.Configuration
 import org.sandboxpowered.api.client.Client
 import org.sandboxpowered.api.client.GraphicsMode
 import org.sandboxpowered.silica.client.server.IntegratedServer
@@ -19,6 +20,11 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.*
+import java.util.concurrent.*
+
+import kotlin.math.max
+import java.util.concurrent.atomic.AtomicInteger
+
 
 class Silica(private val args: Args) : Runnable, Client {
     private val logger: Logger = LogManager.getLogger()
@@ -30,6 +36,35 @@ class Silica(private val args: Args) : Runnable, Client {
 
     private fun close() {
         window.cleanup()
+    }
+
+    private val DEBUG: Boolean = Configuration.DEBUG.get(false)
+    private val executorService = Executors.newFixedThreadPool(
+        max(1, Runtime.getRuntime().availableProcessors() / 2)
+    ) { r: Runnable? ->
+        val t = Thread(r)
+        t.priority = Thread.MIN_PRIORITY
+        t.name = "Chunk builder"
+        t.isDaemon = true
+        t
+    }
+    private val chunkBuildTasksCount = AtomicInteger()
+    private val updateAndRenderRunnables: Queue<DelayedRunnable> = ConcurrentLinkedQueue()
+
+    private class DelayedRunnable(val runnable: Runnable, val name: String, val delay: Int) {
+    }
+
+    init {
+        if (DEBUG) {
+            /* When we are in debug mode, enable all LWJGL debug flags */
+            System.setProperty("org.lwjgl.util.Debug", "true")
+            System.setProperty("org.lwjgl.util.NoChecks", "false")
+            System.setProperty("org.lwjgl.util.DebugLoader", "true")
+            System.setProperty("org.lwjgl.util.DebugAllocator", "true")
+            System.setProperty("org.lwjgl.util.DebugStack", "true")
+        }
+        /* Configure LWJGL MemoryStack to 1024KB */
+        Configuration.STACK_SIZE.set(1024)
     }
 
     override fun run() {
