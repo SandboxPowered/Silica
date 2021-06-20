@@ -3,7 +3,7 @@ import org.gradle.internal.os.OperatingSystem
 plugins {
     id 'application'
     id 'java'
-    id 'org.jetbrains.kotlin.jvm' version '1.5.0-RC'
+    id 'org.jetbrains.kotlin.jvm' version '1.5.0'
 }
 
 allprojects {
@@ -24,18 +24,18 @@ subprojects {
 
     java {
         toolchain {
-            languageVersion.set(JavaLanguageVersion.of(14))
+            languageVersion.set(JavaLanguageVersion.of(16))
         }
     }
 
     compileKotlin {
         kotlinOptions {
-            jvmTarget = "14"
+            jvmTarget = "16"
         }
     }
     compileTestKotlin {
         kotlinOptions {
-            jvmTarget = "14"
+            jvmTarget = "16"
         }
     }
 
@@ -70,5 +70,12 @@ if (hasProperty('buildScan')) {
     buildScan {
         termsOfServiceUrl = 'https://gradle.com/terms-of-service'
         termsOfServiceAgree = 'yes'
+    }
+}
+
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(16))
     }
 }
