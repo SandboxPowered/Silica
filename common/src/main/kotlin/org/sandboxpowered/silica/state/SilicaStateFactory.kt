@@ -3,26 +3,24 @@ package org.sandboxpowered.silica.state
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSortedMap
-import org.sandboxpowered.api.content.Content
-import org.sandboxpowered.api.state.StateFactory
-import org.sandboxpowered.api.state.property.Property
-import org.sandboxpowered.api.state.property.PropertyContainer
-import java.util.*
-import kotlin.collections.ArrayList
+import org.sandboxpowered.api.registry.RegistryEntry
+import org.sandboxpowered.api.world.state.Property
+import org.sandboxpowered.api.world.state.PropertyContainer
+import org.sandboxpowered.api.world.state.StateProvider
 
-class SilicaStateFactory<B : Content<B>, S : PropertyContainer<S>>(
+class SilicaStateFactory<B : RegistryEntry<B>, S : PropertyContainer<S>>(
     private val base: B,
     map: Map<String, Property<*>>,
     stateCreator: Factory<B, S>
-) : StateFactory<B, S> {
+) : StateProvider<B, S> {
     private val propertiesByName: ImmutableSortedMap<String, Property<*>> = ImmutableSortedMap.copyOf(map)
     private val states: ImmutableList<S>
 
-    interface Factory<B : Content<B>, S : PropertyContainer<S>> {
+    interface Factory<B : RegistryEntry<B>, S : PropertyContainer<S>> {
         fun create(base: B, values: ImmutableMap<Property<*>, Comparable<*>>): S
 
         companion object {
-            fun <B : Content<B>, S : PropertyContainer<S>> of(factory: (base: B, properties: ImmutableMap<Property<*>, Comparable<*>>) -> S): Factory<B, S> {
+            fun <B : RegistryEntry<B>, S : PropertyContainer<S>> of(factory: (base: B, properties: ImmutableMap<Property<*>, Comparable<*>>) -> S): Factory<B, S> {
                 return object : Factory<B, S> {
                     override fun create(base: B, values: ImmutableMap<Property<*>, Comparable<*>>): S {
                         return factory.invoke(base, values)

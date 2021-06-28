@@ -1,9 +1,9 @@
 package org.sandboxpowered.silica.util
 
 import com.google.common.base.Objects
-import org.sandboxpowered.api.util.Identity
+import org.sandboxpowered.api.util.Identifier
 
-class SilicaIdentity(private val namespace: String, private val path: String) : Identity {
+class SilicaIdentity(private val namespace: String, private val path: String) : Identifier {
     override fun getNamespace(): String {
         return namespace
     }
@@ -14,6 +14,13 @@ class SilicaIdentity(private val namespace: String, private val path: String) : 
 
     override fun toString(): String {
         return "$namespace:$path"
+    }
+
+    override fun compareTo(other: Identifier): Int {
+        return when (val ns = namespace.compareTo(other.namespace)) {
+            0 -> path.compareTo(other.path)
+            else -> ns
+        }
     }
 
     override fun equals(other: Any?): Boolean {

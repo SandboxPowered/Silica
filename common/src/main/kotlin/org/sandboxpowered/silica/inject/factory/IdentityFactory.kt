@@ -1,14 +1,14 @@
 package org.sandboxpowered.silica.inject.factory
 
-import org.sandboxpowered.api.util.Identity
+import org.sandboxpowered.api.util.Identifier
 import org.sandboxpowered.silica.util.SilicaIdentity
 
-class IdentityFactory : Identity.Factory {
-    override fun create(namespace: String, path: String): Identity {
+class IdentityFactory : Identifier.IdentifierFactory {
+    override fun create(namespace: String, path: String): Identifier {
         return SilicaIdentity(namespace, path)
     }
 
-    override fun create(id: String): Identity {
+    override fun create(id: String): Identifier {
         val identity = arrayOf("minecraft", id)
         val idx = id.indexOf(':')
         if (idx >= 0) {

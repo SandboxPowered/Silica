@@ -5,16 +5,16 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
 import org.jetbrains.annotations.NotNull;
-import org.sandboxpowered.api.content.Content;
-import org.sandboxpowered.api.state.property.Property;
-import org.sandboxpowered.api.state.property.PropertyContainer;
+import org.sandboxpowered.api.registry.RegistryEntry;
+import org.sandboxpowered.api.world.state.Property;
+import org.sandboxpowered.api.world.state.PropertyContainer;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class BaseState<B extends Content<B>, S> implements PropertyContainer<S>, Comparable<S> {
+public class BaseState<B extends RegistryEntry<B>, S> implements PropertyContainer<S>, Comparable<S> {
     protected final B base;
     private final ImmutableMap<Property<?>, Comparable<?>> properties;
     private Table<Property<?>, Comparable<?>, S> possibleStates;
@@ -27,7 +27,7 @@ public class BaseState<B extends Content<B>, S> implements PropertyContainer<S>,
     @Override
     public int compareTo(@NotNull S o) {
         if(o instanceof BaseState)
-            return base.getIdentity().toString().compareTo(((BaseState<?, ?>) o).base.getIdentity().toString());
+            return base.getIdentifier().toString().compareTo(((BaseState<?, ?>) o).base.getIdentifier().toString());
         return 1;
     }
 
@@ -58,7 +58,7 @@ public class BaseState<B extends Content<B>, S> implements PropertyContainer<S>,
     }
 
     @Override
-    public <T extends Comparable<T>, V extends T> S with(Property<T> property, V value) {
+    public <T extends Comparable<T>> S with(Property<T> property, T value) {
         Comparable<?> currentValue = this.properties.get(property);
         if (currentValue == null) {
             throw new IllegalArgumentException(String.format("Cannot set property %s as it does not exist in %s", property, this.base));
@@ -70,6 +70,11 @@ public class BaseState<B extends Content<B>, S> implements PropertyContainer<S>,
                 return state;
             }
         }
+    }
+
+    @Override
+    public <T extends Comparable<T>> boolean has(Property<T> property) {
+        return this.properties.containsKey(property);
     }
 
     @Override
@@ -114,14 +119,9 @@ public class BaseState<B extends Content<B>, S> implements PropertyContainer<S>,
     }
 
     @Override
-    public <T extends Comparable<T>> boolean contains(Property<T> property) {
-        return properties.containsKey(property);
-    }
-
-    @Override
     public String toString() {
         return this.getClass().getSimpleName() + "{" +
-                "base=" + base.getIdentity() +
+                "base=" + base.getIdentifier() +
                 ", properties=" + properties +
                 '}';
     }

@@ -1,33 +1,45 @@
 package org.sandboxpowered.silica.registry
 
-import org.sandboxpowered.api.content.Content
 import org.sandboxpowered.api.registry.Registry
-import org.sandboxpowered.api.util.Identity
-import org.sandboxpowered.silica.util.ifPresent
+import org.sandboxpowered.api.registry.RegistryEntry
+import org.sandboxpowered.api.registry.RegistryObject
+import org.sandboxpowered.api.util.Identifier
 import java.util.*
-import java.util.function.Consumer
 import java.util.function.Supplier
 import java.util.stream.Stream
 
-class SilicaRegistry<T : Content<T>>(private val registryId: Identity, private val type: Class<T>) : Registry<T> {
-    var internalMap: MutableMap<Identity, T> = HashMap()
-    var registryEntries: MutableMap<Identity, SilicaRegistryEntry<T>> = HashMap()
+class SilicaRegistry<T : RegistryEntry<T>>(private val registryId: Identifier, private val type: Class<T>) : Registry<T> {
+    var internalMap: MutableMap<Identifier, T> = HashMap()
+    var registryEntries: MutableMap<Identifier, SilicaRegistryEntry<T>> = HashMap()
 
-    fun <X : Content<X>?> cast(): Registry<X> {
+    fun <X : RegistryEntry<X>?> cast(): Registry<X> {
         return this as Registry<X>
     }
 
-    override fun getIdentity(content: T): Identity {
-        return content.identity
+    override fun iterator(): MutableIterator<T> {
+        return internalMap.values.iterator()
     }
 
-    override fun get(identity: Identity): Registry.Entry<T> {
-        return registryEntries.computeIfAbsent(identity) { id: Identity -> SilicaRegistryEntry(this, id) }
+    override fun getRegistry(): Registry<Registry<out RegistryEntry<*>>> {
+        TODO("Not yet implemented")
     }
 
-    override fun register(content: T): Registry.Entry<T> {
-        internalMap[content.identity] = content
-        return get(content.identity)
+    override fun contains(id: Identifier): Boolean {
+        return internalMap.containsKey(id)
+    }
+
+    override fun getId(element: T): Identifier {
+        return element.identifier
+    }
+
+    override fun getUnsafe(id: Identifier): T? {
+        return internalMap[id]
+    }
+
+    override fun getRegistryType(): Class<T> = type
+
+    override fun get(identity: Identifier): RegistryObject<T> {
+        return registryEntries.computeIfAbsent(identity) { id -> SilicaRegistryEntry(this, id) }
     }
 
     override fun stream(): Stream<T> {
@@ -35,24 +47,11 @@ class SilicaRegistry<T : Content<T>>(private val registryId: Identity, private v
             .map { obj: SilicaRegistryEntry<T> -> obj.get() }
     }
 
-    override fun keys(): Collection<Identity> {
-        return registryEntries.keys
-    }
-
-    override fun getType(): Class<T> {
-        return type
-    }
-
-    override fun getIdentity(): Identity {
-        return registryId
-    }
-
     fun clearCache() {
-        registryEntries.forEach { (_: Identity, aEntry: SilicaRegistryEntry<T>) -> aEntry.clearCache() }
+        registryEntries.forEach { (_, aEntry: SilicaRegistryEntry<T>) -> aEntry.clearCache() }
     }
 
-    class SilicaRegistryEntry<T : Content<T>>(private val registry: SilicaRegistry<T>, private val target: Identity) :
-        Registry.Entry<T> {
+    class SilicaRegistryEntry<T : RegistryEntry<T>>(private val registry: SilicaRegistry<T>, private val target: Identifier) : RegistryObject<T> {
         private var hasCached = false
         private var cachedValue: T? = null
 
@@ -78,38 +77,31 @@ class SilicaRegistry<T : Content<T>>(private val registryId: Identity, private v
             return internal ?: throw NullPointerException()
         }
 
-        override fun getAsOptional(): Optional<T> {
+        override fun asOptional(): Optional<T> {
             return Optional.ofNullable(internal)
         }
 
-        override fun orElse(other: T): T {
-            return internal ?: other
+        override fun isEmpty(): Boolean = !isPresent
+
+        override fun or(supplier: RegistryObject<T>): RegistryObject<T> {
+            if(!this.isPresent)
+                return supplier
+            return this
         }
 
-        override fun orNull(): T? {
-            return internal
+        override fun getId(): Identifier = target
+
+        override fun <X : Throwable?> orElseThrow(supplier: Supplier<X>): T {
+            TODO("Not yet implemented")
         }
 
-        override fun orElseGet(other: Supplier<T>): T {
-            return internal ?: other.get()
-        }
+        override fun getRegistry(): Registry<T> = registry
+
+        override fun orElseGet(other: Supplier<T>): T = internal ?: other.get()
 
         override fun isPresent(): Boolean {
             updateCache()
             return cachedValue != null
-        }
-
-        override fun matches(other: T): Boolean {
-            return internal === other
-        }
-
-        override fun ifPresent(tConsumer: Consumer<T>) {
-            internal.ifPresent(tConsumer::accept)
-        }
-
-        override fun ifPresentOrElse(tConsumer: Consumer<T?>, notPresent: Runnable) {
-            val internalVal = internal
-            if (internalVal != null) tConsumer.accept(internalVal) else notPresent.run()
         }
     }
 }

@@ -8,12 +8,10 @@ import com.mojang.authlib.GameProfile
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.*
-import org.sandboxpowered.api.util.text.Text
 import org.sandboxpowered.silica.component.HitboxComponent
 import org.sandboxpowered.silica.component.PlayerComponent
 import org.sandboxpowered.silica.component.PositionComponent
 import org.sandboxpowered.silica.component.VanillaPlayerInput
-import java.net.SocketAddress
 import java.util.*
 
 @All(PlayerComponent::class, PositionComponent::class)
@@ -36,12 +34,6 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
 
     @Wire
     private lateinit var playerInputMapper: ComponentMapper<VanillaPlayerInput>
-
-    fun checkDisconnectReason(address: SocketAddress, profile: GameProfile): Text? {
-        if (profile.isLegacy)
-            return Text.translatable("multiplayer.disconnect.not_whitelisted")
-        return null
-    }
 
     override fun processSystem() {
 

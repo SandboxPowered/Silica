@@ -2,7 +2,7 @@ package org.sandboxpowered.silica.world.util
 
 import net.mostlyoriginal.api.utils.pooling.ObjectPool
 import net.mostlyoriginal.api.utils.pooling.Poolable
-import org.sandboxpowered.api.state.BlockState
+import org.sandboxpowered.api.world.state.BlockState
 import org.sandboxpowered.silica.util.getPool
 import kotlin.math.pow
 

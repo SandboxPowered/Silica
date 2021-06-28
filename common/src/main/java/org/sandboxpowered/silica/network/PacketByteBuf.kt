@@ -7,10 +7,11 @@ import io.netty.buffer.ByteBufOutputStream
 import io.netty.handler.codec.DecoderException
 import io.netty.handler.codec.EncoderException
 import io.netty.util.ByteProcessor
-import org.sandboxpowered.api.util.Identity
-import org.sandboxpowered.api.util.nbt.CompoundTag
+import org.sandboxpowered.api.util.Identifier
+import org.sandboxpowered.silica.nbt.CompoundTag
 import org.sandboxpowered.silica.nbt.readNbt
 import org.sandboxpowered.silica.nbt.write
+import org.sandboxpowered.silica.util.SilicaIdentity
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -879,16 +880,16 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         return this
     }
 
-    fun readIdentityArray(): Array<Identity?> {
+    fun readIdentityArray(): Array<Identifier?> {
         val size = readVarInt()
-        val arr = arrayOfNulls<Identity>(size)
+        val arr = arrayOfNulls<Identifier>(size)
         for (i in 0 until size) {
             arr[i] = readIdentity()
         }
         return arr
     }
 
-    fun writeIdentityArray(arr: Array<Identity>): ByteBuf {
+    fun writeIdentityArray(arr: Array<Identifier>): ByteBuf {
         val size = arr.size
         arr.forEach { identity ->
             writeIdentity(identity)
@@ -896,11 +897,11 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         return this
     }
 
-    fun readIdentity(): Identity {
-        return Identity.of(readString())
+    fun readIdentity(): Identifier {
+        return Identifier.of(readString())
     }
 
-    fun writeIdentity(identity: Identity): ByteBuf {
+    fun writeIdentity(identity: Identifier): ByteBuf {
         writeString(identity.toString())
         return this
     }

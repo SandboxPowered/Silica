@@ -2,17 +2,15 @@ package org.sandboxpowered.silica
 
 import com.google.gson.Gson
 import com.google.gson.JsonArray
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.*
 import org.apache.logging.log4j.LogManager
-import org.sandboxpowered.api.state.BlockState
-import org.sandboxpowered.api.state.property.Property
+import org.sandboxpowered.api.world.state.BlockState
+import org.sandboxpowered.api.world.state.Property
 import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.state.block.SilicaBlockState
 import org.sandboxpowered.silica.util.getResourceAsString
-import kotlin.math.log
 import kotlin.system.measureTimeMillis
 
 class StateManager {
@@ -49,13 +47,13 @@ class StateManager {
                 if (blockMap == null) {
                     errors.add(id.toString())
                 } else {
-                    block.stateFactory.validStates.map { it as SilicaBlockState }.forEach { state ->
+                    block.stateProvider.validStates.map { it as SilicaBlockState }.forEach { state ->
                         val builder = StringBuilder()
                         state.properties.forEach { entry ->
                             val value = entry.value as Comparable<Any>
                             val prop = entry.key as Property<Comparable<Any>>
                             if (builder.isNotEmpty()) builder.append(",")
-                            builder.append(prop.name).append("@").append(prop.getName(value))
+                            builder.append(prop.propertyName).append("@").append(prop.getValueString(value))
                         }
 
                         val stateString = builder.toString()

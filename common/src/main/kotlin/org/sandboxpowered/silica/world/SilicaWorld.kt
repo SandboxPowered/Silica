@@ -8,20 +8,25 @@ import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import com.artemis.WorldConfigurationBuilder
 import com.mojang.authlib.GameProfile
+import org.joml.Vector3ic
+import org.sandboxpowered.api.block.Block
 import org.sandboxpowered.api.block.Blocks
 import org.sandboxpowered.api.ecs.CapabilityManager
 import org.sandboxpowered.api.ecs.ComponentMapper
 import org.sandboxpowered.api.ecs.EntityBlueprint
 import org.sandboxpowered.api.ecs.component.Component
+import org.sandboxpowered.api.engine.Platform
+import org.sandboxpowered.api.entity.Entity
 import org.sandboxpowered.api.item.ItemStack
 import org.sandboxpowered.api.state.BlockState
 import org.sandboxpowered.api.state.FluidState
 import org.sandboxpowered.api.tags.TagManager
+import org.sandboxpowered.api.util.Identifier
 import org.sandboxpowered.api.util.Side
 import org.sandboxpowered.api.util.math.Position
-import org.sandboxpowered.api.world.BlockFlag
-import org.sandboxpowered.api.world.World
-import org.sandboxpowered.api.world.WorldReader
+import org.sandboxpowered.api.world.*
+import org.sandboxpowered.api.world.state.BlockState
+import org.sandboxpowered.api.world.state.FluidState
 import org.sandboxpowered.silica.SilicaPlayerManager
 import org.sandboxpowered.silica.component.VanillaPlayerInput
 import org.sandboxpowered.silica.network.getSystem
@@ -38,9 +43,9 @@ import java.util.*
 import com.artemis.World as ArtemisWorld
 import org.sandboxpowered.silica.world.gen.TerrainGenerator.Generate as CommandGenerate
 
-class SilicaWorld private constructor(private val side: Side) : World {
+class SilicaWorld private constructor(private val side: Platform.Type) : World {
 
-    private val blocks: BlocTree = BlocTree(WORLD_MIN, WORLD_MIN, WORLD_MIN, WORLD_SIZE, Blocks.AIR.get().baseState)
+    private val blocks: BlocTree = BlocTree(WORLD_MIN, WORLD_MIN, WORLD_MIN, WORLD_SIZE, Block.REGISTRY.get(Identifier.of("minecraft:air")).get().defaultState)
     val artemisWorld: ArtemisWorld
     private var worldTicks = 0L
 
@@ -60,59 +65,40 @@ class SilicaWorld private constructor(private val side: Side) : World {
         )
     }
 
-    override fun getBlockState(position: Position): BlockState {
-        return blocks[position.x, position.y, position.z]
-    }
-
-    override fun getBlockEntity(position: Position): Int {
+    override fun getBlockState(pos: Vector3ic): BlockState {
         TODO("Not yet implemented")
     }
 
-    override fun setBlockState(position: Position, state: BlockState, vararg flags: BlockFlag): Boolean {
-        blocks[position.x, position.y, position.z] = state
-        return true
-    }
-
-    override fun getFluidState(position: Position): FluidState {
-        return getBlockState(position).fluidState
-    }
-
-    override fun getWorldTime(): Long {
-        return worldTicks
-    }
-
-    override fun getTagManager(): TagManager? {
+    override fun getFluidState(pos: Vector3ic): FluidState {
         TODO("Not yet implemented")
     }
 
-    override fun <T : Component?> getMapper(type: Class<T>): ComponentMapper<T> {
+    override fun getType(): DimensionType {
         TODO("Not yet implemented")
     }
 
-    override fun createEntity(): Int {
+    override fun createExplosion(
+        triggerEntity: Entity?,
+        x: Float,
+        y: Float,
+        z: Float,
+        size: Float,
+        createsFires: Boolean,
+        destroysBlocks: Boolean
+    ): Explosion {
         TODO("Not yet implemented")
     }
 
-    override fun createEntity(blueprint: EntityBlueprint): Int {
+    override fun explode(
+        triggerEntity: Entity?,
+        x: Float,
+        y: Float,
+        z: Float,
+        size: Float,
+        createsFires: Boolean,
+        destroysBlocks: Boolean
+    ) {
         TODO("Not yet implemented")
-    }
-
-    override fun removeEntity(entity: Int) {
-        TODO("Not yet implemented")
-    }
-
-    override fun getCapabilityManager(): CapabilityManager {
-        TODO("Not yet implemented")
-    }
-
-    override fun getSide(): Side = this.side
-
-    override fun spawnItem(x: Double, y: Double, z: Double, stack: ItemStack) {
-        TODO("Not yet implemented")
-    }
-
-    override fun hasNeighborSignal(position: Position): Boolean {
-        return false
     }
 
     // TODO: Tmp. Should be read-only
@@ -123,7 +109,7 @@ class SilicaWorld private constructor(private val side: Side) : World {
         private const val WORLD_MAX = (1 shl 25) - 1 // (2^25)-1
         private const val WORLD_SIZE = -WORLD_MIN + WORLD_MAX + 1 // 2^26
 
-        fun actor(side: Side): Behavior<Command> = Behaviors.setup {
+        fun actor(side: Platform.Type): Behavior<Command> = Behaviors.setup {
             Actor(SilicaWorld(side), it)
         }
     }
