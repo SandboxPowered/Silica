@@ -2,7 +2,7 @@ package org.sandboxpowered.silica.loading
 
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.sandboxpowered.api.util.Log
+import org.sandboxpowered.api.addon.Log
 import org.sandboxpowered.internal.AddonSpec
 
 class AddonLog(spec: AddonSpec) : Log {

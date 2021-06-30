@@ -7,11 +7,10 @@ import io.netty.buffer.ByteBufOutputStream
 import io.netty.handler.codec.DecoderException
 import io.netty.handler.codec.EncoderException
 import io.netty.util.ByteProcessor
+import org.sandboxpowered.api.nbt.NBTCompound
 import org.sandboxpowered.api.util.Identifier
-import org.sandboxpowered.silica.nbt.CompoundTag
 import org.sandboxpowered.silica.nbt.readNbt
 import org.sandboxpowered.silica.nbt.write
-import org.sandboxpowered.silica.util.SilicaIdentity
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -880,13 +879,13 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         return this
     }
 
-    fun readIdentityArray(): Array<Identifier?> {
+    fun readIdentityArray(): Array<Identifier> {
         val size = readVarInt()
         val arr = arrayOfNulls<Identifier>(size)
         for (i in 0 until size) {
             arr[i] = readIdentity()
         }
-        return arr
+        return arr.requireNoNulls()
     }
 
     fun writeIdentityArray(arr: Array<Identifier>): ByteBuf {
@@ -906,7 +905,7 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         return this
     }
 
-    fun readNBT(): CompoundTag? {
+    fun readNBT(): NBTCompound? {
         val i = readerIndex()
         val b = readByte()
         return if (b.toInt() == 0) {
@@ -918,7 +917,7 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         }
     }
 
-    fun writeNBT(tag: CompoundTag?) {
+    fun writeNBT(tag: NBTCompound?) {
         if (tag == null)
             writeByte(0)
         else {

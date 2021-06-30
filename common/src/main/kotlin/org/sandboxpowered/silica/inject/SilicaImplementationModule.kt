@@ -2,20 +2,22 @@ package org.sandboxpowered.silica.inject
 
 import com.google.inject.binder.AnnotatedBindingBuilder
 import com.google.inject.binder.ScopedBindingBuilder
-import org.sandboxpowered.api.inject.FactoryProvider
-import org.sandboxpowered.api.inject.Implementation
-import org.sandboxpowered.api.inject.ImplementationModule
-import org.sandboxpowered.api.inject.Sandbox
+import org.sandboxpowered.api.Sandbox
+import org.sandboxpowered.api.engine.FactoryProvider
+import org.sandboxpowered.api.engine.Game
+import org.sandboxpowered.api.engine.inject.ImplementationModule
+import org.sandboxpowered.silica.engine.SilicaGame
 import kotlin.reflect.KClass
 
 class SilicaImplementationModule : ImplementationModule() {
     override fun configure() {
         super.configure()
 
-        bind<Implementation>().to(SilicaImplementation::class)
+        bind<Game>().to(SilicaGame::class)
         bind<FactoryProvider>().to(SilicaFactoryProvider::class)
 
         requestStaticInjection(Sandbox::class)
+        requestStaticInjection<Sandbox>()
     }
 
     private fun <T : Any> requestStaticInjection(vararg kClass: KClass<T>) {

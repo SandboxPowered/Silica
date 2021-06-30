@@ -7,7 +7,7 @@ import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import com.artemis.BaseSystem
 import com.mojang.authlib.GameProfile
-import org.sandboxpowered.api.util.Identity
+import org.sandboxpowered.api.util.Identifier
 import org.sandboxpowered.silica.SilicaPlayerManager
 import org.sandboxpowered.silica.component.VanillaPlayerInput
 import org.sandboxpowered.silica.nbt.CompoundTag
@@ -100,7 +100,7 @@ private class PlayConnectionActor(
 
     private fun handleReceivePlayer(receive: PlayConnection.ReceivePlayer): Behavior<PlayConnection> {
         this.playerInput = receive.input
-        val overworld = Identity.of("minecraft", "overworld")
+        val overworld = Identifier.of("minecraft", "overworld")
         val codec = CompoundTag()
         val dimReg = CompoundTag()
         dimReg.setString("type", "minecraft:dimension_type")

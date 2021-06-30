@@ -1,28 +1,28 @@
 package org.sandboxpowered.silica.nbt
 
-import org.sandboxpowered.api.util.nbt.CompoundTag
+import org.sandboxpowered.api.nbt.NBTCompound
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry
 import java.io.DataInput
 import java.io.DataOutput
 import java.io.IOException
 
 /**
- * Reads a [CompoundTag] from this [DataInput]
+ * Reads a [NBTCompound] from this [DataInput]
  */
-fun DataInput.readNbt(): CompoundTag {
+fun DataInput.readNbt(): NBTCompound {
     return when (val type = readByte().toInt()) {
         0 -> CompoundTag()
         else -> {
             readUTF()
-            NbtType.read(type, this).value as? CompoundTag ?: throw IOException("Root must be a named compound tag")
+            NbtType.read(type, this).value as? NBTCompound ?: throw IOException("Root must be a named compound tag")
         }
     }
 }
 
 /**
- * Writes a [CompoundTag] to this [DataOutput]
+ * Writes a [NBTCompound] to this [DataOutput]
  */
-fun DataOutput.write(tag: CompoundTag) {
+fun DataOutput.write(tag: NBTCompound) {
     writeByte(NbtType.TAG.vanillaId)
     writeUTF("")
     NbtType.TAG.write(this, tag)

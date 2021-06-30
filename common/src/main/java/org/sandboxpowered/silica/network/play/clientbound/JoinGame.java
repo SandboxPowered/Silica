@@ -1,8 +1,11 @@
 package org.sandboxpowered.silica.network.play.clientbound;
 
-import org.sandboxpowered.api.util.Identity;
-import org.sandboxpowered.api.util.nbt.CompoundTag;
-import org.sandboxpowered.silica.network.*;
+import org.sandboxpowered.api.nbt.NBTCompound;
+import org.sandboxpowered.api.util.Identifier;
+import org.sandboxpowered.silica.network.PacketByteBuf;
+import org.sandboxpowered.silica.network.PacketHandler;
+import org.sandboxpowered.silica.network.PacketPlay;
+import org.sandboxpowered.silica.network.PlayContext;
 
 public class JoinGame implements PacketPlay {
     private int playerId;
@@ -10,10 +13,10 @@ public class JoinGame implements PacketPlay {
     private short gamemode;
     private short previousGamemode;
     private int worldCount;
-    private Identity[] worldNames;
-    private CompoundTag dimCodec;
-    private CompoundTag dim;
-    private Identity world;
+    private Identifier[] worldNames;
+    private NBTCompound dimCodec;
+    private NBTCompound dim;
+    private Identifier world;
     private long seed;
     private int maxPlayers;
     private int viewDistance;
@@ -25,7 +28,7 @@ public class JoinGame implements PacketPlay {
     public JoinGame() {
     }
 
-    public JoinGame(int playerId, boolean hardcore, short gamemode, short previousGamemode, int worldCount, Identity[] worldNames, CompoundTag dimCodec, CompoundTag dim, Identity world, long seed, int maxPlayers, int viewDistance, boolean reducedDebug, boolean respawnScreen, boolean debug, boolean flat) {
+    public JoinGame(int playerId, boolean hardcore, short gamemode, short previousGamemode, int worldCount, Identifier[] worldNames, NBTCompound dimCodec, NBTCompound dim, Identifier world, long seed, int maxPlayers, int viewDistance, boolean reducedDebug, boolean respawnScreen, boolean debug, boolean flat) {
         this.playerId = playerId;
         this.hardcore = hardcore;
         this.gamemode = gamemode;

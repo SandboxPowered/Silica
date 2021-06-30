@@ -1,38 +1,28 @@
 package org.sandboxpowered.silica.loading
 
-import org.sandboxpowered.api.SandboxAPI
-import org.sandboxpowered.api.addon.AddonInfo
-import org.sandboxpowered.api.util.Log
-import org.sandboxpowered.api.util.Side
-import org.sandboxpowered.internal.AddonSpec
-import java.nio.file.Path
-import java.nio.file.Paths
+import org.sandboxpowered.api.addon.Log
+import org.sandboxpowered.api.addon.SandboxAPI
+import org.sandboxpowered.api.addon.service.CreationService
+import org.sandboxpowered.api.registry.DeferredRegistrar
+import org.sandboxpowered.api.registry.Registry
+import org.sandboxpowered.api.registry.RegistryEntry
+import java.util.*
+import java.util.function.Consumer
 
-class AddonSpecificAPIReference(private val spec: AddonSpec, private val loader: SandboxLoader) : SandboxAPI {
-    private val configDir: Path = Paths.get("data", spec.id)
-    private val log: Log = AddonLog(spec)
-    override fun isAddonLoaded(addonId: String): Boolean {
-        return loader.isAddonLoaded(addonId)
-    }
-
-    override fun isExternalModLoaded(loader: String, modId: String): Boolean {
-        return loader == "silica" && modId.isEmpty()
-    }
-
-    override fun getSourceAddon(): AddonInfo {
-        return spec
-    }
-
-    override fun getSide(): Side {
-        return loader.side
-    }
-
-    override fun getConfigDirectory(): Path {
-        return configDir
-    }
-
+class AddonSpecificAPIReference(private val loader: SandboxLoader) : SandboxAPI {
     override fun getLog(): Log {
-        return log
+        TODO("Not yet implemented")
     }
 
+    override fun <T : RegistryEntry<T>> getRegistrar(registry: Registry<T>): DeferredRegistrar<T> {
+        TODO("Not yet implemented")
+    }
+
+    override fun <T : CreationService> getCreationService(tClass: Class<T>): Optional<T> {
+        return Optional.empty()
+    }
+
+    override fun <T : CreationService> useCreationService(resourceServiceClass: Class<T>, consumer: Consumer<T>) {
+        getCreationService(resourceServiceClass).ifPresent(consumer)
+    }
 }

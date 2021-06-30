@@ -8,21 +8,10 @@ import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import com.artemis.WorldConfigurationBuilder
 import com.mojang.authlib.GameProfile
-import org.joml.Vector3ic
 import org.sandboxpowered.api.block.Block
-import org.sandboxpowered.api.block.Blocks
-import org.sandboxpowered.api.ecs.CapabilityManager
-import org.sandboxpowered.api.ecs.ComponentMapper
-import org.sandboxpowered.api.ecs.EntityBlueprint
-import org.sandboxpowered.api.ecs.component.Component
 import org.sandboxpowered.api.engine.Platform
 import org.sandboxpowered.api.entity.Entity
-import org.sandboxpowered.api.item.ItemStack
-import org.sandboxpowered.api.state.BlockState
-import org.sandboxpowered.api.state.FluidState
-import org.sandboxpowered.api.tags.TagManager
 import org.sandboxpowered.api.util.Identifier
-import org.sandboxpowered.api.util.Side
 import org.sandboxpowered.api.util.math.Position
 import org.sandboxpowered.api.world.*
 import org.sandboxpowered.api.world.state.BlockState
@@ -65,11 +54,11 @@ class SilicaWorld private constructor(private val side: Platform.Type) : World {
         )
     }
 
-    override fun getBlockState(pos: Vector3ic): BlockState {
+    override fun getBlockState(pos: Position): BlockState {
         TODO("Not yet implemented")
     }
 
-    override fun getFluidState(pos: Vector3ic): FluidState {
+    override fun getFluidState(pos: Position): FluidState {
         TODO("Not yet implemented")
     }
 

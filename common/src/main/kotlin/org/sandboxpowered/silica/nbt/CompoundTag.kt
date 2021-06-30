@@ -1,9 +1,9 @@
 package org.sandboxpowered.silica.nbt
 
-import org.sandboxpowered.api.util.Identity
+import org.sandboxpowered.api.nbt.NBT
+import org.sandboxpowered.api.nbt.NBTCompound
+import org.sandboxpowered.api.util.Identifier
 import org.sandboxpowered.api.util.math.Position
-import org.sandboxpowered.api.util.nbt.CompoundTag
-import org.sandboxpowered.api.util.nbt.Tag
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.byte
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.byteArray
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.double
@@ -15,9 +15,8 @@ import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.longArray
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.string
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.tag
 import java.util.*
-import kotlin.collections.HashMap
 
-class CompoundTag : CompoundTag {
+class CompoundTag : NBTCompound {
     internal val tags: MutableMap<String, Entry> = HashMap()
 
     override fun asString(): String {
@@ -47,13 +46,13 @@ class CompoundTag : CompoundTag {
     override fun getBoolean(key: String) = getByte(key) != 0.toByte()
 
     override fun getUUID(key: String) = getTag(key).let {
-        it as CompoundTag
+        it as NBTCompound
         UUID(it.getLong("M"), it.getLong("L"))
     }
 
     override fun remove(key: String) = tags.remove(key) != null
 
-    override fun getTag(key: String): Tag = tags[key].tag()
+    override fun getTag(key: String): NBT = tags[key].tag()
 
     override fun <T : Any> getList(key: String, tagType: Class<T>): MutableList<T> {
         TODO("Not yet implemented")
@@ -61,13 +60,13 @@ class CompoundTag : CompoundTag {
 
     override fun getCompoundTag(key: String) = tags[key].tag() as? CompoundTag ?: CompoundTag()
 
-    override fun getIdentity(key: String): Identity {
+    override fun getIdentifier(key: String): Identifier {
         TODO("Not yet implemented")
     }
 
     override fun getPosition(key: String): Position = getTag(key).let {
         it as CompoundTag
-        Position.create(it.getInt("X"), it.getInt("Y"), it.getInt("Z"))
+        Position.immutable(it.getInt("X"), it.getInt("Y"), it.getInt("Z"))
     }
 
     override fun setInt(key: String, i: Int) {
@@ -113,11 +112,11 @@ class CompoundTag : CompoundTag {
         })
     }
 
-    override fun setTag(key: String, tag: Tag) {
+    override fun setTag(key: String, tag: NBT) {
         tags[key] = tag(tag)
     }
 
-    override fun <T : Tag?> setList(key: String, list: List<T>) {
+    override fun <T : NBT> setList(key: String, list: List<T>) {
         tags[key] = Entry.list(list)
     }
 
@@ -129,7 +128,7 @@ class CompoundTag : CompoundTag {
         })
     }
 
-    override fun setIdentity(key: String, identity: Identity) {
+    override fun setIdentifier(key: String, identity: Identifier) {
         TODO("Not yet implemented")
     }
 
@@ -163,7 +162,7 @@ class CompoundTag : CompoundTag {
             fun byteArray(value: ByteArray) = Entry(7, value)
             fun string(value: String) = Entry(8, value)
             fun list(value: List<*>) = Entry(9, value)
-            fun tag(value: Tag) = Entry(10, value)
+            fun tag(value: NBT) = Entry(10, value)
             fun intArray(value: IntArray) = Entry(11, value)
             fun longArray(value: LongArray) = Entry(12, value)
             fun unsafe(type: Int, value: Any) = Entry(type, value)
@@ -177,7 +176,7 @@ class CompoundTag : CompoundTag {
             fun Entry?.byteArray(): ByteArray = if (this == null || type != 7) ByteArray(0) else value as ByteArray
             fun Entry?.string(): String = if (this == null || type != 8) "" else value as String
             fun Entry?.list(): List<*> = if (this == null || type != 9) emptyList<Any>() else value as List<*>
-            fun Entry?.tag(): Tag = if (this == null || type != 10) CompoundTag.create() else value as Tag
+            fun Entry?.tag(): NBT = if (this == null || type != 10) NBTCompound.create() else value as NBT
             fun Entry?.intArray(): IntArray = if (this == null || type != 11) IntArray(0) else value as IntArray
             fun Entry?.longArray(): LongArray = if (this == null || type != 12) LongArray(0) else value as LongArray
         }

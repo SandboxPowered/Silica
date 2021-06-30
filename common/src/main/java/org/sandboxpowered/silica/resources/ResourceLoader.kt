@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.resources
 
-import org.sandboxpowered.api.util.Identity
+import org.sandboxpowered.api.util.Identifier
 import java.io.IOException
 import java.io.InputStream
 import java.util.function.Predicate
@@ -20,5 +20,5 @@ interface ResourceLoader {
 
     fun getNamespaces(type: ResourceType): Set<String>
 
-    fun getFilename(type: ResourceType, identity: Identity) = "${type.folder}/${identity.namespace}/${identity.path}"
+    fun getFilename(type: ResourceType, identity: Identifier) = "${type.folder}/${identity.namespace}/${identity.path}"
 }

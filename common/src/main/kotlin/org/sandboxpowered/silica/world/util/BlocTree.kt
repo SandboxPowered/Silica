@@ -6,6 +6,11 @@ import org.sandboxpowered.api.world.state.BlockState
 import org.sandboxpowered.silica.util.getPool
 import kotlin.math.pow
 
+private val BlockState.isAir: Boolean
+    get() {
+        return this.block.identifier.path === "air"
+    }
+
 /**
  * Octree for optimized queries in 3d space, but for BlockStates
  *
