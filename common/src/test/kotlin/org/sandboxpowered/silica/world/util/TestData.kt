@@ -13,7 +13,7 @@ object TestData {
     init {
         mockkStatic(Registry::class)
         val blocks = mockk<Registry<Block>>(relaxed = true)
-        every { Registry.getRegistryFromType(Block::class.java) } returns blocks
+        every { Block.REGISTRY } returns blocks
     }
 
     fun block(name: String, isAir: Boolean = false): Block = mockk(name, relaxed = true) {

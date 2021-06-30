@@ -9,7 +9,7 @@ import org.sandboxpowered.api.registry.RegistryEntry
 import java.util.*
 import java.util.function.Consumer
 
-class AddonSpecificAPIReference(private val loader: SandboxLoader) : SandboxAPI {
+class AddonSpecificAPIReference(private val spec: AddonDefinition, private val loader: SandboxLoader) : SandboxAPI {
     override fun getLog(): Log {
         TODO("Not yet implemented")
     }

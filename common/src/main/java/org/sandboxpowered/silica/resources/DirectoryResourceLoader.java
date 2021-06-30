@@ -2,8 +2,6 @@ package org.sandboxpowered.silica.resources;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.jetbrains.annotations.NotNull;
-import org.sandboxpowered.api.util.Identity;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -55,11 +53,5 @@ public class DirectoryResourceLoader implements ResourceLoader {
             namespaces = set;
         }
         return namespaces;
-    }
-
-    @NotNull
-    @Override
-    public String getFilename(@NotNull ResourceType type, @NotNull Identity identity) {
-        return null;
     }
 }

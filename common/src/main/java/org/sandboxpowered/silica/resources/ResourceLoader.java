@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.resources;
 
-import org.sandboxpowered.api.util.Identity;
+import org.sandboxpowered.api.util.Identifier;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 public interface ResourceLoader {
-    private static String getFilename(ResourceType type, Identity identity) {
+    private static String getFilename(ResourceType type, Identifier identity) {
         return String.format("%s/%s/%s", type.getFolder(), identity.getNamespace(), identity.getPath());
     }
 

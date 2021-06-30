@@ -1,7 +1,10 @@
 package org.sandboxpowered.silica.network.play.clientbound;
 
-import org.sandboxpowered.api.util.Identity;
-import org.sandboxpowered.silica.network.*;
+import org.sandboxpowered.api.util.Identifier;
+import org.sandboxpowered.silica.network.PacketByteBuf;
+import org.sandboxpowered.silica.network.PacketHandler;
+import org.sandboxpowered.silica.network.PacketPlay;
+import org.sandboxpowered.silica.network.PlayContext;
 import org.sandboxpowered.silica.util.Hardcoding;
 
 public class DeclareTags implements PacketPlay {
@@ -18,9 +21,9 @@ public class DeclareTags implements PacketPlay {
         writeEmpty(buf, Hardcoding.ENTITY_TAGS);
     }
 
-    public void writeEmpty(PacketByteBuf buf, Identity[] arr) {
+    public void writeEmpty(PacketByteBuf buf, Identifier[] arr) {
         buf.writeVarInt(arr.length);
-        for (Identity identity : arr) {
+        for (Identifier identity : arr) {
             buf.writeIdentity(identity);
             buf.writeVarInt(0);
         }

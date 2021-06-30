@@ -1,8 +1,5 @@
 dependencies {
-    implementation platform('org.sandboxpowered.api:api:rework-SNAPSHOT')
-    implementation 'org.sandboxpowered.api:base'
-    implementation 'org.sandboxpowered.api:rendering'
-    implementation 'org.sandboxpowered.api:resources'
+    implementation "org.sandboxpowered.api:api:1.0.0-20210630.150802-16"
 
     implementation 'org.jetbrains:annotations:20.1.0'
 

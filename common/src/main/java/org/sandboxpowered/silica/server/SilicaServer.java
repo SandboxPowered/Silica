@@ -1,6 +1,7 @@
 package org.sandboxpowered.silica.server;
 
 import akka.actor.typed.ActorRef;
+import org.sandboxpowered.api.engine.Game;
 import org.sandboxpowered.api.server.Server;
 import org.sandboxpowered.silica.StateManager;
 import org.sandboxpowered.silica.command.Commands;
@@ -34,6 +35,11 @@ public abstract class SilicaServer implements Server {
         commands = new Commands();
         dataManager = new ResourceManager(ResourceType.DATA);
         dataManager.add(new ClasspathResourceLoader());
+    }
+
+    @Override
+    public Game getGame() {
+        return null;
     }
 
     public Commands getCommands() {

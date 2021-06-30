@@ -1,7 +1,5 @@
 package org.sandboxpowered.silica.loading;
 
-import org.sandboxpowered.internal.AddonSpec;
-
 import java.io.ByteArrayOutputStream;
 import java.io.FilePermission;
 import java.io.IOException;
@@ -20,13 +18,13 @@ public class AddonClassLoader extends SecureClassLoader {
     }
 
     private final SandboxLoader loader;
-    private final AddonSpec spec;
+    private final AddonDefinition spec;
     private final ClassLoader original;
     private final URL url;
     private final DynamicURLClassLoader classLoader = (DynamicURLClassLoader) getParent();
     private CodeSource addonSource;
 
-    public AddonClassLoader(SandboxLoader loader, ClassLoader original, URL url, AddonSpec spec) {
+    public AddonClassLoader(SandboxLoader loader, ClassLoader original, URL url, AddonDefinition spec) {
         super(new DynamicURLClassLoader(new URL[]{url}, original));
         this.loader = loader;
         this.original = original;

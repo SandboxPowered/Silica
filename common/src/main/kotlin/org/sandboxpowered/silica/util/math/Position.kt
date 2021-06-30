@@ -21,15 +21,27 @@ class Position(
     }
 
     override fun toMutable(): Position.Mutable {
-        return Position.Mutable.create(x, y, z)
+        return Position.mutable(x, y, z) as Position.Mutable
     }
 
     override fun toImmutable(): Position {
         return this
     }
 
-    override fun offset(direction: Direction, amount: Int): Position {
+    override fun shift(direction: Direction, amount: Int): Position {
         return add(amount * direction.offsetX, amount * direction.offsetY, amount * direction.offsetZ)
+    }
+
+    override fun add(position: Position): Position {
+        return add(position.x, position.y, position.z)
+    }
+
+    override fun sub(position: Position): Position {
+        return sub(position.x, position.y, position.z)
+    }
+
+    override fun shift(direction: Direction): Position {
+        return shift(direction, 1)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -78,15 +90,27 @@ class Position(
         }
 
         override fun toImmutable(): Position {
-            return Position.create(x, y, z)
+            return Position.immutable(x, y, z)
         }
 
-        override fun offset(direction: Direction, amount: Int): Position {
+        override fun shift(direction: Direction, amount: Int): Position {
             return add(
                 amount * direction.offsetX,
                 amount * direction.offsetY,
                 amount * direction.offsetZ,
             )
+        }
+
+        override fun add(position: Position): Position {
+            return add(position.x, position.y, position.z)
+        }
+
+        override fun sub(position: Position): Position {
+            return sub(position.x, position.y, position.z)
+        }
+
+        override fun shift(direction: Direction): Position {
+            return shift(direction, 1)
         }
 
         override fun set(x: Int, y: Int, z: Int): Position.Mutable {

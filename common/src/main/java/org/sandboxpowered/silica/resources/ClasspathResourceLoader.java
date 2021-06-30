@@ -1,8 +1,5 @@
 package org.sandboxpowered.silica.resources;
 
-import org.jetbrains.annotations.NotNull;
-import org.sandboxpowered.api.util.Identity;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -28,11 +25,5 @@ public class ClasspathResourceLoader implements ResourceLoader {
     @Override
     public Set<String> getNamespaces(ResourceType type) {
         return Collections.emptySet();
-    }
-
-    @NotNull
-    @Override
-    public String getFilename(@NotNull ResourceType type, @NotNull Identity identity) {
-        return null;
     }
 }

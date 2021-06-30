@@ -1,11 +1,8 @@
 package org.sandboxpowered.silica.world.util
 
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import org.sandboxpowered.api.state.BlockState
+import org.sandboxpowered.api.world.state.BlockState
 import java.util.stream.Stream
 
 //@TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -25,7 +22,7 @@ internal class BlocTreeTest {
         for ((pos, state) in blocks) {
             val (x, y, z) = pos
             tree[x, y, z] = state
-            if (!state.isAir) ++count
+            if (!state.block.isAir(state)) ++count
         }
 
         for ((pos, state) in blocks) {

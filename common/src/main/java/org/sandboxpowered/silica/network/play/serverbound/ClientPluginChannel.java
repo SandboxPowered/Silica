@@ -1,10 +1,13 @@
 package org.sandboxpowered.silica.network.play.serverbound;
 
-import org.sandboxpowered.api.util.Identity;
-import org.sandboxpowered.silica.network.*;
+import org.sandboxpowered.api.util.Identifier;
+import org.sandboxpowered.silica.network.PacketByteBuf;
+import org.sandboxpowered.silica.network.PacketHandler;
+import org.sandboxpowered.silica.network.PacketPlay;
+import org.sandboxpowered.silica.network.PlayContext;
 
 public class ClientPluginChannel implements PacketPlay {
-    private Identity channel;
+    private Identifier channel;
     private byte[] data;
 
     @Override

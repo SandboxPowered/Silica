@@ -12,10 +12,10 @@ import mu.toKLogger
 import org.apache.commons.io.FileUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.sandboxpowered.api.util.Side
-import org.sandboxpowered.internal.AddonSpec
+import org.sandboxpowered.api.engine.Platform
 import org.sandboxpowered.silica.StateManager
 import org.sandboxpowered.silica.inject.SilicaImplementationModule
+import org.sandboxpowered.silica.loading.AddonDefinition
 import org.sandboxpowered.silica.loading.SandboxLoader
 import org.sandboxpowered.silica.resources.DirectoryResourceLoader
 import org.sandboxpowered.silica.resources.ResourceLoader
@@ -26,7 +26,6 @@ import org.sandboxpowered.silica.util.onMessage
 import org.sandboxpowered.silica.util.onSignal
 import org.sandboxpowered.silica.world.SilicaWorld
 import java.io.File
-import java.lang.StringBuilder
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.time.Duration
@@ -49,7 +48,7 @@ class DedicatedServer : SilicaServer() {
         acceptVanillaConnections = stateManagerErrors.isEmpty()
     }
 
-    private fun createAddonPack(spec: AddonSpec, file: File): ResourceLoader {
+    private fun createAddonPack(spec: AddonDefinition, file: File): ResourceLoader {
         return if (file.isDirectory) DirectoryResourceLoader(file) else ZIPResourceLoader(file)
     }
 
@@ -110,7 +109,7 @@ class DedicatedServer : SilicaServer() {
         private val logger = context.log.toKLogger()
         private var skippedTicks = 0
         private var lastTickTime: Long = -1
-        private val world: ActorRef<in SilicaWorld.Command> = context.spawn(SilicaWorld.actor(Side.SERVER), "world").apply(worldInit)
+        private val world: ActorRef<in SilicaWorld.Command> = context.spawn(SilicaWorld.actor(Platform.Type.SERVER), "world").apply(worldInit)
         private val network: ActorRef<in Network> = context.spawn(Network.actor(server), "network").apply(networkInit)
         private val currentlyTicking: Object2LongMap<ActorRef<*>> = Object2LongOpenHashMap(3)
 

@@ -10,9 +10,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.sandboxpowered.api.addon.Addon;
-import org.sandboxpowered.api.util.Identity;
-import org.sandboxpowered.api.util.Side;
-import org.sandboxpowered.internal.AddonSpec;
+import org.sandboxpowered.api.util.Identifier;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,10 +28,9 @@ import static org.sandboxpowered.silica.loading.AddonFinder.SANDBOX_TOML;
 
 public class SandboxLoader {
     private static final Parser<Expression> PARSER = ExpressionParser.newInstance();
-    private final Map<String, AddonSpec> loadedAddons = new HashMap<>();
-    private final Map<AddonSpec, Addon> addonMap = new HashMap<>();
-    private final Map<AddonSpec, AddonSpecificAPIReference> addonAPIs = new HashMap<>();
-    private final Map<AddonSpec, AddonSpecificRegistrarReference> addonRegistrars = new HashMap<>();
+    private final Map<String, AddonDefinition> loadedAddons = new HashMap<>();
+    private final Map<AddonDefinition, Addon> addonMap = new HashMap<>();
+    private final Map<AddonDefinition, AddonSpecificAPIReference> addonAPIs = new HashMap<>();
     private final AddonFinder scanner = new AddonFinder.MergedFinder(
             new AddonFinder.DirectoryFinder(Paths.get("addons")),
             new AddonFinder.ClasspathFinder()
@@ -42,33 +39,29 @@ public class SandboxLoader {
     public Logger log = LogManager.getLogger(SandboxLoader.class);
     private boolean loaded;
 
-    private AddonSpecificRegistrarReference getRegistrarForAddon(AddonSpec spec) {
-        return addonRegistrars.computeIfAbsent(spec, s -> new AddonSpecificRegistrarReference(s, this));
-    }
-
-    private AddonSpecificAPIReference getAPIForAddon(AddonSpec spec) {
+    private AddonSpecificAPIReference getAPIForAddon(AddonDefinition spec) {
         return addonAPIs.computeIfAbsent(spec, s -> new AddonSpecificAPIReference(s, this));
     }
 
-    public Optional<AddonSpec> getAddon(String addonId) {
+    public Optional<AddonDefinition> getAddon(String addonId) {
         return Optional.ofNullable(loadedAddons.get(addonId));
     }
 
-    public void loadAddon(AddonSpec info, Addon addon) {
+    public void loadAddon(AddonDefinition info, Addon addon) {
         loadedAddons.put(info.getId(), info);
         addonMap.put(info, addon);
     }
 
-    private List<AddonSpec> getLoadOrder() {
-        Set<AddonSpec> visited = new HashSet<>();
-        List<AddonSpec> loadOrder = new ArrayList<>();
-        for (AddonSpec info : getAllAddons().keySet()) {
+    private List<AddonDefinition> getLoadOrder() {
+        Set<AddonDefinition> visited = new HashSet<>();
+        List<AddonDefinition> loadOrder = new ArrayList<>();
+        for (AddonDefinition info : getAllAddons().keySet()) {
             handleDependencies(visited, loadOrder, info);
         }
         return loadOrder;
     }
 
-    private void loopInOrder(Consumer<AddonSpec> consumer) {
+    private void loopInOrder(Consumer<AddonDefinition> consumer) {
         getLoadOrder().forEach(spec -> {
             if (!spec.getPlatformSupport(getPlatform()).canRun()) {
                 throw new IllegalStateException(String.format("Addon %s cannot run on platform %s!", spec.getId(), getPlatform().toString()));
@@ -81,19 +74,19 @@ public class SandboxLoader {
         });
     }
 
-    public Identity getPlatform() {
-        return Identity.of("sandbox", "test");
+    public Identifier getPlatform() {
+        return Identifier.of("sandbox", "test");
     }
 
-    private void handleDependencies(Set<AddonSpec> visited, List<AddonSpec> order, AddonSpec spec) {
+    private void handleDependencies(Set<AddonDefinition> visited, List<AddonDefinition> order, AddonDefinition spec) {
         if (visited.contains(spec)) return;
         visited.add(spec);
         Map<String, String> dependencies = spec.getDependencies();
         for (String dep : dependencies.keySet()) {
-            Optional<AddonSpec> optionalDep = getAddon(dep);
+            Optional<AddonDefinition> optionalDep = getAddon(dep);
             if (!optionalDep.isPresent())
                 throw new IllegalStateException(String.format("Addon %s depends on other addon %s that isn't loaded!", spec.getId(), dep));
-            AddonSpec dependency = optionalDep.get();
+            AddonDefinition dependency = optionalDep.get();
             String versionString = dependencies.get(dep);
             Expression version = PARSER.parse(versionString);
             if (!version.interpret(dependency.getVersion()))
@@ -103,7 +96,7 @@ public class SandboxLoader {
         order.add(spec);
     }
 
-    public Map<AddonSpec, Addon> getAllAddons() {
+    public Map<AddonDefinition, Addon> getAllAddons() {
         return ImmutableMap.copyOf(addonMap);
     }
 
@@ -112,12 +105,11 @@ public class SandboxLoader {
         loadedAddons.clear();
         addonMap.clear();
         addonAPIs.clear();
-        addonRegistrars.clear();
         addonToClassLoader.clear();
         loaded = false;
     }
 
-    public AddonClassLoader getClassLoader(AddonSpec spec, URL url) {
+    public AddonClassLoader getClassLoader(AddonDefinition spec, URL url) {
         return addonToClassLoader.computeIfAbsent(spec.getId(), addonId -> new AddonClassLoader(this, Addon.class.getClassLoader(), url, spec));
     }
 
@@ -143,7 +135,7 @@ public class SandboxLoader {
                         continue;
                     Config config = parser.parse(configStream);
                     URL url = uri.toURL();
-                    AddonSpec spec = AddonSpec.from(config, url);
+                    AddonDefinition spec = AddonDefinition.from(config, url);
                     AddonClassLoader loader = getClassLoader(spec, url);
                     Class<?> mainClass = loader.loadClass(spec.getMainClass());
                     Object obj = mainClass.getConstructor().newInstance();
@@ -170,18 +162,12 @@ public class SandboxLoader {
             log.error("Failed to load classpath addons", e);
         }
 
-        loopInOrder(spec -> addonMap.get(spec).init(getAPIForAddon(spec)));
-        loopInOrder(spec -> addonMap.get(spec).register(getAPIForAddon(spec), getRegistrarForAddon(spec)));
-        loopInOrder(spec -> addonMap.get(spec).finishLoad(getAPIForAddon(spec)));
+        loopInOrder(spec -> addonMap.get(spec).setup(getAPIForAddon(spec)));
         loaded = true;
     }
 
     public boolean isAddonLoaded(String addonId) {
         return getAddon(addonId).isPresent();
-    }
-
-    public Side getSide() {
-        return Side.SERVER;
     }
 
     public boolean isLoaded() {

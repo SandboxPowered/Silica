@@ -7,7 +7,8 @@ import org.apache.logging.log4j.Logger
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.system.Configuration
 import org.sandboxpowered.api.client.Client
-import org.sandboxpowered.api.client.GraphicsMode
+import org.sandboxpowered.api.client.render.RenderManager
+import org.sandboxpowered.api.engine.Game
 import org.sandboxpowered.silica.client.server.IntegratedServer
 import org.sandboxpowered.silica.resources.*
 import org.sandboxpowered.silica.util.FileFilters
@@ -20,10 +21,10 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.*
-import java.util.concurrent.*
-
-import kotlin.math.max
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.max
 
 
 class Silica(private val args: Args) : Runnable, Client {
@@ -79,8 +80,16 @@ class Silica(private val args: Args) : Runnable, Client {
 
     class Args(val width: Int, val height: Int, val renderer: String, val minecraftPath: Path?)
 
-    override fun getGraphicsMode(): GraphicsMode {
-        return GraphicsMode.FABULOUS
+    override fun getGame(): Game {
+        TODO("Not yet implemented")
+    }
+
+    override fun getRenderManager(): RenderManager {
+        TODO("Not yet implemented")
+    }
+
+    override fun getResourceManager(): org.sandboxpowered.api.client.resource.ResourceManager {
+        TODO("Not yet implemented")
     }
 
     class InvalidRendererException(message: String) : RuntimeException(message)

@@ -2,7 +2,7 @@ package org.sandboxpowered.silica.state
 
 import com.google.common.collect.Maps
 import org.sandboxpowered.api.registry.RegistryEntry
-import org.sandboxpowered.api.world.state.Property
+import org.sandboxpowered.api.world.state.property.Property
 import org.sandboxpowered.api.world.state.PropertyContainer
 import org.sandboxpowered.api.world.state.StateProvider
 

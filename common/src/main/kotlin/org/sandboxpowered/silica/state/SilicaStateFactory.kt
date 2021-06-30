@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSortedMap
 import org.sandboxpowered.api.registry.RegistryEntry
-import org.sandboxpowered.api.world.state.Property
+import org.sandboxpowered.api.world.state.property.Property
 import org.sandboxpowered.api.world.state.PropertyContainer
 import org.sandboxpowered.api.world.state.StateProvider
 

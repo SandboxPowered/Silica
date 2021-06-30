@@ -3,7 +3,7 @@ package org.sandboxpowered.silica.state.block
 import com.google.common.collect.ImmutableMap
 import org.sandboxpowered.api.block.Block
 import org.sandboxpowered.api.world.state.BlockState
-import org.sandboxpowered.api.world.state.Property
+import org.sandboxpowered.api.world.state.property.Property
 import org.sandboxpowered.silica.state.BaseState
 
 class SilicaBlockState(base: Block, properties: ImmutableMap<Property<*>, Comparable<*>>) :

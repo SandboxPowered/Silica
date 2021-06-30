@@ -1,10 +1,10 @@
 package org.sandboxpowered.silica.block;
 
-import org.sandboxpowered.api.state.property.BooleanProperty;
-import org.sandboxpowered.api.state.property.EnumProperty;
-import org.sandboxpowered.api.state.property.IntProperty;
-import org.sandboxpowered.api.state.property.Property;
 import org.sandboxpowered.api.util.*;
+import org.sandboxpowered.api.world.state.property.BooleanProperty;
+import org.sandboxpowered.api.world.state.property.EnumProperty;
+import org.sandboxpowered.api.world.state.property.IntProperty;
+import org.sandboxpowered.api.world.state.property.Property;
 
 public class SilicaBlockProperties {
     public static final Property<Boolean> ATTACHED = BooleanProperty.of("attached");
@@ -73,7 +73,7 @@ public class SilicaBlockProperties {
     public static final Property<Direction> HOPPER_FACING = EnumProperty.of("facing", Direction.class, direction -> direction != Direction.UP);
     public static final Property<Direction.Axis> HORIZONTAL_AXIS = EnumProperty.of("axis", Direction.Axis.class, Direction.Axis::isHorizontal);
     public static final Property<Direction.Axis> AXIS = EnumProperty.of("axis", Direction.Axis.class);
-    public static final Property<SlabType> SLAB_TYPE = EnumProperty.of("type", SlabType.class);
+    public static final Property<SlabHalf> SLAB_TYPE = EnumProperty.of("type", SlabHalf.class);
     public static final Property<Half> HALF = EnumProperty.of("half", Half.class);
     public static final Property<Hinge> HINGE = EnumProperty.of("hinge", Hinge.class);
     public static final Property<BedHalf> BED_HALF = EnumProperty.of("bed_half", BedHalf.class);
