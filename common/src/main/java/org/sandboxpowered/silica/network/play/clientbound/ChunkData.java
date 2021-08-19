@@ -3,7 +3,6 @@ package org.sandboxpowered.silica.network.play.clientbound;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import kotlin.jvm.functions.Function1;
-import org.sandboxpowered.api.world.state.BlockState;
 import org.sandboxpowered.silica.nbt.CompoundTag;
 import org.sandboxpowered.silica.network.PacketByteBuf;
 import org.sandboxpowered.silica.network.PacketHandler;
@@ -11,14 +10,15 @@ import org.sandboxpowered.silica.network.PacketPlay;
 import org.sandboxpowered.silica.network.PlayContext;
 import org.sandboxpowered.silica.network.play.clientbound.world.VanillaChunkSection;
 import org.sandboxpowered.silica.network.util.BitPackedLongArray;
+import org.sandboxpowered.silica.state.block.BlockState;
 import org.sandboxpowered.silica.world.util.BlocTree;
 
 public class ChunkData implements PacketPlay {
+    private final VanillaChunkSection[] sections = new VanillaChunkSection[16];
     private int cX, cZ;
     private int bitMask;
     private byte[] buffer;
     private int[] biomes;
-    private final VanillaChunkSection[] sections = new VanillaChunkSection[16];
 
     public ChunkData() {
     }

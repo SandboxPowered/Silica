@@ -6,9 +6,6 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.system.Configuration
-import org.sandboxpowered.api.client.Client
-import org.sandboxpowered.api.client.render.RenderManager
-import org.sandboxpowered.api.engine.Game
 import org.sandboxpowered.silica.client.server.IntegratedServer
 import org.sandboxpowered.silica.resources.*
 import org.sandboxpowered.silica.util.FileFilters
@@ -27,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.max
 
 
-class Silica(private val args: Args) : Runnable, Client {
+class Silica(private val args: Args) : Runnable {
     private val logger: Logger = LogManager.getLogger()
     lateinit var window: Window
     private lateinit var assetManager: ResourceManager
@@ -69,7 +66,7 @@ class Silica(private val args: Args) : Runnable, Client {
     }
 
     override fun run() {
-        if(init())
+        if (init())
             return
         while (!window.shouldClose()) {
             renderer.frame()
@@ -79,18 +76,6 @@ class Silica(private val args: Args) : Runnable, Client {
     }
 
     class Args(val width: Int, val height: Int, val renderer: String, val minecraftPath: Path?)
-
-    override fun getGame(): Game {
-        TODO("Not yet implemented")
-    }
-
-    override fun getRenderManager(): RenderManager {
-        TODO("Not yet implemented")
-    }
-
-    override fun getResourceManager(): org.sandboxpowered.api.client.resource.ResourceManager {
-        TODO("Not yet implemented")
-    }
 
     class InvalidRendererException(message: String) : RuntimeException(message)
 
@@ -120,14 +105,17 @@ class Silica(private val args: Args) : Runnable, Client {
         for (string in list) {
             logger.error("GLFW error collected during initialization: {}", string)
         }
-        if(list.isNotEmpty())
+        if (list.isNotEmpty())
             return true
         assetManager = ResourceManager(ResourceType.ASSETS)
         assetManager.add(ClasspathResourceLoader())
         when {
             args.minecraftPath != null -> {
-                if(Files.notExists(args.minecraftPath)) {
-                    logger.error("The specified path of {} does not exist, please make sure this is targeting a Minecraft 1.16.5 jar file", args.minecraftPath)
+                if (Files.notExists(args.minecraftPath)) {
+                    logger.error(
+                        "The specified path of {} does not exist, please make sure this is targeting a Minecraft 1.16.5 jar file",
+                        args.minecraftPath
+                    )
                     return true
                 }
                 assetManager.add(ZIPResourceLoader(args.minecraftPath.toFile()))

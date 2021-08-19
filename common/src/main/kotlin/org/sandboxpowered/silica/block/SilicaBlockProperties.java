@@ -1,10 +1,11 @@
 package org.sandboxpowered.silica.block;
 
-import org.sandboxpowered.api.util.*;
-import org.sandboxpowered.api.world.state.property.BooleanProperty;
-import org.sandboxpowered.api.world.state.property.EnumProperty;
-import org.sandboxpowered.api.world.state.property.IntProperty;
-import org.sandboxpowered.api.world.state.property.Property;
+import org.sandboxpowered.silica.state.property.BooleanProperty;
+import org.sandboxpowered.silica.state.property.EnumProperty;
+import org.sandboxpowered.silica.state.property.IntProperty;
+import org.sandboxpowered.silica.state.property.Property;
+import org.sandboxpowered.silica.util.Direction;
+import org.sandboxpowered.silica.util.Direction.Axis;
 
 public class SilicaBlockProperties {
     public static final Property<Boolean> ATTACHED = BooleanProperty.of("attached");
@@ -42,6 +43,7 @@ public class SilicaBlockProperties {
     public static final Property<Boolean> EAST = BooleanProperty.of("east");
     public static final Property<Boolean> SOUTH = BooleanProperty.of("south");
     public static final Property<Boolean> WEST = BooleanProperty.of("west");
+
     public static final Property<Integer> FLUID_LEVEL = IntProperty.of("level", 1, 8);
     public static final Property<Integer> AGE_1 = IntProperty.of("age", 0, 1);
     public static final Property<Integer> AGE_2 = IntProperty.of("age", 0, 2);
@@ -68,14 +70,10 @@ public class SilicaBlockProperties {
     public static final Property<Integer> STAGE = IntProperty.of("stage", 0, 1);
     public static final Property<Integer> DISTANCE_0_7 = IntProperty.of("distance", 0, 7);
     public static final Property<Integer> ROTATION = IntProperty.of("rotation", 0, 15);
+
     public static final Property<Direction> FACING = EnumProperty.of("facing", Direction.class);
     public static final Property<Direction> HORIZONTAL_FACING = EnumProperty.of("facing", Direction.class, Direction.Type.HORIZONTAL);
     public static final Property<Direction> HOPPER_FACING = EnumProperty.of("facing", Direction.class, direction -> direction != Direction.UP);
-    public static final Property<Direction.Axis> HORIZONTAL_AXIS = EnumProperty.of("axis", Direction.Axis.class, Direction.Axis::isHorizontal);
-    public static final Property<Direction.Axis> AXIS = EnumProperty.of("axis", Direction.Axis.class);
-    public static final Property<SlabHalf> SLAB_TYPE = EnumProperty.of("type", SlabHalf.class);
-    public static final Property<Half> HALF = EnumProperty.of("half", Half.class);
-    public static final Property<Hinge> HINGE = EnumProperty.of("hinge", Hinge.class);
-    public static final Property<BedHalf> BED_HALF = EnumProperty.of("bed_half", BedHalf.class);
-    public static final Property<StairShape> STAIR_SHAPE = EnumProperty.of("shape", StairShape.class);
+    public static final Property<Axis> HORIZONTAL_AXIS = EnumProperty.of("axis", Axis.class, Axis::isHorizontal);
+    public static final Property<Axis> AXIS = EnumProperty.of("axis", Axis.class);
 }

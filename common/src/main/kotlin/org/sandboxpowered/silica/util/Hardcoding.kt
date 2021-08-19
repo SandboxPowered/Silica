@@ -1,7 +1,5 @@
 package org.sandboxpowered.silica.util
 
-import org.sandboxpowered.api.util.Identifier
-
 object Hardcoding {
     @JvmField
     var BLOCK_TAGS = arrayOf(

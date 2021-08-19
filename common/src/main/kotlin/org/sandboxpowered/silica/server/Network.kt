@@ -27,6 +27,7 @@ sealed class Network {
     class Tick(val delta: Float, val replyTo: ActorRef<Tock>) : Network() {
         class Tock(val done: ActorRef<Network>)
     }
+
     class Start(val replyTo: ActorRef<in Boolean>) : Network()
     class Disconnected(val user: GameProfile) : Network()
     class CreateConnection(
@@ -95,6 +96,7 @@ private class NetworkActor(
 
         return Behaviors.same()
     }
+
     private fun handleStart(start: Network.Start): Behavior<Network> {
         val properties = server.properties
         val bossGroup: EventLoopGroup = NioEventLoopGroup()
@@ -106,12 +108,15 @@ private class NetworkActor(
                 .childHandler(object : ChannelInitializer<SocketChannel>() {
                     override fun initChannel(ch: SocketChannel) {
                         ch.pipeline()
-                            .addLast("timeout",ReadTimeoutHandler(30))
-                            .addLast("splitter",LengthSplitter())
+                            .addLast("timeout", ReadTimeoutHandler(30))
+                            .addLast("splitter", LengthSplitter())
                             .addLast("decoder", PacketDecoder(Flow.SERVERBOUND))
-                            .addLast("prepender",LengthPrepender())
-                            .addLast("encoder",PacketEncoder(Flow.CLIENTBOUND))
-                            .addLast("handler",PacketHandler(Connection(server, context.self, context.system.scheduler())))
+                            .addLast("prepender", LengthPrepender())
+                            .addLast("encoder", PacketEncoder(Flow.CLIENTBOUND))
+                            .addLast(
+                                "handler",
+                                PacketHandler(Connection(server, context.self, context.system.scheduler()))
+                            )
                     }
                 })
                 .option(ChannelOption.SO_BACKLOG, 128)

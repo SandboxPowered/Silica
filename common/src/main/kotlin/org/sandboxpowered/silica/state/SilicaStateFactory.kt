@@ -3,24 +3,24 @@ package org.sandboxpowered.silica.state
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSortedMap
-import org.sandboxpowered.api.registry.RegistryEntry
-import org.sandboxpowered.api.world.state.property.Property
-import org.sandboxpowered.api.world.state.PropertyContainer
-import org.sandboxpowered.api.world.state.StateProvider
+import org.sandboxpowered.silica.registry.RegistryEntry
+import org.sandboxpowered.silica.state.property.Property
 
 class SilicaStateFactory<B : RegistryEntry<B>, S : PropertyContainer<S>>(
-    private val base: B,
+    override val baseObject: B,
     map: Map<String, Property<*>>,
     stateCreator: Factory<B, S>
 ) : StateProvider<B, S> {
     private val propertiesByName: ImmutableSortedMap<String, Property<*>> = ImmutableSortedMap.copyOf(map)
-    private val states: ImmutableList<S>
+    override val validStates: ImmutableList<S>
+    override val baseState: S
+        get() = this.validStates[0]
 
-    interface Factory<B : RegistryEntry<B>, S : PropertyContainer<S>> {
+    interface Factory<B, S : PropertyContainer<S>> {
         fun create(base: B, values: ImmutableMap<Property<*>, Comparable<*>>): S
 
         companion object {
-            fun <B : RegistryEntry<B>, S : PropertyContainer<S>> of(factory: (base: B, properties: ImmutableMap<Property<*>, Comparable<*>>) -> S): Factory<B, S> {
+            fun <B, S : PropertyContainer<S>> of(factory: (base: B, properties: ImmutableMap<Property<*>, Comparable<*>>) -> S): Factory<B, S> {
                 return object : Factory<B, S> {
                     override fun create(base: B, values: ImmutableMap<Property<*>, Comparable<*>>): S {
                         return factory.invoke(base, values)
@@ -28,18 +28,6 @@ class SilicaStateFactory<B : RegistryEntry<B>, S : PropertyContainer<S>>(
                 }
             }
         }
-    }
-
-    override fun getBaseState(): S {
-        return states[0]
-    }
-
-    override fun getBaseObject(): B {
-        return base
-    }
-
-    override fun getValidStates(): Collection<S> {
-        return states
     }
 
     init {
@@ -63,7 +51,7 @@ class SilicaStateFactory<B : RegistryEntry<B>, S : PropertyContainer<S>>(
                     { obj: Pair<Property<*>, Comparable<*>> -> obj.first },
                     { obj: Pair<Property<*>, Comparable<*>> -> obj.second }
                 ))
-            val state = stateCreator.create(base, propertyValues)
+            val state = stateCreator.create(baseObject, propertyValues)
             propertyToState[propertyValues] = state
             allStates.add(state)
         }
@@ -74,6 +62,6 @@ class SilicaStateFactory<B : RegistryEntry<B>, S : PropertyContainer<S>>(
                 (state as BaseState<B, S>).initTable(propertyToState)
             }
         }
-        states = ImmutableList.copyOf(allStates)
+        this.validStates = ImmutableList.copyOf(allStates)
     }
 }

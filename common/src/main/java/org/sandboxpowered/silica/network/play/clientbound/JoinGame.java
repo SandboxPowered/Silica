@@ -1,11 +1,11 @@
 package org.sandboxpowered.silica.network.play.clientbound;
 
-import org.sandboxpowered.api.nbt.NBTCompound;
-import org.sandboxpowered.api.util.Identifier;
+import org.sandboxpowered.silica.nbt.NBTCompound;
 import org.sandboxpowered.silica.network.PacketByteBuf;
 import org.sandboxpowered.silica.network.PacketHandler;
 import org.sandboxpowered.silica.network.PacketPlay;
 import org.sandboxpowered.silica.network.PlayContext;
+import org.sandboxpowered.silica.util.Identifier;
 
 public class JoinGame implements PacketPlay {
     private int playerId;

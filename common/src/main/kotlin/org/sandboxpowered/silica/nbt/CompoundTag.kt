@@ -1,9 +1,5 @@
 package org.sandboxpowered.silica.nbt
 
-import org.sandboxpowered.api.nbt.NBT
-import org.sandboxpowered.api.nbt.NBTCompound
-import org.sandboxpowered.api.util.Identifier
-import org.sandboxpowered.api.util.math.Position
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.byte
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.byteArray
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.double
@@ -14,6 +10,8 @@ import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.long
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.longArray
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.string
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.tag
+import org.sandboxpowered.silica.util.Identifier
+import org.sandboxpowered.silica.util.math.Position
 import java.util.*
 
 class CompoundTag : NBTCompound {
@@ -23,9 +21,10 @@ class CompoundTag : NBTCompound {
         TODO("Not yet implemented")
     }
 
-    override fun size() = tags.size
-
-    override fun getKeys() = tags.keys
+    override val size: Int
+        get() = tags.size
+    override val keys: Collection<String>
+        get() = tags.keys
 
     override fun contains(key: String) = key in tags
 
@@ -54,7 +53,7 @@ class CompoundTag : NBTCompound {
 
     override fun getTag(key: String): NBT = tags[key].tag()
 
-    override fun <T : Any> getList(key: String, tagType: Class<T>): MutableList<T> {
+    override fun <T> getList(key: String, tagType: Class<T>): List<T> {
         TODO("Not yet implemented")
     }
 
@@ -66,7 +65,7 @@ class CompoundTag : NBTCompound {
 
     override fun getPosition(key: String): Position = getTag(key).let {
         it as CompoundTag
-        Position.immutable(it.getInt("X"), it.getInt("Y"), it.getInt("Z"))
+        Position(it.getInt("X"), it.getInt("Y"), it.getInt("Z"))
     }
 
     override fun setInt(key: String, i: Int) {
@@ -122,19 +121,19 @@ class CompoundTag : NBTCompound {
 
     override fun setPosition(key: String, position: Position) {
         setTag(key, CompoundTag().apply {
-            setInt("X", position.x)
-            setInt("Y", position.y)
-            setInt("Z", position.z)
+            setInt("X", position.getX())
+            setInt("Y", position.getY())
+            setInt("Z", position.getZ())
         })
     }
 
-    override fun setIdentifier(key: String, identity: Identifier) {
+    override fun setIdentifier(key: String, identifier: Identifier) {
         TODO("Not yet implemented")
     }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is org.sandboxpowered.silica.nbt.CompoundTag) return false
+        if (other !is CompoundTag) return false
 
         if (tags.keys != other.tags.keys) return false
         return tags.all { (k, v) -> v == other.tags[k] } // TODO: this doesn't support comparing arrays ;-;
@@ -176,7 +175,7 @@ class CompoundTag : NBTCompound {
             fun Entry?.byteArray(): ByteArray = if (this == null || type != 7) ByteArray(0) else value as ByteArray
             fun Entry?.string(): String = if (this == null || type != 8) "" else value as String
             fun Entry?.list(): List<*> = if (this == null || type != 9) emptyList<Any>() else value as List<*>
-            fun Entry?.tag(): NBT = if (this == null || type != 10) NBTCompound.create() else value as NBT
+            fun Entry?.tag(): NBT = if (this == null || type != 10) CompoundTag() else value as NBT
             fun Entry?.intArray(): IntArray = if (this == null || type != 11) IntArray(0) else value as IntArray
             fun Entry?.longArray(): LongArray = if (this == null || type != 12) LongArray(0) else value as LongArray
         }

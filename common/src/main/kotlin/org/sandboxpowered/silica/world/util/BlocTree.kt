@@ -2,13 +2,13 @@ package org.sandboxpowered.silica.world.util
 
 import net.mostlyoriginal.api.utils.pooling.ObjectPool
 import net.mostlyoriginal.api.utils.pooling.Poolable
-import org.sandboxpowered.api.world.state.BlockState
+import org.sandboxpowered.silica.state.block.BlockState
 import org.sandboxpowered.silica.util.getPool
 import kotlin.math.pow
 
 private val BlockState.isAir: Boolean
     get() {
-        return this.block.identifier.path === "air"
+        return this.block.identifier.path == "air"
     }
 
 /**

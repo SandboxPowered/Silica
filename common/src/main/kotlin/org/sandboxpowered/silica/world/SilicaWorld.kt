@@ -8,20 +8,18 @@ import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import com.artemis.WorldConfigurationBuilder
 import com.mojang.authlib.GameProfile
-import org.sandboxpowered.api.block.Block
-import org.sandboxpowered.api.engine.Platform
-import org.sandboxpowered.api.entity.Entity
-import org.sandboxpowered.api.util.Identifier
-import org.sandboxpowered.api.util.math.Position
-import org.sandboxpowered.api.world.*
-import org.sandboxpowered.api.world.state.BlockState
-import org.sandboxpowered.api.world.state.FluidState
 import org.sandboxpowered.silica.SilicaPlayerManager
 import org.sandboxpowered.silica.component.VanillaPlayerInput
 import org.sandboxpowered.silica.network.getSystem
+import org.sandboxpowered.silica.registry.SilicaRegistries
+import org.sandboxpowered.silica.state.block.BlockState
+import org.sandboxpowered.silica.state.fluid.FluidState
 import org.sandboxpowered.silica.system.Entity3dMap
 import org.sandboxpowered.silica.system.Entity3dMapSystem
 import org.sandboxpowered.silica.system.VanillaInputSystem
+import org.sandboxpowered.silica.util.Identifier
+import org.sandboxpowered.silica.util.Side
+import org.sandboxpowered.silica.util.math.Position
 import org.sandboxpowered.silica.util.onMessage
 import org.sandboxpowered.silica.util.registerAs
 import org.sandboxpowered.silica.world.gen.TerrainGenerator
@@ -32,9 +30,15 @@ import java.util.*
 import com.artemis.World as ArtemisWorld
 import org.sandboxpowered.silica.world.gen.TerrainGenerator.Generate as CommandGenerate
 
-class SilicaWorld private constructor(private val side: Platform.Type) : World {
+class SilicaWorld private constructor(private val side: Side) : World {
 
-    private val blocks: BlocTree = BlocTree(WORLD_MIN, WORLD_MIN, WORLD_MIN, WORLD_SIZE, Block.REGISTRY.get(Identifier.of("minecraft:air")).get().defaultState)
+    private val blocks: BlocTree = BlocTree(
+        WORLD_MIN,
+        WORLD_MIN,
+        WORLD_MIN,
+        WORLD_SIZE,
+        SilicaRegistries.BLOCK_REGISTRY.get(Identifier.of("minecraft:air")).get().defaultState
+    )
     val artemisWorld: ArtemisWorld
     private var worldTicks = 0L
 
@@ -49,8 +53,9 @@ class SilicaWorld private constructor(private val side: Platform.Type) : World {
             )
         )
         config.with(entityMap)
-        artemisWorld = ArtemisWorld(config.build()
-            .registerAs<Entity3dMap>(entityMap)
+        artemisWorld = ArtemisWorld(
+            config.build()
+                .registerAs<Entity3dMap>(entityMap)
         )
     }
 
@@ -62,35 +67,6 @@ class SilicaWorld private constructor(private val side: Platform.Type) : World {
         TODO("Not yet implemented")
     }
 
-    override fun getType(): DimensionType {
-        TODO("Not yet implemented")
-    }
-
-    override fun createExplosion(
-        triggerEntity: Entity?,
-        x: Float,
-        y: Float,
-        z: Float,
-        size: Float,
-        createsFires: Boolean,
-        destroysBlocks: Boolean
-    ): Explosion {
-        TODO("Not yet implemented")
-    }
-
-    override fun explode(
-        triggerEntity: Entity?,
-        x: Float,
-        y: Float,
-        z: Float,
-        size: Float,
-        createsFires: Boolean,
-        destroysBlocks: Boolean
-    ) {
-        TODO("Not yet implemented")
-    }
-
-    // TODO: Tmp. Should be read-only
     fun getTerrain(): BlocTree = this.blocks
 
     companion object {
@@ -98,7 +74,7 @@ class SilicaWorld private constructor(private val side: Platform.Type) : World {
         private const val WORLD_MAX = (1 shl 25) - 1 // (2^25)-1
         private const val WORLD_SIZE = -WORLD_MIN + WORLD_MAX + 1 // 2^26
 
-        fun actor(side: Platform.Type): Behavior<Command> = Behaviors.setup {
+        fun actor(side: Side): Behavior<Command> = Behaviors.setup {
             Actor(SilicaWorld(side), it)
         }
     }

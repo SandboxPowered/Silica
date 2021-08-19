@@ -12,6 +12,7 @@ class VanillaInputSystem : IteratingSystem() {
 
     @Wire
     private lateinit var positionMapper: ComponentMapper<PositionComponent>
+
     @Wire
     private lateinit var playerInputMapper: ComponentMapper<VanillaPlayerInput>
 

@@ -1,6 +1,5 @@
 package org.sandboxpowered.silica.nbt
 
-import org.sandboxpowered.api.nbt.NBTCompound
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry
 import java.io.DataInput
 import java.io.DataOutput
@@ -51,11 +50,11 @@ private enum class NbtType(
     LIST({
         val type = readByte()
         val s = readInt()
-        List<Entry>(s) {
+        List(s) {
             read(type.toInt(), this)
         }
     }, {
-        it as List<org.sandboxpowered.silica.nbt.CompoundTag>
+        it as List<CompoundTag>
         val type = if (it.isEmpty()) {
             0
         } else {

@@ -6,10 +6,11 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.*
 import org.apache.logging.log4j.LogManager
-import org.sandboxpowered.api.world.state.BlockState
-import org.sandboxpowered.api.world.state.property.Property
+import org.sandboxpowered.silica.block.Block
 import org.sandboxpowered.silica.registry.SilicaRegistries
-import org.sandboxpowered.silica.state.block.SilicaBlockState
+import org.sandboxpowered.silica.registry.SilicaRegistry
+import org.sandboxpowered.silica.state.block.BlockState
+import org.sandboxpowered.silica.state.property.Property
 import org.sandboxpowered.silica.util.getResourceAsString
 import kotlin.system.measureTimeMillis
 
@@ -42,12 +43,12 @@ class StateManager {
 
             val errors = ObjectOpenHashSet<String>()
 
-            SilicaRegistries.BLOCK_REGISTRY.internalMap.forEach { (id, block) ->
+            (SilicaRegistries.BLOCK_REGISTRY as SilicaRegistry<Block>).internalMap.forEach { (id, block) ->
                 val blockMap = rawMap[id.toString()]
                 if (blockMap == null) {
                     errors.add(id.toString())
                 } else {
-                    block.stateProvider.validStates.map { it as SilicaBlockState }.forEach { state ->
+                    block.stateProvider.validStates.map { it }.forEach { state ->
                         val builder = StringBuilder()
                         state.properties.forEach { entry ->
                             val value = entry.value as Comparable<Any>
@@ -98,7 +99,7 @@ class StateManager {
     fun toVanillaId(state: BlockState): Int = stateMap.getInt(state)
     fun fromVanillaId(id: Int): BlockState = idMap.getOrElse(id) { idMap.get(0) }
 
-    public enum class ErrorType {
+    enum class ErrorType {
         MISSING,
         UNKNOWN
     }

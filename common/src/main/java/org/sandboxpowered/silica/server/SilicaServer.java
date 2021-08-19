@@ -1,8 +1,6 @@
 package org.sandboxpowered.silica.server;
 
 import akka.actor.typed.ActorRef;
-import org.sandboxpowered.api.engine.Game;
-import org.sandboxpowered.api.server.Server;
 import org.sandboxpowered.silica.StateManager;
 import org.sandboxpowered.silica.command.Commands;
 import org.sandboxpowered.silica.resources.ClasspathResourceLoader;
@@ -15,7 +13,7 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
-public abstract class SilicaServer implements Server {
+public abstract class SilicaServer {
     private final KeyPair encryptionKeyPair;
     private final byte[] verificationArray = new byte[4];
     private final Random serverRandom = new Random();
@@ -37,11 +35,6 @@ public abstract class SilicaServer implements Server {
         dataManager.add(new ClasspathResourceLoader());
     }
 
-    @Override
-    public Game getGame() {
-        return null;
-    }
-
     public Commands getCommands() {
         return commands;
     }
@@ -57,5 +50,6 @@ public abstract class SilicaServer implements Server {
     public abstract StateManager getStateManager();
 
     public abstract ActorRef<SilicaWorld.Command> getWorld();
+
     public abstract ActorRef<Network> getNetwork();
 }

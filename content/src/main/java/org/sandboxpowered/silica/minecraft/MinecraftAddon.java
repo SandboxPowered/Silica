@@ -184,7 +184,7 @@ public class MinecraftAddon implements Addon {
     }
 
     public void registerWithExtraPluraliseNormal(Registrar registrar, String name, BaseBlock block, Extra... extras) {
-        registerWithExtra(registrar, e -> e == null ? name+"s" : e.format(name), block, extras);
+        registerWithExtra(registrar, e -> e == null ? name + "s" : e.format(name), block, extras);
     }
 
     public enum Extra {

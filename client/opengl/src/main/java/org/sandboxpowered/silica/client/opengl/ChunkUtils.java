@@ -42,7 +42,11 @@ public class ChunkUtils {
     });
 
     private static final AtomicInteger chunkBuildTasksCount = new AtomicInteger();
-
+    private static float nxX, nxY, nxZ, nxW, pxX, pxY, pxZ, pxW, nyX, nyY, nyZ, nyW, pyX, pyY, pyZ, pyW;
+    private static Vector3d playerPosition;
+    private static final Comparator<RenderChunk> inView = comparing(ChunkUtils::chunkNotInFrustum);
+    private static final Comparator<RenderChunk> byDistance = comparingDouble(ChunkUtils::distToChunk);
+    private static final Comparator<RenderChunk> inViewAndDistance = inView.thenComparing(byDistance);
 
     public static void shutdown() {
         executorService.shutdown();
@@ -66,10 +70,6 @@ public class ChunkUtils {
         return chunk;
     }
 
-    private static final Comparator<RenderChunk> inView = comparing(ChunkUtils::chunkNotInFrustum);
-    private static final Comparator<RenderChunk> byDistance = comparingDouble(ChunkUtils::distToChunk);
-    private static final Comparator<RenderChunk> inViewAndDistance = inView.thenComparing(byDistance);
-
     private static int onChunkRemoved(RenderChunk chunk) {
         double d = distToChunk(chunk.cx, chunk.cy, chunk.cz);
         return onChunkRemoved(chunk.cx - 1, chunk.cy, chunk.cz, d)
@@ -79,15 +79,6 @@ public class ChunkUtils {
                 + onChunkRemoved(chunk.cx, chunk.cy - 1, chunk.cz, d)
                 + onChunkRemoved(chunk.cx, chunk.cy + 1, chunk.cz, d);
     }
-
-    private boolean playerInsideChunk(RenderChunk chunk) {
-        float margin = CHUNK_SIZE * 0.5f;
-        int minX = chunk.cx << CHUNK_SIZE_SHIFT, maxX = minX + CHUNK_SIZE;
-        int minZ = chunk.cz << CHUNK_SIZE_SHIFT, maxZ = minZ + CHUNK_SIZE;
-        return playerPosition.x + margin >= minX && playerPosition.x - margin <= maxX && playerPosition.z + margin >= minZ && playerPosition.z - margin <= maxZ;
-    }
-
-    private static float nxX, nxY, nxZ, nxW, pxX, pxY, pxZ, pxW, nyX, nyY, nyZ, nyW, pyX, pyY, pyZ, pyW;
 
     private static boolean culledXY(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
         return nxX * (nxX < 0 ? minX : maxX) + nxY * (nxY < 0 ? minY : maxY) + nxZ * (nxZ < 0 ? minZ : maxZ) < -nxW
@@ -118,8 +109,6 @@ public class ChunkUtils {
         }
         return 0;
     }
-
-    private static Vector3d playerPosition;
 
     private static double distToChunk(RenderChunk chunk) {
         return distToChunk(chunk.cx, chunk.cy, chunk.cz);
@@ -154,12 +143,19 @@ public class ChunkUtils {
         }
     }
 
+    private boolean playerInsideChunk(RenderChunk chunk) {
+        float margin = CHUNK_SIZE * 0.5f;
+        int minX = chunk.cx << CHUNK_SIZE_SHIFT, maxX = minX + CHUNK_SIZE;
+        int minZ = chunk.cz << CHUNK_SIZE_SHIFT, maxZ = minZ + CHUNK_SIZE;
+        return playerPosition.x + margin >= minX && playerPosition.x - margin <= maxX && playerPosition.z + margin >= minZ && playerPosition.z - margin <= maxZ;
+    }
+
     public static class RenderChunk {
-        private boolean built;
         private final int cx;
         private final int cy;
         private final int cz;
         public int neighbors;
+        private boolean built;
 
         public RenderChunk(int cx, int cy, int cz) {
             this.cx = cx;

@@ -1,7 +1,6 @@
 package org.sandboxpowered.silica.client
 
 import org.lwjgl.glfw.GLFW.*
-import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil
 
 class Window(private var windowName: String, var width: Int, var height: Int, val renderer: Renderer) {

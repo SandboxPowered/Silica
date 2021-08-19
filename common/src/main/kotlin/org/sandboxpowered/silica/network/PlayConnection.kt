@@ -7,13 +7,13 @@ import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import com.artemis.BaseSystem
 import com.mojang.authlib.GameProfile
-import org.sandboxpowered.api.util.Identifier
 import org.sandboxpowered.silica.SilicaPlayerManager
 import org.sandboxpowered.silica.component.VanillaPlayerInput
 import org.sandboxpowered.silica.nbt.CompoundTag
 import org.sandboxpowered.silica.network.play.clientbound.*
 import org.sandboxpowered.silica.server.Network
 import org.sandboxpowered.silica.server.SilicaServer
+import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.onMessage
 import org.sandboxpowered.silica.world.SilicaWorld
 import org.sandboxpowered.silica.world.util.BlocTree
@@ -55,12 +55,15 @@ private class PlayConnectionActor(
         .build()
 
     private val logger = context.log
+
     // TODO: apply at the right time + unsafe to keep a ref to a component
     private lateinit var playerInput: VanillaPlayerInput
 
-    private val playContext by lazy { PlayContext {
-        server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { _ -> it(playerInput) })
-    } }
+    private val playContext by lazy {
+        PlayContext {
+            server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { _ -> it(playerInput) })
+        }
+    }
 
     init {
         this.packetHandler.setPlayConnection(context.self)
@@ -172,7 +175,17 @@ private class PlayConnectionActor(
         packetHandler.sendPacket(DeclareCommands())
         packetHandler.sendPacket(UnlockRecipes())
         val currentPos = receive.input.wantedPosition
-        packetHandler.sendPacket(SetPlayerPositionAndLook(currentPos.x, currentPos.y, currentPos.z, 0f, 0f, 0.toByte(), 0))
+        packetHandler.sendPacket(
+            SetPlayerPositionAndLook(
+                currentPos.x,
+                currentPos.y,
+                currentPos.z,
+                0f,
+                0f,
+                0.toByte(),
+                0
+            )
+        )
         val gamemodes = IntArray(receive.gameProfiles.size)
         val pings = IntArray(receive.gameProfiles.size)
         receive.gameProfiles.forEachIndexed { index, uuid ->
@@ -180,9 +193,12 @@ private class PlayConnectionActor(
             pings[index] = 1
         }
         server.network.tell(
-            Network.SendToAll(PlayerInfo.addPlayer(
-            receive.gameProfiles,gamemodes,pings
-        )))
+            Network.SendToAll(
+                PlayerInfo.addPlayer(
+                    receive.gameProfiles, gamemodes, pings
+                )
+            )
+        )
         packetHandler.sendPacket(UpdateChunkPosition(0, 0))
 
         server.world.tell(

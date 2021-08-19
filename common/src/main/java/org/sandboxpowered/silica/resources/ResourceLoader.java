@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.resources;
 
-import org.sandboxpowered.api.util.Identifier;
+import org.sandboxpowered.silica.util.Identifier;
 
 import java.io.IOException;
 import java.io.InputStream;

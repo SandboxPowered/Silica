@@ -1,7 +1,6 @@
 package org.sandboxpowered.silica.component
 
 import com.artemis.PooledComponent
-import org.joml.Vector3d
 import org.joml.Vector3f
 
 class HitboxComponent : PooledComponent() {

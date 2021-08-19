@@ -1,16 +1,11 @@
 package org.sandboxpowered.silica.client.opengl
 
-import com.sun.source.tree.BlockTree
-import it.unimi.dsi.fastutil.floats.FloatArrayList
-import it.unimi.dsi.fastutil.floats.FloatArraySet
-import it.unimi.dsi.fastutil.ints.IntArrayList
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL30.*
 import org.sandboxpowered.silica.client.*
 import org.sandboxpowered.silica.util.getResourceAsString
-import org.sandboxpowered.silica.world.util.iterateCube
 
 class OpenGLRenderer(private val silica: Silica) : Renderer {
     private val fov = Math.toRadians(60.0).toFloat()
@@ -33,17 +28,17 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
 
         val positions = floatArrayOf(
             // VO
-            0.0f,  1.0f,  1.0f,
+            0.0f, 1.0f, 1.0f,
             // V1
-            0.0f, 0.0f,  1.0f,
+            0.0f, 0.0f, 1.0f,
             // V2
-            1.0f, 0.0f,  1.0f,
+            1.0f, 0.0f, 1.0f,
             // V3
-            1.0f,  1.0f,  1.0f,
+            1.0f, 1.0f, 1.0f,
             // V4
-            0.0f,  1.0f, 0.0f,
+            0.0f, 1.0f, 0.0f,
             // V5
-            1.0f,  1.0f, 0.0f,
+            1.0f, 1.0f, 0.0f,
             // V6
             0.0f, 0.0f, 0.0f,
             // V7

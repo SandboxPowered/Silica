@@ -3,7 +3,6 @@ package org.sandboxpowered.silica.server.main;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.sandboxpowered.silica.server.DedicatedServer;
 import org.sandboxpowered.silica.server.ServerEula;
 import org.sandboxpowered.silica.server.ServerProperties;

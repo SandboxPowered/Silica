@@ -7,10 +7,10 @@ import io.netty.buffer.ByteBufOutputStream
 import io.netty.handler.codec.DecoderException
 import io.netty.handler.codec.EncoderException
 import io.netty.util.ByteProcessor
-import org.sandboxpowered.api.nbt.NBTCompound
-import org.sandboxpowered.api.util.Identifier
+import org.sandboxpowered.silica.nbt.NBTCompound
 import org.sandboxpowered.silica.nbt.readNbt
 import org.sandboxpowered.silica.nbt.write
+import org.sandboxpowered.silica.util.Identifier
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream

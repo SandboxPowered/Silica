@@ -8,7 +8,6 @@ plugins {
 
 allprojects {
     repositories {
-        maven { url 'https://maven.modded-mc.com/repository/sandbox-snapshot/' }
         maven { url 'https://maven.modded-mc.com/repository/maven-public/' }
         mavenCentral()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }

@@ -2,7 +2,7 @@ package org.sandboxpowered.silica.world.util
 
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.provider.MethodSource
-import org.sandboxpowered.api.world.state.BlockState
+import org.sandboxpowered.silica.state.block.BlockState
 import java.util.stream.Stream
 
 //@TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -70,7 +70,7 @@ internal class BlocTreeTest {
         }
     })
 
-//    @Test
+    //    @Test
     fun `A tree filled with the same BlockState should have no nodes`() {
         val tree = BlocTree(-8, 0, -8, 16, air)
 

@@ -5,25 +5,14 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.Behavior
 import akka.actor.typed.Terminated
 import akka.actor.typed.javadsl.*
-import com.google.inject.Guice
 import it.unimi.dsi.fastutil.objects.Object2LongMap
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap
 import mu.toKLogger
 import org.apache.commons.io.FileUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.sandboxpowered.api.engine.Platform
 import org.sandboxpowered.silica.StateManager
-import org.sandboxpowered.silica.inject.SilicaImplementationModule
-import org.sandboxpowered.silica.loading.AddonDefinition
-import org.sandboxpowered.silica.loading.SandboxLoader
-import org.sandboxpowered.silica.resources.DirectoryResourceLoader
-import org.sandboxpowered.silica.resources.ResourceLoader
-import org.sandboxpowered.silica.resources.ZIPResourceLoader
-import org.sandboxpowered.silica.util.join
-import org.sandboxpowered.silica.util.messageAdapter
-import org.sandboxpowered.silica.util.onMessage
-import org.sandboxpowered.silica.util.onSignal
+import org.sandboxpowered.silica.util.*
 import org.sandboxpowered.silica.world.SilicaWorld
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -32,7 +21,6 @@ import java.time.Duration
 
 class DedicatedServer : SilicaServer() {
     private var log: Logger = LogManager.getLogger()
-    private var loader: SandboxLoader? = null
     private val stateManager = StateManager()
     private val acceptVanillaConnections: Boolean
     private lateinit var world: ActorRef<SilicaWorld.Command>
@@ -40,16 +28,10 @@ class DedicatedServer : SilicaServer() {
     private val stateManagerErrors: Map<StateManager.ErrorType, Set<String>>
 
     init {
-        Guice.createInjector(SilicaImplementationModule())
+//        Guice.createInjector(SilicaImplementationModule())
         properties = ServerProperties.fromFile(Paths.get("server.properties"))
-        loader = SandboxLoader()
-        loader!!.load()
         stateManagerErrors = stateManager.load()
         acceptVanillaConnections = stateManagerErrors.isEmpty()
-    }
-
-    private fun createAddonPack(spec: AddonDefinition, file: File): ResourceLoader {
-        return if (file.isDirectory) DirectoryResourceLoader(file) else ZIPResourceLoader(file)
     }
 
     fun run() {
@@ -74,11 +56,11 @@ class DedicatedServer : SilicaServer() {
             }
             log.info("Rejecting vanilla connections")
         }
-        loader!!.allAddons.keys.forEach {
-            dataManager.add(createAddonPack(it, File(it.path.toURI())))
-        }
         log.debug("Loaded namespaces: [${dataManager.getNamespaces().join(",")}]")
-        val system = ActorSystem.create(DedicatedServerGuardian.create(this, this::world::set, this::network::set), "dedicatedServerGuardian")
+        val system = ActorSystem.create(
+            DedicatedServerGuardian.create(this, this::world::set, this::network::set),
+            "dedicatedServerGuardian"
+        )
 //        system.terminate()
     }
 
@@ -99,7 +81,11 @@ class DedicatedServer : SilicaServer() {
         networkInit: (ActorRef<Network>) -> Unit
     ) : AbstractBehavior<Command>(context) {
         companion object {
-            fun create(server: SilicaServer, worldInit: (ActorRef<SilicaWorld.Command>) -> Unit, networkInit: (ActorRef<Network>) -> Unit): Behavior<Command> = Behaviors.withTimers { timerScheduler ->
+            fun create(
+                server: SilicaServer,
+                worldInit: (ActorRef<SilicaWorld.Command>) -> Unit,
+                networkInit: (ActorRef<Network>) -> Unit
+            ): Behavior<Command> = Behaviors.withTimers { timerScheduler ->
                 Behaviors.setup {
                     DedicatedServerGuardian(server, it, timerScheduler, worldInit, networkInit)
                 }
@@ -109,7 +95,8 @@ class DedicatedServer : SilicaServer() {
         private val logger = context.log.toKLogger()
         private var skippedTicks = 0
         private var lastTickTime: Long = -1
-        private val world: ActorRef<in SilicaWorld.Command> = context.spawn(SilicaWorld.actor(Platform.Type.SERVER), "world").apply(worldInit)
+        private val world: ActorRef<in SilicaWorld.Command> =
+            context.spawn(SilicaWorld.actor(Side.SERVER), "world").apply(worldInit)
         private val network: ActorRef<in Network> = context.spawn(Network.actor(server), "network").apply(networkInit)
         private val currentlyTicking: Object2LongMap<ActorRef<*>> = Object2LongOpenHashMap(3)
 

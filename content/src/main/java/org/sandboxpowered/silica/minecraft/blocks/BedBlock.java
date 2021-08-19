@@ -9,6 +9,7 @@ import org.sandboxpowered.api.state.property.EnumProperty;
 
 public class BedBlock extends BaseBlock {
     private static final EnumProperty<BedPart> BED_PART = EnumProperty.of("part", BedPart.class);
+
     public BedBlock(Settings settings) {
         super(settings);
     }

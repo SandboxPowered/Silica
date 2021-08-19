@@ -1,15 +1,11 @@
 package org.sandboxpowered.silica.client.main
 
-import com.google.inject.Guice
-import com.google.inject.Injector
 import joptsimple.ArgumentAcceptingOptionSpec
 import joptsimple.OptionParser
 import joptsimple.OptionSpec
 import org.apache.logging.log4j.LogManager
 import org.sandboxpowered.silica.client.Silica
 import org.sandboxpowered.silica.client.Silica.Args
-import org.sandboxpowered.silica.inject.SilicaImplementationModule
-import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.reflect.KClass
 
@@ -20,7 +16,7 @@ object Main {
     fun main(args: Array<String>) {
         val optionSpec = OptionParser()
         optionSpec.allowsUnrecognizedOptions()
-        Guice.createInjector(SilicaImplementationModule())
+//        Guice.createInjector(SilicaImplementationModule())
         val widthSpec = optionSpec.accepts("width")
             .withRequiredArg()
             .ofType(Int::class)

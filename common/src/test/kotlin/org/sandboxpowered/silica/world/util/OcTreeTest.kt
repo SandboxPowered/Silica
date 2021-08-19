@@ -4,7 +4,7 @@ import com.artemis.utils.IntBag
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-internal class OcTreeTest{
+internal class OcTreeTest {
     @Test
     fun `get inexact`() {
         val fill = IntBag()

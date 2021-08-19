@@ -3,7 +3,6 @@ package org.sandboxpowered.silica.client.vulkan
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import org.joml.Matrix4f
-import org.joml.Matrix4fc
 import org.joml.Vector2f
 import org.joml.Vector3f
 import org.lwjgl.PointerBuffer
@@ -21,7 +20,6 @@ import org.lwjgl.vulkan.EXTDebugUtils.*
 import org.lwjgl.vulkan.KHRSurface.*
 import org.lwjgl.vulkan.KHRSwapchain.*
 import org.lwjgl.vulkan.VK10.*
-import org.sandboxpowered.api.util.math.Maths.clamp
 import org.sandboxpowered.silica.client.Renderer
 import org.sandboxpowered.silica.client.RenderingFactory
 import org.sandboxpowered.silica.client.Silica
@@ -36,10 +34,8 @@ import java.io.PrintStream
 import java.nio.ByteBuffer
 import java.nio.IntBuffer
 import java.nio.LongBuffer
-import java.util.*
 import java.util.stream.Collectors.toSet
 import java.util.stream.IntStream
-import kotlin.collections.ArrayList
 
 
 class VulkanRenderer(private val silica: Silica) : Renderer {
@@ -210,8 +206,13 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
             val ubo = UniformBufferObject()
 
             ubo.model.rotate((glfwGetTime() * Math.toRadians(90.0)).toFloat(), 0f, 0f, 1f)
-            ubo.view.lookAt(2f,2f,2f,0f,0f,0f,0f,0f,1f)
-            ubo.projection.perspective(Math.toRadians(45.0).toFloat(), swapChainExtent.width().toFloat()/swapChainExtent.height().toFloat(), 0.1f, 10f)
+            ubo.view.lookAt(2f, 2f, 2f, 0f, 0f, 0f, 0f, 0f, 1f)
+            ubo.projection.perspective(
+                Math.toRadians(45.0).toFloat(),
+                swapChainExtent.width().toFloat() / swapChainExtent.height().toFloat(),
+                0.1f,
+                10f
+            )
             ubo.projection.m11(-ubo.projection.m11())
 
             val data = it.mallocPointer(1)
@@ -266,15 +267,19 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
 
             val pDescriptorPool = it.mallocLong(1)
 
-            checkError("Failed to create descriptor pool", vkCreateDescriptorPool(device, poolInfo, null, pDescriptorPool))
+            checkError(
+                "Failed to create descriptor pool",
+                vkCreateDescriptorPool(device, poolInfo, null, pDescriptorPool)
+            )
 
-            descriptorPool= pDescriptorPool[0]
+            descriptorPool = pDescriptorPool[0]
         }
     }
+
     private fun createDescriptorSets() {
         stackPush().use {
             val layouts = it.mallocLong(swapChainImages.size)
-            for(i in 0 until layouts.capacity()) {
+            for (i in 0 until layouts.capacity()) {
                 layouts[i] = descriptorSetLayout
             }
 
@@ -285,7 +290,10 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
 
             val pDescriptorSets = it.mallocLong(swapChainImages.size)
 
-            checkError("Failed to allocate descriptor sets", vkAllocateDescriptorSets(device, allocInfo, pDescriptorSets))
+            checkError(
+                "Failed to allocate descriptor sets",
+                vkAllocateDescriptorSets(device, allocInfo, pDescriptorSets)
+            )
 
             descriptorSets = ArrayList(pDescriptorSets.capacity())
 
@@ -301,7 +309,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
             descriptorWrite.descriptorCount(1)
             descriptorWrite.pBufferInfo(bufferInfo)
 
-            for(i in 0 until pDescriptorSets.capacity()) {
+            for (i in 0 until pDescriptorSets.capacity()) {
                 val set = pDescriptorSets[i]
                 bufferInfo.buffer(uniformBuffers[i])
 
@@ -532,10 +540,11 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
 
         ubo.model.get(0, byteBuffer)
         ubo.view.get(alignas(mat4Size, 4 * Float.SIZE_BYTES), byteBuffer)
-        ubo.projection.get(alignas(mat4Size*2, 4 * Float.SIZE_BYTES), byteBuffer)
+        ubo.projection.get(alignas(mat4Size * 2, 4 * Float.SIZE_BYTES), byteBuffer)
     }
 
-    private fun alignas(offset: Int, alignment: Int): Int = if (offset % alignment == 0) offset else (offset - 1 or alignment - 1) + 1
+    private fun alignas(offset: Int, alignment: Int): Int =
+        if (offset % alignment == 0) offset else (offset - 1 or alignment - 1) + 1
 
     private fun findMemoryType(memoryTypeBits: Int, properties: Int): Int {
         val memProperties = VkPhysicalDeviceMemoryProperties.mallocStack()
@@ -635,8 +644,15 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
                 val offsets = it.longs(0)
                 vkCmdBindVertexBuffers(buffer, 0, vertexBuffers, offsets)
                 vkCmdBindIndexBuffer(buffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16)
-                vkCmdBindDescriptorSets(buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, it.longs(descriptorSets[i]), null)
-                vkCmdDrawIndexed(buffer, indices.size, 1, 0,0,0)
+                vkCmdBindDescriptorSets(
+                    buffer,
+                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    pipelineLayout,
+                    0,
+                    it.longs(descriptorSets[i]),
+                    null
+                )
+                vkCmdDrawIndexed(buffer, indices.size, 1, 0, 0, 0)
                 vkCmdEndRenderPass(buffer)
 
                 checkError("Failed to record command buffer", vkEndCommandBuffer(buffer))
@@ -990,8 +1006,8 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         val min = capabilities.minImageExtent()
         val max = capabilities.maxImageExtent()
 
-        actual.width(clamp(actual.width(), min.width(), max.width()))
-        actual.height(clamp(actual.height(), min.height(), max.height()))
+        actual.width(actual.width().coerceIn(min.width()..max.width()))
+        actual.width(actual.height().coerceIn(min.height()..max.height()))
 
         return actual
     }
@@ -1189,6 +1205,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         val model = Matrix4f()
         val view = Matrix4f()
         val projection = Matrix4f()
+
         companion object {
             const val sizeOf: Long = 3 * 16 * Float.SIZE_BYTES.toLong()
         }
@@ -1259,7 +1276,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         val callbackData = VkDebugUtilsMessengerCallbackDataEXT.create(pCallbackData)
         var printStream: PrintStream = System.out
         if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
-            printStream = System.err;
+            printStream = System.err
         printStream.println("Validation layer: " + callbackData.pMessageString())
         return VK_FALSE
     }

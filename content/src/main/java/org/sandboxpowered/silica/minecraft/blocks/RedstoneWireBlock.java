@@ -12,6 +12,7 @@ public class RedstoneWireBlock extends BaseBlock {
     private static final EnumProperty<Side> EAST = EnumProperty.of("east", Side.class);
     private static final EnumProperty<Side> SOUTH = EnumProperty.of("south", Side.class);
     private static final EnumProperty<Side> WEST = EnumProperty.of("west", Side.class);
+
     public RedstoneWireBlock(Settings settings) {
         super(settings);
     }

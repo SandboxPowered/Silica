@@ -1,17 +1,8 @@
 package org.sandboxpowered.silica.util
 
 import com.google.common.base.Objects
-import org.sandboxpowered.api.util.Identifier
 
-class SilicaIdentity(private val namespace: String, private val path: String) : Identifier {
-    override fun getNamespace(): String {
-        return namespace
-    }
-
-    override fun getPath(): String {
-        return path
-    }
-
+class Identifier private constructor(val namespace: String, val path: String) : Comparable<Identifier> {
     override fun toString(): String {
         return "$namespace:$path"
     }
@@ -26,7 +17,7 @@ class SilicaIdentity(private val namespace: String, private val path: String) : 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false
-        val that = other as SilicaIdentity
+        val that = other as Identifier
         return Objects.equal(namespace, that.namespace) && Objects.equal(
             path, that.path
         )
@@ -34,5 +25,21 @@ class SilicaIdentity(private val namespace: String, private val path: String) : 
 
     override fun hashCode(): Int {
         return Objects.hashCode(namespace, path)
+    }
+
+    companion object {
+        fun of(id: String): Identifier {
+            val identity = arrayOf("minecraft", id)
+            val idx = id.indexOf(':')
+            if (idx >= 0) {
+                identity[1] = id.substring(idx + 1)
+                if (idx >= 1) {
+                    identity[0] = id.substring(0, idx)
+                }
+            }
+            return of(identity[0], identity[1])
+        }
+
+        fun of(namespace: String, path: String): Identifier = Identifier(namespace, path)
     }
 }

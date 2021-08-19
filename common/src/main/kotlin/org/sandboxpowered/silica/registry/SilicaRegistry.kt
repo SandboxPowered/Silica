@@ -1,27 +1,21 @@
 package org.sandboxpowered.silica.registry
 
-import org.sandboxpowered.api.registry.Registry
-import org.sandboxpowered.api.registry.RegistryEntry
-import org.sandboxpowered.api.registry.RegistryObject
-import org.sandboxpowered.api.util.Identifier
+import org.sandboxpowered.silica.util.Identifier
 import java.util.*
 import java.util.function.Supplier
 import java.util.stream.Stream
 
-class SilicaRegistry<T : RegistryEntry<T>>(private val registryId: Identifier, private val type: Class<T>) : Registry<T> {
+class SilicaRegistry<T : RegistryEntry<T>>(private val registryId: Identifier, override val registryType: Class<T>) :
+    Registry<T> {
     var internalMap: MutableMap<Identifier, T> = HashMap()
     var registryEntries: MutableMap<Identifier, SilicaRegistryEntry<T>> = HashMap()
 
-    fun <X : RegistryEntry<X>?> cast(): Registry<X> {
+    fun <X : RegistryEntry<X>> cast(): Registry<X> {
         return this as Registry<X>
     }
 
     override fun iterator(): MutableIterator<T> {
         return internalMap.values.iterator()
-    }
-
-    override fun getRegistry(): Registry<Registry<out RegistryEntry<*>>> {
-        TODO("Not yet implemented")
     }
 
     override fun contains(id: Identifier): Boolean {
@@ -36,8 +30,6 @@ class SilicaRegistry<T : RegistryEntry<T>>(private val registryId: Identifier, p
         return internalMap[id]
     }
 
-    override fun getRegistryType(): Class<T> = type
-
     override fun get(identity: Identifier): RegistryObject<T> {
         return registryEntries.computeIfAbsent(identity) { id -> SilicaRegistryEntry(this, id) }
     }
@@ -51,7 +43,10 @@ class SilicaRegistry<T : RegistryEntry<T>>(private val registryId: Identifier, p
         registryEntries.forEach { (_, aEntry: SilicaRegistryEntry<T>) -> aEntry.clearCache() }
     }
 
-    class SilicaRegistryEntry<T : RegistryEntry<T>>(private val registry: SilicaRegistry<T>, private val target: Identifier) : RegistryObject<T> {
+    class SilicaRegistryEntry<T : RegistryEntry<T>>(
+        private val registry: SilicaRegistry<T>,
+        private val target: Identifier
+    ) : RegistryObject<T> {
         private var hasCached = false
         private var cachedValue: T? = null
 
@@ -84,7 +79,7 @@ class SilicaRegistry<T : RegistryEntry<T>>(private val registryId: Identifier, p
         override fun isEmpty(): Boolean = !isPresent
 
         override fun or(supplier: RegistryObject<T>): RegistryObject<T> {
-            if(!this.isPresent)
+            if (!this.isPresent)
                 return supplier
             return this
         }

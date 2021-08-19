@@ -1,12 +1,11 @@
 package org.sandboxpowered.silica.state
 
 import com.google.common.collect.Maps
-import org.sandboxpowered.api.registry.RegistryEntry
-import org.sandboxpowered.api.world.state.property.Property
-import org.sandboxpowered.api.world.state.PropertyContainer
-import org.sandboxpowered.api.world.state.StateProvider
+import org.sandboxpowered.silica.registry.RegistryEntry
+import org.sandboxpowered.silica.state.property.Property
 
-class SilicaStateBuilder<B : RegistryEntry<B>, S : PropertyContainer<S>?>(private val base: B) : StateProvider.Builder<B, S> {
+class SilicaStateBuilder<B : RegistryEntry<B>, S : PropertyContainer<S>>(private val base: B) :
+    StateProvider.Builder<B, S> {
     private val properties: MutableMap<String, Property<*>> = Maps.newHashMap()
 
     fun getProperties(): Map<String, Property<*>> {

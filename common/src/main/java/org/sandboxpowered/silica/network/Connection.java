@@ -20,10 +20,10 @@ public class Connection {
     private final SilicaServer server;
     private final ActorRef<? super Network.CreateConnection> network;
     private final Scheduler scheduler;
+    public int ping;
     private GameProfile profile;
     private SecretKey secretKey;
     private PacketHandler packetHandler;
-    public int ping;
 
     public Connection(SilicaServer server, ActorRef<? super Network.CreateConnection> network, Scheduler scheduler) {
         this.server = server;

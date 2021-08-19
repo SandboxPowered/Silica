@@ -1,52 +1,51 @@
 package org.sandboxpowered.silica.util.math
 
-import org.sandboxpowered.api.util.Direction
-import org.sandboxpowered.api.util.math.Position
+import org.sandboxpowered.silica.util.Direction
 
-class Position(
+open class Position(
     private val x: Int,
     private val y: Int,
     private val z: Int
-) : Position {
-    override fun getX() = x
-    override fun getY() = y
-    override fun getZ() = z
+) {
+    open fun getX() = x
+    open fun getY() = y
+    open fun getZ() = z
 
-    override fun add(x: Int, y: Int, z: Int): Position {
+    open fun add(x: Int, y: Int, z: Int): Position {
         return Position(this.x + x, this.y + y, this.z + z)
     }
 
-    override fun sub(x: Int, y: Int, z: Int): Position {
+    open fun sub(x: Int, y: Int, z: Int): Position {
         return add(-x, -y, -z)
     }
 
-    override fun toMutable(): Position.Mutable {
-        return Position.mutable(x, y, z) as Position.Mutable
+    open fun toMutable(): Mutable {
+        return Mutable(x, y, z)
     }
 
-    override fun toImmutable(): Position {
+    open fun toImmutable(): Position {
         return this
     }
 
-    override fun shift(direction: Direction, amount: Int): Position {
+    open fun shift(direction: Direction, amount: Int): Position {
         return add(amount * direction.offsetX, amount * direction.offsetY, amount * direction.offsetZ)
     }
 
-    override fun add(position: Position): Position {
+    open fun add(position: Position): Position {
         return add(position.x, position.y, position.z)
     }
 
-    override fun sub(position: Position): Position {
+    open fun sub(position: Position): Position {
         return sub(position.x, position.y, position.z)
     }
 
-    override fun shift(direction: Direction): Position {
+    open fun shift(direction: Direction): Position {
         return shift(direction, 1)
     }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is org.sandboxpowered.silica.util.math.Position) return false
+        if (other !is Position) return false
 
         if (x != other.x) return false
         if (y != other.y) return false
@@ -66,31 +65,31 @@ class Position(
         private var x: Int,
         private var y: Int,
         private var z: Int
-    ) : Position.Mutable {
+    ) : Position(x, y, z) {
         override fun getX() = x
         override fun getY() = y
         override fun getZ() = z
 
-        override fun add(x: Int, y: Int, z: Int): Position.Mutable {
+        override fun add(x: Int, y: Int, z: Int): Mutable {
             this.x += x
             this.y += y
             this.z += z
             return this
         }
 
-        override fun sub(x: Int, y: Int, z: Int): Position.Mutable {
+        override fun sub(x: Int, y: Int, z: Int): Mutable {
             this.x -= x
             this.y -= y
             this.z -= z
             return this
         }
 
-        override fun toMutable(): Position.Mutable {
+        override fun toMutable(): Mutable {
             return this
         }
 
         override fun toImmutable(): Position {
-            return Position.immutable(x, y, z)
+            return Position(x, y, z)
         }
 
         override fun shift(direction: Direction, amount: Int): Position {
@@ -113,7 +112,7 @@ class Position(
             return shift(direction, 1)
         }
 
-        override fun set(x: Int, y: Int, z: Int): Position.Mutable {
+        fun set(x: Int, y: Int, z: Int): Mutable {
             this.x = x
             this.y = y
             this.z = z

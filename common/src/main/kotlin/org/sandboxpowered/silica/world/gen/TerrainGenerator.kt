@@ -6,7 +6,7 @@ import akka.actor.typed.javadsl.AbstractBehavior
 import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
-import org.sandboxpowered.api.block.Blocks
+import org.sandboxpowered.silica.block.Blocks
 import org.sandboxpowered.silica.util.onMessage
 import org.sandboxpowered.silica.world.util.BlocTree
 import org.sandboxpowered.silica.world.util.iterateCube
@@ -56,14 +56,14 @@ private class SimpleFiller : ChunkFiller {
     override fun fill(sx: Int, sy: Int, sz: Int, chunk: BlocTree) {
         if (sy > 0) return
 
-            iterateCube(sx, sy, sz, w = 16, h = 7) { x, y, z ->
-                chunk[x, y, z] = when (y) {
-                    0 -> bedrock
-                    1, 2, 3 -> stone
-                    4, 5 -> dirt
-                    6 -> grass
-                    else -> air
-                }
+        iterateCube(sx, sy, sz, w = 16, h = 7) { x, y, z ->
+            chunk[x, y, z] = when (y) {
+                0 -> bedrock
+                1, 2, 3 -> stone
+                4, 5 -> dirt
+                6 -> grass
+                else -> air
+            }
         }
     }
 }
