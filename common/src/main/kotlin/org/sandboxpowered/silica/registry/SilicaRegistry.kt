@@ -14,6 +14,11 @@ class SilicaRegistry<T : RegistryEntry<T>>(private val registryId: Identifier, o
         return this as Registry<X>
     }
 
+    fun register(t: T): T {
+        internalMap[t.identifier] = t
+        return t
+    }
+
     override fun iterator(): MutableIterator<T> {
         return internalMap.values.iterator()
     }
