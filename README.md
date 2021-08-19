@@ -1,9 +1,5 @@
-
 <p align="center">  
-    <!-- 
-    <img src="https://raw.githubusercontent.com/sandboxpowered/silica/main/.github/assets/logo.png" width="320" alt="Material for MkDocs">  
-    -->  
-    <img src="https://i.imgur.com/ig3t9i5.png" width="320" alt="Material for MkDocs">  
+    <img src="https://raw.githubusercontent.com/sandboxpowered/silica/main/.github/assets/github.png" width="320" alt="Logo">
 </p>  
 
 <p align="center">
@@ -15,7 +11,6 @@
 <p align="center">  
     <a href="https://discord.gg/m9DMfnD"><img src="https://img.shields.io/discord/444525609008496640.svg?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"/></a>  
     <a href="https://github.com/SandboxPowered/Silica/graphs/contributors"><img src="https://img.shields.io/github/contributors/SandboxPowered/Silica.svg?style=for-the-badge&logo=github" alt="Discord"/></a>  
-    <a href="https://patreon.com/SandboxPowered"><img src="https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.vercel.app%2Fapi%3Fusername%3DSandboxPowered%26type%3Dpatrons&style=for-the-badge" alt="Patreon"/></a>  
 </p>
 
 ## What is Silica?
