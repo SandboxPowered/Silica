@@ -32,6 +32,8 @@ class CompoundTag : NBTCompound {
 
     override fun getIntArray(key: String): IntArray = tags[key].intArray()
 
+    override fun getLongArray(key: String): LongArray = tags[key].longArray()
+
     override fun getString(key: String): String = tags[key].string()
 
     override fun getDouble(key: String): Double = tags[key].double()
@@ -59,9 +61,7 @@ class CompoundTag : NBTCompound {
 
     override fun getCompoundTag(key: String) = tags[key].tag() as? CompoundTag ?: CompoundTag()
 
-    override fun getIdentifier(key: String): Identifier {
-        TODO("Not yet implemented")
-    }
+    override fun getIdentifier(key: String): Identifier = Identifier.of(getString(key))
 
     override fun getPosition(key: String): Position = getTag(key).let {
         it as CompoundTag
@@ -76,7 +76,7 @@ class CompoundTag : NBTCompound {
         tags[key] = intArray(i)
     }
 
-    /*override*/ fun setLongArray(key: String, i: LongArray) {
+    override fun setLongArray(key: String, i: LongArray) {
         tags[key] = longArray(i)
     }
 
@@ -104,12 +104,10 @@ class CompoundTag : NBTCompound {
         tags[key] = byte(if (bool) 1 else 0)
     }
 
-    override fun setUUID(key: String, uuid: UUID) {
-        setTag(key, CompoundTag().apply {
-            setLong("M", uuid.mostSignificantBits)
-            setLong("L", uuid.leastSignificantBits)
-        })
-    }
+    override fun setUUID(key: String, uuid: UUID) = setTag(key, CompoundTag().apply {
+        setLong("M", uuid.mostSignificantBits)
+        setLong("L", uuid.leastSignificantBits)
+    })
 
     override fun setTag(key: String, tag: NBT) {
         tags[key] = tag(tag)
@@ -119,17 +117,13 @@ class CompoundTag : NBTCompound {
         tags[key] = Entry.list(list)
     }
 
-    override fun setPosition(key: String, position: Position) {
-        setTag(key, CompoundTag().apply {
-            setInt("X", position.getX())
-            setInt("Y", position.getY())
-            setInt("Z", position.getZ())
-        })
-    }
+    override fun setPosition(key: String, position: Position) = setTag(key, CompoundTag().apply {
+        setInt("X", position.getX())
+        setInt("Y", position.getY())
+        setInt("Z", position.getZ())
+    })
 
-    override fun setIdentifier(key: String, identifier: Identifier) {
-        TODO("Not yet implemented")
-    }
+    override fun setIdentifier(key: String, identifier: Identifier) = setString(key, identifier.toString())
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -139,9 +133,7 @@ class CompoundTag : NBTCompound {
         return tags.all { (k, v) -> v == other.tags[k] } // TODO: this doesn't support comparing arrays ;-;
     }
 
-    override fun hashCode(): Int {
-        return tags.hashCode() // TODO: probs incorrect
-    }
+    override fun hashCode(): Int = tags.hashCode() // TODO: probs incorrect
 
     override fun toString() = "CompoundTag(tags=$tags)"
 

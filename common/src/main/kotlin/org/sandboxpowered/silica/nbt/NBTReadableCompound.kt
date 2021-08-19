@@ -11,6 +11,7 @@ interface NBTReadableCompound : NBT {
     operator fun contains(key: String): Boolean
     fun getInt(key: String): Int
     fun getIntArray(key: String): IntArray
+    fun getLongArray(key: String): LongArray
     fun getString(key: String): String
     fun getDouble(key: String): Double
     fun getByte(key: String): Byte

@@ -7,6 +7,7 @@ import java.util.*
 interface NBTWritableCompound : NBT {
     fun setInt(key: String, i: Int)
     fun setIntArray(key: String, i: IntArray)
+    fun setLongArray(key: String, i: LongArray)
     fun setString(key: String, s: String)
     fun setDouble(key: String, d: Double)
     fun setByte(key: String, b: Byte)
