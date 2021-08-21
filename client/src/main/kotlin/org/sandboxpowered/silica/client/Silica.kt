@@ -6,7 +6,6 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.system.Configuration
-import org.sandboxpowered.silica.client.server.IntegratedServer
 import org.sandboxpowered.silica.resources.*
 import org.sandboxpowered.silica.util.FileFilters
 import org.sandboxpowered.silica.util.join
@@ -29,8 +28,6 @@ class Silica(private val args: Args) : Runnable {
     lateinit var window: Window
     private lateinit var assetManager: ResourceManager
     lateinit var renderer: Renderer
-
-    val server = IntegratedServer()
 
     private fun close() {
         window.cleanup()

@@ -21,10 +21,10 @@ import java.time.Duration
 
 class DedicatedServer : SilicaServer() {
     private var log: Logger = LogManager.getLogger()
-    private val stateManager = StateManager()
+    override val stateManager = StateManager()
     private val acceptVanillaConnections: Boolean
-    private lateinit var world: ActorRef<SilicaWorld.Command>
-    private lateinit var network: ActorRef<Network>
+    override lateinit var world: ActorRef<SilicaWorld.Command>
+    override lateinit var network: ActorRef<Network>
     private val stateManagerErrors: Map<StateManager.ErrorType, Set<String>>
 
     init {
@@ -63,10 +63,6 @@ class DedicatedServer : SilicaServer() {
         )
 //        system.terminate()
     }
-
-    override fun getWorld() = this.world
-
-    override fun getNetwork() = this.network
 
     sealed class Command {
         class Tick(val delta: Float) : Command()
@@ -119,7 +115,7 @@ class DedicatedServer : SilicaServer() {
         private fun handleTick(tick: Command.Tick): Behavior<Command> {
             if (currentlyTicking.isNotEmpty()) {
                 val lastTickOffset = System.currentTimeMillis() - lastTickTime
-                if (server.properties.maxTickTime != -1 && lastTickOffset >= server.properties.maxTickTime) {
+                if (server.properties!!.maxTickTime != -1 && lastTickOffset >= server.properties!!.maxTickTime) {
                     TODO("Terminate server after taking too long")
                 }
                 ++skippedTicks
@@ -154,6 +150,4 @@ class DedicatedServer : SilicaServer() {
             return Behaviors.stopped()
         }
     }
-
-    override fun getStateManager() = stateManager
 }

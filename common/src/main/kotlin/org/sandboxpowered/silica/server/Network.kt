@@ -98,7 +98,7 @@ private class NetworkActor(
     }
 
     private fun handleStart(start: Network.Start): Behavior<Network> {
-        val properties = server.properties
+        val properties = server.properties!!
         val bossGroup: EventLoopGroup = NioEventLoopGroup()
         val workerGroup: EventLoopGroup = NioEventLoopGroup()
         try {
@@ -110,9 +110,9 @@ private class NetworkActor(
                         ch.pipeline()
                             .addLast("timeout", ReadTimeoutHandler(30))
                             .addLast("splitter", LengthSplitter())
-                            .addLast("decoder", PacketDecoder(Flow.SERVERBOUND))
+                            .addLast("decoder", PacketDecoder(NetworkFlow.SERVERBOUND))
                             .addLast("prepender", LengthPrepender())
-                            .addLast("encoder", PacketEncoder(Flow.CLIENTBOUND))
+                            .addLast("encoder", PacketEncoder(NetworkFlow.CLIENTBOUND))
                             .addLast(
                                 "handler",
                                 PacketHandler(Connection(server, context.self, context.system.scheduler()))

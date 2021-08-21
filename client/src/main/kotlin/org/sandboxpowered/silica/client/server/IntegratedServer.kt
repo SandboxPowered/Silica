@@ -6,16 +6,9 @@ import org.sandboxpowered.silica.server.Network
 import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.world.SilicaWorld
 
-class IntegratedServer : SilicaServer() {
-    override fun getStateManager(): StateManager {
-        TODO("Not yet implemented")
-    }
-
-    override fun getWorld(): ActorRef<SilicaWorld.Command> {
-        TODO("Not yet implemented")
-    }
-
-    override fun getNetwork(): ActorRef<Network> {
-        TODO("Not yet implemented")
-    }
+class IntegratedServer(
+    override val stateManager: StateManager,
+    override val world: ActorRef<SilicaWorld.Command>,
+    override val network: ActorRef<Network>
+) : SilicaServer() {
 }

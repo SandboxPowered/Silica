@@ -30,14 +30,14 @@ import java.util.function.Supplier
 enum class Protocol(private val id: Int, builder: Builder) {
     HANDSHAKE(
         -1, newProtocol().addFlow(
-            Flow.SERVERBOUND, Packets()
+            NetworkFlow.SERVERBOUND, Packets()
                 .addPacket(0x00, ::HandshakeRequest)
         )
     ),
     PLAY(
         0, newProtocol()
             .addFlow(
-                Flow.SERVERBOUND, Packets()
+                NetworkFlow.SERVERBOUND, Packets()
                     .addPacket(0x00, ::TeleportConfirmation)
                     .addPacket(0x05, ::ClientSettings)
                     .addPacket(0x0B, ::ClientPluginChannel)
@@ -47,7 +47,7 @@ enum class Protocol(private val id: Int, builder: Builder) {
                     .addPacket(0x14, ::PlayerRotation)
                     .addPacket(0x15, ::PlayerMovement)
             ).addFlow(
-                Flow.CLIENTBOUND, Packets()
+                NetworkFlow.CLIENTBOUND, Packets()
                     .addPacket(0x24, ::JoinGame)
                     .addPacket(0x3F, ::HeldItemChange)
                     .addPacket(0x5A, ::DeclareRecipes)
@@ -67,11 +67,11 @@ enum class Protocol(private val id: Int, builder: Builder) {
     STATUS(
         1, newProtocol()
             .addFlow(
-                Flow.SERVERBOUND, Packets()
+                NetworkFlow.SERVERBOUND, Packets()
                     .addPacket(0x00, ::StatusRequest)
                     .addPacket(0x01, ::PingRequest)
             ).addFlow(
-                Flow.CLIENTBOUND, Packets()
+                NetworkFlow.CLIENTBOUND, Packets()
                     .addPacket(0x00, ::StatusResponse)
                     .addPacket(0x01, ::PongResponse)
             )
@@ -79,11 +79,11 @@ enum class Protocol(private val id: Int, builder: Builder) {
     LOGIN(
         2, newProtocol()
             .addFlow(
-                Flow.SERVERBOUND, Packets()
+                NetworkFlow.SERVERBOUND, Packets()
                     .addPacket(0x00, ::LoginStart)
                     .addPacket(0x01, ::EncryptionResponse)
             ).addFlow(
-                Flow.CLIENTBOUND, Packets()
+                NetworkFlow.CLIENTBOUND, Packets()
                     .addPacket(0x00, ::Disconnect)
                     .addPacket(0x01, ::EncryptionRequest)
                     .addPacket(0x02, ::LoginSuccess)
@@ -109,7 +109,7 @@ enum class Protocol(private val id: Int, builder: Builder) {
 
         init {
             for (protocol in values()) {
-                protocol.packets.forEach { (_: Flow, packetSet: Packets) ->
+                protocol.packets.forEach { (_: NetworkFlow, packetSet: Packets) ->
                     packetSet.allPackets.forEach { packetClass: Class<out PacketBase> ->
                         PROTOCOL_BY_PACKET[packetClass] = protocol
                     }
@@ -119,13 +119,13 @@ enum class Protocol(private val id: Int, builder: Builder) {
         }
     }
 
-    private val packets: Map<Flow, Packets>
-    fun getPacketId(flow: Flow, msg: PacketBase): Int {
-        return packets[flow]?.getId(msg.javaClass) ?: -1
+    private val packets: Map<NetworkFlow, Packets>
+    fun getPacketId(networkFlow: NetworkFlow, msg: PacketBase): Int {
+        return packets[networkFlow]?.getId(msg.javaClass) ?: -1
     }
 
-    fun createPacket(flow: Flow, packetId: Int): PacketBase? {
-        return packets[flow]?.createPacket(packetId)
+    fun createPacket(networkFlow: NetworkFlow, packetId: Int): PacketBase? {
+        return packets[networkFlow]?.createPacket(packetId)
     }
 
     class Builder {
@@ -135,10 +135,10 @@ enum class Protocol(private val id: Int, builder: Builder) {
             }
         }
 
-        val packets: MutableMap<Flow, Packets> = EnumMap(Flow::class.java)
+        val packets: MutableMap<NetworkFlow, Packets> = EnumMap(NetworkFlow::class.java)
 
-        fun addFlow(flow: Flow, packetSet: Packets): Builder {
-            packets[flow] = packetSet
+        fun addFlow(networkFlow: NetworkFlow, packetSet: Packets): Builder {
+            packets[networkFlow] = packetSet
             return this
         }
     }

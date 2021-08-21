@@ -12,7 +12,7 @@ class BlockState(base: Block, properties: ImmutableMap<Property<*>, Comparable<*
         get() = base
 
     companion object {
-        val factory = SilicaStateFactory.Factory.of<Block,BlockState> { base, properties ->
+        val factory = SilicaStateFactory.Factory.of<Block, BlockState> { base, properties ->
             BlockState(base, properties)
         }
     }

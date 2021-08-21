@@ -22,9 +22,9 @@ dependencies {
     api artemisContrib('plugin-singleton')
     api artemisContrib('plugin-operations')
 
-    def akka_version='2.6.10'
-    def alpakka_version='2.0.2'
-    def scala_bin_version= '2.13'
+    def akka_version = '2.6.10'
+    def alpakka_version = '2.0.2'
+    def scala_bin_version = '2.13'
     api "com.typesafe.akka:akka-actor-typed_$scala_bin_version:$akka_version"
     api "com.typesafe.akka:akka-stream-typed_$scala_bin_version:$akka_version"
     api "com.lightbend.akka:akka-stream-alpakka-udp_$scala_bin_version:$alpakka_version"

@@ -12,7 +12,8 @@ class BaseBlock(override val identifier: Identifier) : Block {
         return identifier.path == "air"
     }
 
-    override val stateProvider: StateProvider<Block, BlockState> = SilicaStateFactory(this, emptyMap(), BlockState.factory)
+    override val stateProvider: StateProvider<Block, BlockState> =
+        SilicaStateFactory(this, emptyMap(), BlockState.factory)
     override val defaultState: BlockState
         get() = stateProvider.baseState
     override val registry: Registry<Block>
