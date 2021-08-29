@@ -12,6 +12,9 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 object Util {
+
+    const val MINECRAFT_VERSION = "1.17.1"
+
     fun createService(string: String): ExecutorService {
         val i = Math.clamp(1, 32, Runtime.getRuntime().availableProcessors())
         return if (i == 1) {
@@ -24,13 +27,16 @@ object Util {
     fun findMinecraft(manager: ResourceManager, minecraftPath: Path?) {
         when {
             minecraftPath != null -> {
-                require(Files.exists(minecraftPath)) { "The specified path of $minecraftPath does not exist, please make sure this is targeting a Minecraft 1.17.1 jar file" }
+                require(Files.exists(minecraftPath)) { "The specified path of $minecraftPath does not exist, please make sure this is targeting a Minecraft $MINECRAFT_VERSION jar file" }
                 manager.add(ZIPResourceLoader(minecraftPath.toFile()))
             }
             SystemUtils.IS_OS_WINDOWS || SystemUtils.IS_OS_LINUX -> {
-                val homeDir = if(SystemUtils.IS_OS_LINUX) System.getenv("user.home") else System.getenv("APPDATA")
-                val asPath = Paths.get(homeDir, ".minecraft", "versions", "1.17.1", "1.17.1.jar")
-                require(Files.exists(asPath)) { "Unable to find Minecraft 1.17.1 installation at $asPath, please install minecraft or use the --minecraft argument to point to a specific jar" }
+                val homeDir = when {
+                    SystemUtils.IS_OS_LINUX -> System.getenv("HOME")
+                    else -> System.getenv("APPDATA")
+                }
+                val asPath = Paths.get(homeDir, ".minecraft", "versions", MINECRAFT_VERSION, "$MINECRAFT_VERSION.jar")
+                require(Files.exists(asPath)) { "Unable to find Minecraft $MINECRAFT_VERSION installation at $asPath, please install minecraft or use the --minecraft argument to point to a specific jar" }
                 manager.add(ZIPResourceLoader(asPath.toFile()))
             }
             else -> {
