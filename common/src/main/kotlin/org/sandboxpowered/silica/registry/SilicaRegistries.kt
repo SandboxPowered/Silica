@@ -2,6 +2,7 @@ package org.sandboxpowered.silica.registry
 
 import org.sandboxpowered.silica.block.BaseBlock
 import org.sandboxpowered.silica.block.Block
+import org.sandboxpowered.silica.block.GrassBlock
 import org.sandboxpowered.silica.fluid.Fluid
 import org.sandboxpowered.silica.item.Item
 import org.sandboxpowered.silica.util.Identifier
@@ -13,7 +14,7 @@ object SilicaRegistries {
         register(BaseBlock(Identifier.of("bedrock")))
         register(BaseBlock(Identifier.of("stone")))
         register(BaseBlock(Identifier.of("dirt")))
-        register(BaseBlock(Identifier.of("grass_block")))
+        register(GrassBlock(Identifier.of("grass_block")))
     }
 
     @JvmField
