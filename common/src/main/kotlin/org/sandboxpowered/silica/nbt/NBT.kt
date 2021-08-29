@@ -1,5 +1,5 @@
 package org.sandboxpowered.silica.nbt
 
-interface NBT {
+sealed interface NBT {
     fun asString(): String
 }
