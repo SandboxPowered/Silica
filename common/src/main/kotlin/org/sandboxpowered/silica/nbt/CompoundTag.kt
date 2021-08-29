@@ -84,6 +84,10 @@ class CompoundTag : NBTCompound {
         tags[key] = string(s)
     }
 
+    override fun setFloat(key: String, f: Float) {
+        tags[key] = float(f)
+    }
+
     override fun setDouble(key: String, d: Double) {
         tags[key] = double(d)
     }
@@ -136,10 +140,6 @@ class CompoundTag : NBTCompound {
     override fun hashCode(): Int = tags.hashCode() // TODO: probs incorrect
 
     override fun toString() = "CompoundTag(tags=$tags)"
-
-    fun setFloat(key: String, f: Float) {
-        tags[key] = float(f)
-    }
 
     internal class Entry private constructor(val type: Int, val value: Any) {
         companion object {

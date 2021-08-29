@@ -3,6 +3,11 @@ package org.sandboxpowered.silica.util
 import com.google.common.base.Objects
 
 class Identifier private constructor(val namespace: String, val path: String) : Comparable<Identifier> {
+    init {
+        require(namespace.isNotEmpty()) { "Identifier can not have an empty namespace. Path: $path" }
+        require(path.isNotEmpty()) { "Identifier can not have an empty path. Namespace: $namespace" }
+    }
+
     override fun toString(): String {
         return "$namespace:$path"
     }
@@ -29,15 +34,12 @@ class Identifier private constructor(val namespace: String, val path: String) : 
 
     companion object {
         fun of(id: String): Identifier {
-            val identity = arrayOf("minecraft", id)
-            val idx = id.indexOf(':')
-            if (idx >= 0) {
-                identity[1] = id.substring(idx + 1)
-                if (idx >= 1) {
-                    identity[0] = id.substring(0, idx)
-                }
+            val identity = id.split(":")
+            return when (identity.size) {
+                1 -> of("minecraft", id)
+                2 -> of(identity[0], identity[1])
+                else -> error("Couldn't parse $id")
             }
-            return of(identity[0], identity[1])
         }
 
         fun of(namespace: String, path: String): Identifier = Identifier(namespace, path)

@@ -16,7 +16,7 @@ import org.sandboxpowered.silica.world.util.BlocTree;
 public class ChunkData implements PacketPlay {
     private final VanillaChunkSection[] sections = new VanillaChunkSection[16];
     private int cX, cZ;
-    private int bitMask;
+    private long[] bitMask;
     private byte[] buffer;
     private int[] biomes;
 
@@ -33,16 +33,16 @@ public class ChunkData implements PacketPlay {
             sections[i] = new VanillaChunkSection(blocTree, cX * 16, i * 16, cZ * 16, stateToId);
         }
         this.buffer = new byte[calculateSize(cX, cZ)];
-        bitMask = extractData(new PacketByteBuf(getWriteBuffer()), cX, cZ, blocTree);
+        bitMask = extractData(new PacketByteBuf(getWriteBuffer()), cX, cZ, blocTree).getData();
     }
 
-    private int extractData(PacketByteBuf packetByteBuf, int cX, int cZ, BlocTree blocTree) {
-        int j = 0;
+    private BitPackedLongArray extractData(PacketByteBuf packetByteBuf, int cX, int cZ, BlocTree blocTree) {
+        final var mask = new BitPackedLongArray(16, 1);
         for (int i = 0; i < 16; ++i) {
             sections[i].write(packetByteBuf);
-            j |= 1 << i; // TODO: only write non-empty
+            mask.set(i, 1); // TODO: only write non-empty
         }
-        return j;
+        return mask;
     }
 
     public PacketByteBuf getReadBuffer() {
@@ -72,13 +72,12 @@ public class ChunkData implements PacketPlay {
     public void write(PacketByteBuf buf) {
         buf.writeInt(cX);
         buf.writeInt(cZ);
-        buf.writeBoolean(true);
-        buf.writeVarInt(bitMask);
+        buf.writeLongArray(bitMask);
         final CompoundTag heightmap = new CompoundTag();
         final BitPackedLongArray heightmapData = new BitPackedLongArray(256, 9);
         for (int i = 0; i < 256; i++) heightmapData.set(i, 7);
         heightmap.setLongArray("MOTION_BLOCKING", heightmapData.getData());
-        heightmap.setLongArray("WORLD_SURFACE", heightmapData.getData());
+//        heightmap.setLongArray("WORLD_SURFACE", heightmapData.getData());
         buf.writeNBT(heightmap);
         buf.writeVarIntArray(biomes);
         buf.writeVarInt(buffer.length);

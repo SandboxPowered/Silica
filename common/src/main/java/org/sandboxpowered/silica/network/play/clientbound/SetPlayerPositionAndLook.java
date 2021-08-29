@@ -44,6 +44,7 @@ public class SetPlayerPositionAndLook implements PacketPlay {
         buf.writeFloat(pitch);
         buf.writeByte(flags);
         buf.writeVarInt(id);
+        buf.writeBoolean(false); // dismount vehicle
     }
 
     @Override
