@@ -8,9 +8,10 @@ import org.sandboxpowered.silica.state.property.Property
 
 class SilicaStateFactory<B : RegistryEntry<B>, S : PropertyContainer<S>>(
     override val baseObject: B,
-    propertiesByName: Map<String, Property<*>>,
+    map: Map<String, Property<*>>,
     stateCreator: Factory<B, S>
 ) : StateProvider<B, S> {
+    private val propertiesByName: ImmutableSortedMap<String, Property<*>> = ImmutableSortedMap.copyOf(map)
     override val validStates: ImmutableList<S>
     override val baseState: S
         get() = this.validStates[0]
