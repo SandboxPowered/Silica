@@ -122,9 +122,9 @@ class CompoundTag : NBTCompound {
     }
 
     override fun setPosition(key: String, position: Position) = setTag(key, CompoundTag().apply {
-        setInt("X", position.getX())
-        setInt("Y", position.getY())
-        setInt("Z", position.getZ())
+        setInt("X", position.x)
+        setInt("Y", position.y)
+        setInt("Z", position.z)
     })
 
     override fun setIdentifier(key: String, identifier: Identifier) = setString(key, identifier.toString())

@@ -60,7 +60,7 @@ class SilicaWorld private constructor(private val side: Side) : World {
     }
 
     override fun getBlockState(pos: Position): BlockState {
-        TODO("Not yet implemented")
+        return blocks[pos.x, pos.y, pos.z]
     }
 
     override fun getFluidState(pos: Position): FluidState {

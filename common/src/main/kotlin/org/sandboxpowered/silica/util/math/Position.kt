@@ -3,14 +3,10 @@ package org.sandboxpowered.silica.util.math
 import org.sandboxpowered.silica.util.content.Direction
 
 open class Position(
-    private val x: Int,
-    private val y: Int,
-    private val z: Int
+    open val x: Int,
+    open val y: Int,
+    open val z: Int
 ) {
-    open fun getX() = x
-    open fun getY() = y
-    open fun getZ() = z
-
     open fun add(x: Int, y: Int, z: Int): Position {
         return Position(this.x + x, this.y + y, this.z + z)
     }
@@ -62,13 +58,10 @@ open class Position(
     }
 
     class Mutable(
-        private var x: Int,
-        private var y: Int,
-        private var z: Int
+        override var x: Int,
+        override var y: Int,
+        override var z: Int
     ) : Position(x, y, z) {
-        override fun getX() = x
-        override fun getY() = y
-        override fun getZ() = z
 
         override fun add(x: Int, y: Int, z: Int): Mutable {
             this.x += x
