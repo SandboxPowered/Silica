@@ -13,6 +13,10 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.sandboxpowered.silica.StateManager
 import org.sandboxpowered.silica.util.*
+import org.sandboxpowered.silica.util.extensions.join
+import org.sandboxpowered.silica.util.extensions.messageAdapter
+import org.sandboxpowered.silica.util.extensions.onMessage
+import org.sandboxpowered.silica.util.extensions.onSignal
 import org.sandboxpowered.silica.world.SilicaWorld
 import java.io.File
 import java.nio.charset.StandardCharsets

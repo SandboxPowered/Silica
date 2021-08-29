@@ -1,5 +1,6 @@
-package org.sandboxpowered.silica.util
+package org.sandboxpowered.silica.util.extensions
 
+import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.math.Position
 
 operator fun Position.component1(): Int = getX()

@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL30.*
 import org.sandboxpowered.silica.client.*
-import org.sandboxpowered.silica.util.getResourceAsString
+import org.sandboxpowered.silica.util.extensions.getResourceAsString
 
 class OpenGLRenderer(private val silica: Silica) : Renderer {
     private val fov = Math.toRadians(60.0).toFloat()

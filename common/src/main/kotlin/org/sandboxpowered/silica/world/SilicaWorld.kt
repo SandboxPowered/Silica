@@ -20,8 +20,8 @@ import org.sandboxpowered.silica.system.VanillaInputSystem
 import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.Side
 import org.sandboxpowered.silica.util.math.Position
-import org.sandboxpowered.silica.util.onMessage
-import org.sandboxpowered.silica.util.registerAs
+import org.sandboxpowered.silica.util.extensions.onMessage
+import org.sandboxpowered.silica.util.extensions.registerAs
 import org.sandboxpowered.silica.world.gen.TerrainGenerator
 import org.sandboxpowered.silica.world.util.BlocTree
 import org.sandboxpowered.silica.world.util.OcTree

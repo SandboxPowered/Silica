@@ -9,9 +9,9 @@ import org.joml.Vector3fc
 import org.sandboxpowered.silica.component.HitboxComponent
 import org.sandboxpowered.silica.component.PlayerComponent
 import org.sandboxpowered.silica.component.PositionComponent
-import org.sandboxpowered.silica.util.math.component1
-import org.sandboxpowered.silica.util.math.component2
-import org.sandboxpowered.silica.util.math.component3
+import org.sandboxpowered.silica.util.extensions.component1
+import org.sandboxpowered.silica.util.extensions.component2
+import org.sandboxpowered.silica.util.extensions.component3
 import org.sandboxpowered.silica.world.util.OcTree
 
 /**

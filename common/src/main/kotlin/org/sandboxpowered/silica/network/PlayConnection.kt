@@ -9,7 +9,6 @@ import com.artemis.BaseSystem
 import com.mojang.authlib.GameProfile
 import org.sandboxpowered.silica.SilicaPlayerManager
 import org.sandboxpowered.silica.component.VanillaPlayerInput
-import org.sandboxpowered.silica.nbt.CompoundTag
 import org.sandboxpowered.silica.nbt.NBTCompound
 import org.sandboxpowered.silica.nbt.nbt
 import org.sandboxpowered.silica.nbt.setTag
@@ -17,7 +16,7 @@ import org.sandboxpowered.silica.network.play.clientbound.*
 import org.sandboxpowered.silica.server.Network
 import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.util.Identifier
-import org.sandboxpowered.silica.util.onMessage
+import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.world.SilicaWorld
 import org.sandboxpowered.silica.world.util.BlocTree
 import java.time.Duration

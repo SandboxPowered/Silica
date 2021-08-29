@@ -11,7 +11,7 @@ import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.registry.SilicaRegistry
 import org.sandboxpowered.silica.state.block.BlockState
 import org.sandboxpowered.silica.state.property.Property
-import org.sandboxpowered.silica.util.getResourceAsString
+import org.sandboxpowered.silica.util.extensions.getResourceAsString
 import kotlin.system.measureTimeMillis
 
 class StateManager {

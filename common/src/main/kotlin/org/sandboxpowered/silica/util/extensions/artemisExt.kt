@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.util
+package org.sandboxpowered.silica.util.extensions
 
 import com.artemis.Component
 import com.artemis.ComponentMapper

@@ -5,9 +5,9 @@ import com.artemis.utils.IntBag
 import net.mostlyoriginal.api.utils.QuadTree
 import net.mostlyoriginal.api.utils.pooling.ObjectPool
 import net.mostlyoriginal.api.utils.pooling.Poolable
-import org.sandboxpowered.silica.util.bag
-import org.sandboxpowered.silica.util.getPool
-import org.sandboxpowered.silica.util.plusAssign
+import org.sandboxpowered.silica.util.extensions.bag
+import org.sandboxpowered.silica.util.extensions.getPool
+import org.sandboxpowered.silica.util.extensions.plusAssign
 
 /**
  * Octree for optimized queries in 3d space

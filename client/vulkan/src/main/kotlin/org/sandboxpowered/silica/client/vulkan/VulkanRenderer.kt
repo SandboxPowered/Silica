@@ -29,7 +29,7 @@ import org.sandboxpowered.silica.client.vulkan.SPIRVUtil.ShaderKind.FRAGMENT_SHA
 import org.sandboxpowered.silica.client.vulkan.SPIRVUtil.ShaderKind.VERTEX_SHADER
 import org.sandboxpowered.silica.client.vulkan.VkError.Companion.checkError
 import org.sandboxpowered.silica.client.vulkan.VkError.Companion.checkErrorRun
-import org.sandboxpowered.silica.util.set
+import org.sandboxpowered.silica.util.extensions.set
 import java.io.PrintStream
 import java.nio.ByteBuffer
 import java.nio.IntBuffer

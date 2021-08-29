@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.util.math
+package org.sandboxpowered.silica.util.extensions
 
 import org.joml.Vector3dc
 import org.joml.Vector3fc

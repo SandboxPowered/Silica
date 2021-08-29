@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.util
+package org.sandboxpowered.silica.util.extensions
 
 import akka.actor.typed.ActorRef
 import akka.actor.typed.Behavior

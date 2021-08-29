@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.client.util
 
 import org.lwjgl.system.MemoryStack
-import org.sandboxpowered.silica.util.set
+import org.sandboxpowered.silica.util.extensions.set
 import java.nio.IntBuffer
 
 fun MemoryStack.ints(array: IntArray): IntBuffer {

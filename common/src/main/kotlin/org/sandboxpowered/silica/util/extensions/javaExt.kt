@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.util
+package org.sandboxpowered.silica.util.extensions
 
 import org.apache.commons.io.filefilter.IOFileFilter
 import org.apache.commons.lang3.StringUtils

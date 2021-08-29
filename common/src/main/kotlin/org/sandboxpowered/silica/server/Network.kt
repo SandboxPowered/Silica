@@ -20,7 +20,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import org.sandboxpowered.silica.network.*
 import org.sandboxpowered.silica.network.play.clientbound.KeepAliveClient
 import org.sandboxpowered.silica.network.play.clientbound.PlayerInfo
-import org.sandboxpowered.silica.util.onMessage
+import org.sandboxpowered.silica.util.extensions.onMessage
 import java.util.*
 
 sealed class Network {

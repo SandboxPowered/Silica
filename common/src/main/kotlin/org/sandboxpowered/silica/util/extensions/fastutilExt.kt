@@ -17,7 +17,7 @@
  * along with Brahma.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.sandboxpowered.silica.util
+package org.sandboxpowered.silica.util.extensions
 
 import it.unimi.dsi.fastutil.ints.*
 import it.unimi.dsi.fastutil.objects.Object2IntFunction

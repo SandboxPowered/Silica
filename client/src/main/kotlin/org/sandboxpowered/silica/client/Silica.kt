@@ -7,6 +7,9 @@ import org.lwjgl.glfw.GLFW
 import org.lwjgl.system.Configuration
 import org.sandboxpowered.silica.resources.*
 import org.sandboxpowered.silica.util.*
+import org.sandboxpowered.silica.util.extensions.join
+import org.sandboxpowered.silica.util.extensions.listFiles
+import org.sandboxpowered.silica.util.extensions.notExists
 import java.io.File
 import java.io.IOException
 import java.nio.file.Path
