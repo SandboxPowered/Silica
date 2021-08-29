@@ -1,21 +1,15 @@
 package org.sandboxpowered.silica.client
 
 import com.google.common.base.Joiner
-import org.apache.commons.lang3.SystemUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.system.Configuration
 import org.sandboxpowered.silica.resources.*
-import org.sandboxpowered.silica.util.FileFilters
-import org.sandboxpowered.silica.util.join
-import org.sandboxpowered.silica.util.listFiles
-import org.sandboxpowered.silica.util.notExists
+import org.sandboxpowered.silica.util.*
 import java.io.File
 import java.io.IOException
-import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executors
@@ -72,7 +66,7 @@ class Silica(private val args: Args) : Runnable {
         close()
     }
 
-    class Args(val width: Int, val height: Int, val renderer: String, val minecraftPath: Path?)
+    data class Args(val width: Int, val height: Int, val renderer: String, val minecraftPath: Path?)
 
     class InvalidRendererException(message: String) : RuntimeException(message)
 
@@ -106,34 +100,8 @@ class Silica(private val args: Args) : Runnable {
             return true
         assetManager = ResourceManager(ResourceType.ASSETS)
         assetManager.add(ClasspathResourceLoader())
-        when {
-            args.minecraftPath != null -> {
-                if (Files.notExists(args.minecraftPath)) {
-                    logger.error(
-                        "The specified path of {} does not exist, please make sure this is targeting a Minecraft 1.16.5 jar file",
-                        args.minecraftPath
-                    )
-                    return true
-                }
-                assetManager.add(ZIPResourceLoader(args.minecraftPath.toFile()))
-            }
-            SystemUtils.IS_OS_WINDOWS -> {
-                val appdataEnv = System.getenv("APPDATA")
-                val asPath = Paths.get(appdataEnv, ".minecraft", "versions", "1.16.5", "1.16.5.jar")
-                if (Files.notExists(asPath)) {
-                    logger.error(
-                        "Unable to find Minecraft 1.16.5 installation at {}, please install minecraft or use the --minecraft argument to point to a specific jar",
-                        asPath
-                    )
-                    return true
-                }
-                assetManager.add(ZIPResourceLoader(asPath.toFile()))
-            }
-            else -> {
-                logger.error("Silica supports automatically searching for Minecraft on windows only. use the --minecraft argument on other operating systems")
-                return true
-            }
-        }
+        Util.findMinecraft(assetManager, args.minecraftPath)
+
         File("resourcepacks").apply {
             if (notExists()) {
                 mkdirs()

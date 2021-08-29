@@ -9,4 +9,9 @@ enum class Stone(val string: String) : StringSerializable {
     ANDESITE("andesite");
 
     override fun getName(): String = string
+
+    companion object {
+        val ALL = values()
+        val NAMES = ALL.map { it.getName() }
+    }
 }

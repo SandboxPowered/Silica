@@ -16,10 +16,11 @@ import org.sandboxpowered.silica.util.*
 import org.sandboxpowered.silica.world.SilicaWorld
 import java.io.File
 import java.nio.charset.StandardCharsets
+import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Duration
 
-class DedicatedServer : SilicaServer() {
+class DedicatedServer(val args: Args) : SilicaServer() {
     private var log: Logger = LogManager.getLogger()
     override val stateManager = StateManager()
     private val acceptVanillaConnections: Boolean
@@ -27,8 +28,11 @@ class DedicatedServer : SilicaServer() {
     override lateinit var network: ActorRef<Network>
     private val stateManagerErrors: Map<StateManager.ErrorType, Set<String>>
 
+    class Args(val minecraftPath: Path?)
+
     init {
 //        Guice.createInjector(SilicaImplementationModule())
+        Util.findMinecraft(dataManager, args.minecraftPath)
         properties = ServerProperties.fromFile(Paths.get("server.properties"))
         stateManagerErrors = stateManager.load()
         acceptVanillaConnections = stateManagerErrors.isEmpty()

@@ -25,7 +25,7 @@ object SilicaRegistries {
             register(BaseBlock(id("${colour}_carpet")))
             register(BaseBlock(id("${colour}_stained_glass")))
         }
-        for (stone in Stone.values().map { it.getName() }) {
+        for (stone in Stone.NAMES) {
             register(BaseBlock(id(stone)))
             register(SlabBlock(id("${stone}_slab")))
             register(StairBlock(id("${stone}_stairs")))

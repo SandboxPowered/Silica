@@ -6,6 +6,7 @@ import joptsimple.OptionSpec
 import org.apache.logging.log4j.LogManager
 import org.sandboxpowered.silica.client.Silica
 import org.sandboxpowered.silica.client.Silica.Args
+import org.sandboxpowered.silica.util.extensions.ofType
 import java.nio.file.Paths
 import kotlin.reflect.KClass
 
@@ -53,8 +54,4 @@ object Main {
             e.printStackTrace()
         }
     }
-}
-
-private fun <V, T : Any> ArgumentAcceptingOptionSpec<V>.ofType(kClass: KClass<T>): ArgumentAcceptingOptionSpec<T> {
-    return ofType(kClass.java)
 }
