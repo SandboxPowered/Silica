@@ -42,7 +42,7 @@ class DedicatedServer : SilicaServer() {
             if (unknown != null && unknown.isNotEmpty()) {
                 log.info("Found ${unknown.size} custom BlockStates")
                 unknown.forEach {
-//                    log.info("   $it")
+                    log.info("   $it")
                 }
             }
             val missing = stateManagerErrors[StateManager.ErrorType.MISSING]

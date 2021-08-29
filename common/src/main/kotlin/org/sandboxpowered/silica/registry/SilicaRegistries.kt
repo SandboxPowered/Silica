@@ -3,6 +3,8 @@ package org.sandboxpowered.silica.registry
 import org.sandboxpowered.silica.block.*
 import org.sandboxpowered.silica.fluid.Fluid
 import org.sandboxpowered.silica.item.Item
+import org.sandboxpowered.silica.util.Colour
+import org.sandboxpowered.silica.util.Stone
 import org.sandboxpowered.silica.util.Identifier.Companion.of as id
 
 object SilicaRegistries {
@@ -13,10 +15,22 @@ object SilicaRegistries {
         register(BaseBlock(id("dirt")))
         register(GrassBlock(id("grass_block")))
 
-        for (stone in arrayOf("stone", "diorite", "granite", "andesite")) {
+        register(BaseBlock(id("sand")))
+        register(BaseBlock(id("gravel")))
+
+        register(BaseBlock(id("glass")))
+
+        for (colour in Colour.NAMES) {
+            register(BaseBlock(id("${colour}_wool")))
+            register(BaseBlock(id("${colour}_carpet")))
+            register(BaseBlock(id("${colour}_stained_glass")))
+        }
+        for (stone in Stone.values().map { it.getName() }) {
             register(BaseBlock(id(stone)))
             register(SlabBlock(id("${stone}_slab")))
             register(StairBlock(id("${stone}_stairs")))
+            if (stone != Stone.STONE.getName())
+                register(WallBlock(id("${stone}_wall")))
         }
         for (wood in arrayOf("oak", "spruce", "birch", "jungle", "dark_oak", "acacia")) {
             register(BaseBlock(id("${wood}_planks")))

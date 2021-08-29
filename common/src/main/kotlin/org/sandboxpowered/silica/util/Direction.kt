@@ -35,7 +35,7 @@ enum class Direction(
     override fun toString(): String = this.dirName
 
     companion object {
-        val ALL = Direction.values()
+        val ALL = values()
         val NAME_MAP = ALL.associateBy { it.name }
         val ID_TO_DIRECTION = ALL.sortedWith(Comparator.comparingInt { it.id }).toTypedArray()
         val HORIZONTAL = ALL.filter { it.axis.isHorizontal }

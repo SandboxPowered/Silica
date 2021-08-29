@@ -82,4 +82,8 @@ object SilicaBlockProperties {
     val SLAB_HALF: Property<Half> = of<Half>("type")
     val STAIR_HALF: Property<Half> = of("half") { it != Half.DOUBLE }
     val STAIR_SHAPE: Property<StairShape> = of<StairShape>("shape")
+    val WALL_SHAPE_NORTH: Property<WallShape> = of<WallShape>("north")
+    val WALL_SHAPE_EAST: Property<WallShape> = of<WallShape>("east")
+    val WALL_SHAPE_SOUTH: Property<WallShape> = of<WallShape>("south")
+    val WALL_SHAPE_WEST: Property<WallShape> = of<WallShape>("west")
 }
