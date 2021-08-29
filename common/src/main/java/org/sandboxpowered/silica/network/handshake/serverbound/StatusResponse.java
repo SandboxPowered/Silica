@@ -9,8 +9,8 @@ public class StatusResponse implements Packet {
     private String responseJson = """
             {
                 "version": {
-                    "name": "1.16.4",
-                    "protocol": 755
+                    "name": "1.17.1",
+                    "protocol": 756
                 },
                 "players": {
                     "max": 100000,
