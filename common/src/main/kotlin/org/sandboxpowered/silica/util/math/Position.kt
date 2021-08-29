@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.util.math
 
-import org.sandboxpowered.silica.util.Direction
+import org.sandboxpowered.silica.util.content.Direction
 
 open class Position(
     private val x: Int,

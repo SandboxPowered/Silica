@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.util
+package org.sandboxpowered.silica.util.content
 
 import org.sandboxpowered.silica.state.property.StringSerializable
 

@@ -3,8 +3,8 @@ package org.sandboxpowered.silica.registry
 import org.sandboxpowered.silica.block.*
 import org.sandboxpowered.silica.fluid.Fluid
 import org.sandboxpowered.silica.item.Item
-import org.sandboxpowered.silica.util.Colour
-import org.sandboxpowered.silica.util.Stone
+import org.sandboxpowered.silica.util.content.Colour
+import org.sandboxpowered.silica.util.content.Stone
 import org.sandboxpowered.silica.util.Identifier.Companion.of as id
 
 object SilicaRegistries {

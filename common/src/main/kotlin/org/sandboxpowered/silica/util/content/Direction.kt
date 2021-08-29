@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.util
+package org.sandboxpowered.silica.util.content
 
 import com.google.common.collect.Iterators
 import org.jetbrains.annotations.Range
@@ -56,8 +56,8 @@ enum class Direction(
 
     enum class Type(private vararg val facingArray: Direction) :
         Predicate<Direction>, Iterable<Direction> {
-        HORIZONTAL(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST),
-        VERTICAL(Direction.UP, Direction.DOWN);
+        HORIZONTAL(NORTH, EAST, SOUTH, WEST),
+        VERTICAL(UP, DOWN);
 
         override fun test(direction: Direction): Boolean {
             return direction.axis.type == this

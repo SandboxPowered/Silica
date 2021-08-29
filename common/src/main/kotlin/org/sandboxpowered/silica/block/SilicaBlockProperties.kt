@@ -6,11 +6,11 @@ import org.sandboxpowered.silica.state.property.BooleanProperty.Companion.of
 import org.sandboxpowered.silica.state.property.EnumProperty.Companion.of
 import org.sandboxpowered.silica.state.property.IntProperty.Companion.of
 import org.sandboxpowered.silica.state.property.Property
-import org.sandboxpowered.silica.util.Direction
-import org.sandboxpowered.silica.util.Direction.Axis
-import org.sandboxpowered.silica.util.Half
-import org.sandboxpowered.silica.util.StairShape
-import org.sandboxpowered.silica.util.WallShape
+import org.sandboxpowered.silica.util.content.Direction
+import org.sandboxpowered.silica.util.content.Direction.Axis
+import org.sandboxpowered.silica.util.content.Half
+import org.sandboxpowered.silica.util.content.StairShape
+import org.sandboxpowered.silica.util.content.WallShape
 
 object SilicaBlockProperties {
     val ATTACHED: Property<Boolean> = of("attached")
