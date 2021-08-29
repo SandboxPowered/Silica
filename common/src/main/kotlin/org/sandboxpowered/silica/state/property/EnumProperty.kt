@@ -17,6 +17,19 @@ class EnumProperty<E> private constructor(name: String, type: Class<E>, collecti
 
     companion object {
         @JvmStatic
+        inline fun <reified T> of(name: String): EnumProperty<T> where T : Enum<T>, T : StringSerializable {
+            return of(name, T::class.java) { true }
+        }
+
+        @JvmStatic
+        inline fun <reified T> of(
+            name: String,
+            predicate: Predicate<T>,
+        ): EnumProperty<T> where T : Enum<T>, T : StringSerializable {
+            return of(name, T::class.java, predicate)
+        }
+
+        @JvmStatic
         fun <T> of(name: String, type: Class<T>): EnumProperty<T> where T : Enum<T>, T : StringSerializable {
             return of(name, type) { true }
         }
@@ -25,7 +38,7 @@ class EnumProperty<E> private constructor(name: String, type: Class<E>, collecti
         fun <T> of(
             name: String,
             type: Class<T>,
-            predicate: Predicate<T>?
+            predicate: Predicate<T>,
         ): EnumProperty<T> where T : Enum<T>, T : StringSerializable {
             return of(name, type, Arrays.stream(type.enumConstants).filter(predicate).collect(Collectors.toList()))
         }

@@ -7,8 +7,10 @@ import org.sandboxpowered.silica.state.property.EnumProperty.Companion.of
 import org.sandboxpowered.silica.state.property.IntProperty.Companion.of
 import org.sandboxpowered.silica.state.property.Property
 import org.sandboxpowered.silica.util.Direction
+import org.sandboxpowered.silica.util.Direction.Axis
 import org.sandboxpowered.silica.util.Half
 import org.sandboxpowered.silica.util.StairShape
+import org.sandboxpowered.silica.util.WallShape
 
 object SilicaBlockProperties {
     val ATTACHED: Property<Boolean> = of("attached")
@@ -72,12 +74,12 @@ object SilicaBlockProperties {
     val STAGE: Property<Int> = of("stage", 0, 1)
     val DISTANCE_0_7: Property<Int> = of("distance", 0, 7)
     val ROTATION: Property<Int> = of("rotation", 0, 15)
-    val FACING: Property<Direction> = of("facing", Direction::class.java)
-    val HORIZONTAL_FACING: Property<Direction> = of("facing", Direction::class.java, Direction.Type.HORIZONTAL)
-    val HOPPER_FACING: Property<Direction> = of("facing", Direction::class.java) { it != Direction.UP }
-    val HORIZONTAL_AXIS: Property<Direction.Axis> = of("axis", Direction.Axis::class.java, Direction.Axis::isHorizontal)
-    val AXIS: Property<Direction.Axis> = of("axis", Direction.Axis::class.java)
-    val SLAB_HALF: Property<Half> = of("type", Half::class.java)
-    val STAIR_HALF: Property<Half> = of("half", Half::class.java) { it != Half.DOUBLE }
-    val STAIR_SHAPE: Property<StairShape> = of("shape", StairShape::class.java)
+    val FACING: Property<Direction> = of<Direction>("facing")
+    val HORIZONTAL_FACING: Property<Direction> = of("facing", Direction.Type.HORIZONTAL)
+    val HOPPER_FACING: Property<Direction> = of("facing") { it != Direction.UP }
+    val HORIZONTAL_AXIS: Property<Axis> = of("axis", Axis::isHorizontal)
+    val AXIS: Property<Axis> = of<Axis>("axis")
+    val SLAB_HALF: Property<Half> = of<Half>("type")
+    val STAIR_HALF: Property<Half> = of("half") { it != Half.DOUBLE }
+    val STAIR_SHAPE: Property<StairShape> = of<StairShape>("shape")
 }
