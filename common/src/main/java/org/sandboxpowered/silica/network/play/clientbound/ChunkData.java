@@ -13,6 +13,8 @@ import org.sandboxpowered.silica.network.util.BitPackedLongArray;
 import org.sandboxpowered.silica.state.block.BlockState;
 import org.sandboxpowered.silica.world.util.BlocTree;
 
+import java.util.BitSet;
+
 public class ChunkData implements PacketPlay {
     private final VanillaChunkSection[] sections = new VanillaChunkSection[16];
     private int cX, cZ;
@@ -33,14 +35,14 @@ public class ChunkData implements PacketPlay {
             sections[i] = new VanillaChunkSection(blocTree, cX * 16, i * 16, cZ * 16, stateToId);
         }
         this.buffer = new byte[calculateSize(cX, cZ)];
-        bitMask = extractData(new PacketByteBuf(getWriteBuffer()), cX, cZ, blocTree).getData();
+        bitMask = extractData(new PacketByteBuf(getWriteBuffer()), cX, cZ, blocTree).toLongArray();
     }
 
-    private BitPackedLongArray extractData(PacketByteBuf packetByteBuf, int cX, int cZ, BlocTree blocTree) {
-        final var mask = new BitPackedLongArray(16, 1);
+    private BitSet extractData(PacketByteBuf packetByteBuf, int cX, int cZ, BlocTree blocTree) {
+        final var mask = new BitSet();
         for (int i = 0; i < 16; ++i) {
             sections[i].write(packetByteBuf);
-            mask.set(i, 1); // TODO: only write non-empty
+            mask.set(i); // TODO: only write non-empty
         }
         return mask;
     }

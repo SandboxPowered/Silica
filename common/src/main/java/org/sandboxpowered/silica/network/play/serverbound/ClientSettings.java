@@ -12,6 +12,7 @@ public class ClientSettings implements PacketPlay {
     private boolean enableColour;
     private short displayedSkin;
     private int hand;
+    private boolean textFiltering;
 
     @Override
     public void read(PacketByteBuf buf) {
@@ -21,6 +22,7 @@ public class ClientSettings implements PacketPlay {
         enableColour = buf.readBoolean();
         displayedSkin = buf.readUnsignedByte();
         hand = buf.readVarInt();
+        textFiltering = buf.readBoolean();
     }
 
     @Override

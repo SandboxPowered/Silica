@@ -99,7 +99,39 @@ object Hardcoding {
         Identifier.of("minecraft", "guarded_by_piglins"),
         Identifier.of("minecraft", "standing_signs"),
         Identifier.of("minecraft", "infiniburn_end"),
-        Identifier.of("minecraft", "unstable_bottom_center")
+        Identifier.of("minecraft", "unstable_bottom_center"),
+        Identifier.of("minecraft", "redstone_ores"),
+        Identifier.of("minecraft", "needs_stone_tool"),
+        Identifier.of("minecraft", "inside_step_sound_blocks"),
+        Identifier.of("minecraft", "coal_ores"),
+        Identifier.of("minecraft", "occludes_vibration_signals"),
+        Identifier.of("minecraft", "cauldrons"),
+        Identifier.of("minecraft", "diamond_ores"),
+        Identifier.of("minecraft", "geode_invalid_blocks"),
+        Identifier.of("minecraft", "deepslate_ore_replaceables"),
+        Identifier.of("minecraft", "cave_vines"),
+        Identifier.of("minecraft", "candles"),
+        Identifier.of("minecraft", "dripstone_replaceable_blocks"),
+        Identifier.of("minecraft", "lapis_ores"),
+        Identifier.of("minecraft", "moss_replaceable"),
+        Identifier.of("minecraft", "lava_pool_stone_replaceables"),
+        Identifier.of("minecraft", "mineable/axe"),
+        Identifier.of("minecraft", "needs_diamond_tool"),
+        Identifier.of("minecraft", "lush_ground_replaceable"),
+        Identifier.of("minecraft", "copper_ores"),
+        Identifier.of("minecraft", "snow"),
+        Identifier.of("minecraft", "features_cannot_replace"),
+        Identifier.of("minecraft", "small_dripleaf_placeable"),
+        Identifier.of("minecraft", "crystal_sound_blocks"),
+        Identifier.of("minecraft", "mineable/hoe"),
+        Identifier.of("minecraft", "mineable/pickaxe"),
+        Identifier.of("minecraft", "mineable/shovel"),
+        Identifier.of("minecraft", "dirt"),
+        Identifier.of("minecraft", "iron_ores"),
+        Identifier.of("minecraft", "candle_cakes"),
+        Identifier.of("minecraft", "emerald_ores"),
+        Identifier.of("minecraft", "stone_ore_replaceables"),
+        Identifier.of("minecraft", "needs_iron_tool"),
     )
 
     @JvmField
@@ -114,7 +146,12 @@ object Hardcoding {
         Identifier.of("minecraft", "raiders"),
         Identifier.of("minecraft", "arrows"),
         Identifier.of("minecraft", "beehive_inhabitors"),
-        Identifier.of("minecraft", "impact_projectiles")
+        Identifier.of("minecraft", "impact_projectiles"),
+        Identifier.of("minecraft", "axolotl_always_hostiles"),
+        Identifier.of("minecraft", "freeze_hurts_extra_types"),
+        Identifier.of("minecraft", "freeze_immune_entity_types"),
+        Identifier.of("minecraft", "powder_snow_walkable_mobs"),
+        Identifier.of("minecraft", "axolotl_hunt_targets"),
     )
 
     @JvmField
@@ -215,9 +252,27 @@ object Hardcoding {
         Identifier.of("minecraft", "stone_tool_materials"),
         Identifier.of("minecraft", "lectern_books"),
         Identifier.of("minecraft", "boats"),
-        Identifier.of("minecraft", "arrows")
+        Identifier.of("minecraft", "arrows"),
+        Identifier.of("minecraft", "redstone_ores"),
+        Identifier.of("minecraft", "candles"),
+        Identifier.of("minecraft", "ignored_by_piglin_babies"),
+        Identifier.of("minecraft", "lapis_ores"),
+        Identifier.of("minecraft", "fox_food"),
+        Identifier.of("minecraft", "coal_ores"),
+        Identifier.of("minecraft", "occludes_vibration_signals"),
+        Identifier.of("minecraft", "copper_ores"),
+        Identifier.of("minecraft", "diamond_ores"),
+        Identifier.of("minecraft", "freeze_immune_wearables"),
+        Identifier.of("minecraft", "piglin_food"),
+        Identifier.of("minecraft", "iron_ores"),
+        Identifier.of("minecraft", "emerald_ores"),
+        Identifier.of("minecraft", "axolotl_tempt_items"),
+        Identifier.of("minecraft", "cluster_max_harvestables"),
     )
 
     @JvmField
-    val GAME_EVENT_TAGS = arrayOf<Identifier>()
+    val GAME_EVENT_TAGS = arrayOf(
+        Identifier.of("minecraft", "vibrations"),
+        Identifier.of("minecraft", "ignore_vibrations_sneaking"),
+    )
 }

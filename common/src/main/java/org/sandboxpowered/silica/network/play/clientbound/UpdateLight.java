@@ -4,16 +4,18 @@ import org.sandboxpowered.silica.network.PacketByteBuf;
 import org.sandboxpowered.silica.network.PacketHandler;
 import org.sandboxpowered.silica.network.PacketPlay;
 import org.sandboxpowered.silica.network.PlayContext;
+import org.sandboxpowered.silica.network.util.BitPackedLongArray;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 
 public class UpdateLight implements PacketPlay {
     private int cX, cZ;
-    private int skyYMask;
-    private int blockYMask;
-    private int emptySkyYMask;
-    private int emptyBlockYMask;
+    private BitSet skyYMask = new BitSet();
+    private BitSet blockYMask = new BitSet();
+    private BitSet emptySkyYMask = new BitSet();
+    private BitSet emptyBlockYMask = new BitSet();
     private List<byte[]> skyUpdates;
     private List<byte[]> blockUpdates;
     private boolean trustEdges;
@@ -27,22 +29,12 @@ public class UpdateLight implements PacketPlay {
         this.trustEdges = trustEdges;
         this.skyUpdates = new ArrayList<>();
         this.blockUpdates = new ArrayList<>();
-        byte[] data = new byte[2048];
-        for (int i = 0; i < 18; ++i) {
-            this.emptySkyYMask |= 1 << i;
-            this.emptyBlockYMask |= 1 << i;
-        }
-        int j;
-        for (j = 0; j < 18; ++j) {
-            if ((this.skyYMask & 1 << j) != 0) {
-                System.out.println(true);
-            }
-        }
-        for (j = 0; j < 18; ++j) {
-            if ((this.blockYMask & 1 << j) != 0) {
-                System.out.println(false);
-            }
-        }
+        /*for (int i = 0; i < 34; ++i) {
+            this.skyYMask.set(i, false);
+            this.blockYMask.set(i);
+            this.emptySkyYMask.set(i);
+            this.emptyBlockYMask.set(i);
+        }*/
     }
 
     @Override
@@ -55,15 +47,17 @@ public class UpdateLight implements PacketPlay {
         buf.writeVarInt(cX);
         buf.writeVarInt(cZ);
         buf.writeBoolean(trustEdges);
-        buf.writeVarInt(skyYMask);
-        buf.writeVarInt(blockYMask);
-        buf.writeVarInt(emptySkyYMask);
-        buf.writeVarInt(emptyBlockYMask);
+        buf.writeLongArray(skyYMask.toLongArray());
+        buf.writeLongArray(blockYMask.toLongArray());
+        buf.writeLongArray(emptySkyYMask.toLongArray());
+        buf.writeLongArray(emptyBlockYMask.toLongArray());
 
+        buf.writeVarInt(skyUpdates.size());
         for (byte[] skyUpdate : skyUpdates) {
             buf.writeByteArray(skyUpdate);
         }
 
+        buf.writeVarInt(blockUpdates.size());
         for (byte[] blockUpdate : blockUpdates) {
             buf.writeByteArray(blockUpdate);
         }

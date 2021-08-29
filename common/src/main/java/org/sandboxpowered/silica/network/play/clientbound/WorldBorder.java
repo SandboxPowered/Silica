@@ -13,7 +13,6 @@ public class WorldBorder implements PacketPlay {
 
     @Override
     public void write(PacketByteBuf buf) {
-        buf.writeVarInt(3);
         buf.writeDouble(0);
         buf.writeDouble(0);
         buf.writeDouble(1000);
