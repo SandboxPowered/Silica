@@ -40,28 +40,28 @@ enum class Protocol(private val id: Int, builder: Builder) {
                 NetworkFlow.SERVERBOUND, Packets()
                     .addPacket(0x00, ::TeleportConfirmation)
                     .addPacket(0x05, ::ClientSettings)
-                    .addPacket(0x0B, ::ClientPluginChannel)
-                    .addPacket(0x10, ::KeepAliveServer)
-                    .addPacket(0x12, ::PlayerPosition)
-                    .addPacket(0x13, ::PlayerPositionAndRotation)
-                    .addPacket(0x14, ::PlayerRotation)
-                    .addPacket(0x15, ::PlayerMovement)
+                    .addPacket(0x0A, ::ClientPluginChannel)
+                    .addPacket(0x0F, ::KeepAliveServer)
+                    .addPacket(0x11, ::PlayerPosition)
+                    .addPacket(0x12, ::PlayerPositionAndRotation)
+                    .addPacket(0x13, ::PlayerRotation)
+                    .addPacket(0x14, ::PlayerMovement)
             ).addFlow(
                 NetworkFlow.CLIENTBOUND, Packets()
-                    .addPacket(0x24, ::JoinGame)
-                    .addPacket(0x3F, ::HeldItemChange)
-                    .addPacket(0x5A, ::DeclareRecipes)
-                    .addPacket(0x5B, ::DeclareTags)
-                    .addPacket(0x1A, ::EntityStatus)
-                    .addPacket(0x10, ::DeclareCommands)
-                    .addPacket(0x34, ::SetPlayerPositionAndLook)
-                    .addPacket(0x35, ::UnlockRecipes)
-                    .addPacket(0x32, ::PlayerInfo)
-                    .addPacket(0x40, ::UpdateChunkPosition)
-                    .addPacket(0x20, ::ChunkData)
-                    .addPacket(0x23, ::UpdateLight)
-                    .addPacket(0x3D, ::WorldBorder)
-                    .addPacket(0x1F, ::KeepAliveClient)
+                    .addPacket(0x26, ::JoinGame)
+                    .addPacket(0x48, ::HeldItemChange)
+                    .addPacket(0x65, ::DeclareRecipes)
+                    .addPacket(0X66, ::DeclareTags)
+                    .addPacket(0x1B, ::EntityStatus)
+                    .addPacket(0x12, ::DeclareCommands)
+                    .addPacket(0x37, ::SetPlayerPositionAndLook)
+                    .addPacket(0x39, ::UnlockRecipes)
+                    .addPacket(0x36, ::PlayerInfo)
+//                    .addPacket(0x40, ::UpdateChunkPosition)
+                    .addPacket(0x22, ::ChunkData)
+                    .addPacket(0x25, ::UpdateLight)
+                    .addPacket(0x20, ::WorldBorder)
+                    .addPacket(0x21, ::KeepAliveClient)
             )
     ),
     STATUS(
@@ -171,7 +171,7 @@ enum class Protocol(private val id: Int, builder: Builder) {
             return this
         }
 
-        fun getId(aClass: Class<out PacketBase?>?): Int {
+        fun getId(aClass: Class<out PacketBase>): Int {
             return classToId.getInt(aClass)
         }
 
