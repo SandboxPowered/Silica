@@ -15,14 +15,12 @@ class LengthPrepender : MessageToByteEncoder<ByteBuf>() {
         packetByteBuf.writeBytes(buf, buf.readerIndex(), packetSize)
     }
 
-    companion object {
-        fun getVarIntSize(value: Int): Int {
-            for (variable in 1..4) {
-                if (value and -1 shl variable * 7 == 0) {
-                    return variable
-                }
+    private fun getVarIntSize(value: Int): Int {
+        for (variable in 1..4) {
+            if (value and (-1 shl variable * 7) == 0) {
+                return variable
             }
-            return 5
         }
+        return 5
     }
 }
