@@ -57,7 +57,7 @@ enum class Protocol(private val id: Int, builder: Builder) {
                     .addPacket(0x37, ::SetPlayerPositionAndLook)
                     .addPacket(0x39, ::UnlockRecipes)
                     .addPacket(0x36, ::PlayerInfo)
-//                    .addPacket(0x40, ::UpdateChunkPosition)
+                    .addPacket(0x49, ::UpdateChunkPosition)
                     .addPacket(0x22, ::ChunkData)
                     .addPacket(0x25, ::UpdateLight)
                     .addPacket(0x20, ::WorldBorder)
