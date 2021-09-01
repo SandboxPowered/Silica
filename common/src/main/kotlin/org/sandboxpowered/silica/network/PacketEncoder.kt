@@ -15,7 +15,10 @@ class PacketEncoder(private val networkFlow: NetworkFlow) : MessageToByteEncoder
         } else {
             val packetByteBuf = PacketByteBuf(out)
             packetByteBuf.writeVarInt(id)
+            val i = packetByteBuf.writerIndex()
             msg.write(packetByteBuf)
+            val j = packetByteBuf.writerIndex() - i
+            require(j <= 2097152) { "Packet too big (is $j, should be less than 2097152): $msg" }
         }
     }
 }

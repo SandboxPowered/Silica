@@ -8,7 +8,7 @@ class LengthPrepender : MessageToByteEncoder<ByteBuf>() {
     override fun encode(ctx: ChannelHandlerContext, buf: ByteBuf, out: ByteBuf) {
         val packetSize = buf.readableBytes()
         val length = getVarIntSize(packetSize)
-        require(length <= 3) { "unable to fit $packetSize into 3" }
+        require(length <= 3) { "unable to fit $packetSize into 3 bytes" }
         val packetByteBuf = PacketByteBuf(out)
         packetByteBuf.ensureWritable(length + packetSize)
         packetByteBuf.writeVarInt(packetSize)
@@ -16,7 +16,7 @@ class LengthPrepender : MessageToByteEncoder<ByteBuf>() {
     }
 
     private fun getVarIntSize(value: Int): Int {
-        for (variable in 1..4) {
+        for (variable in 1 until 5) {
             if (value and (-1 shl variable * 7) == 0) {
                 return variable
             }

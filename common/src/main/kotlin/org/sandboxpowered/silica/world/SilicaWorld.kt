@@ -19,9 +19,9 @@ import org.sandboxpowered.silica.system.Entity3dMapSystem
 import org.sandboxpowered.silica.system.VanillaInputSystem
 import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.Side
-import org.sandboxpowered.silica.util.math.Position
 import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.util.extensions.registerAs
+import org.sandboxpowered.silica.util.math.Position
 import org.sandboxpowered.silica.world.gen.TerrainGenerator
 import org.sandboxpowered.silica.world.util.BlocTree
 import org.sandboxpowered.silica.world.util.OcTree
@@ -61,6 +61,10 @@ class SilicaWorld private constructor(private val side: Side) : World {
 
     override fun getBlockState(pos: Position): BlockState {
         return blocks[pos.x, pos.y, pos.z]
+    }
+
+    override fun setBlockState(pos: Position, state: BlockState) {
+        blocks[pos.x, pos.y, pos.z] = state
     }
 
     override fun getFluidState(pos: Position): FluidState {
@@ -181,7 +185,7 @@ class SilicaWorld private constructor(private val side: Side) : World {
 
         // TODO: TMP !!
         private fun enqueueGeneration(to: ActorRef<in CommandGenerate>) {
-            iterateCube(-3, 0, -3, w = 6, h = 1) { dx, dy, dz ->
+            iterateCube(-5, 0, -5, w = 10, h = 1) { dx, dy, dz ->
                 val x = dx * 16
                 val z = dz * 16
                 to.tell(CommandGenerate(x, dy, z, world.blocks[x, dy, z, 16, 16, 16], context.system.ignoreRef()))

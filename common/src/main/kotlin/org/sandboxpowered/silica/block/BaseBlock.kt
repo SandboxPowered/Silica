@@ -13,11 +13,11 @@ open class BaseBlock(override val identifier: Identifier) : Block {
         return identifier.path == "air"
     }
 
-    open fun appendProperties(builder: StateProvider.Builder<Block, BlockState>) {
+    protected open fun appendProperties(builder: StateProvider.Builder<Block, BlockState>) {
 
     }
 
-    open fun createDefaultState(baseState: BlockState): BlockState = baseState
+    protected open fun createDefaultState(baseState: BlockState): BlockState = baseState
 
     override val stateProvider: StateProvider<Block, BlockState> by lazy {
         SilicaStateFactory(this,

@@ -46,6 +46,7 @@ enum class Protocol(private val id: Int, builder: Builder) {
                     .addPacket(0x12, ::PlayerPositionAndRotation)
                     .addPacket(0x13, ::PlayerRotation)
                     .addPacket(0x14, ::PlayerMovement)
+                    .addPacket(0x1A, ::PlayerDigging)
             ).addFlow(
                 NetworkFlow.CLIENTBOUND, Packets()
                     .addPacket(0x26, ::JoinGame)
@@ -62,6 +63,7 @@ enum class Protocol(private val id: Int, builder: Builder) {
                     .addPacket(0x25, ::UpdateLight)
                     .addPacket(0x20, ::WorldBorder)
                     .addPacket(0x21, ::KeepAliveClient)
+                    .addPacket(0x08, ::AcknowledgePlayerDigging)
             )
     ),
     STATUS(

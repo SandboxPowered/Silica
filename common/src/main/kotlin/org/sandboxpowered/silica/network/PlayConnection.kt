@@ -63,9 +63,13 @@ private class PlayConnectionActor(
     private lateinit var playerInput: VanillaPlayerInput
 
     private val playContext by lazy {
-        PlayContext {
-            server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { _ -> it(playerInput) })
-        }
+        PlayContext(
+            server,
+            {
+                server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { _ -> it(playerInput) })
+            }, {
+                server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { world -> it(world) })
+            })
     }
 
     init {
@@ -242,8 +246,8 @@ private class PlayConnectionActor(
 
     private fun handleReceiveWorld(world: PlayConnection.ReceiveWorld): Behavior<PlayConnection> {
         logger.info("Sending world")
-        for (x in -2..2) {
-            for (z in -2..2) {
+        for (x in -4..4) {
+            for (z in -4..4) {
                 val time = measureTimeMillis {
                     packetHandler.sendPacket(ChunkData(x, z, world.blocks, server.stateManager::toVanillaId))
                 }

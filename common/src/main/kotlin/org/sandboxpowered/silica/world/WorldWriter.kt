@@ -1,3 +1,8 @@
 package org.sandboxpowered.silica.world
 
-interface WorldWriter 
+import org.sandboxpowered.silica.state.block.BlockState
+import org.sandboxpowered.silica.util.math.Position
+
+interface WorldWriter {
+    fun setBlockState(pos: Position, state: BlockState)
+}
