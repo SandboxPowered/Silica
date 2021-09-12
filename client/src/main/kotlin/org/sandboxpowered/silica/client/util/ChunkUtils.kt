@@ -22,7 +22,7 @@ class ChunkUtils {
 
     class RenderChunk(val cx: Int, val cy: Int, val cz: Int) {
         var neighbors = 0
-        private val built = false
+        private var built = false
     }
 
     companion object {

@@ -15,7 +15,7 @@ class PacketDecoder(private val networkFlow: NetworkFlow) : ByteToMessageDecoder
                 packet.read(buf)
                 out.add(packet)
             } else {
-//                throw new IOException("Unknown packet " + packetId);
+                error("Unknown packet 0x${"%02x".format(packetId)}")
             }
         }
     }

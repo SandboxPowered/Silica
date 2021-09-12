@@ -17,11 +17,16 @@ class VanillaPlayerInput : PooledComponent() {
     var wantedYaw: Float = 0f
     var wantedPitch: Float = 0f
 
+    var sneaking = false
+    var jumping = false
+
     override fun reset() {
         initialized = false
         wantedPosition.set(0.0, 0.0, 0.0)
         wantedYaw = 0f
         wantedPitch = 0f
+        sneaking = false
+        jumping = false
     }
 
     internal fun initialize(playerId: Int, gameProfile: GameProfile) {
