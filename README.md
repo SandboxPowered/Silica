@@ -18,5 +18,9 @@ Silica is a complete rewrite of Minecraft's internals, similar to projects like 
 
 However, Silica aims to rewrite the client as well as the server, using modern technologies targeting modern hardware.
 
+## Current Status
+
+Silica in the very early stages of development and still in a proof of concept state. Major refactors will happen while the project grows. Join the Discord Server if you want to see the latest state of our development.
+
 ## Contributing
 Silica is open to any and all contributions, for larger contributions however we recommend discussing with the team on [Discord](https://discord.gg/m9DMfnD) to avoid duplicated or wasted work
