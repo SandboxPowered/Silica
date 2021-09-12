@@ -3,14 +3,16 @@ package org.sandboxpowered.silica.server.main
 import joptsimple.OptionParser
 import joptsimple.OptionSpec
 import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import org.sandboxpowered.silica.server.DedicatedServer
 import org.sandboxpowered.silica.server.ServerEula
 import org.sandboxpowered.silica.server.ServerProperties.Companion.fromFile
+import org.sandboxpowered.silica.util.Util.getLogger
 import org.sandboxpowered.silica.util.extensions.ofType
 import java.nio.file.Paths
 
 object Main {
-    val LOG = LogManager.getLogger(Main::class.java)
+    private val logger = getLogger<Main>()
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -25,7 +27,7 @@ object Main {
         val set = spec.parse(*args)
         val unknownOptions = set.valuesOf(unknownOptionsSpec)
         if (unknownOptions.isNotEmpty()) {
-            LOG.warn("Ignoring arguments: {}", unknownOptions)
+            logger.warn("Ignoring arguments: {}", unknownOptions)
         }
         val path = set.valueOf(minecraftPath)
         val eula = ServerEula(Paths.get("eula.txt"))

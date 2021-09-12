@@ -1,12 +1,12 @@
 package org.sandboxpowered.silica.client
 
 import com.google.common.base.Joiner
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.system.Configuration
 import org.sandboxpowered.silica.resources.*
-import org.sandboxpowered.silica.util.*
+import org.sandboxpowered.silica.util.FileFilters
+import org.sandboxpowered.silica.util.Util
+import org.sandboxpowered.silica.util.Util.getLogger
 import org.sandboxpowered.silica.util.extensions.join
 import org.sandboxpowered.silica.util.extensions.listFiles
 import org.sandboxpowered.silica.util.extensions.notExists
@@ -21,7 +21,7 @@ import kotlin.math.max
 
 
 class Silica(private val args: Args) : Runnable {
-    private val logger: Logger = LogManager.getLogger()
+    private val logger = getLogger<Silica>()
     lateinit var window: Window
     private lateinit var assetManager: ResourceManager
     lateinit var renderer: Renderer

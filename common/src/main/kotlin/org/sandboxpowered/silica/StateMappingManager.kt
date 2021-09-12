@@ -5,12 +5,12 @@ import com.google.gson.JsonArray
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.*
-import org.apache.logging.log4j.LogManager
 import org.sandboxpowered.silica.block.Block
 import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.registry.SilicaRegistry
 import org.sandboxpowered.silica.state.block.BlockState
 import org.sandboxpowered.silica.state.property.Property
+import org.sandboxpowered.silica.util.Util.getLogger
 import org.sandboxpowered.silica.util.extensions.getResourceAsString
 import kotlin.system.measureTimeMillis
 
@@ -19,7 +19,7 @@ class StateManager {
     private val stateMap: Object2IntMap<BlockState> = Object2IntOpenHashMap()
     private val idMap: Int2ObjectMap<BlockState> = Int2ObjectOpenHashMap()
 
-    private val logger = LogManager.getLogger()
+    private val logger = getLogger<StateManager>()
 
     fun load(): Map<ErrorType, Set<String>> {
         val errorMap = Object2ObjectOpenHashMap<ErrorType, ObjectOpenHashSet<String>>()

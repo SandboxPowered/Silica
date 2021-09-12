@@ -10,7 +10,6 @@ import it.unimi.dsi.fastutil.ints.IntArrayList
 import it.unimi.dsi.fastutil.ints.IntList
 import it.unimi.dsi.fastutil.objects.Object2IntMap
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
-import org.apache.logging.log4j.LogManager
 import org.sandboxpowered.silica.network.Protocol.Builder.Companion.newProtocol
 import org.sandboxpowered.silica.network.handshake.clientbound.PingRequest
 import org.sandboxpowered.silica.network.handshake.clientbound.StatusRequest
@@ -24,6 +23,7 @@ import org.sandboxpowered.silica.network.login.serverbound.HandshakeRequest
 import org.sandboxpowered.silica.network.login.serverbound.LoginStart
 import org.sandboxpowered.silica.network.play.clientbound.*
 import org.sandboxpowered.silica.network.play.serverbound.*
+import org.sandboxpowered.silica.util.Util.getLogger
 import java.util.*
 import java.util.function.Supplier
 
@@ -96,6 +96,8 @@ enum class Protocol(private val id: Int, builder: Builder) {
     );
 
     companion object {
+        val logger = getLogger<Protocol>()
+
         @JvmField
         val PROTOCOL_ATTRIBUTE_KEY: AttributeKey<Protocol> = AttributeKey.valueOf("protocol")
         private val PROTOCOL_BY_PACKET: MutableMap<Class<out PacketBase>, Protocol> = Maps.newHashMap()
@@ -161,7 +163,7 @@ enum class Protocol(private val id: Int, builder: Builder) {
             val id = classToId.put(P::class.java, targetId)
             return if (id != -1) {
                 val string = "Packet ${P::class.java} is already registered to ID $id"
-                LogManager.getLogger().fatal(string)
+                logger.fatal(string)
                 throw IllegalArgumentException(string)
             } else {
                 idToConstructor[targetId] = supplier

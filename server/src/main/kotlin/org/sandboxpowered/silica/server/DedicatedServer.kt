@@ -7,12 +7,11 @@ import akka.actor.typed.Terminated
 import akka.actor.typed.javadsl.*
 import it.unimi.dsi.fastutil.objects.Object2LongMap
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap
-import mu.toKLogger
 import org.apache.commons.io.FileUtils
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 import org.sandboxpowered.silica.StateManager
-import org.sandboxpowered.silica.util.*
+import org.sandboxpowered.silica.util.Side
+import org.sandboxpowered.silica.util.Util
+import org.sandboxpowered.silica.util.Util.getLogger
 import org.sandboxpowered.silica.util.extensions.join
 import org.sandboxpowered.silica.util.extensions.messageAdapter
 import org.sandboxpowered.silica.util.extensions.onMessage
@@ -24,8 +23,8 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Duration
 
-class DedicatedServer(val args: Args) : SilicaServer() {
-    private var log: Logger = LogManager.getLogger()
+class DedicatedServer(args: Args) : SilicaServer() {
+    private var logger = getLogger<DedicatedServer>()
     override val stateManager = StateManager()
     private val acceptVanillaConnections: Boolean
     override lateinit var world: ActorRef<SilicaWorld.Command>
@@ -44,27 +43,27 @@ class DedicatedServer(val args: Args) : SilicaServer() {
 
     fun run() {
         if (acceptVanillaConnections) {
-            log.info("Accepting vanilla connections")
+            logger.info("Accepting vanilla connections")
         } else {
             val unknown = stateManagerErrors[StateManager.ErrorType.UNKNOWN]
             if (unknown != null && unknown.isNotEmpty()) {
-                log.info("Found ${unknown.size} custom BlockStates")
+                logger.info("Found ${unknown.size} custom BlockStates")
                 unknown.forEach {
-                    log.info("   $it")
+                    logger.info("   $it")
                 }
             }
             val missing = stateManagerErrors[StateManager.ErrorType.MISSING]
             if (missing != null && missing.isNotEmpty()) {
-                log.info("Missing ${missing.size} vanilla BlockStates. Exported to missing.txt")
+                logger.info("Missing ${missing.size} vanilla BlockStates. Exported to missing.txt")
                 val builder = StringBuilder()
                 missing.forEach {
                     builder.append(it).append("\n")
                 }
                 FileUtils.writeStringToFile(File("missing.txt"), builder.toString(), StandardCharsets.UTF_8)
             }
-            log.info("Rejecting vanilla connections")
+            logger.info("Rejecting vanilla connections")
         }
-        log.debug("Loaded namespaces: [${dataManager.getNamespaces().join(",")}]")
+        logger.debug("Loaded namespaces: [${dataManager.getNamespaces().join(",")}]")
         val system = ActorSystem.create(
             DedicatedServerGuardian.create(this, this::world::set, this::network::set),
             "dedicatedServerGuardian"
@@ -96,7 +95,7 @@ class DedicatedServer(val args: Args) : SilicaServer() {
             }
         }
 
-        private val logger = context.log.toKLogger()
+        private val logger = getLogger<DedicatedServerGuardian>()
         private var skippedTicks = 0
         private var lastTickTime: Long = -1
         private val world: ActorRef<in SilicaWorld.Command> =
@@ -147,14 +146,14 @@ class DedicatedServer(val args: Args) : SilicaServer() {
 
         private fun handleTock(tock: Command.Tock): Behavior<Command> {
             val startTime = currentlyTicking.removeLong(tock.done)
-            if (startTime == 0L) logger.warn { "Received tock for actor which shouldn't be ticking : ${tock.done}" }
+            if (startTime == 0L) logger.warn("Received tock for actor which shouldn't be ticking : ${tock.done}")
             // TODO: profiling ?
 
             return Behaviors.same()
         }
 
         private fun terminated(terminated: Terminated): Behavior<Command> {
-            logger.warn { "${terminated.ref.path()} terminated" }
+            logger.warn("${terminated.ref.path()} terminated")
             return Behaviors.stopped()
         }
     }

@@ -1,17 +1,16 @@
 package org.sandboxpowered.silica.client.main
 
-import joptsimple.ArgumentAcceptingOptionSpec
 import joptsimple.OptionParser
 import joptsimple.OptionSpec
-import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import org.sandboxpowered.silica.client.Silica
 import org.sandboxpowered.silica.client.Silica.Args
+import org.sandboxpowered.silica.util.Util.getLogger
 import org.sandboxpowered.silica.util.extensions.ofType
 import java.nio.file.Paths
-import kotlin.reflect.KClass
 
 object Main {
-    val LOG = LogManager.getLogger(Main::class.java)
+    private val logger = getLogger<Main>()
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -38,7 +37,7 @@ object Main {
         val options = optionSpec.parse(*args)
         val unknownOptions = options.valuesOf(unknownOptionsSpec)
         if (unknownOptions.isNotEmpty()) {
-            LOG.warn("Ignoring arguments: {}", unknownOptions)
+            logger.warn("Ignoring arguments: {}", unknownOptions)
         }
         val path = options.valueOf(minecraftPath)
         try {

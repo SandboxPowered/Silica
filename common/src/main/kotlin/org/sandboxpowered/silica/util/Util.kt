@@ -2,6 +2,8 @@ package org.sandboxpowered.silica.util
 
 import com.google.common.util.concurrent.MoreExecutors
 import org.apache.commons.lang3.SystemUtils
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import org.joml.Math
 import org.sandboxpowered.silica.resources.ResourceManager
 import org.sandboxpowered.silica.resources.ZIPResourceLoader
@@ -22,6 +24,10 @@ object Util {
         } else {
             Executors.newFixedThreadPool(i)
         }
+    }
+
+    inline fun <reified T> getLogger(): Logger {
+        return LogManager.getLogger(T::class.java)
     }
 
     fun findMinecraft(manager: ResourceManager, minecraftPath: Path?) {
