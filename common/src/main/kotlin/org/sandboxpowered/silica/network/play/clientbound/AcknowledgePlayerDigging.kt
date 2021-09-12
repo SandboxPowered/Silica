@@ -7,14 +7,11 @@ import org.sandboxpowered.silica.network.PlayContext
 import org.sandboxpowered.silica.util.math.Position
 
 class AcknowledgePlayerDigging(
-    private val pos: Position?,
-    private val blockState: Int,
-    private val status: Int,
-    private val success: Boolean,
+    private val pos: Position? = null,
+    private val blockState: Int = 0,
+    private val status: Int = 0,
+    private val success: Boolean = false,
 ) : PacketPlay {
-
-    constructor() : this(null, 0, 0, false)
-
     override fun read(buf: PacketByteBuf) {
         TODO("Not yet implemented")
     }
