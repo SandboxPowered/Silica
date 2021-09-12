@@ -24,9 +24,9 @@ class PlayerRotation(
     }
 
     override fun handle(packetHandler: PacketHandler, context: PlayContext) {
-        context.mutatePlayerJava { input: VanillaPlayerInput ->
-            input.wantedYaw = yaw
-            input.wantedPitch = pitch
+        context.mutatePlayer {
+            it.wantedYaw = yaw
+            it.wantedPitch = pitch
         }
     }
 }

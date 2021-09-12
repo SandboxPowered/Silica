@@ -31,10 +31,10 @@ class PlayerPositionAndRotation(
     }
 
     override fun handle(packetHandler: PacketHandler, context: PlayContext) {
-        context.mutatePlayerJava { input: VanillaPlayerInput ->
-            input.wantedPosition[x, y] = z
-            input.wantedYaw = yaw
-            input.wantedPitch = pitch
+        context.mutatePlayer {
+            it.wantedPosition[x, y] = z
+            it.wantedYaw = yaw
+            it.wantedPitch = pitch
         }
     }
 }

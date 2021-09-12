@@ -1,5 +1,5 @@
 package org.sandboxpowered.silica.network
 
-interface PacketPlay : PacketBase {
+sealed interface PacketPlay : PacketBase {
     fun handle(packetHandler: PacketHandler, context: PlayContext)
 }

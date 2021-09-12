@@ -12,6 +12,4 @@ class PlayContext(
     val server: SilicaServer,
     val mutatePlayer: (PlayerMutation) -> Unit,
     val mutateWorld: (WorldMutation) -> Unit
-) {
-    fun mutatePlayerJava(block: Consumer<VanillaPlayerInput>): Unit = this.mutatePlayer { block.accept(it) }
-}
+)
