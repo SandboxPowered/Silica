@@ -9,7 +9,7 @@
 </p>  
 
 <p align="center">  
-    <a href="https://discord.gg/m9DMfnD"><img src="https://img.shields.io/discord/444525609008496640.svg?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"/></a>  
+    <a href="https://discord.gg/fTZSX9Y7uz"><img src="https://img.shields.io/discord/752614300413329510.svg?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"/></a>  
     <a href="https://github.com/SandboxPowered/Silica/graphs/contributors"><img src="https://img.shields.io/github/contributors/SandboxPowered/Silica.svg?style=for-the-badge&logo=github" alt="Discord"/></a>  
 </p>
 
