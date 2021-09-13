@@ -13,9 +13,7 @@ open class BaseBlock(override val identifier: Identifier) : Block {
         return identifier.path == "air"
     }
 
-    protected open fun appendProperties(builder: StateProvider.Builder<Block, BlockState>) {
-
-    }
+    protected open fun appendProperties(builder: StateProvider.Builder<Block, BlockState>) = Unit
 
     protected open fun createDefaultState(baseState: BlockState): BlockState = baseState
 

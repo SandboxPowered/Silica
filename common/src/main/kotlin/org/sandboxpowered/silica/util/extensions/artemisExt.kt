@@ -1,9 +1,6 @@
 package org.sandboxpowered.silica.util.extensions
 
-import com.artemis.Component
-import com.artemis.ComponentMapper
-import com.artemis.World
-import com.artemis.WorldConfiguration
+import com.artemis.*
 import com.artemis.utils.Bag
 import com.artemis.utils.IntBag
 import net.mostlyoriginal.api.utils.pooling.ObjectPool
@@ -23,3 +20,7 @@ operator fun IntBag.plusAssign(e: Int) = this.add(e)
 
 inline fun <reified T> WorldConfiguration.registerAs(it: T): WorldConfiguration =
     this.register(T::class.qualifiedName, it)
+
+inline fun <reified T : Component> ArchetypeBuilder.add() {
+    add(T::class.java)
+}

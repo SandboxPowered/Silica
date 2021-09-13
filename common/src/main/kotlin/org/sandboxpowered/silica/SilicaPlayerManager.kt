@@ -12,6 +12,7 @@ import org.sandboxpowered.silica.component.HitboxComponent
 import org.sandboxpowered.silica.component.PlayerComponent
 import org.sandboxpowered.silica.component.PositionComponent
 import org.sandboxpowered.silica.component.VanillaPlayerInput
+import org.sandboxpowered.silica.util.extensions.add
 import java.util.*
 
 @All(PlayerComponent::class, PositionComponent::class)
@@ -110,10 +111,6 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
     private companion object {
         private const val UNKNOWN_ID = -1
     }
-}
-
-private inline fun <reified T : Component> ArchetypeBuilder.add() {
-    add(T::class.java)
 }
 
 private operator fun <V> Int2ObjectFunction<V>.set(key: Int, value: V) {
