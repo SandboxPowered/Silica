@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package org.sandboxpowered.silica.network.protocol;
+
+import "google/protobuf/descriptor.proto";
+
+enum Protocol {
+  HANDSHAKE = 0;
+  PLAY = 1;
+  STATUS = 2;
+  LOGIN = 3;
+}
+
+enum Side {
+  SERVERBOUND = 0;
+  CLIENTBOUND = 1;
+}
+
+extend google.protobuf.FileOptions {
+  Protocol protocol = 51236;
+}
+
+extend google.protobuf.MessageOptions {
+  int32 packet_id = 51234;
+  Side side = 51235;
+}

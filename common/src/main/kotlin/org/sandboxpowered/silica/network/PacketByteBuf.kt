@@ -34,8 +34,12 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
 
     override fun alloc(): ByteBufAllocator = source.alloc()
 
+    @Deprecated("use the Little Endian accessors, e.g. getShortLE, getIntLE instead of creating a buffer with swapped endianness.")
+    @Suppress("DEPRECATION")
     override fun order(): ByteOrder = source.order()
 
+    @Deprecated("use the Little Endian accessors, e.g. getShortLE, getIntLE instead of creating a buffer with swapped endianness.")
+    @Suppress("DEPRECATION")
     override fun order(byteOrder: ByteOrder): ByteBuf = source.order(byteOrder)
 
     override fun unwrap(): ByteBuf = source.unwrap()
