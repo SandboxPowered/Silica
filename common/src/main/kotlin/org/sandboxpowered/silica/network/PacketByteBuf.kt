@@ -26,749 +26,401 @@ import java.util.*
 import kotlin.experimental.and
 
 class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
-    override fun capacity(): Int {
-        return source.capacity()
-    }
+    override fun capacity(): Int = source.capacity()
 
-    override fun capacity(i: Int): ByteBuf {
-        return source.capacity(i)
-    }
+    override fun capacity(i: Int): ByteBuf = source.capacity(i)
 
-    override fun maxCapacity(): Int {
-        return source.maxCapacity()
-    }
+    override fun maxCapacity(): Int = source.maxCapacity()
 
-    override fun alloc(): ByteBufAllocator {
-        return source.alloc()
-    }
+    override fun alloc(): ByteBufAllocator = source.alloc()
 
-    override fun order(): ByteOrder {
-        return source.order()
-    }
+    override fun order(): ByteOrder = source.order()
 
-    override fun order(byteOrder: ByteOrder): ByteBuf {
-        return source.order(byteOrder)
-    }
+    override fun order(byteOrder: ByteOrder): ByteBuf = source.order(byteOrder)
 
-    override fun unwrap(): ByteBuf {
-        return source.unwrap()
-    }
+    override fun unwrap(): ByteBuf = source.unwrap()
 
-    override fun isDirect(): Boolean {
-        return source.isDirect
-    }
+    override fun isDirect(): Boolean = source.isDirect
 
-    override fun isReadOnly(): Boolean {
-        return source.isReadOnly
-    }
+    override fun isReadOnly(): Boolean = source.isReadOnly
 
-    override fun asReadOnly(): ByteBuf {
-        return source.asReadOnly()
-    }
+    override fun asReadOnly(): ByteBuf = source.asReadOnly()
 
-    override fun readerIndex(): Int {
-        return source.readerIndex()
-    }
+    override fun readerIndex(): Int = source.readerIndex()
 
-    override fun readerIndex(i: Int): ByteBuf {
-        return source.readerIndex(i)
-    }
+    override fun readerIndex(i: Int): ByteBuf = source.readerIndex(i)
 
-    override fun writerIndex(): Int {
-        return source.writerIndex()
-    }
+    override fun writerIndex(): Int = source.writerIndex()
 
-    override fun writerIndex(i: Int): ByteBuf {
-        return source.writerIndex(i)
-    }
+    override fun writerIndex(i: Int): ByteBuf = source.writerIndex(i)
 
-    override fun setIndex(i: Int, j: Int): ByteBuf {
-        return source.setIndex(i, j)
-    }
+    override fun setIndex(i: Int, j: Int): ByteBuf = source.setIndex(i, j)
 
-    override fun readableBytes(): Int {
-        return source.readableBytes()
-    }
+    override fun readableBytes(): Int = source.readableBytes()
 
-    override fun writableBytes(): Int {
-        return source.writableBytes()
-    }
+    override fun writableBytes(): Int = source.writableBytes()
 
-    override fun maxWritableBytes(): Int {
-        return source.maxWritableBytes()
-    }
+    override fun maxWritableBytes(): Int = source.maxWritableBytes()
 
-    override fun isReadable(): Boolean {
-        return source.isReadable
-    }
+    override fun isReadable(): Boolean = source.isReadable
 
-    override fun isReadable(i: Int): Boolean {
-        return source.isReadable(i)
-    }
+    override fun isReadable(i: Int): Boolean = source.isReadable(i)
 
-    override fun isWritable(): Boolean {
-        return source.isWritable
-    }
+    override fun isWritable(): Boolean = source.isWritable
 
-    override fun isWritable(i: Int): Boolean {
-        return source.isWritable(i)
-    }
+    override fun isWritable(i: Int): Boolean = source.isWritable(i)
 
-    override fun clear(): ByteBuf {
-        return source.clear()
-    }
+    override fun clear(): ByteBuf = source.clear()
 
-    override fun markReaderIndex(): ByteBuf {
-        return source.markReaderIndex()
-    }
+    override fun markReaderIndex(): ByteBuf = source.markReaderIndex()
 
-    override fun resetReaderIndex(): ByteBuf {
-        return source.resetReaderIndex()
-    }
+    override fun resetReaderIndex(): ByteBuf = source.resetReaderIndex()
 
-    override fun markWriterIndex(): ByteBuf {
-        return source.markWriterIndex()
-    }
+    override fun markWriterIndex(): ByteBuf = source.markWriterIndex()
 
-    override fun resetWriterIndex(): ByteBuf {
-        return source.resetWriterIndex()
-    }
+    override fun resetWriterIndex(): ByteBuf = source.resetWriterIndex()
 
-    override fun discardReadBytes(): ByteBuf {
-        return source.discardReadBytes()
-    }
+    override fun discardReadBytes(): ByteBuf = source.discardReadBytes()
 
-    override fun discardSomeReadBytes(): ByteBuf {
-        return source.discardSomeReadBytes()
-    }
+    override fun discardSomeReadBytes(): ByteBuf = source.discardSomeReadBytes()
 
-    override fun ensureWritable(i: Int): ByteBuf {
-        return source.ensureWritable(i)
-    }
+    override fun ensureWritable(i: Int): ByteBuf = source.ensureWritable(i)
 
-    override fun ensureWritable(i: Int, bl: Boolean): Int {
-        return source.ensureWritable(i, bl)
-    }
+    override fun ensureWritable(i: Int, bl: Boolean): Int = source.ensureWritable(i, bl)
 
-    override fun getBoolean(i: Int): Boolean {
-        return source.getBoolean(i)
-    }
+    override fun getBoolean(i: Int): Boolean = source.getBoolean(i)
 
-    override fun getByte(i: Int): Byte {
-        return source.getByte(i)
-    }
+    override fun getByte(i: Int): Byte = source.getByte(i)
 
-    override fun getUnsignedByte(i: Int): Short {
-        return source.getUnsignedByte(i)
-    }
+    override fun getUnsignedByte(i: Int): Short = source.getUnsignedByte(i)
 
-    override fun getShort(i: Int): Short {
-        return source.getShort(i)
-    }
+    override fun getShort(i: Int): Short = source.getShort(i)
 
-    override fun getShortLE(i: Int): Short {
-        return source.getShortLE(i)
-    }
+    override fun getShortLE(i: Int): Short = source.getShortLE(i)
 
-    override fun getUnsignedShort(i: Int): Int {
-        return source.getUnsignedShort(i)
-    }
+    override fun getUnsignedShort(i: Int): Int = source.getUnsignedShort(i)
 
-    override fun getUnsignedShortLE(i: Int): Int {
-        return source.getUnsignedShortLE(i)
-    }
+    override fun getUnsignedShortLE(i: Int): Int = source.getUnsignedShortLE(i)
 
-    override fun getMedium(i: Int): Int {
-        return source.getMedium(i)
-    }
+    override fun getMedium(i: Int): Int = source.getMedium(i)
 
-    override fun getMediumLE(i: Int): Int {
-        return source.getMediumLE(i)
-    }
+    override fun getMediumLE(i: Int): Int = source.getMediumLE(i)
 
-    override fun getUnsignedMedium(i: Int): Int {
-        return source.getUnsignedMedium(i)
-    }
+    override fun getUnsignedMedium(i: Int): Int = source.getUnsignedMedium(i)
 
-    override fun getUnsignedMediumLE(i: Int): Int {
-        return source.getUnsignedMediumLE(i)
-    }
+    override fun getUnsignedMediumLE(i: Int): Int = source.getUnsignedMediumLE(i)
 
-    override fun getInt(i: Int): Int {
-        return source.getInt(i)
-    }
+    override fun getInt(i: Int): Int = source.getInt(i)
 
-    override fun getIntLE(i: Int): Int {
-        return source.getIntLE(i)
-    }
+    override fun getIntLE(i: Int): Int = source.getIntLE(i)
 
-    override fun getUnsignedInt(i: Int): Long {
-        return source.getUnsignedInt(i)
-    }
+    override fun getUnsignedInt(i: Int): Long = source.getUnsignedInt(i)
 
-    override fun getUnsignedIntLE(i: Int): Long {
-        return source.getUnsignedIntLE(i)
-    }
+    override fun getUnsignedIntLE(i: Int): Long = source.getUnsignedIntLE(i)
 
-    override fun getLong(i: Int): Long {
-        return source.getLong(i)
-    }
+    override fun getLong(i: Int): Long = source.getLong(i)
 
-    override fun getLongLE(i: Int): Long {
-        return source.getLongLE(i)
-    }
+    override fun getLongLE(i: Int): Long = source.getLongLE(i)
 
-    override fun getChar(i: Int): Char {
-        return source.getChar(i)
-    }
+    override fun getChar(i: Int): Char = source.getChar(i)
 
-    override fun getFloat(i: Int): Float {
-        return source.getFloat(i)
-    }
+    override fun getFloat(i: Int): Float = source.getFloat(i)
 
-    override fun getDouble(i: Int): Double {
-        return source.getDouble(i)
-    }
+    override fun getDouble(i: Int): Double = source.getDouble(i)
 
-    override fun getBytes(i: Int, byteBuf: ByteBuf): ByteBuf {
-        return source.getBytes(i, byteBuf)
-    }
+    override fun getBytes(i: Int, byteBuf: ByteBuf): ByteBuf = source.getBytes(i, byteBuf)
 
-    override fun getBytes(i: Int, byteBuf: ByteBuf, j: Int): ByteBuf {
-        return source.getBytes(i, byteBuf, j)
-    }
+    override fun getBytes(i: Int, byteBuf: ByteBuf, j: Int): ByteBuf = source.getBytes(i, byteBuf, j)
 
-    override fun getBytes(i: Int, byteBuf: ByteBuf, j: Int, k: Int): ByteBuf {
-        return source.getBytes(i, byteBuf, j, k)
-    }
+    override fun getBytes(i: Int, byteBuf: ByteBuf, j: Int, k: Int): ByteBuf = source.getBytes(i, byteBuf, j, k)
 
-    override fun getBytes(i: Int, bs: ByteArray): ByteBuf {
-        return source.getBytes(i, bs)
-    }
+    override fun getBytes(i: Int, bs: ByteArray): ByteBuf = source.getBytes(i, bs)
 
-    override fun getBytes(i: Int, bs: ByteArray, j: Int, k: Int): ByteBuf {
-        return source.getBytes(i, bs, j, k)
-    }
+    override fun getBytes(i: Int, bs: ByteArray, j: Int, k: Int): ByteBuf = source.getBytes(i, bs, j, k)
 
-    override fun getBytes(i: Int, byteBuffer: ByteBuffer): ByteBuf {
-        return source.getBytes(i, byteBuffer)
-    }
+    override fun getBytes(i: Int, byteBuffer: ByteBuffer): ByteBuf = source.getBytes(i, byteBuffer)
 
     @Throws(IOException::class)
-    override fun getBytes(i: Int, outputStream: OutputStream, j: Int): ByteBuf {
-        return source.getBytes(i, outputStream, j)
-    }
+    override fun getBytes(i: Int, outputStream: OutputStream, j: Int): ByteBuf = source.getBytes(i, outputStream, j)
 
     @Throws(IOException::class)
-    override fun getBytes(i: Int, gatheringByteChannel: GatheringByteChannel, j: Int): Int {
-        return source.getBytes(i, gatheringByteChannel, j)
-    }
+    override fun getBytes(i: Int, bc: GatheringByteChannel, j: Int): Int = source.getBytes(i, bc, j)
 
     @Throws(IOException::class)
-    override fun getBytes(i: Int, fileChannel: FileChannel, l: Long, j: Int): Int {
-        return source.getBytes(i, fileChannel, l, j)
-    }
+    override fun getBytes(i: Int, fc: FileChannel, l: Long, j: Int): Int = source.getBytes(i, fc, l, j)
 
-    override fun getCharSequence(i: Int, j: Int, charset: Charset): CharSequence {
-        return source.getCharSequence(i, j, charset)
-    }
+    override fun getCharSequence(i: Int, j: Int, charset: Charset): CharSequence = source.getCharSequence(i, j, charset)
 
-    override fun setBoolean(i: Int, bl: Boolean): ByteBuf {
-        return source.setBoolean(i, bl)
-    }
+    override fun setBoolean(i: Int, bl: Boolean): ByteBuf = source.setBoolean(i, bl)
 
-    override fun setByte(i: Int, j: Int): ByteBuf {
-        return source.setByte(i, j)
-    }
+    override fun setByte(i: Int, j: Int): ByteBuf = source.setByte(i, j)
 
-    override fun setShort(i: Int, j: Int): ByteBuf {
-        return source.setShort(i, j)
-    }
+    override fun setShort(i: Int, j: Int): ByteBuf = source.setShort(i, j)
 
-    override fun setShortLE(i: Int, j: Int): ByteBuf {
-        return source.setShortLE(i, j)
-    }
+    override fun setShortLE(i: Int, j: Int): ByteBuf = source.setShortLE(i, j)
 
-    override fun setMedium(i: Int, j: Int): ByteBuf {
-        return source.setMedium(i, j)
-    }
+    override fun setMedium(i: Int, j: Int): ByteBuf = source.setMedium(i, j)
 
-    override fun setMediumLE(i: Int, j: Int): ByteBuf {
-        return source.setMediumLE(i, j)
-    }
+    override fun setMediumLE(i: Int, j: Int): ByteBuf = source.setMediumLE(i, j)
 
-    override fun setInt(i: Int, j: Int): ByteBuf {
-        return source.setInt(i, j)
-    }
+    override fun setInt(i: Int, j: Int): ByteBuf = source.setInt(i, j)
 
-    override fun setIntLE(i: Int, j: Int): ByteBuf {
-        return source.setIntLE(i, j)
-    }
+    override fun setIntLE(i: Int, j: Int): ByteBuf = source.setIntLE(i, j)
 
-    override fun setLong(i: Int, l: Long): ByteBuf {
-        return source.setLong(i, l)
-    }
+    override fun setLong(i: Int, l: Long): ByteBuf = source.setLong(i, l)
 
-    override fun setLongLE(i: Int, l: Long): ByteBuf {
-        return source.setLongLE(i, l)
-    }
+    override fun setLongLE(i: Int, l: Long): ByteBuf = source.setLongLE(i, l)
 
-    override fun setChar(i: Int, j: Int): ByteBuf {
-        return source.setChar(i, j)
-    }
+    override fun setChar(i: Int, j: Int): ByteBuf = source.setChar(i, j)
 
-    override fun setFloat(i: Int, f: Float): ByteBuf {
-        return source.setFloat(i, f)
-    }
+    override fun setFloat(i: Int, f: Float): ByteBuf = source.setFloat(i, f)
 
-    override fun setDouble(i: Int, d: Double): ByteBuf {
-        return source.setDouble(i, d)
-    }
+    override fun setDouble(i: Int, d: Double): ByteBuf = source.setDouble(i, d)
 
-    override fun setBytes(i: Int, byteBuf: ByteBuf): ByteBuf {
-        return source.setBytes(i, byteBuf)
-    }
+    override fun setBytes(i: Int, byteBuf: ByteBuf): ByteBuf = source.setBytes(i, byteBuf)
 
-    override fun setBytes(i: Int, byteBuf: ByteBuf, j: Int): ByteBuf {
-        return source.setBytes(i, byteBuf, j)
-    }
+    override fun setBytes(i: Int, byteBuf: ByteBuf, j: Int): ByteBuf = source.setBytes(i, byteBuf, j)
 
-    override fun setBytes(i: Int, byteBuf: ByteBuf, j: Int, k: Int): ByteBuf {
-        return source.setBytes(i, byteBuf, j, k)
-    }
+    override fun setBytes(i: Int, byteBuf: ByteBuf, j: Int, k: Int): ByteBuf = source.setBytes(i, byteBuf, j, k)
 
-    override fun setBytes(i: Int, bs: ByteArray): ByteBuf {
-        return source.setBytes(i, bs)
-    }
+    override fun setBytes(i: Int, bs: ByteArray): ByteBuf = source.setBytes(i, bs)
 
-    override fun setBytes(i: Int, bs: ByteArray, j: Int, k: Int): ByteBuf {
-        return source.setBytes(i, bs, j, k)
-    }
+    override fun setBytes(i: Int, bs: ByteArray, j: Int, k: Int): ByteBuf = source.setBytes(i, bs, j, k)
 
-    override fun setBytes(i: Int, byteBuffer: ByteBuffer): ByteBuf {
-        return source.setBytes(i, byteBuffer)
-    }
+    override fun setBytes(i: Int, byteBuffer: ByteBuffer): ByteBuf = source.setBytes(i, byteBuffer)
 
     @Throws(IOException::class)
-    override fun setBytes(i: Int, inputStream: InputStream, j: Int): Int {
-        return source.setBytes(i, inputStream, j)
-    }
+    override fun setBytes(i: Int, inputStream: InputStream, j: Int): Int = source.setBytes(i, inputStream, j)
 
     @Throws(IOException::class)
-    override fun setBytes(i: Int, scatteringByteChannel: ScatteringByteChannel, j: Int): Int {
-        return source.setBytes(i, scatteringByteChannel, j)
-    }
+    override fun setBytes(i: Int, sbc: ScatteringByteChannel, j: Int): Int = source.setBytes(i, sbc, j)
 
     @Throws(IOException::class)
-    override fun setBytes(i: Int, fileChannel: FileChannel, l: Long, j: Int): Int {
-        return source.setBytes(i, fileChannel, l, j)
-    }
+    override fun setBytes(i: Int, fc: FileChannel, l: Long, j: Int): Int = source.setBytes(i, fc, l, j)
 
-    override fun setZero(i: Int, j: Int): ByteBuf {
-        return source.setZero(i, j)
-    }
+    override fun setZero(i: Int, j: Int): ByteBuf = source.setZero(i, j)
 
-    override fun setCharSequence(i: Int, charSequence: CharSequence, charset: Charset): Int {
-        return source.setCharSequence(i, charSequence, charset)
-    }
+    override fun setCharSequence(i: Int, charSequence: CharSequence, charset: Charset): Int =
+        source.setCharSequence(i, charSequence, charset)
 
-    override fun readBoolean(): Boolean {
-        return source.readBoolean()
-    }
+    override fun readBoolean(): Boolean = source.readBoolean()
 
-    override fun readByte(): Byte {
-        return source.readByte()
-    }
+    override fun readByte(): Byte = source.readByte()
 
-    override fun readUnsignedByte(): Short {
-        return source.readUnsignedByte()
-    }
+    override fun readUnsignedByte(): Short = source.readUnsignedByte()
 
-    override fun readShort(): Short {
-        return source.readShort()
-    }
+    override fun readShort(): Short = source.readShort()
 
-    override fun readShortLE(): Short {
-        return source.readShortLE()
-    }
+    override fun readShortLE(): Short = source.readShortLE()
 
-    override fun readUnsignedShort(): Int {
-        return source.readUnsignedShort()
-    }
+    override fun readUnsignedShort(): Int = source.readUnsignedShort()
 
-    override fun readUnsignedShortLE(): Int {
-        return source.readUnsignedShortLE()
-    }
+    fun readUByte(): UByte = readUnsignedByte().toUByte()
 
-    override fun readMedium(): Int {
-        return source.readMedium()
-    }
+    fun writeUByte(b: UByte): ByteBuf = writeByte(b.toInt())
 
-    override fun readMediumLE(): Int {
-        return source.readMediumLE()
-    }
+    fun readUShort(): UShort = readUnsignedShort().toUShort()
 
-    override fun readUnsignedMedium(): Int {
-        return source.readUnsignedMedium()
-    }
+    fun writeUShort(s: UShort): ByteBuf = writeShort(s.toInt())
 
-    override fun readUnsignedMediumLE(): Int {
-        return source.readUnsignedMediumLE()
-    }
+    fun readUInt(): UInt = readVarInt().toUInt()
 
-    override fun readInt(): Int {
-        return source.readInt()
-    }
+    fun writeUInt(i: UInt): ByteBuf = writeVarInt(i.toInt())
 
-    override fun readIntLE(): Int {
-        return source.readIntLE()
-    }
+    fun readULong(): ULong = readVarLong().toULong()
 
-    override fun readUnsignedInt(): Long {
-        return source.readUnsignedInt()
-    }
+    fun writeULong(l: ULong): ByteBuf = writeVarLong(l.toLong())
 
-    override fun readUnsignedIntLE(): Long {
-        return source.readUnsignedIntLE()
-    }
+    override fun readUnsignedShortLE(): Int = source.readUnsignedShortLE()
 
-    override fun readLong(): Long {
-        return source.readLong()
-    }
+    override fun readMedium(): Int = source.readMedium()
 
-    override fun readLongLE(): Long {
-        return source.readLongLE()
-    }
+    override fun readMediumLE(): Int = source.readMediumLE()
 
-    override fun readChar(): Char {
-        return source.readChar()
-    }
+    override fun readUnsignedMedium(): Int = source.readUnsignedMedium()
 
-    override fun readFloat(): Float {
-        return source.readFloat()
-    }
+    override fun readUnsignedMediumLE(): Int = source.readUnsignedMediumLE()
 
-    override fun readDouble(): Double {
-        return source.readDouble()
-    }
+    override fun readInt(): Int = source.readInt()
 
-    override fun readBytes(i: Int): ByteBuf {
-        return source.readBytes(i)
-    }
+    override fun readIntLE(): Int = source.readIntLE()
 
-    override fun readSlice(i: Int): ByteBuf {
-        return source.readSlice(i)
-    }
+    override fun readUnsignedInt(): Long = source.readUnsignedInt()
 
-    override fun readRetainedSlice(i: Int): ByteBuf {
-        return source.readRetainedSlice(i)
-    }
+    override fun readUnsignedIntLE(): Long = source.readUnsignedIntLE()
 
-    override fun readBytes(byteBuf: ByteBuf): ByteBuf {
-        return source.readBytes(byteBuf)
-    }
+    override fun readLong(): Long = source.readLong()
 
-    override fun readBytes(byteBuf: ByteBuf, i: Int): ByteBuf {
-        return source.readBytes(byteBuf, i)
-    }
+    override fun readLongLE(): Long = source.readLongLE()
 
-    override fun readBytes(byteBuf: ByteBuf, i: Int, j: Int): ByteBuf {
-        return source.readBytes(byteBuf, i, j)
-    }
+    override fun readChar(): Char = source.readChar()
 
-    override fun readBytes(bs: ByteArray): ByteBuf {
-        return source.readBytes(bs)
-    }
+    override fun readFloat(): Float = source.readFloat()
 
-    override fun readBytes(bs: ByteArray, i: Int, j: Int): ByteBuf {
-        return source.readBytes(bs, i, j)
-    }
+    override fun readDouble(): Double = source.readDouble()
 
-    override fun readBytes(byteBuffer: ByteBuffer): ByteBuf {
-        return source.readBytes(byteBuffer)
-    }
+    override fun readBytes(i: Int): ByteBuf = source.readBytes(i)
+
+    override fun readSlice(i: Int): ByteBuf = source.readSlice(i)
+
+    override fun readRetainedSlice(i: Int): ByteBuf = source.readRetainedSlice(i)
+
+    override fun readBytes(byteBuf: ByteBuf): ByteBuf = source.readBytes(byteBuf)
+
+    override fun readBytes(byteBuf: ByteBuf, i: Int): ByteBuf = source.readBytes(byteBuf, i)
+
+    override fun readBytes(byteBuf: ByteBuf, i: Int, j: Int): ByteBuf = source.readBytes(byteBuf, i, j)
+
+    override fun readBytes(bs: ByteArray): ByteBuf = source.readBytes(bs)
+
+    override fun readBytes(bs: ByteArray, i: Int, j: Int): ByteBuf = source.readBytes(bs, i, j)
+
+    override fun readBytes(byteBuffer: ByteBuffer): ByteBuf = source.readBytes(byteBuffer)
 
     @Throws(IOException::class)
-    override fun readBytes(outputStream: OutputStream, i: Int): ByteBuf {
-        return source.readBytes(outputStream, i)
-    }
+    override fun readBytes(outputStream: OutputStream, i: Int): ByteBuf = source.readBytes(outputStream, i)
 
     @Throws(IOException::class)
-    override fun readBytes(gatheringByteChannel: GatheringByteChannel, i: Int): Int {
-        return source.readBytes(gatheringByteChannel, i)
-    }
+    override fun readBytes(gatheringByteChannel: GatheringByteChannel, i: Int): Int =
+        source.readBytes(gatheringByteChannel, i)
 
-    override fun readCharSequence(i: Int, charset: Charset): CharSequence {
-        return source.readCharSequence(i, charset)
-    }
+    override fun readCharSequence(i: Int, charset: Charset): CharSequence = source.readCharSequence(i, charset)
 
     @Throws(IOException::class)
-    override fun readBytes(fileChannel: FileChannel, l: Long, i: Int): Int {
-        return source.readBytes(fileChannel, l, i)
-    }
+    override fun readBytes(fileChannel: FileChannel, l: Long, i: Int): Int = source.readBytes(fileChannel, l, i)
 
-    override fun skipBytes(i: Int): ByteBuf {
-        return source.skipBytes(i)
-    }
+    override fun skipBytes(i: Int): ByteBuf = source.skipBytes(i)
 
-    override fun writeBoolean(bl: Boolean): ByteBuf {
-        return source.writeBoolean(bl)
-    }
+    override fun writeBoolean(bl: Boolean): ByteBuf = source.writeBoolean(bl)
 
-    override fun writeByte(i: Int): ByteBuf {
-        return source.writeByte(i)
-    }
+    override fun writeByte(i: Int): ByteBuf = source.writeByte(i)
 
-    override fun writeShort(i: Int): ByteBuf {
-        return source.writeShort(i)
-    }
+    override fun writeShort(i: Int): ByteBuf = source.writeShort(i)
 
-    override fun writeShortLE(i: Int): ByteBuf {
-        return source.writeShortLE(i)
-    }
+    override fun writeShortLE(i: Int): ByteBuf = source.writeShortLE(i)
 
-    override fun writeMedium(i: Int): ByteBuf {
-        return source.writeMedium(i)
-    }
+    override fun writeMedium(i: Int): ByteBuf = source.writeMedium(i)
 
-    override fun writeMediumLE(i: Int): ByteBuf {
-        return source.writeMediumLE(i)
-    }
+    override fun writeMediumLE(i: Int): ByteBuf = source.writeMediumLE(i)
 
-    override fun writeInt(i: Int): ByteBuf {
-        return source.writeInt(i)
-    }
+    override fun writeInt(i: Int): ByteBuf = source.writeInt(i)
 
-    override fun writeIntLE(i: Int): ByteBuf {
-        return source.writeIntLE(i)
-    }
+    override fun writeIntLE(i: Int): ByteBuf = source.writeIntLE(i)
 
-    override fun writeLong(l: Long): ByteBuf {
-        return source.writeLong(l)
-    }
+    override fun writeLong(l: Long): ByteBuf = source.writeLong(l)
 
-    override fun writeLongLE(l: Long): ByteBuf {
-        return source.writeLongLE(l)
-    }
+    override fun writeLongLE(l: Long): ByteBuf = source.writeLongLE(l)
 
-    override fun writeChar(i: Int): ByteBuf {
-        return source.writeChar(i)
-    }
+    override fun writeChar(i: Int): ByteBuf = source.writeChar(i)
 
-    override fun writeFloat(f: Float): ByteBuf {
-        return source.writeFloat(f)
-    }
+    override fun writeFloat(f: Float): ByteBuf = source.writeFloat(f)
 
-    override fun writeDouble(d: Double): ByteBuf {
-        return source.writeDouble(d)
-    }
+    override fun writeDouble(d: Double): ByteBuf = source.writeDouble(d)
 
-    override fun writeBytes(byteBuf: ByteBuf): ByteBuf {
-        return source.writeBytes(byteBuf)
-    }
+    override fun writeBytes(byteBuf: ByteBuf): ByteBuf = source.writeBytes(byteBuf)
 
-    override fun writeBytes(byteBuf: ByteBuf, i: Int): ByteBuf {
-        return source.writeBytes(byteBuf, i)
-    }
+    override fun writeBytes(byteBuf: ByteBuf, i: Int): ByteBuf = source.writeBytes(byteBuf, i)
 
-    override fun writeBytes(byteBuf: ByteBuf, i: Int, j: Int): ByteBuf {
-        return source.writeBytes(byteBuf, i, j)
-    }
+    override fun writeBytes(byteBuf: ByteBuf, i: Int, j: Int): ByteBuf = source.writeBytes(byteBuf, i, j)
 
-    override fun writeBytes(bs: ByteArray): ByteBuf {
-        return source.writeBytes(bs)
-    }
+    override fun writeBytes(bs: ByteArray): ByteBuf = source.writeBytes(bs)
 
-    override fun writeBytes(bs: ByteArray, i: Int, j: Int): ByteBuf {
-        return source.writeBytes(bs, i, j)
-    }
+    override fun writeBytes(bs: ByteArray, i: Int, j: Int): ByteBuf = source.writeBytes(bs, i, j)
 
-    override fun writeBytes(byteBuffer: ByteBuffer): ByteBuf {
-        return source.writeBytes(byteBuffer)
-    }
+    override fun writeBytes(byteBuffer: ByteBuffer): ByteBuf = source.writeBytes(byteBuffer)
 
     @Throws(IOException::class)
-    override fun writeBytes(inputStream: InputStream, i: Int): Int {
-        return source.writeBytes(inputStream, i)
-    }
+    override fun writeBytes(inputStream: InputStream, i: Int): Int = source.writeBytes(inputStream, i)
 
     @Throws(IOException::class)
-    override fun writeBytes(scatteringByteChannel: ScatteringByteChannel, i: Int): Int {
-        return source.writeBytes(scatteringByteChannel, i)
-    }
+    override fun writeBytes(bc: ScatteringByteChannel, i: Int): Int = source.writeBytes(bc, i)
 
     @Throws(IOException::class)
-    override fun writeBytes(fileChannel: FileChannel, l: Long, i: Int): Int {
-        return source.writeBytes(fileChannel, l, i)
-    }
+    override fun writeBytes(fc: FileChannel, l: Long, i: Int): Int = source.writeBytes(fc, l, i)
 
-    override fun writeZero(i: Int): ByteBuf {
-        return source.writeZero(i)
-    }
+    override fun writeZero(i: Int): ByteBuf = source.writeZero(i)
 
-    override fun writeCharSequence(charSequence: CharSequence, charset: Charset): Int {
-        return source.writeCharSequence(charSequence, charset)
-    }
+    override fun writeCharSequence(cs: CharSequence, charset: Charset): Int = source.writeCharSequence(cs, charset)
 
-    override fun indexOf(i: Int, j: Int, b: Byte): Int {
-        return source.indexOf(i, j, b)
-    }
+    override fun indexOf(i: Int, j: Int, b: Byte): Int = source.indexOf(i, j, b)
 
-    override fun bytesBefore(b: Byte): Int {
-        return source.bytesBefore(b)
-    }
+    override fun bytesBefore(b: Byte): Int = source.bytesBefore(b)
 
-    override fun bytesBefore(i: Int, b: Byte): Int {
-        return source.bytesBefore(i, b)
-    }
+    override fun bytesBefore(i: Int, b: Byte): Int = source.bytesBefore(i, b)
 
-    override fun bytesBefore(i: Int, j: Int, b: Byte): Int {
-        return source.bytesBefore(i, j, b)
-    }
+    override fun bytesBefore(i: Int, j: Int, b: Byte): Int = source.bytesBefore(i, j, b)
 
-    override fun forEachByte(byteProcessor: ByteProcessor): Int {
-        return source.forEachByte(byteProcessor)
-    }
+    override fun forEachByte(byteProcessor: ByteProcessor): Int = source.forEachByte(byteProcessor)
 
-    override fun forEachByte(i: Int, j: Int, byteProcessor: ByteProcessor): Int {
-        return source.forEachByte(i, j, byteProcessor)
-    }
+    override fun forEachByte(i: Int, j: Int, bp: ByteProcessor): Int = source.forEachByte(i, j, bp)
 
-    override fun forEachByteDesc(byteProcessor: ByteProcessor): Int {
-        return source.forEachByteDesc(byteProcessor)
-    }
+    override fun forEachByteDesc(bp: ByteProcessor): Int = source.forEachByteDesc(bp)
 
-    override fun forEachByteDesc(i: Int, j: Int, byteProcessor: ByteProcessor): Int {
-        return source.forEachByteDesc(i, j, byteProcessor)
-    }
+    override fun forEachByteDesc(i: Int, j: Int, bp: ByteProcessor): Int = source.forEachByteDesc(i, j, bp)
 
-    override fun copy(): ByteBuf {
-        return source.copy()
-    }
+    override fun copy(): ByteBuf = source.copy()
 
-    override fun copy(i: Int, j: Int): ByteBuf {
-        return source.copy(i, j)
-    }
+    override fun copy(i: Int, j: Int): ByteBuf = source.copy(i, j)
 
-    override fun slice(): ByteBuf {
-        return source.slice()
-    }
+    override fun slice(): ByteBuf = source.slice()
 
-    override fun retainedSlice(): ByteBuf {
-        return source.retainedSlice()
-    }
+    override fun retainedSlice(): ByteBuf = source.retainedSlice()
 
-    override fun slice(i: Int, j: Int): ByteBuf {
-        return source.slice(i, j)
-    }
+    override fun slice(i: Int, j: Int): ByteBuf = source.slice(i, j)
 
-    override fun retainedSlice(i: Int, j: Int): ByteBuf {
-        return source.retainedSlice(i, j)
-    }
+    override fun retainedSlice(i: Int, j: Int): ByteBuf = source.retainedSlice(i, j)
 
-    override fun duplicate(): ByteBuf {
-        return source.duplicate()
-    }
+    override fun duplicate(): ByteBuf = source.duplicate()
 
-    override fun retainedDuplicate(): ByteBuf {
-        return source.retainedDuplicate()
-    }
+    override fun retainedDuplicate(): ByteBuf = source.retainedDuplicate()
 
-    override fun nioBufferCount(): Int {
-        return source.nioBufferCount()
-    }
+    override fun nioBufferCount(): Int = source.nioBufferCount()
 
-    override fun nioBuffer(): ByteBuffer {
-        return source.nioBuffer()
-    }
+    override fun nioBuffer(): ByteBuffer = source.nioBuffer()
 
-    override fun nioBuffer(i: Int, j: Int): ByteBuffer {
-        return source.nioBuffer(i, j)
-    }
+    override fun nioBuffer(i: Int, j: Int): ByteBuffer = source.nioBuffer(i, j)
 
-    override fun internalNioBuffer(i: Int, j: Int): ByteBuffer {
-        return source.internalNioBuffer(i, j)
-    }
+    override fun internalNioBuffer(i: Int, j: Int): ByteBuffer = source.internalNioBuffer(i, j)
 
-    override fun nioBuffers(): Array<ByteBuffer> {
-        return source.nioBuffers()
-    }
+    override fun nioBuffers(): Array<ByteBuffer> = source.nioBuffers()
 
-    override fun nioBuffers(i: Int, j: Int): Array<ByteBuffer> {
-        return source.nioBuffers(i, j)
-    }
+    override fun nioBuffers(i: Int, j: Int): Array<ByteBuffer> = source.nioBuffers(i, j)
 
-    override fun hasArray(): Boolean {
-        return source.hasArray()
-    }
+    override fun hasArray(): Boolean = source.hasArray()
 
-    override fun array(): ByteArray {
-        return source.array()
-    }
+    override fun array(): ByteArray = source.array()
 
-    override fun arrayOffset(): Int {
-        return source.arrayOffset()
-    }
+    override fun arrayOffset(): Int = source.arrayOffset()
 
-    override fun hasMemoryAddress(): Boolean {
-        return source.hasMemoryAddress()
-    }
+    override fun hasMemoryAddress(): Boolean = source.hasMemoryAddress()
 
-    override fun memoryAddress(): Long {
-        return source.memoryAddress()
-    }
+    override fun memoryAddress(): Long = source.memoryAddress()
 
-    override fun toString(charset: Charset): String {
-        return source.toString(charset)
-    }
+    override fun toString(charset: Charset): String = source.toString(charset)
 
-    override fun toString(i: Int, j: Int, charset: Charset): String {
-        return source.toString(i, j, charset)
-    }
+    override fun toString(i: Int, j: Int, charset: Charset): String = source.toString(i, j, charset)
 
-    override fun hashCode(): Int {
-        return source.hashCode()
-    }
+    override fun hashCode(): Int = source.hashCode()
 
-    override fun equals(other: Any?): Boolean {
-        return source == other
-    }
+    override fun equals(other: Any?): Boolean = source == other
 
-    override fun compareTo(other: ByteBuf): Int {
-        return source.compareTo(other)
-    }
+    override fun compareTo(other: ByteBuf): Int = source.compareTo(other)
 
-    override fun toString(): String {
-        return source.toString()
-    }
+    override fun toString(): String = source.toString()
 
-    override fun retain(i: Int): ByteBuf {
-        return source.retain(i)
-    }
+    override fun retain(i: Int): ByteBuf = source.retain(i)
 
-    override fun retain(): ByteBuf {
-        return source.retain()
-    }
+    override fun retain(): ByteBuf = source.retain()
 
-    override fun touch(): ByteBuf {
-        return source.touch()
-    }
+    override fun touch(): ByteBuf = source.touch()
 
-    override fun touch(`object`: Any): ByteBuf {
-        return source.touch(`object`)
-    }
+    override fun touch(o: Any): ByteBuf = source.touch(o)
 
-    override fun refCnt(): Int {
-        return source.refCnt()
-    }
+    override fun refCnt(): Int = source.refCnt()
 
-    override fun release(): Boolean {
-        return source.release()
-    }
+    override fun release(): Boolean = source.release()
 
-    override fun release(i: Int): Boolean {
-        return source.release(i)
-    }
+    override fun release(i: Int): Boolean = source.release(i)
 
     fun readVarInt(): Int {
         var i = 0
@@ -870,9 +522,7 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         return this
     }
 
-    fun readUUID(): UUID {
-        return UUID(readLong(), readLong())
-    }
+    fun readUUID(): UUID = UUID(readLong(), readLong())
 
     fun writeUUID(uuid: UUID): ByteBuf {
         writeLong(uuid.mostSignificantBits)
@@ -897,9 +547,7 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         return this
     }
 
-    fun readIdentity(): Identifier {
-        return Identifier.of(readString())
-    }
+    fun readIdentity(): Identifier = Identifier.of(readString())
 
     fun writeIdentity(identity: Identifier): ByteBuf {
         writeString(identity.toString())

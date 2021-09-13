@@ -9,23 +9,23 @@ import org.sandboxpowered.silica.network.Protocol.Companion.getProtocolFromId
 class HandshakeRequest(
     private var protocolVersion: Int,
     private var hostName: String?,
-    private var port: Int,
-    private var intention: Int
+    private var port: UShort,
+    private var intention: Int,
 ) : Packet {
 
-    constructor() : this(0, null, 0, 0)
+    constructor() : this(0, null, 0u, 0)
 
     override fun read(buf: PacketByteBuf) {
         protocolVersion = buf.readVarInt()
         hostName = buf.readString(255)
-        port = buf.readUnsignedShort()
+        port = buf.readUShort()
         intention = buf.readVarInt()
     }
 
     override fun write(buf: PacketByteBuf) {
         buf.writeVarInt(protocolVersion)
         buf.writeString(hostName!!)
-        buf.writeShort(port)
+        buf.writeUShort(port)
         buf.writeVarInt(intention)
     }
 
