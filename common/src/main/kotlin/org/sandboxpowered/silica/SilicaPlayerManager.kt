@@ -1,6 +1,9 @@
 package org.sandboxpowered.silica
 
-import com.artemis.*
+import com.artemis.Archetype
+import com.artemis.ArchetypeBuilder
+import com.artemis.BaseEntitySystem
+import com.artemis.ComponentMapper
 import com.artemis.annotations.All
 import com.artemis.annotations.Wire
 import com.artemis.utils.IntBag

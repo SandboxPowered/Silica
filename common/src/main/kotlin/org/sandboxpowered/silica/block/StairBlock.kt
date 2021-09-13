@@ -13,7 +13,4 @@ class StairBlock(identifier: Identifier) : BaseBlock(identifier) {
         builder.add(WATERLOGGED, HORIZONTAL_FACING, STAIR_HALF, STAIR_SHAPE)
     }
 
-    override fun createDefaultState(baseState: BlockState): BlockState {
-        return super.createDefaultState(baseState)
-    }
 }

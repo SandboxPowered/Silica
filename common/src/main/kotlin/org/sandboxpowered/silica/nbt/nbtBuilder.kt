@@ -1,7 +1,6 @@
 package org.sandboxpowered.silica.nbt
 
 import org.jetbrains.annotations.Contract
-import org.jetbrains.annotations.Range
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract

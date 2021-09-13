@@ -17,7 +17,7 @@ class UpdateLight : PacketPlay {
     private var blockUpdates: List<ByteArray>? = null
     private var trustEdges = false
 
-    constructor() {}
+    constructor()
     constructor(cX: Int, cZ: Int, trustEdges: Boolean) {
         this.cX = cX
         this.cZ = cZ

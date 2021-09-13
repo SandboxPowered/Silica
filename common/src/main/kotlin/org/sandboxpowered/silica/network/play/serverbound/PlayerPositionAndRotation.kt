@@ -1,6 +1,5 @@
 package org.sandboxpowered.silica.network.play.serverbound
 
-import org.sandboxpowered.silica.component.VanillaPlayerInput
 import org.sandboxpowered.silica.network.PacketByteBuf
 import org.sandboxpowered.silica.network.PacketHandler
 import org.sandboxpowered.silica.network.PacketPlay

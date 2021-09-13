@@ -15,7 +15,4 @@ class WallBlock(identifier: Identifier) : BaseBlock(identifier) {
         builder.add(WATERLOGGED, WALL_SHAPE_EAST, WALL_SHAPE_NORTH, WALL_SHAPE_WEST, WALL_SHAPE_SOUTH, UP)
     }
 
-    override fun createDefaultState(baseState: BlockState): BlockState {
-        return super.createDefaultState(baseState)
-    }
 }

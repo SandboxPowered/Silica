@@ -18,9 +18,11 @@ open class BaseBlock(override val identifier: Identifier) : Block {
     protected open fun createDefaultState(baseState: BlockState): BlockState = baseState
 
     override val stateProvider: StateProvider<Block, BlockState> by lazy {
-        SilicaStateFactory(this,
+        SilicaStateFactory(
+            this,
             SilicaStateBuilder<Block, BlockState>(this).apply { appendProperties(this) }.getProperties(),
-            BlockState.factory)
+            BlockState.factory
+        )
     }
     override val defaultState: BlockState by lazy { createDefaultState(stateProvider.baseState) }
     override val registry: Registry<Block>

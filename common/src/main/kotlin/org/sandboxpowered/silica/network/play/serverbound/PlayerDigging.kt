@@ -27,7 +27,14 @@ class PlayerDigging(private var status: Int, private var location: Position?, pr
         location?.let { pos ->
             context.mutateWorld {
                 it.setBlockState(pos, Blocks.AIR.get().defaultState)
-                packetHandler.sendPacket(AcknowledgePlayerDigging(pos, context.server.stateManager.toVanillaId(it.getBlockState(pos)), status, true))
+                packetHandler.sendPacket(
+                    AcknowledgePlayerDigging(
+                        pos,
+                        context.server.stateManager.toVanillaId(it.getBlockState(pos)),
+                        status,
+                        true
+                    )
+                )
             }
         }
     }

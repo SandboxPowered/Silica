@@ -63,7 +63,7 @@ open class Position(
     }
 
     val packed: Long
-        get() = packIntoLong(x,y,z)
+        get() = packIntoLong(x, y, z)
 
     companion object {
         private val SIZE_BITS_X = 1 + log2(smallestEncompassingPowerOfTwo(30000000).toDouble()).toInt()

@@ -11,7 +11,4 @@ class SlabBlock(identifier: Identifier) : BaseBlock(identifier) {
         builder.add(WATERLOGGED, SLAB_HALF)
     }
 
-    override fun createDefaultState(baseState: BlockState): BlockState {
-        return super.createDefaultState(baseState)
-    }
 }

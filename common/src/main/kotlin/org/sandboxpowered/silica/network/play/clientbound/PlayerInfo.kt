@@ -63,12 +63,14 @@ class PlayerInfo(
                 names[i] = profile.name
                 propertyMaps[i] = profile.properties
             }
-            return PlayerInfo(0,
+            return PlayerInfo(
+                0,
                 uuids.requireNoNulls(),
                 names.requireNoNulls(),
                 propertyMaps.requireNoNulls(),
                 gamemodes,
-                pings)
+                pings
+            )
         }
 
         fun updateLatency(uuids: Array<UUID?>, pings: IntArray): PlayerInfo {
