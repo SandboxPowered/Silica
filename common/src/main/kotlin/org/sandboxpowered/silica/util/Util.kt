@@ -34,7 +34,7 @@ object Util {
         when {
             minecraftPath != null -> {
                 require(Files.exists(minecraftPath)) { "The specified path of $minecraftPath does not exist, please make sure this is targeting a Minecraft $MINECRAFT_VERSION jar file" }
-                manager.add(ZIPResourceLoader(minecraftPath.toFile()))
+                manager.add(ZIPResourceLoader("Minecraft $MINECRAFT_VERSION", minecraftPath.toFile()))
             }
             SystemUtils.IS_OS_WINDOWS || SystemUtils.IS_OS_LINUX -> {
                 val homeDir = when {
@@ -43,7 +43,7 @@ object Util {
                 }
                 val asPath = Paths.get(homeDir, ".minecraft", "versions", MINECRAFT_VERSION, "$MINECRAFT_VERSION.jar")
                 require(Files.exists(asPath)) { "Unable to find Minecraft $MINECRAFT_VERSION installation at $asPath, please install minecraft or use the --minecraft argument to point to a specific jar" }
-                manager.add(ZIPResourceLoader(asPath.toFile()))
+                manager.add(ZIPResourceLoader("Minecraft $MINECRAFT_VERSION", asPath.toFile()))
             }
             else -> {
                 error("Silica supports automatically searching for Minecraft on Windows and Linux only. use the --minecraft argument on other operating systems")

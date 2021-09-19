@@ -1,19 +1,25 @@
 package org.sandboxpowered.silica.resources
 
+import org.sandboxpowered.silica.util.Identifier
 import java.io.File
 import java.io.InputStream
 import java.util.function.Predicate
 import java.util.regex.Pattern
 import java.util.zip.ZipFile
 
-class ZIPResourceLoader(private val file: File) : ResourceLoader {
+class ZIPResourceLoader(override val name: String, private val file: File) : ResourceLoader {
     private val zip: ZipFile
     private var namespaces: Set<String>? = null
-    override fun containsFile(type: ResourceType, path: String): Boolean {
-        return false
+
+    override fun contains(type: ResourceType, file: Identifier): Boolean {
+        TODO("Not yet implemented")
     }
 
-    override fun openFile(type: ResourceType, path: String): InputStream {
+    override fun open(file: String): InputStream? {
+        TODO("Not yet implemented")
+    }
+
+    override fun open(type: ResourceType, file: Identifier): InputStream {
         TODO("Not yet implemented")
     }
 
@@ -23,8 +29,8 @@ class ZIPResourceLoader(private val file: File) : ResourceLoader {
         path: String,
         depth: Int,
         filter: Predicate<String>
-    ): Set<String> {
-        return emptySet()
+    ): Set<Identifier> {
+        TODO("Not yet implemented")
     }
 
     override fun getNamespaces(type: ResourceType): Set<String> {

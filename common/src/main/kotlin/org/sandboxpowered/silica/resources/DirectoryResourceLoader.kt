@@ -2,18 +2,24 @@ package org.sandboxpowered.silica.resources
 
 import com.google.common.collect.Sets
 import org.apache.commons.io.filefilter.DirectoryFileFilter
+import org.sandboxpowered.silica.util.Identifier
 import java.io.File
 import java.io.FileFilter
 import java.io.InputStream
 import java.util.function.Predicate
 
-class DirectoryResourceLoader(private val directory: File) : ResourceLoader {
+class DirectoryResourceLoader(override val name: String, private val directory: File) : ResourceLoader {
     private var namespaces: Set<String>? = null
-    override fun containsFile(type: ResourceType, path: String): Boolean {
-        return false
+
+    override fun contains(type: ResourceType, file: Identifier): Boolean {
+        TODO("Not yet implemented")
     }
 
-    override fun openFile(type: ResourceType, path: String): InputStream {
+    override fun open(file: String): InputStream? {
+        TODO("Not yet implemented")
+    }
+
+    override fun open(type: ResourceType, file: Identifier): InputStream {
         TODO("Not yet implemented")
     }
 
@@ -23,8 +29,8 @@ class DirectoryResourceLoader(private val directory: File) : ResourceLoader {
         path: String,
         depth: Int,
         filter: Predicate<String>
-    ): Set<String> {
-        return emptySet()
+    ): Set<Identifier> {
+        TODO("Not yet implemented")
     }
 
     override fun getNamespaces(type: ResourceType): Set<String> {

@@ -5,9 +5,13 @@ import java.io.InputStream
 import java.util.function.Predicate
 
 interface ResourceLoader {
-    fun containsFile(type: ResourceType, path: String): Boolean
+    val name: String
 
-    fun openFile(type: ResourceType, path: String): InputStream
+    fun contains(type: ResourceType, file: Identifier): Boolean
+
+    fun open(file: String): InputStream?
+
+    fun open(type: ResourceType, file: Identifier): InputStream
 
     fun findResources(
         type: ResourceType,
@@ -15,13 +19,13 @@ interface ResourceLoader {
         path: String,
         depth: Int,
         filter: Predicate<String>
-    ): Set<String>
+    ): Set<Identifier>
 
     fun getNamespaces(type: ResourceType): Set<String>
 
     companion object {
-        private fun getFilename(type: ResourceType, identifier: Identifier): String {
-            return "${type.folder}/${identifier.namespace}/${identifier.path}"
+        fun getPath(type: ResourceType, identifier: Identifier): String {
+            return "/${type.folder}/${identifier.namespace}/${identifier.path}"
         }
     }
 }

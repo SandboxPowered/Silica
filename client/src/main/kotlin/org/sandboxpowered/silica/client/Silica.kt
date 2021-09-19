@@ -102,7 +102,7 @@ class Silica(private val args: Args) : Runnable {
         if (list.isNotEmpty())
             return true
         assetManager = ResourceManager(ResourceType.ASSETS)
-        assetManager.add(ClasspathResourceLoader())
+        assetManager.add(ClasspathResourceLoader("Silica"))
         Util.findMinecraft(assetManager, args.minecraftPath)
 
         File("resourcepacks").apply {
@@ -115,9 +115,9 @@ class Silica(private val args: Args) : Runnable {
         }.listFiles(FileFilters.ZIP) { file ->
             try {
                 if (file.isDirectory) {
-                    assetManager.add(DirectoryResourceLoader(file))
+                    assetManager.add(DirectoryResourceLoader(file.name, file))
                 } else {
-                    assetManager.add(ZIPResourceLoader(file))
+                    assetManager.add(ZIPResourceLoader(file.name, file))
                 }
             } catch (e: IOException) {
                 logger.error("Failed loading resource source {}", file.name)
