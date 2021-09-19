@@ -4,7 +4,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import org.joml.Matrix4f
 import org.lwjgl.opengl.GL20.*
-import org.lwjgl.system.MemoryStack
+import org.sandboxpowered.silica.client.util.stackPush
 
 class ShaderProgram {
     private var programId: Int = glCreateProgram()
@@ -38,7 +38,7 @@ class ShaderProgram {
     }
 
     fun setUniform(uniformName: String, value: Matrix4f) {
-        MemoryStack.stackPush().use { stack ->
+        stackPush { stack ->
             glUniformMatrix4fv(uniforms.getInt(uniformName), false, value.get(stack.mallocFloat(16)))
         }
     }

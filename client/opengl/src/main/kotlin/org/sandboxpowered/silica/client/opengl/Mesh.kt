@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.client.opengl
 
 import org.lwjgl.opengl.GL30.*
-import org.lwjgl.system.MemoryStack.stackPush
+import org.sandboxpowered.silica.client.util.stackPush
 
 class Mesh(private val positions: FloatArray, private val colours: FloatArray, private val indices: IntArray) {
     var vaoId = -1
@@ -11,7 +11,7 @@ class Mesh(private val positions: FloatArray, private val colours: FloatArray, p
     var vertexCount = -1
 
     init {
-        stackPush().use {
+        stackPush {
             val vertBuffer = it.mallocFloat(positions.size)
             vertexCount = indices.size
             vertBuffer.put(positions).flip()

@@ -13,7 +13,6 @@ import org.lwjgl.glfw.GLFWVulkan.glfwGetRequiredInstanceExtensions
 import org.lwjgl.system.Configuration.DEBUG
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryStack.stackGet
-import org.lwjgl.system.MemoryStack.stackPush
 import org.lwjgl.system.Pointer
 import org.lwjgl.vulkan.*
 import org.lwjgl.vulkan.EXTDebugUtils.*
@@ -24,6 +23,7 @@ import org.sandboxpowered.silica.client.Renderer
 import org.sandboxpowered.silica.client.RenderingFactory
 import org.sandboxpowered.silica.client.Silica
 import org.sandboxpowered.silica.client.util.ints
+import org.sandboxpowered.silica.client.util.stackPush
 import org.sandboxpowered.silica.client.vulkan.SPIRVUtil.Companion.compileShaderFile
 import org.sandboxpowered.silica.client.vulkan.SPIRVUtil.ShaderKind.FRAGMENT_SHADER
 import org.sandboxpowered.silica.client.vulkan.SPIRVUtil.ShaderKind.VERTEX_SHADER
@@ -139,7 +139,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     }
 
     override fun frame() {
-        stackPush().use {
+        stackPush {
             val frame = inFlightFrames[currentFrame]
 
             vkWaitForFences(device, frame.pFence(), true, Long.MAX_VALUE)
@@ -202,7 +202,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     }
 
     private fun updateUniformBuffer(imageIndex: Int) {
-        stackPush().use {
+        stackPush {
             val ubo = UniformBufferObject()
 
             ubo.model.rotate((glfwGetTime() * Math.toRadians(90.0)).toFloat(), 0f, 0f, 1f)
@@ -255,7 +255,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     }
 
     private fun createDescriptorPool() {
-        stackPush().use {
+        stackPush {
             val poolSize = VkDescriptorPoolSize.callocStack(1, it)
             poolSize.type(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
             poolSize.descriptorCount(swapChainImages.size)
@@ -277,7 +277,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     }
 
     private fun createDescriptorSets() {
-        stackPush().use {
+        stackPush {
             val layouts = it.mallocLong(swapChainImages.size)
             for (i in 0 until layouts.capacity()) {
                 layouts[i] = descriptorSetLayout
@@ -331,7 +331,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     }
 
     private fun createDescriptorSetLayout() {
-        stackPush().use {
+        stackPush {
             val uboLayoutBinding = VkDescriptorSetLayoutBinding.callocStack(1, it)
 
             uboLayoutBinding.binding(0)
@@ -358,7 +358,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     private fun createUniformBuffers() {
         uniformBuffers = ArrayList(swapChainImages.size)
         uniformBuffersMemory = ArrayList(swapChainImages.size)
-        stackPush().use {
+        stackPush {
             val pBuffer = it.mallocLong(1)
             val pBufferMemory = it.mallocLong(1)
 
@@ -377,7 +377,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     }
 
     private fun createIndexBuffer() {
-        stackPush().use {
+        stackPush {
             val bufferSize = Short.SIZE_BYTES.toLong() * indices.size
 
             val pBuffer = it.mallocLong(1)
@@ -417,7 +417,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     }
 
     private fun createVertexBuffer() {
-        stackPush().use {
+        stackPush {
             val bufferSize = Vertex.sizeOf.toLong() * vertices.size
 
             val pBuffer = it.mallocLong(1)
@@ -457,7 +457,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     }
 
     private fun copyBuffer(srcBuffer: Long, dstBuffer: Long, size: Long) {
-        stackPush().use {
+        stackPush {
 
             val beginInfo = VkCommandBufferBeginInfo.callocStack(it)
             beginInfo.sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO)
@@ -488,7 +488,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         pBuffer: LongBuffer,
         pBufferMemory: LongBuffer
     ) {
-        stackPush().use {
+        stackPush {
             val bufferInfo = VkBufferCreateInfo.callocStack(it)
             bufferInfo.sType(VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO)
             bufferInfo.size(size)
@@ -564,7 +564,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         inFlightFrames = ArrayList(maxFramesInFlight)
         imagesInFlight = Int2ObjectOpenHashMap(swapChainImages.size)
 
-        stackPush().use { stack ->
+        stackPush { stack ->
             val semaphoreInfo = VkSemaphoreCreateInfo.callocStack(stack)
             semaphoreInfo.sType(VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO)
 
@@ -597,7 +597,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
 
         commandBuffers = ArrayList(bufferCount)
 
-        stackPush().use {
+        stackPush {
             val allocInfo = VkCommandBufferAllocateInfo.callocStack(it)
             allocInfo.sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO)
             allocInfo.commandPool(commandPool)
@@ -661,7 +661,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     }
 
     private fun createCommandPool() {
-        stackPush().use {
+        stackPush {
             val indices = findQueueFamilies(physicalDevice)
 
             val poolInfo = VkCommandPoolCreateInfo.callocStack(it)
@@ -686,7 +686,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     }
 
     private fun allocateTransferCommandBuffer() {
-        stackPush().use {
+        stackPush {
             val allocInfo = VkCommandBufferAllocateInfo.callocStack(it)
             allocInfo.sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO)
             allocInfo.level(VK_COMMAND_BUFFER_LEVEL_PRIMARY)
@@ -702,7 +702,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     private fun createFramebuffers() {
         swapChainFramebuffers = LongArray(swapChainImageViews.size)
 
-        stackPush().use {
+        stackPush {
             val attachments = it.mallocLong(1)
             val pFramebuffer = it.mallocLong(1)
 
@@ -726,7 +726,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     }
 
     private fun createRenderPass() {
-        stackPush().use {
+        stackPush {
             val colorAttachment = VkAttachmentDescription.callocStack(1, it)
             colorAttachment.format(swapChainImageFormat)
             colorAttachment.samples(VK_SAMPLE_COUNT_1_BIT)
@@ -769,7 +769,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     }
 
     private fun createGraphicsPipeline() {
-        stackPush().use {
+        stackPush {
             val vertexShader = compileShaderFile("shaders/test.vert", VERTEX_SHADER)
             val fragmentShader = compileShaderFile("shaders/test.frag", FRAGMENT_SHADER)
 
@@ -908,7 +908,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     private fun createImageViews() {
         swapChainImageViews = LongArray(swapChainImages.size)
 
-        stackPush().use {
+        stackPush {
             val pImageView = it.mallocLong(1)
 
             swapChainImages.forEachIndexed { index, image ->
@@ -938,7 +938,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     }
 
     private fun createSwapChain() {
-        stackPush().use {
+        stackPush {
             val swapChainSupport = querySwapChainSupport(physicalDevice, it)
 
             val surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats)
@@ -1054,7 +1054,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     }
 
     private fun createSurface() {
-        stackPush().use {
+        stackPush {
             val pSurface = it.longs(VK_NULL_HANDLE)
 
             checkError(
@@ -1067,7 +1067,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     }
 
     private fun createLogicalDevice() {
-        stackPush().use {
+        stackPush {
             val indices = findQueueFamilies(physicalDevice)
 
             val uniqueQueueFamilies = indices.unique()
@@ -1116,7 +1116,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     }
 
     private fun createInstance() {
-        stackPush().use {
+        stackPush {
             val appInfo = VkApplicationInfo.callocStack(it)
 
             appInfo.sType(VK_STRUCTURE_TYPE_APPLICATION_INFO)
@@ -1148,7 +1148,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     }
 
     private fun pickPhysicalDevice() {
-        stackPush().use {
+        stackPush {
             val deviceCount = it.ints(0)
 
             checkError("Failed to enumerate physical devices", vkEnumeratePhysicalDevices(instance, deviceCount, null))
@@ -1217,7 +1217,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         var swapChainAdequate = false
 
         if (extensionsSupported) {
-            stackPush().use {
+            stackPush {
                 val swapchainSupportDetails = querySwapChainSupport(device, it)
                 swapChainAdequate =
                     swapchainSupportDetails.formats.hasRemaining() && swapchainSupportDetails.presentModes.hasRemaining()
@@ -1228,7 +1228,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     }
 
     private fun checkDeviceExtensionSupport(device: VkPhysicalDevice): Boolean {
-        stackPush().use {
+        stackPush {
             val extensionCount = it.ints(0)
 
             vkEnumerateDeviceExtensionProperties(device, null as String?, extensionCount, null)
@@ -1243,7 +1243,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     private fun findQueueFamilies(device: VkPhysicalDevice): QueueFamilyIndices {
         val indices = QueueFamilyIndices()
 
-        stackPush().use {
+        stackPush {
             val queueFamilyCount = it.ints(0)
 
             vkGetPhysicalDeviceQueueFamilyProperties(device, queueFamilyCount, null)
@@ -1301,7 +1301,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     }
 
     private fun checkValidationLayerSupport(): Boolean {
-        stackPush().use { stack ->
+        stackPush { stack ->
             val layerCount = stack.ints(0)
             vkEnumerateInstanceLayerProperties(layerCount, null)
             val availableLayers = VkLayerProperties.mallocStack(layerCount[0], stack)
@@ -1315,7 +1315,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         if (!enableValidationLayers) {
             return
         }
-        stackPush().use { stack ->
+        stackPush { stack ->
             val createInfo = VkDebugUtilsMessengerCreateInfoEXT.callocStack(stack)
             populateDebugMessengerCreateInfo(createInfo)
             val pDebugMessenger = stack.longs(VK_NULL_HANDLE)
