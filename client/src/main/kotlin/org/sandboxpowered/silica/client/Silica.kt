@@ -5,14 +5,15 @@ import org.lwjgl.glfw.GLFW
 import org.lwjgl.system.Configuration
 import org.sandboxpowered.silica.resources.*
 import org.sandboxpowered.silica.util.FileFilters
+import org.sandboxpowered.silica.util.Side
 import org.sandboxpowered.silica.util.Util
+import org.sandboxpowered.silica.util.Util.MINECRAFT_VERSION
 import org.sandboxpowered.silica.util.Util.getLogger
 import org.sandboxpowered.silica.util.extensions.join
 import org.sandboxpowered.silica.util.extensions.listFiles
 import org.sandboxpowered.silica.util.extensions.notExists
 import java.io.File
 import java.io.IOException
-import java.nio.file.Path
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executors
@@ -69,7 +70,7 @@ class Silica(private val args: Args) : Runnable {
         close()
     }
 
-    data class Args(val width: Int, val height: Int, val renderer: String, val minecraftPath: Path?)
+    data class Args(val width: Int, val height: Int, val renderer: String)
 
     class InvalidRendererException(message: String) : RuntimeException(message)
 
@@ -103,7 +104,9 @@ class Silica(private val args: Args) : Runnable {
             return true
         assetManager = ResourceManager(ResourceType.ASSETS)
         assetManager.add(ClasspathResourceLoader("Silica"))
-        Util.findMinecraft(assetManager, args.minecraftPath)
+
+        val mcArchive = Util.ensureMinecraftVersion(MINECRAFT_VERSION, Side.CLIENT)
+        assetManager.add(ZIPResourceLoader("Minecraft $MINECRAFT_VERSION", mcArchive))
 
         File("resourcepacks").apply {
             if (notExists()) {

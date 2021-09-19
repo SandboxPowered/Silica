@@ -19,17 +19,12 @@ object Main {
         val spec = OptionParser()
         spec.allowsUnrecognizedOptions()
         spec.accepts("initSettings")
-        val minecraftPath = spec.accepts("minecraft")
-            .withRequiredArg()
-            .ofType(String::class)
-            .defaultsTo("")
         val unknownOptionsSpec: OptionSpec<String> = spec.nonOptions()
         val set = spec.parse(*args)
         val unknownOptions = set.valuesOf(unknownOptionsSpec)
         if (unknownOptions.isNotEmpty()) {
             logger.warn("Ignoring arguments: {}", unknownOptions)
         }
-        val path = set.valueOf(minecraftPath)
         val eula = ServerEula(Paths.get("eula.txt"))
         if (set.has("initSettings")) {
             fromFile(Paths.get("server.properties"))
@@ -40,7 +35,7 @@ object Main {
                 return
             }
             DedicatedServer(DedicatedServer.Args(
-                if (path.isEmpty()) null else Paths.get(path)
+
             )).run()
         }
     }

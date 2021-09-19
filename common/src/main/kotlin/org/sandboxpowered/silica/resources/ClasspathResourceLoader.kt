@@ -67,6 +67,7 @@ class ClasspathResourceLoader(override val name: String) : ResourceLoader {
     }
 
     override fun getNamespaces(type: ResourceType): Set<String> {
-        TODO("Not yet implemented")
+//        TODO("Not yet implemented")
+        return emptySet()
     }
 }

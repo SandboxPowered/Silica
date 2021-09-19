@@ -1,4 +1,5 @@
 project.ext.jomlVersion = "1.9.25"
+project.ext.ktorVersion = "1.6.3"
 
 group 'org.sandboxpowered'
 version '1.0-SNAPSHOT'
@@ -45,6 +46,11 @@ dependencies {
     api 'com.mojang:authlib:1.5.21'
 
     api 'io.netty:netty-all:4.1.56.Final'
+
+    api "io.ktor:ktor-client-core:$ktorVersion"
+    api "io.ktor:ktor-client-cio:$ktorVersion"
+    api "io.ktor:ktor-client-serialization:$ktorVersion"
+    api "io.ktor:ktor-client-gson:$ktorVersion"
 }
 
 

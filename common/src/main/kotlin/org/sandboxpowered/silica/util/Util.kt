@@ -1,14 +1,21 @@
 package org.sandboxpowered.silica.util
 
 import com.google.common.util.concurrent.MoreExecutors
+import com.google.gson.JsonObject
+import io.ktor.client.*
+import io.ktor.client.features.json.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.util.cio.*
+import io.ktor.utils.io.*
+import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.SystemUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.joml.Math
-import org.sandboxpowered.silica.resources.ResourceManager
-import org.sandboxpowered.silica.resources.ZIPResourceLoader
+import java.io.File
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -16,6 +23,8 @@ import java.util.concurrent.Executors
 object Util {
 
     const val MINECRAFT_VERSION = "1.17.1"
+
+    private const val LAUNCHMETA_JSON = "https://launchermeta.mojang.com/mc/game/version_manifest.json"
 
     fun createService(string: String): ExecutorService {
         val i = Math.clamp(1, 32, Runtime.getRuntime().availableProcessors())
@@ -30,24 +39,59 @@ object Util {
         return LogManager.getLogger(T::class.java)
     }
 
-    fun findMinecraft(manager: ResourceManager, minecraftPath: Path?) {
-        when {
-            minecraftPath != null -> {
-                require(Files.exists(minecraftPath)) { "The specified path of $minecraftPath does not exist, please make sure this is targeting a Minecraft $MINECRAFT_VERSION jar file" }
-                manager.add(ZIPResourceLoader("Minecraft $MINECRAFT_VERSION", minecraftPath.toFile()))
+    private val ktorClient = HttpClient() {
+        install(JsonFeature) {
+            serializer = GsonSerializer()
+        }
+    }
+
+    fun ensureMinecraftVersion(version: String, side: Side): File {
+        val file = File("versions/$version-${side.str}.jar")
+        file.parentFile.mkdirs()
+        if (!file.exists() && side == Side.CLIENT) {
+            findMinecraft(version)?.copyTo(file, true)
+        }
+        if (!file.exists()) {
+            runBlocking {
+                val response: JsonObject = ktorClient.get(LAUNCHMETA_JSON)
+                val versions = response.getAsJsonArray("versions")
+                val v = versions.asSequence().map { it.asJsonObject }.firstOrNull {
+                    it.getAsJsonPrimitive("id").asString == version
+                }
+                if (v != null) {
+                    val res: JsonObject = ktorClient.get(v.get("url").asString)
+                    val download = res.getAsJsonObject("downloads").getAsJsonObject(side.str)
+
+                    ktorClient.downloadFile(file, download.get("url").asString)
+                }
             }
+        }
+        return file
+    }
+
+    private fun findMinecraft(version: String): File? {
+        return when {
             SystemUtils.IS_OS_WINDOWS || SystemUtils.IS_OS_LINUX -> {
                 val homeDir = when {
                     SystemUtils.IS_OS_LINUX -> System.getenv("HOME")
                     else -> System.getenv("APPDATA")
                 }
-                val asPath = Paths.get(homeDir, ".minecraft", "versions", MINECRAFT_VERSION, "$MINECRAFT_VERSION.jar")
-                require(Files.exists(asPath)) { "Unable to find Minecraft $MINECRAFT_VERSION installation at $asPath, please install minecraft or use the --minecraft argument to point to a specific jar" }
-                manager.add(ZIPResourceLoader("Minecraft $MINECRAFT_VERSION", asPath.toFile()))
+                val asPath = Paths.get(homeDir, ".minecraft", "versions", version, "$version.jar")
+                if (Files.exists(asPath)) asPath.toFile() else null
             }
-            else -> {
-                error("Silica supports automatically searching for Minecraft on Windows and Linux only. use the --minecraft argument on other operating systems")
-            }
+            else -> null
         }
     }
+}
+
+suspend fun HttpClient.downloadFile(file: File, url: String): Boolean {
+    val call: HttpResponse = request {
+        url(url)
+        method = HttpMethod.Get
+    }
+    if (!call.status.isSuccess()) {
+        return false
+    }
+    call.content.copyAndClose(file.writeChannel())
+    return true
 }

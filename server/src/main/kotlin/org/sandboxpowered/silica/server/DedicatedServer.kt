@@ -9,8 +9,10 @@ import it.unimi.dsi.fastutil.objects.Object2LongMap
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap
 import org.apache.commons.io.FileUtils
 import org.sandboxpowered.silica.StateManager
+import org.sandboxpowered.silica.resources.ZIPResourceLoader
 import org.sandboxpowered.silica.util.Side
 import org.sandboxpowered.silica.util.Util
+import org.sandboxpowered.silica.util.Util.MINECRAFT_VERSION
 import org.sandboxpowered.silica.util.Util.getLogger
 import org.sandboxpowered.silica.util.extensions.join
 import org.sandboxpowered.silica.util.extensions.messageAdapter
@@ -31,11 +33,13 @@ class DedicatedServer(args: Args) : SilicaServer() {
     override lateinit var network: ActorRef<Network>
     private val stateManagerErrors: Map<StateManager.ErrorType, Set<String>>
 
-    class Args(val minecraftPath: Path?)
+    class Args()
 
     init {
 //        Guice.createInjector(SilicaImplementationModule())
-        Util.findMinecraft(dataManager, args.minecraftPath)
+        val mcArchive = Util.ensureMinecraftVersion(MINECRAFT_VERSION, Side.SERVER)
+        dataManager.add(ZIPResourceLoader("Minecraft $MINECRAFT_VERSION", mcArchive))
+
         properties = ServerProperties.fromFile(Paths.get("server.properties"))
         stateManagerErrors = stateManager.load()
         acceptVanillaConnections = stateManagerErrors.isEmpty()
