@@ -1,11 +1,15 @@
 package org.sandboxpowered.silica.world.util
 
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.ParameterizedTest.DISPLAY_NAME_PLACEHOLDER
+import org.junit.jupiter.params.ParameterizedTest.INDEX_PLACEHOLDER
 import org.junit.jupiter.params.provider.MethodSource
 import org.sandboxpowered.silica.state.block.BlockState
 import java.util.stream.Stream
 
-//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BlocTreeTest {
     private val air = TestData.state("air", true)
     private val bedrock = TestData.state("bedrock")
@@ -14,7 +18,7 @@ internal class BlocTreeTest {
     private val grass = TestData.state("grass")
 
     @MethodSource("world layers")
-//    @ParameterizedTest(name = "[${ParameterizedTest.INDEX_PLACEHOLDER}] ${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER}")
+    @ParameterizedTest(name = "[$INDEX_PLACEHOLDER] $DISPLAY_NAME_PLACEHOLDER")
     fun `A tree filled with layers should store correct info`(blocks: Sequence<Pair<Triple<Int, Int, Int>, BlockState>>) {
         val tree = BlocTree(-8, 0, -8, 16, air)
         var count = 0
@@ -40,33 +44,33 @@ internal class BlocTreeTest {
             yield(Triple(x, y, z) to bedrock)
         }
         ++dy
-        iterateCube(0, dy, 0, w = 16, h = 3, d = 16) { x, y, z ->
-            yield(Triple(x, y, z - 8) to if (x % 2 == z % 2) stone else dirt)
+        iterateCube(-8, dy, -8, w = 16, h = 3, d = 16) { x, y, z ->
+            yield(Triple(x, y, z) to if (x % 2 == z % 2) stone else dirt)
         }
         dy += 3
         iterateCube(-8, dy, -8, w = 16, h = 1) { x, y, z ->
-            yield(Triple(x - 8, y, z - 8) to dirt)
+            yield(Triple(x, y, z) to dirt)
         }
         ++dy
         iterateCube(-8, dy, -8, w = 16, h = 1) { x, y, z ->
-            yield(Triple(x - 8, y, z - 8) to grass)
+            yield(Triple(x, y, z) to grass)
         }
     }, sequence {
         var dy = 0
         iterateCube(-8, dy, -8, w = 16, h = 1) { x, y, z ->
-            yield(Triple(x - 8, y, z - 8) to bedrock)
+            yield(Triple(x, y, z) to bedrock)
         }
         ++dy
         iterateCube(-8, dy, -8, w = 16, h = 3) { x, y, z ->
-            yield(Triple(x - 8, y, z - 8) to stone)
+            yield(Triple(x, y, z) to stone)
         }
         dy += 3
         iterateCube(-8, dy, -8, w = 16, h = 1) { x, y, z ->
-            yield(Triple(x - 8, y, z - 8) to dirt)
+            yield(Triple(x, y, z) to dirt)
         }
         ++dy
         iterateCube(-8, dy, -8, w = 16, h = 1) { x, y, z ->
-            yield(Triple(x - 8, y, z - 8) to grass)
+            yield(Triple(x, y, z) to grass)
         }
     })
 
@@ -85,7 +89,7 @@ internal class BlocTreeTest {
     }
 
     @MethodSource("illegal pos")
-//    @ParameterizedTest(name = "[${ParameterizedTest.INDEX_PLACEHOLDER}] ${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER} ${ParameterizedTest.ARGUMENTS_PLACEHOLDER}")
+    @ParameterizedTest(name = "[$INDEX_PLACEHOLDER] $DISPLAY_NAME_PLACEHOLDER ${ParameterizedTest.ARGUMENTS_PLACEHOLDER}")
     fun `Trying to set a block outside of the tree's bounds should throw an ISE`(pos: Triple<Int, Int, Int>) {
         val tree = BlocTree(-8, 0, -8, 16, air)
         val (x, y, z) = pos

@@ -1,6 +1,8 @@
 package org.sandboxpowered.silica.nbt
 
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.sandboxpowered.silica.util.math.Position
@@ -11,10 +13,10 @@ import java.io.DataOutputStream
 import java.util.*
 import java.util.stream.Stream
 
-//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class NBTSerdeTest {
 
-    //    @ParameterizedTest
+    @ParameterizedTest
     @MethodSource("examples")
     fun readNbt(data: String, expected: CompoundTag) {
         val iss = ByteArrayInputStream(Base64.getDecoder().decode(data))
@@ -34,7 +36,7 @@ internal class NBTSerdeTest {
         }
     }
 
-    //    @ParameterizedTest
+    @ParameterizedTest
     @MethodSource("examples")
     fun write(expected: String, data: CompoundTag) {
         val oss = ByteArrayOutputStream()
@@ -44,8 +46,7 @@ internal class NBTSerdeTest {
         assertEquals(expected, result)
     }
 
-    @Suppress("unused")
-    fun examples(): Stream<Arguments> = Stream.of(
+    private fun examples(): Stream<Arguments> = Stream.of(
         Arguments.of("CgAAAQAIc29tZUJ5dGUDAA==", CompoundTag().apply {
             setByte("someByte", 3)
         }),
