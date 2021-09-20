@@ -30,7 +30,7 @@ internal class BlocTreeTest {
         for ((pos, state) in blocks) {
             val (x, y, z) = pos
             tree[x, y, z] = state
-            if (!state.block.isAir(state)) ++count
+            if (!state.isAir) ++count
         }
 
         for ((pos, state) in blocks) {
@@ -41,7 +41,6 @@ internal class BlocTreeTest {
         Assertions.assertEquals(count, tree.nonAirInChunk(-8, 0, -8))
     }
 
-    @Suppress("unused")
     private fun `world layers`(): Stream<Sequence<Pair<Position, BlockState>>> = Stream.of(sequence {
         var dy = 0
         iterateCube(-8, dy, -8, w = 16, h = 1) { x, y, z ->
@@ -102,7 +101,6 @@ internal class BlocTreeTest {
         }
     }
 
-    @Suppress("unused")
     private fun `illegal pos`(): Stream<Position> = Stream.of(
         Position(2, -1, 2),
         Position(2, 16, 2),
