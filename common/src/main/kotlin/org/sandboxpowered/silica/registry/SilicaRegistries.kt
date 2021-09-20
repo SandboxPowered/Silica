@@ -29,7 +29,7 @@ object SilicaRegistries {
             register(BaseBlock(id(stone)))
             register(SlabBlock(id("${stone}_slab")))
             register(StairBlock(id("${stone}_stairs")))
-            if (stone != Stone.STONE.getName())
+            if (stone != Stone.STONE.asString)
                 register(WallBlock(id("${stone}_wall")))
         }
         for (wood in arrayOf("oak", "spruce", "birch", "jungle", "dark_oak", "acacia")) {

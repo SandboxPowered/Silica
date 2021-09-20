@@ -7,38 +7,23 @@ open class Position(
     open val x: Int,
     open val y: Int,
     open val z: Int
-) {
-    open fun add(x: Int, y: Int, z: Int): Position {
-        return Position(this.x + x, this.y + y, this.z + z)
-    }
+) : Comparable<Position> {
+    open fun add(x: Int, y: Int, z: Int): Position = Position(this.x + x, this.y + y, this.z + z)
 
-    open fun sub(x: Int, y: Int, z: Int): Position {
-        return add(-x, -y, -z)
-    }
+    open fun sub(x: Int, y: Int, z: Int): Position = add(-x, -y, -z)
 
-    open fun toMutable(): Mutable {
-        return Mutable(x, y, z)
-    }
+    open fun toMutable(): Mutable = Mutable(x, y, z)
 
-    open fun toImmutable(): Position {
-        return this
-    }
+    open fun toImmutable(): Position = this
 
-    open fun shift(direction: Direction, amount: Int): Position {
-        return add(amount * direction.offsetX, amount * direction.offsetY, amount * direction.offsetZ)
-    }
+    open fun shift(direction: Direction, amount: Int): Position =
+        add(amount * direction.offsetX, amount * direction.offsetY, amount * direction.offsetZ)
 
-    open fun add(position: Position): Position {
-        return add(position.x, position.y, position.z)
-    }
+    open fun add(position: Position): Position = add(position.x, position.y, position.z)
 
-    open fun sub(position: Position): Position {
-        return sub(position.x, position.y, position.z)
-    }
+    open fun sub(position: Position): Position = sub(position.x, position.y, position.z)
 
-    open fun shift(direction: Direction): Position {
-        return shift(direction, 1)
-    }
+    open fun shift(direction: Direction): Position = shift(direction, 1)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -51,6 +36,14 @@ open class Position(
         return true
     }
 
+    override fun compareTo(other: Position): Int {
+        val xCompare = x.compareTo(other.x)
+        if (xCompare != 0) return xCompare
+        val yCompare = y.compareTo(other.y)
+        if (yCompare != 0) return yCompare
+        return z.compareTo(other.z)
+    }
+
     override fun hashCode(): Int {
         var result = x
         result = 31 * result + y
@@ -58,9 +51,7 @@ open class Position(
         return result
     }
 
-    override fun toString(): String {
-        return "[$x,$y,$z]"
-    }
+    override fun toString(): String = "[$x,$y,$z]"
 
     val packed: Long
         get() = packIntoLong(x, y, z)
@@ -104,6 +95,8 @@ open class Position(
         fun unpack(long: Long): Position = Position(unpackLongX(long), unpackLongY(long), unpackLongZ(long))
     }
 
+    operator fun rangeTo(other: Position) = PositionRange(this, other)
+
     class Mutable(
         override var x: Int,
         override var y: Int,
@@ -124,33 +117,21 @@ open class Position(
             return this
         }
 
-        override fun toMutable(): Mutable {
-            return this
-        }
+        override fun toMutable(): Mutable = this
 
-        override fun toImmutable(): Position {
-            return Position(x, y, z)
-        }
+        override fun toImmutable(): Position = Position(x, y, z)
 
-        override fun shift(direction: Direction, amount: Int): Position {
-            return add(
-                amount * direction.offsetX,
-                amount * direction.offsetY,
-                amount * direction.offsetZ,
-            )
-        }
+        override fun shift(direction: Direction, amount: Int): Position = add(
+            amount * direction.offsetX,
+            amount * direction.offsetY,
+            amount * direction.offsetZ,
+        )
 
-        override fun add(position: Position): Position {
-            return add(position.x, position.y, position.z)
-        }
+        override fun add(position: Position): Position = add(position.x, position.y, position.z)
 
-        override fun sub(position: Position): Position {
-            return sub(position.x, position.y, position.z)
-        }
+        override fun sub(position: Position): Position = sub(position.x, position.y, position.z)
 
-        override fun shift(direction: Direction): Position {
-            return shift(direction, 1)
-        }
+        override fun shift(direction: Direction): Position = shift(direction, 1)
 
         fun set(x: Int, y: Int, z: Int): Mutable {
             this.x = x
@@ -158,5 +139,17 @@ open class Position(
             this.z = z
             return this
         }
+    }
+
+    class PositionRange(override val start: Position, private val end: Position) : ClosedRange<Position> {
+        override val endInclusive: Position
+            get() = end
+
+        override fun contains(value: Position): Boolean =
+            start.x <= value.x && start.y <= value.y && start.z <= value.z && end.x >= value.x && end.y >= value.y && end.z >= value.z
+
+        override fun isEmpty(): Boolean = false
+
+        override fun toString(): String = "$start-$end"
     }
 }

@@ -3,7 +3,7 @@ import org.gradle.internal.os.OperatingSystem
 apply plugin: 'java'
 apply plugin: 'org.jetbrains.kotlin.jvm'
 
-project.ext.lwjglVersion = "3.2.4-SNAPSHOT"
+project.ext.lwjglVersion = "3.3.0-SNAPSHOT"
 project.ext.jomlVersion = "1.9.25"
 
 switch (OperatingSystem.current()) {
@@ -31,9 +31,9 @@ dependencies {
     api project(":common")
 
     api platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+
     api "org.lwjgl:lwjgl"
     api "org.lwjgl:lwjgl-assimp"
-    api "org.lwjgl:lwjgl-bullet"
     api "org.lwjgl:lwjgl-glfw"
     api "org.lwjgl:lwjgl-nfd"
     api "org.lwjgl:lwjgl-openal"
@@ -44,7 +44,6 @@ dependencies {
     api "org.lwjgl:lwjgl-tinyexr"
     runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-bullet::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-nfd::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"

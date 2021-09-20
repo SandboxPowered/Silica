@@ -1,5 +1,6 @@
 package org.sandboxpowered.silica.client.vulkan
 
+import com.github.zafarkhaja.semver.Version
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import org.joml.Matrix4f
@@ -38,7 +39,14 @@ import java.util.stream.Collectors.toSet
 import java.util.stream.IntStream
 
 
+private val Version.vKVersion: Int
+    get() = VK_MAKE_VERSION(majorVersion, minorVersion, patchVersion)
+
 class VulkanRenderer(private val silica: Silica) : Renderer {
+
+    override val name: String = "Vulkan"
+    override val version: Version = Version.forIntegers(0, 1, 0)
+
     private val deviceExtensions: Set<String> = setOf(VK_KHR_SWAPCHAIN_EXTENSION_NAME)
     private val enableValidationLayers: Boolean = DEBUG.get(false)
     private val validationLayers: Set<String> = setOf("VK_LAYER_KHRONOS_validation")
@@ -1121,9 +1129,9 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
 
             appInfo.sType(VK_STRUCTURE_TYPE_APPLICATION_INFO)
             appInfo.pApplicationName(it.UTF8Safe("Silica"))
-            appInfo.applicationVersion(VK_MAKE_VERSION(0, 1, 0))
+            appInfo.applicationVersion(silica.version.vKVersion)
             appInfo.pEngineName(it.UTF8Safe("Sandstone"))
-            appInfo.engineVersion(VK_MAKE_VERSION(0, 1, 0))
+            appInfo.engineVersion(version.vKVersion)
             appInfo.apiVersion(VK_API_VERSION_1_0)
 
             val createInfo = VkInstanceCreateInfo.callocStack(it)
@@ -1350,11 +1358,9 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE)
     }
 
-    override fun getName(): String = "Vulkan"
-
     class VulkanRenderingFactory : RenderingFactory {
-        override fun getPriority(): Int = 600
-        override fun getId(): String = "vulkan"
+        override val priority: Int = 600
+        override val name: String = "vulkan"
         override fun createRenderer(silica: Silica): Renderer = VulkanRenderer(silica)
     }
 }

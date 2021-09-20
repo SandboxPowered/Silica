@@ -10,7 +10,6 @@ import com.artemis.WorldConfigurationBuilder
 import com.mojang.authlib.GameProfile
 import org.sandboxpowered.silica.SilicaPlayerManager
 import org.sandboxpowered.silica.component.VanillaPlayerInput
-import org.sandboxpowered.silica.network.getSystem
 import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.state.block.BlockState
 import org.sandboxpowered.silica.state.fluid.FluidState
@@ -19,6 +18,7 @@ import org.sandboxpowered.silica.system.Entity3dMapSystem
 import org.sandboxpowered.silica.system.VanillaInputSystem
 import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.Side
+import org.sandboxpowered.silica.util.extensions.getSystem
 import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.util.extensions.registerAs
 import org.sandboxpowered.silica.util.math.Position

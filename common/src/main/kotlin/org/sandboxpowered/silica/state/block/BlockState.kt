@@ -9,16 +9,12 @@ import org.sandboxpowered.silica.state.property.Property
 class BlockState(base: Block, properties: ImmutableMap<Property<*>, Comparable<*>>) :
     BaseState<Block, BlockState>(base, properties) {
     val isAir: Boolean
-        get() {
-            return this.block.isAir(this)
-        }
+        get() = this.block.isAir(this)
 
     val block: Block
         get() = base
 
     companion object {
-        val factory = SilicaStateFactory.Factory.of<Block, BlockState> { base, properties ->
-            BlockState(base, properties)
-        }
+        val factory = SilicaStateFactory.Factory.of(::BlockState)
     }
 }

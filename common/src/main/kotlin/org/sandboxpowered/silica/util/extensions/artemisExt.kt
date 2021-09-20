@@ -18,9 +18,10 @@ operator fun <T> Bag<in T>.plusAssign(e: T) = this.add(e)
 
 operator fun IntBag.plusAssign(e: Int) = this.add(e)
 
-inline fun <reified T> WorldConfiguration.registerAs(it: T): WorldConfiguration =
-    this.register(T::class.qualifiedName, it)
+inline fun <reified T> WorldConfiguration.registerAs(it: T): WorldConfiguration = this.register(T::class.qualifiedName, it)
 
 inline fun <reified T : Component> ArchetypeBuilder.add() {
     add(T::class.java)
 }
+
+inline fun <reified T : BaseSystem> World.getSystem(): T = getSystem(T::class.java)

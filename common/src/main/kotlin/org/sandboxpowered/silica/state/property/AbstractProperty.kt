@@ -19,7 +19,5 @@ abstract class AbstractProperty<T : Comparable<T>> protected constructor(
         }
     }
 
-    override fun hashCode(): Int {
-        return 31 * valueType.hashCode() + propertyName.hashCode()
-    }
+    override fun hashCode(): Int = 31 * valueType.hashCode() + propertyName.hashCode()
 }

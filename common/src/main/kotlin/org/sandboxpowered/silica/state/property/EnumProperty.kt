@@ -11,7 +11,7 @@ class EnumProperty<E> private constructor(name: String, type: Class<E>, collecti
     AbstractProperty<E>(name, type) where E : Enum<E>, E : StringSerializable {
     override val values: ImmutableSet<E>
     private val names: MutableMap<String, E> = HashMap()
-    override fun getValueString(value: E): String = value.getName()
+    override fun getValueString(value: E): String = value.asString
 
     override fun getValue(name: String): Optional<E> = Optional.ofNullable(names[name])
 
@@ -25,41 +25,33 @@ class EnumProperty<E> private constructor(name: String, type: Class<E>, collecti
         inline fun <reified T> of(
             name: String,
             predicate: Predicate<T>,
-        ): EnumProperty<T> where T : Enum<T>, T : StringSerializable {
-            return of(name, T::class.java, predicate)
-        }
+        ): EnumProperty<T> where T : Enum<T>, T : StringSerializable = of(name, T::class.java, predicate)
 
         @JvmStatic
-        fun <T> of(name: String, type: Class<T>): EnumProperty<T> where T : Enum<T>, T : StringSerializable {
-            return of(name, type) { true }
-        }
+        fun <T> of(name: String, type: Class<T>): EnumProperty<T> where T : Enum<T>, T : StringSerializable =
+            of(name, type) { true }
 
         @JvmStatic
         fun <T> of(
             name: String,
             type: Class<T>,
             predicate: Predicate<T>,
-        ): EnumProperty<T> where T : Enum<T>, T : StringSerializable {
-            return of(name, type, Arrays.stream(type.enumConstants).filter(predicate).collect(Collectors.toList()))
-        }
+        ): EnumProperty<T> where T : Enum<T>, T : StringSerializable =
+            of(name, type, Arrays.stream(type.enumConstants).filter(predicate).collect(Collectors.toList()))
 
         @JvmStatic
         fun <T> of(
             name: String,
             type: Class<T>,
             vararg values: T
-        ): EnumProperty<T> where T : Enum<T>, T : StringSerializable {
-            return of(name, type, Lists.newArrayList(*values))
-        }
+        ): EnumProperty<T> where T : Enum<T>, T : StringSerializable = of(name, type, Lists.newArrayList(*values))
 
         @JvmStatic
         fun <T> of(
             name: String,
             type: Class<T>,
             values: Collection<T>
-        ): EnumProperty<T> where T : Enum<T>, T : StringSerializable {
-            return EnumProperty(name, type, values)
-        }
+        ): EnumProperty<T> where T : Enum<T>, T : StringSerializable = EnumProperty(name, type, values)
     }
 
     init {

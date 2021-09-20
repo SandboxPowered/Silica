@@ -6,9 +6,7 @@ import java.util.*
 
 class IntProperty private constructor(name: String, min: Int, max: Int) : AbstractProperty<Int>(name, Int::class) {
     override val values: ImmutableSet<Int>
-    override fun getValueString(value: Int): String {
-        return value.toString()
-    }
+    override fun getValueString(value: Int): String = value.toString()
 
     override fun getValue(name: String): Optional<Int> {
         val i = Integer.valueOf(name)
@@ -21,9 +19,7 @@ class IntProperty private constructor(name: String, min: Int, max: Int) : Abstra
 
     companion object {
         @JvmStatic
-        fun of(name: String, min: Int, max: Int): IntProperty {
-            return IntProperty(name, min, max)
-        }
+        fun of(name: String, min: Int, max: Int): IntProperty = IntProperty(name, min, max)
     }
 
     init {

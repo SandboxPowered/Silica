@@ -1,9 +1,8 @@
 package org.sandboxpowered.silica.client
 
 interface RenderingFactory {
-    fun getPriority(): Int
+    val priority: Int
+    val name: String
 
     fun createRenderer(silica: Silica): Renderer
-
-    fun getId(): String
 }

@@ -7,7 +7,5 @@ import org.sandboxpowered.silica.state.property.Property
 
 class FluidState(base: Fluid, properties: ImmutableMap<Property<*>, Comparable<*>>) :
     BaseState<Fluid, FluidState>(base, properties) {
-    fun getFluid(): Fluid {
-        return base
-    }
+    fun getFluid(): Fluid = base
 }

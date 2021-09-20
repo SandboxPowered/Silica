@@ -1,5 +1,6 @@
 package org.sandboxpowered.silica.client.opengl
 
+import com.github.zafarkhaja.semver.Version
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
@@ -21,7 +22,8 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
     private val window: Window
         get() = silica.window
 
-    override fun getName(): String = "OpenGL"
+    override val name: String = "OpenGL"
+    override val version: Version = Version.forIntegers(0,1,0)
 
     override fun init() {
         GL.createCapabilities()
@@ -117,8 +119,9 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
     }
 
     class OpenGLRenderingFactory : RenderingFactory {
-        override fun getPriority(): Int = 600
-        override fun getId(): String = "opengl"
+        override val priority: Int = 600
+        override val name: String = "opengl"
+
         override fun createRenderer(silica: Silica): Renderer = OpenGLRenderer(silica)
     }
 }

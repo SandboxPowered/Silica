@@ -2,7 +2,7 @@ package org.sandboxpowered.silica.util.content
 
 import org.sandboxpowered.silica.state.property.StringSerializable
 
-enum class Colour(private val s: String) : StringSerializable {
+enum class Colour(override val asString: String) : StringSerializable {
     BLACK("black"),
     RED("red"),
     GREEN("green"),
@@ -18,13 +18,10 @@ enum class Colour(private val s: String) : StringSerializable {
     LIGHT_BLUE("light_blue"),
     MAGENTA("magenta"),
     ORANGE("orange"),
-    WHITE("white")
-    ;
-
-    override fun getName(): String = s
+    WHITE("white");
 
     companion object {
         val ALL = values()
-        val NAMES = ALL.map { it.getName() }
+        val NAMES = ALL.map { it.asString }
     }
 }

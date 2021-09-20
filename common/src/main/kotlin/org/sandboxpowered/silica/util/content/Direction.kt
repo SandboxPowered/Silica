@@ -11,7 +11,7 @@ enum class Direction(
     val id: Int,
     val invertedId: Int,
     val horizontalId: Int,
-    private val dirName: String,
+    override val asString: String,
     val axisDirection: AxisDirection,
     val axis: Axis,
     val offset: Vector3i,
@@ -30,9 +30,7 @@ enum class Direction(
     val offsetZ: Int
         get() = this.offset.z
 
-    override fun getName(): String = this.dirName
-
-    override fun toString(): String = this.dirName
+    override fun toString(): String = this.asString
 
     companion object {
         val ALL = values()
@@ -73,7 +71,7 @@ enum class Direction(
         NEGATIVE(-1, "Towards negative");
     }
 
-    enum class Axis(private val axisName: String) : Predicate<Direction>, StringSerializable {
+    enum class Axis(override val asString: String) : Predicate<Direction>, StringSerializable {
         X("x"),
         Y("y"),
         Z("z");
@@ -88,9 +86,7 @@ enum class Direction(
                 else -> Type.HORIZONTAL
             }
 
-        override fun getName(): String = axisName
-
-        override fun toString(): String = axisName
+        override fun toString(): String = asString
 
         override fun test(t: Direction): Boolean = t.axis == this
     }

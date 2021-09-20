@@ -5,7 +5,6 @@ import akka.actor.typed.javadsl.AbstractBehavior
 import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
-import com.artemis.BaseSystem
 import com.mojang.authlib.GameProfile
 import org.sandboxpowered.silica.SilicaPlayerManager
 import org.sandboxpowered.silica.component.VanillaPlayerInput
@@ -16,12 +15,12 @@ import org.sandboxpowered.silica.network.play.clientbound.*
 import org.sandboxpowered.silica.server.Network
 import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.util.Identifier
+import org.sandboxpowered.silica.util.extensions.getSystem
 import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.world.SilicaWorld
 import org.sandboxpowered.silica.world.util.BlocTree
 import java.time.Duration
 import kotlin.system.measureTimeMillis
-import com.artemis.World as ArtemisWorld
 
 sealed class PlayConnection {
     class ReceivePacket(val packet: PacketPlay) : PlayConnection()
@@ -65,11 +64,8 @@ private class PlayConnectionActor(
     private val playContext by lazy {
         PlayContext(
             server,
-            {
-                server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { _ -> it(playerInput) })
-            }, {
-                server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { world -> it(world) })
-            })
+            { server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { _ -> it(playerInput) }) },
+            { server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { world -> it(world) }) })
     }
 
     init {
@@ -260,8 +256,4 @@ private class PlayConnectionActor(
         return Behaviors.same()
     }
 
-}
-
-inline fun <reified T : BaseSystem> ArtemisWorld.getSystem(): T {
-    return getSystem(T::class.java)
 }

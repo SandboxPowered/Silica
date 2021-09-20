@@ -1,5 +1,7 @@
 package org.sandboxpowered.silica.client
 
+import akka.actor.typed.javadsl.*
+import com.github.zafarkhaja.semver.Version
 import com.google.common.base.Joiner
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.system.Configuration
@@ -22,6 +24,7 @@ import kotlin.math.max
 
 
 class Silica(private val args: Args) : Runnable {
+    val version: Version = Version.forIntegers(0, 1, 0)
     private val logger = getLogger<Silica>()
     lateinit var window: Window
     private lateinit var assetManager: ResourceManager
@@ -32,10 +35,9 @@ class Silica(private val args: Args) : Runnable {
     }
 
     private val DEBUG: Boolean = Configuration.DEBUG.get(false)
-    private val executorService = Executors.newFixedThreadPool(
-        max(1, Runtime.getRuntime().availableProcessors() / 2)
-    ) { r: Runnable? ->
-        val t = Thread(r)
+
+    private val executorService = Executors.newFixedThreadPool(max(1, Runtime.getRuntime().availableProcessors() / 2)) {
+        val t = Thread(it)
         t.priority = Thread.MIN_PRIORITY
         t.name = "Chunk builder"
         t.isDaemon = true
@@ -80,18 +82,18 @@ class Silica(private val args: Args) : Runnable {
 
         renderer = when {
             args.renderer.isNotEmpty() -> {
-                val factory = renderers.find { it.getId() == args.renderer }
+                val factory = renderers.find { it.name == args.renderer }
                 factory?.createRenderer(this)
                     ?: throw InvalidRendererException("${args.renderer} renderer is not supported")
             }
             renderers.isEmpty() -> throw UnknownError("No renderers defined")
             renderers.size == 1 -> renderers[0].createRenderer(this)
             else -> {
-                val sorted = renderers.sortedBy { it.getPriority() }
+                val sorted = renderers.sortedBy { it.priority }
                 sorted[0].createRenderer(this)
             }
         }
-        logger.debug("Using Renderer: ${renderer.getName()}")
+        logger.debug("Using Renderer: ${renderer.name}")
         val list: MutableList<String?> = ArrayList()
         GLFW.glfwSetErrorCallback { i: Int, l: Long ->
             list.add(String.format("GLFW error during init: [0x%X]%s", i, l))
