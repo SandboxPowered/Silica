@@ -5,8 +5,7 @@ import java.util.*
 import java.util.function.Supplier
 import java.util.stream.Stream
 
-class SilicaRegistry<T : RegistryEntry<T>>(private val registryId: Identifier, override val registryType: Class<T>) :
-    Registry<T> {
+class SilicaRegistry<T : RegistryEntry<T>>(private val id: Identifier, override val type: Class<T>) : Registry<T> {
     var internalMap: MutableMap<Identifier, T> = HashMap()
     var registryEntries: MutableMap<Identifier, SilicaRegistryEntry<T>> = HashMap()
 

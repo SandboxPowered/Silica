@@ -1,23 +1,22 @@
 package org.sandboxpowered.silica.resources
 
+import org.sandboxpowered.silica.util.Identifier
+import java.io.InputStream
+
 class ResourceManager(private val resourceType: ResourceType) {
     private val loaders: ArrayList<ResourceLoader> = arrayListOf()
-
-    private lateinit var _vanilla: ResourceLoader
-
-    var vanilla: ResourceLoader
-        get() = _vanilla
-        set(value) {
-            add(value)
-            _vanilla = value
-        }
 
     fun add(loader: ResourceLoader) {
         loaders.add(loader)
     }
 
-    fun getVanillaLoader(): ResourceLoader {
-        return vanilla
+    fun contains(type: ResourceType, file: Identifier): Boolean {
+        return loaders.any { it.contains(type, file) }
+    }
+
+    fun open(type: ResourceType, file: Identifier): InputStream {
+        return loaders.firstOrNull { it.contains(type, file) }?.open(type, file)
+                ?: error("Resource [$file] not found in ${type.folder}")
     }
 
     fun getNamespaces(): Set<String> {

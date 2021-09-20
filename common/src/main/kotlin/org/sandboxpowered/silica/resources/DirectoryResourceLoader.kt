@@ -2,33 +2,42 @@ package org.sandboxpowered.silica.resources
 
 import com.google.common.collect.Sets
 import org.apache.commons.io.filefilter.DirectoryFileFilter
+import org.sandboxpowered.silica.resources.ResourceLoader.Companion.isValidPath
 import org.sandboxpowered.silica.util.Identifier
 import java.io.File
 import java.io.FileFilter
+import java.io.FileInputStream
 import java.io.InputStream
 import java.util.function.Predicate
 
-class DirectoryResourceLoader(override val name: String, private val directory: File) : ResourceLoader {
+class DirectoryResourceLoader(override val name: String, private val directory: File) : AbstractResourceLoader() {
     private var namespaces: Set<String>? = null
 
-    override fun contains(type: ResourceType, file: Identifier): Boolean {
-        TODO("Not yet implemented")
+    private fun getFile(name: String): File? {
+        val file = File(this.directory, name)
+        if (file.isFile && isValidPath(file, name)) {
+            return file
+        }
+        return null
     }
 
-    override fun open(file: String): InputStream? {
-        TODO("Not yet implemented")
-    }
+    override fun containsFile(file: String): Boolean = getFile(file) != null
 
-    override fun open(type: ResourceType, file: Identifier): InputStream {
-        TODO("Not yet implemented")
+    override fun openFile(file: String): InputStream {
+        val f = getFile(file)
+        if (f == null) {
+            error("")
+        } else {
+            return FileInputStream(f)
+        }
     }
 
     override fun findResources(
-        type: ResourceType,
-        namespace: String,
-        path: String,
-        depth: Int,
-        filter: Predicate<String>
+            type: ResourceType,
+            namespace: String,
+            path: String,
+            depth: Int,
+            filter: Predicate<String>
     ): Set<Identifier> {
         TODO("Not yet implemented")
     }

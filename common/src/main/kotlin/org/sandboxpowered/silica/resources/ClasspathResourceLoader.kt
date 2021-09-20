@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.resources
 
-import org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS
 import org.sandboxpowered.silica.resources.ResourceLoader.Companion.getPath
+import org.sandboxpowered.silica.resources.ResourceLoader.Companion.isValidPath
 import org.sandboxpowered.silica.util.Identifier
 import java.io.File
 import java.io.FileNotFoundException
@@ -23,14 +23,6 @@ class ClasspathResourceLoader(override val name: String) : ResourceLoader {
         return ClasspathResourceLoader::class.java.getResourceAsStream(pathString)
     }
 
-    private fun isValidPath(file: File, filename: String): Boolean {
-        var string = file.canonicalPath
-        if (IS_OS_WINDOWS) {
-            string = string.replace('\\', '/')
-        }
-        return string.endsWith(filename)
-    }
-
     @OptIn(ExperimentalContracts::class)
     private fun isValidUrl(fileName: String, url: URL?): Boolean {
         contract { returns(true) implies (url != null) }
@@ -43,9 +35,9 @@ class ClasspathResourceLoader(override val name: String) : ResourceLoader {
         return isValidUrl(path, url)
     }
 
-    override fun open(file: String): InputStream? {
+    override fun open(file: String): InputStream {
         if (!file.contains('/') && !file.contains('\\'))
-            return ClasspathResourceLoader::class.java.getResourceAsStream("/$file")
+            return ClasspathResourceLoader::class.java.getResourceAsStream("/$file")!!
         else throw IllegalArgumentException("Root resources can only be a single filename")
     }
 

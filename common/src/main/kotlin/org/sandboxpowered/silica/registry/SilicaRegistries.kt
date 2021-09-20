@@ -14,6 +14,8 @@ object SilicaRegistries {
         register(BaseBlock(id("bedrock")))
         register(BaseBlock(id("dirt")))
         register(GrassBlock(id("grass_block")))
+        register(GrassBlock(id("mycelium")))
+        register(GrassBlock(id("podzol")))
 
         register(BaseBlock(id("sand")))
         register(BaseBlock(id("gravel")))

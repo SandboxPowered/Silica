@@ -37,9 +37,13 @@ class ShaderProgram {
         uniforms[uniformName] = uniformLocation
     }
 
+    fun setUniform(uniformName: String, value: Int) {
+        glUniform1i(uniforms.getInt(uniformName), value)
+    }
+
     fun setUniform(uniformName: String, value: Matrix4f) {
-        stackPush { stack ->
-            glUniformMatrix4fv(uniforms.getInt(uniformName), false, value.get(stack.mallocFloat(16)))
+        stackPush {
+            glUniformMatrix4fv(uniforms.getInt(uniformName), false, value.get(it.mallocFloat(16)))
         }
     }
 

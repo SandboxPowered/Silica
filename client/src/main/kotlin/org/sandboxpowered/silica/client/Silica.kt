@@ -27,7 +27,7 @@ class Silica(private val args: Args) : Runnable {
     val version: Version = Version.forIntegers(0, 1, 0)
     private val logger = getLogger<Silica>()
     lateinit var window: Window
-    private lateinit var assetManager: ResourceManager
+    lateinit var assetManager: ResourceManager
     lateinit var renderer: Renderer
 
     private fun close() {

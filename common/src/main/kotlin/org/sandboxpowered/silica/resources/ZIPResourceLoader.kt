@@ -7,28 +7,23 @@ import java.util.function.Predicate
 import java.util.regex.Pattern
 import java.util.zip.ZipFile
 
-class ZIPResourceLoader(override val name: String, private val file: File) : ResourceLoader {
-    private val zip: ZipFile
+class ZIPResourceLoader(override val name: String, private val file: File) : AbstractResourceLoader() {
+    private val zip: ZipFile = ZipFile(file)
     private var namespaces: Set<String>? = null
 
-    override fun contains(type: ResourceType, file: Identifier): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun containsFile(file: String): Boolean = zip.getEntry(file) != null
 
-    override fun open(file: String): InputStream? {
-        TODO("Not yet implemented")
-    }
-
-    override fun open(type: ResourceType, file: Identifier): InputStream {
-        TODO("Not yet implemented")
+    override fun openFile(file: String): InputStream = when (val zipEntry = zip.getEntry(file)) {
+        null -> error("")
+        else -> zip.getInputStream(zipEntry)
     }
 
     override fun findResources(
-        type: ResourceType,
-        namespace: String,
-        path: String,
-        depth: Int,
-        filter: Predicate<String>
+            type: ResourceType,
+            namespace: String,
+            path: String,
+            depth: Int,
+            filter: Predicate<String>
     ): Set<Identifier> {
         TODO("Not yet implemented")
     }
@@ -53,10 +48,7 @@ class ZIPResourceLoader(override val name: String, private val file: File) : Res
     }
 
     companion object {
-        var pattern = Pattern.compile("(assets|data)\\/([a-z]*)\\/")
+        var pattern: Pattern = Pattern.compile("(assets|data)\\/([a-z]*)\\/")
     }
 
-    init {
-        zip = ZipFile(file)
-    }
 }

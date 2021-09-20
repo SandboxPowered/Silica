@@ -3,10 +3,10 @@ package org.sandboxpowered.silica.client.opengl
 import org.lwjgl.opengl.GL30.*
 import org.sandboxpowered.silica.client.util.stackPush
 
-class Mesh(private val positions: FloatArray, private val colours: FloatArray, private val indices: IntArray) {
+class Mesh(private val positions: FloatArray, private val texCoords: FloatArray, private val indices: IntArray) {
     var vaoId = -1
     var posVboId = -1
-    var colourVboId = -1
+    var texCoordsVboId = -1
     var idxVboId = -1
     var vertexCount = -1
 
@@ -28,13 +28,13 @@ class Mesh(private val positions: FloatArray, private val colours: FloatArray, p
             glEnableVertexAttribArray(0)
             glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0)
 
-            colourVboId = glGenBuffers()
-            val colourBuffer = it.mallocFloat(colours.size)
-            colourBuffer.put(colours).flip()
-            glBindBuffer(GL_ARRAY_BUFFER, colourVboId)
-            glBufferData(GL_ARRAY_BUFFER, colourBuffer, GL_STATIC_DRAW)
+            texCoordsVboId = glGenBuffers()
+            val texCoordsBuffer = it.mallocFloat(texCoords.size)
+            texCoordsBuffer.put(texCoords).flip()
+            glBindBuffer(GL_ARRAY_BUFFER, texCoordsVboId)
+            glBufferData(GL_ARRAY_BUFFER, texCoordsBuffer, GL_STATIC_DRAW)
             glEnableVertexAttribArray(1)
-            glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0)
+            glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0)
 
             idxVboId = glGenBuffers()
             val indicesBuffer = it.mallocInt(indices.size)
@@ -53,7 +53,7 @@ class Mesh(private val positions: FloatArray, private val colours: FloatArray, p
         // Delete the VBOs
         glBindBuffer(GL_ARRAY_BUFFER, 0)
         glDeleteBuffers(posVboId)
-        glDeleteBuffers(colourVboId)
+        glDeleteBuffers(texCoordsVboId)
         glDeleteBuffers(idxVboId)
 
         // Delete the VAO
