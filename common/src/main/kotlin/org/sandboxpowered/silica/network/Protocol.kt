@@ -26,61 +26,61 @@ import kotlin.collections.set
 enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
     HANDSHAKE(-1, {
         server {
-            add(0x00, ::HandshakeRequest)
+            0x00 means ::HandshakeRequest
         }
     }),
     PLAY(0, {
         server {
-            add(0x00, ::TeleportConfirmation)
-            add(0x05, ::ClientSettings)
-            add(0x0A, ::ClientPluginChannel)
-            add(0x0F, ::KeepAliveServer)
-            add(0x11, ::PlayerPosition)
-            add(0x12, ::PlayerPositionAndRotation)
-            add(0x13, ::PlayerRotation)
-            add(0x14, ::PlayerMovement)
-            add(0x1A, ::PlayerDigging)
-            add(0x2C, ::HandSwingAnimation)
-            add(0x1B, ::EntityAction)
-            add(0x2E, ::PlayerBlockPlacement)
+            0x00 means ::TeleportConfirmation
+            0x05 means ::ClientSettings
+            0x0A means ::ClientPluginChannel
+            0x0F means ::KeepAliveServer
+            0x11 means ::PlayerPosition
+            0x12 means ::PlayerPositionAndRotation
+            0x13 means ::PlayerRotation
+            0x14 means ::PlayerMovement
+            0x1A means ::PlayerDigging
+            0x2C means ::HandSwingAnimation
+            0x1B means ::EntityAction
+            0x2E means ::PlayerBlockPlacement
         }
         client {
-            add(0x26, ::JoinGame)
-            add(0x48, ::HeldItemChange)
-            add(0x65, ::DeclareRecipes)
-            add(0X66, ::DeclareTags)
-            add(0x1B, ::EntityStatus)
-            add(0x12, ::DeclareCommands)
-            add(0x38, ::SetPlayerPositionAndLook)
-            add(0x39, ::UnlockRecipes)
-            add(0x36, ::PlayerInfo)
-            add(0x49, ::UpdateChunkPosition)
-            add(0x22, ::ChunkData)
-            add(0x25, ::UpdateLight)
-            add(0x20, ::WorldBorder)
-            add(0x21, ::KeepAliveClient)
-            add(0x08, ::AcknowledgePlayerDigging)
+            0x26 means ::JoinGame
+            0x48 means ::HeldItemChange
+            0x65 means ::DeclareRecipes
+            0X66 means ::DeclareTags
+            0x1B means ::EntityStatus
+            0x12 means ::DeclareCommands
+            0x38 means ::SetPlayerPositionAndLook
+            0x39 means ::UnlockRecipes
+            0x36 means ::PlayerInfo
+            0x49 means ::UpdateChunkPosition
+            0x22 means ::ChunkData
+            0x25 means ::UpdateLight
+            0x20 means ::WorldBorder
+            0x21 means ::KeepAliveClient
+            0x08 means ::AcknowledgePlayerDigging
         }
     }),
     STATUS(1, {
         server {
-            add(0x00, ::StatusRequest)
-            add(0x01, ::PingRequest)
+            0x00 means ::StatusRequest
+            0x01 means ::PingRequest
         }
         client {
-            add(0x00, ::StatusResponse)
-            add(0x01, ::PongResponse)
+            0x00 means ::StatusResponse
+            0x01 means ::PongResponse
         }
     }),
     LOGIN(2, {
         server {
-            add(0x00, ::LoginStart)
-            add(0x01, ::EncryptionResponse)
+            0x00 means ::LoginStart
+            0x01 means ::EncryptionResponse
         }
         client {
-            add(0x00, ::Disconnect)
-            add(0x01, ::EncryptionRequest)
-            add(0x02, ::LoginSuccess)
+            0x00 means ::Disconnect
+            0x01 means ::EncryptionRequest
+            0x02 means ::LoginSuccess
         }
     });
 
@@ -142,11 +142,11 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             fun createPacket(packetId: Int): PacketBase? =
                 if (packetId !in idToConstructor) null else idToConstructor[packetId].get()
 
-            inline fun <reified P : PacketBase> add(targetId: Int, packetSupplier: Supplier<P>): FlowBuilder {
-                val id = classToId.put(P::class.java, targetId)
+            inline infix fun <reified P : PacketBase> Int.means(packetSupplier: Supplier<P>): FlowBuilder {
+                val id = classToId.put(P::class.java, this)
                 require(id == -1) { "Packet ${P::class.java} is already registered to ID $id" }
-                idToConstructor[targetId] = packetSupplier
-                return this
+                idToConstructor[this] = packetSupplier
+                return this@FlowBuilder
             }
         }
 
