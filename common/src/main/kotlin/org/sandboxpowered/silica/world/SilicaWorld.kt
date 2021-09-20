@@ -9,6 +9,8 @@ import akka.actor.typed.javadsl.Receive
 import com.artemis.WorldConfigurationBuilder
 import com.mojang.authlib.GameProfile
 import org.sandboxpowered.silica.SilicaPlayerManager
+import org.sandboxpowered.silica.block.BlockEntityProvider
+import org.sandboxpowered.silica.component.BlockPositionComponent
 import org.sandboxpowered.silica.component.VanillaPlayerInput
 import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.state.block.BlockState
@@ -18,12 +20,14 @@ import org.sandboxpowered.silica.system.Entity3dMapSystem
 import org.sandboxpowered.silica.system.VanillaInputSystem
 import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.Side
+import org.sandboxpowered.silica.util.extensions.add
 import org.sandboxpowered.silica.util.extensions.getSystem
 import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.util.extensions.registerAs
 import org.sandboxpowered.silica.util.math.Position
 import org.sandboxpowered.silica.world.gen.TerrainGenerator
 import org.sandboxpowered.silica.world.util.BlocTree
+import org.sandboxpowered.silica.world.util.IntTree
 import org.sandboxpowered.silica.world.util.OcTree
 import org.sandboxpowered.silica.world.util.iterateCube
 import java.util.*
@@ -50,6 +54,10 @@ class SilicaWorld private constructor(private val side: Side) : World {
             OcTree(
                 WORLD_MIN.toFloat(), WORLD_MIN.toFloat(), WORLD_MIN.toFloat(),
                 WORLD_SIZE.toFloat(), WORLD_SIZE.toFloat(), WORLD_SIZE.toFloat()
+            ),
+            IntTree(
+                WORLD_MIN, WORLD_MIN, WORLD_MIN,
+                WORLD_SIZE, WORLD_SIZE, WORLD_SIZE
             )
         )
         config.with(entityMap)
@@ -64,6 +72,19 @@ class SilicaWorld private constructor(private val side: Side) : World {
     }
 
     override fun setBlockState(pos: Position, state: BlockState) {
+        //TODO see if theres generally any better way of doing this.
+        val system = artemisWorld.getSystem<Entity3dMapSystem>()
+        val ents = system.getBlockEntities(pos)
+        if (!ents.isEmpty) {
+            artemisWorld.delete(ents[0])
+        }
+        val block = state.block
+        if (block is BlockEntityProvider) {
+            val builder = block.createArchetype()
+            builder.add<BlockPositionComponent>()
+            val archetype = builder.build(artemisWorld) // TODO cache these per world
+            artemisWorld.create(archetype)
+        }
         blocks[pos.x, pos.y, pos.z] = state
     }
 
