@@ -1,9 +1,11 @@
 package org.sandboxpowered.silica.network.play.serverbound
 
+import org.sandboxpowered.silica.block.Blocks
 import org.sandboxpowered.silica.network.PacketByteBuf
 import org.sandboxpowered.silica.network.PacketHandler
 import org.sandboxpowered.silica.network.PacketPlay
 import org.sandboxpowered.silica.network.PlayContext
+import org.sandboxpowered.silica.util.content.Direction
 import org.sandboxpowered.silica.util.math.Position
 
 class PlayerBlockPlacement(
@@ -31,5 +33,8 @@ class PlayerBlockPlacement(
 
     override fun handle(packetHandler: PacketHandler, context: PlayContext) {
         // TODO
+        context.mutateWorld {
+            it.setBlockState(location!!.shift(Direction.byId(face)), Blocks.STONE.get().defaultState)
+        }
     }
 }

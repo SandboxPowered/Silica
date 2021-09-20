@@ -41,12 +41,12 @@ enum class Direction(
             .toTypedArray()
 
         fun byId(idx: @Range(from = 0, to = 5) Int): Direction {
-            require(idx in 0..5) { "Direction id can only be within 0-5" }
+            require(idx in 0..5) { "Direction id can only be within 0-5 got $idx" }
             return ID_TO_DIRECTION[idx]
         }
 
         fun byHorizontalId(idx: @Range(from = 0, to = 3) Int): Direction {
-            require(idx in 0..5) { "Horizontal Direction id can only be within 0-3" }
+            require(idx in 0..5) { "Horizontal Direction id can only be within 0-3 got $idx" }
             return HORIZONTAL[abs(idx % 3)]
         }
     }

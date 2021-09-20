@@ -12,7 +12,10 @@ import org.sandboxpowered.silica.SilicaPlayerManager
 import org.sandboxpowered.silica.block.BlockEntityProvider
 import org.sandboxpowered.silica.component.BlockPositionComponent
 import org.sandboxpowered.silica.component.VanillaPlayerInput
+import org.sandboxpowered.silica.network.play.clientbound.BlockChange
 import org.sandboxpowered.silica.registry.SilicaRegistries
+import org.sandboxpowered.silica.server.Network
+import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.state.block.BlockState
 import org.sandboxpowered.silica.state.fluid.FluidState
 import org.sandboxpowered.silica.system.Entity3dMap
@@ -34,7 +37,7 @@ import java.util.*
 import com.artemis.World as ArtemisWorld
 import org.sandboxpowered.silica.world.gen.TerrainGenerator.Generate as CommandGenerate
 
-class SilicaWorld private constructor(private val side: Side) : World {
+class SilicaWorld private constructor(private val side: Side, private val server: SilicaServer) : World {
 
     private val blocks: BlocTree = BlocTree(
         WORLD_MIN,
@@ -61,10 +64,7 @@ class SilicaWorld private constructor(private val side: Side) : World {
             )
         )
         config.with(entityMap)
-        artemisWorld = ArtemisWorld(
-            config.build()
-                .registerAs<Entity3dMap>(entityMap)
-        )
+        artemisWorld = ArtemisWorld(config.build().registerAs<Entity3dMap>(entityMap))
     }
 
     override fun getBlockState(pos: Position): BlockState {
@@ -86,6 +86,8 @@ class SilicaWorld private constructor(private val side: Side) : World {
             artemisWorld.create(archetype)
         }
         blocks[pos.x, pos.y, pos.z] = state
+        // TODO: only send to nearby players
+        server.network.tell(Network.SendToAll(BlockChange(pos, server.stateManager.toVanillaId(state))))
     }
 
     override fun getFluidState(pos: Position): FluidState {
@@ -99,8 +101,8 @@ class SilicaWorld private constructor(private val side: Side) : World {
         private const val WORLD_MAX = (1 shl 25) - 1 // (2^25)-1
         private const val WORLD_SIZE = -WORLD_MIN + WORLD_MAX + 1 // 2^26
 
-        fun actor(side: Side): Behavior<Command> = Behaviors.setup {
-            Actor(SilicaWorld(side), it)
+        fun actor(side: Side, server: SilicaServer): Behavior<Command> = Behaviors.setup {
+            Actor(SilicaWorld(side, server), it)
         }
     }
 

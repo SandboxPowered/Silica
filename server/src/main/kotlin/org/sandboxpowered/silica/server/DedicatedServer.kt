@@ -102,7 +102,7 @@ class DedicatedServer(args: Args) : SilicaServer() {
         private var skippedTicks = 0
         private var lastTickTime: Long = -1
         private val world: ActorRef<in SilicaWorld.Command> =
-            context.spawn(SilicaWorld.actor(Side.SERVER), "world").apply(worldInit)
+            context.spawn(SilicaWorld.actor(Side.SERVER, server), "world").apply(worldInit)
         private val network: ActorRef<in Network> = context.spawn(Network.actor(server), "network").apply(networkInit)
         private val currentlyTicking: Object2LongMap<ActorRef<*>> = Object2LongOpenHashMap(3)
 

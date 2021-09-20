@@ -8,9 +8,7 @@ class Identifier private constructor(val namespace: String, val path: String) : 
         require(path.isNotEmpty()) { "Identifier can not have an empty path. Namespace: $namespace" }
     }
 
-    override fun toString(): String {
-        return "$namespace:$path"
-    }
+    override fun toString(): String = "$namespace:$path"
 
     override fun compareTo(other: Identifier): Int {
         return when (val ns = namespace.compareTo(other.namespace)) {
@@ -28,9 +26,7 @@ class Identifier private constructor(val namespace: String, val path: String) : 
         )
     }
 
-    override fun hashCode(): Int {
-        return Objects.hashCode(namespace, path)
-    }
+    override fun hashCode(): Int = Objects.hashCode(namespace, path)
 
     companion object {
         fun of(id: String): Identifier {

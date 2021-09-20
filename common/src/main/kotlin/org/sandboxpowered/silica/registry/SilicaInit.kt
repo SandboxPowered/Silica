@@ -55,6 +55,9 @@ object SilicaInit {
                     LEAVES not "warped" not "crimson"
                 )
             }
+            arrayOf("nether_wart_block", "warped_wart_block") defines {
+                archetypes(BLOCK)
+            }
             "iron" defines { archetypes(DOOR, TRAPDOOR) }
             "stone" defines { archetypes(BUTTON) }
             arrayOf("iron", "coal", "gold", "diamond", "emerald", "lapis") defines {
