@@ -23,5 +23,6 @@ enum class Colour(override val asString: String) : StringSerializable {
     companion object {
         val ALL = values()
         val NAMES = ALL.map { it.asString }
+        val NAME_ARRAY = NAMES.toTypedArray()
     }
 }

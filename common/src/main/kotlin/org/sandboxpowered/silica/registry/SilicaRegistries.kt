@@ -40,17 +40,24 @@ object SilicaRegistries {
         register(FireBlock(id("fire")))
         register(GlassPaneBlock(id("glass_pane")))
 
-        for (colour in Colour.NAMES) {
-            register(BaseBlock(id("${colour}_wool")))
-            register(BaseBlock(id("${colour}_carpet")))
-            register(BaseBlock(id("${colour}_stained_glass")))
-            register(GlassPaneBlock(id("${colour}_stained_glass_pane")))
-            register(BedBlock(id("${colour}_bed")))
-        }
-
         blocks {
+            Colour.NAME_ARRAY defines {
+                archetypes(BLOCK suffix "_wool")
+                archetypes(BLOCK suffix "_carpet")
+                archetypes(BLOCK suffix "_stained_glass")
+                archetypes(EMPTY suffix "_stained_glass_pane" block ::GlassPaneBlock)
+                archetypes(EMPTY suffix "_bed" block ::BedBlock)
+            }
             arrayOf("oak", "spruce", "birch", "jungle", "dark_oak", "acacia", "warped", "crimson") defines {
-                archetypes(BLOCK suffix "_planks", STAIRS, SLAB, DOOR, TRAPDOOR, BUTTON, LEAVES not "warped" not "crimson")
+                archetypes(
+                    BLOCK suffix "_planks",
+                    STAIRS,
+                    SLAB,
+                    DOOR,
+                    TRAPDOOR,
+                    BUTTON,
+                    LEAVES not "warped" not "crimson"
+                )
             }
             "iron" defines { archetypes(DOOR, TRAPDOOR) }
             "stone" defines { archetypes(BUTTON) }
