@@ -46,12 +46,9 @@ class SilicaWorld private constructor(private val side: Side) : World {
         val config = WorldConfigurationBuilder()
         config.with(VanillaInputSystem())
         config.with(SilicaPlayerManager(10))
-        val entityMap = Entity3dMapSystem(
-            OcTree(
-                WORLD_MIN.toFloat(), WORLD_MIN.toFloat(), WORLD_MIN.toFloat(),
-                WORLD_SIZE.toFloat(), WORLD_SIZE.toFloat(), WORLD_SIZE.toFloat()
-            )
-        )
+        val min = WORLD_MIN.toFloat()
+        val size = WORLD_SIZE.toFloat()
+        val entityMap = Entity3dMapSystem(OcTree(min, min, min, size, size, size))
         config.with(entityMap)
         artemisWorld = ArtemisWorld(
             config.build()
