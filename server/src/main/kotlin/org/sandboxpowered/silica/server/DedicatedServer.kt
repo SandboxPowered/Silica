@@ -59,7 +59,7 @@ class DedicatedServer(args: Args) : SilicaServer() {
             if (missing != null && missing.isNotEmpty()) {
                 logger.info("Missing ${missing.size} vanilla BlockStates. Exported to missing.txt")
                 val builder = StringBuilder()
-                missing.forEach {
+                missing.sorted().forEach {
                     builder.append(it).append("\n")
                 }
                 FileUtils.writeStringToFile(File("missing.txt"), builder.toString(), StandardCharsets.UTF_8)

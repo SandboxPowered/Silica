@@ -97,16 +97,15 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
         GL11.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, decoder.width, decoder.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf)
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
-        glGenerateMipmap(GL_TEXTURE_2D);
-
+        glGenerateMipmap(GL_TEXTURE_2D)
 
         GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
     }
 
-    private var pos = Vector3f(0f, 0f, -2f)
+    private var pos = Vector3f(-0.5f, -0.5f, -2f)
     private var rot = Vector3f()
 
     override fun frame() {

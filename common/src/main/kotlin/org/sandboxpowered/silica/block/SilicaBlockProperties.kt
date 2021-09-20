@@ -6,11 +6,8 @@ import org.sandboxpowered.silica.state.property.BooleanProperty.Companion.of
 import org.sandboxpowered.silica.state.property.EnumProperty.Companion.of
 import org.sandboxpowered.silica.state.property.IntProperty.Companion.of
 import org.sandboxpowered.silica.state.property.Property
-import org.sandboxpowered.silica.util.content.Direction
+import org.sandboxpowered.silica.util.content.*
 import org.sandboxpowered.silica.util.content.Direction.Axis
-import org.sandboxpowered.silica.util.content.Half
-import org.sandboxpowered.silica.util.content.StairShape
-import org.sandboxpowered.silica.util.content.WallShape
 
 object SilicaBlockProperties {
     val ATTACHED: Property<Boolean> = of("attached")
@@ -80,10 +77,18 @@ object SilicaBlockProperties {
     val HORIZONTAL_AXIS: Property<Axis> = of("axis", Axis::isHorizontal)
     val AXIS: Property<Axis> = of<Axis>("axis")
     val SLAB_HALF: Property<Half> = of<Half>("type")
-    val STAIR_HALF: Property<Half> = of("half") { it != Half.DOUBLE }
+    val HALF: Property<Half> = of("half") { it != Half.DOUBLE }
     val STAIR_SHAPE: Property<StairShape> = of<StairShape>("shape")
     val WALL_SHAPE_NORTH: Property<WallShape> = of<WallShape>("north")
     val WALL_SHAPE_EAST: Property<WallShape> = of<WallShape>("east")
     val WALL_SHAPE_SOUTH: Property<WallShape> = of<WallShape>("south")
     val WALL_SHAPE_WEST: Property<WallShape> = of<WallShape>("west")
+
+    val INSTRUMENT: Property<Instrument> = of<Instrument>("instrument")
+    val BED_PART: Property<BedPart> = of<BedPart>("part")
+
+    val DOOR_HALF: Property<DoorHalf> = of<DoorHalf>("half")
+    val DOOR_HINGE: Property<DoorHinge> = of<DoorHinge>("hinge")
+
+    val BUTTON_FACE: Property<ButtonFace> = of<ButtonFace>("face")
 }

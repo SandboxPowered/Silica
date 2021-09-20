@@ -1,16 +1,15 @@
 package org.sandboxpowered.silica.block
 
+import org.sandboxpowered.silica.block.SilicaBlockProperties.BUTTON_FACE
 import org.sandboxpowered.silica.block.SilicaBlockProperties.HORIZONTAL_FACING
-import org.sandboxpowered.silica.block.SilicaBlockProperties.HALF
-import org.sandboxpowered.silica.block.SilicaBlockProperties.STAIR_SHAPE
-import org.sandboxpowered.silica.block.SilicaBlockProperties.WATERLOGGED
+import org.sandboxpowered.silica.block.SilicaBlockProperties.POWERED
 import org.sandboxpowered.silica.state.StateProvider
 import org.sandboxpowered.silica.state.block.BlockState
 import org.sandboxpowered.silica.util.Identifier
 
-class StairBlock(identifier: Identifier) : BaseBlock(identifier) {
+class ButtonBlock(identifier: Identifier) : BaseBlock(identifier) {
     override fun appendProperties(builder: StateProvider.Builder<Block, BlockState>) {
-        builder.add(WATERLOGGED, HORIZONTAL_FACING, HALF, STAIR_SHAPE)
+        super.appendProperties(builder)
+        builder.add(POWERED, HORIZONTAL_FACING, BUTTON_FACE)
     }
-
 }
