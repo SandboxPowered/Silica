@@ -33,11 +33,11 @@ class DirectoryResourceLoader(override val name: String, private val directory: 
     }
 
     override fun findResources(
-            type: ResourceType,
-            namespace: String,
-            path: String,
-            depth: Int,
-            filter: Predicate<String>
+        type: ResourceType,
+        namespace: String,
+        path: String,
+        depth: Int,
+        filter: Predicate<String>
     ): Set<Identifier> {
         TODO("Not yet implemented")
     }

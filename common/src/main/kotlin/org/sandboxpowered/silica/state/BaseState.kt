@@ -106,10 +106,7 @@ open class BaseState<B : RegistryEntry<B>, S>(
     }
 
     override fun toString(): String {
-        return this.javaClass.simpleName + "{" +
-                "base=" + base +
-                ", properties=" + properties +
-                '}'
+        return "${javaClass.simpleName}{base=$base, properties=$properties}"
     }
 
     private fun <T> findNextInCollection(collection: Collection<T>, value: T): T {

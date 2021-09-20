@@ -16,11 +16,11 @@ interface ResourceLoader {
     fun open(type: ResourceType, file: Identifier): InputStream
 
     fun findResources(
-            type: ResourceType,
-            namespace: String,
-            path: String,
-            depth: Int,
-            filter: Predicate<String>
+        type: ResourceType,
+        namespace: String,
+        path: String,
+        depth: Int,
+        filter: Predicate<String>
     ): Set<Identifier>
 
     fun getNamespaces(type: ResourceType): Set<String>

@@ -302,8 +302,8 @@ class BlocTree private constructor(
 
         fun contains(x: Int, y: Int, z: Int): Boolean =
             this.x <= x && this.x + this.size > x
-                    && this.y <= y && this.y + this.size > y
-                    && this.z <= z && this.z + this.size > z
+                && this.y <= y && this.y + this.size > y
+                && this.z <= z && this.z + this.size > z
 
         override fun toString() = "Bounds(x=$x, y=$y, z=$z, size=$size)"
     }

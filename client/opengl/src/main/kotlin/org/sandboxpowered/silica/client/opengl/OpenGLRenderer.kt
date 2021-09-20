@@ -35,46 +35,46 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
         GL.createCapabilities()
 
         val positions = floatArrayOf(
-                // VO
-                0.0f, 1.0f, 1.0f,
-                // V1
-                0.0f, 0.0f, 1.0f,
-                // V2
-                1.0f, 0.0f, 1.0f,
-                // V3
-                1.0f, 1.0f, 1.0f,
-                // V4
-                0.0f, 1.0f, 0.0f,
-                // V5
-                1.0f, 1.0f, 0.0f,
-                // V6
-                0.0f, 0.0f, 0.0f,
-                // V7
-                1.0f, 0.0f, 0.0f,
+            // VO
+            0.0f, 1.0f, 1.0f,
+            // V1
+            0.0f, 0.0f, 1.0f,
+            // V2
+            1.0f, 0.0f, 1.0f,
+            // V3
+            1.0f, 1.0f, 1.0f,
+            // V4
+            0.0f, 1.0f, 0.0f,
+            // V5
+            1.0f, 1.0f, 0.0f,
+            // V6
+            0.0f, 0.0f, 0.0f,
+            // V7
+            1.0f, 0.0f, 0.0f,
         )
         val texCoords = floatArrayOf(
-                0.0f, 0.0f,
-                0.0f, 1.0f,
-                1.0f, 1.0f,
-                1.0f, 0.0f,
-                1.0f, 0.0f,
-                1.0f, 1.0f,
-                0.0f, 1.0f,
-                0.0f, 0.0f,
+            0.0f, 0.0f,
+            0.0f, 1.0f,
+            1.0f, 1.0f,
+            1.0f, 0.0f,
+            1.0f, 0.0f,
+            1.0f, 1.0f,
+            0.0f, 1.0f,
+            0.0f, 0.0f,
         )
         val indices = intArrayOf(
-                // Front face
-                0, 1, 3, 3, 1, 2,
-                // Back face
-                7, 6, 4, 7, 4, 5,
-                // Left face
-                6, 1, 0, 6, 0, 4,
-                // Right face
-                3, 2, 7, 5, 3, 7,
-                // Top Face
-                4, 0, 3, 5, 4, 3,
-                // Bottom face
-                2, 1, 6, 2, 6, 7,
+            // Front face
+            0, 1, 3, 3, 1, 2,
+            // Back face
+            7, 6, 4, 7, 4, 5,
+            // Left face
+            6, 1, 0, 6, 0, 4,
+            // Right face
+            3, 2, 7, 5, 3, 7,
+            // Top Face
+            4, 0, 3, 5, 4, 3,
+            // Bottom face
+            2, 1, 6, 2, 6, 7,
         )
         mesh = Mesh(positions, texCoords, indices)
 
@@ -86,7 +86,8 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
         shaderProgram.createUniform("worldMatrix")
         shaderProgram.createUniform("texture_sampler")
 
-        val decoder = PNGDecoder(silica.assetManager.open(ResourceType.ASSETS, Identifier.of("textures/block/stone.png")))
+        val decoder =
+            PNGDecoder(silica.assetManager.open(ResourceType.ASSETS, Identifier.of("textures/block/stone.png")))
         val buf = ByteBuffer.allocateDirect(4 * decoder.width * decoder.height)
         decoder.decode(buf, decoder.width * 4, PNGDecoder.Format.RGBA)
         buf.flip()
@@ -122,8 +123,8 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
 
         shaderProgram.bind()
         shaderProgram.setUniform(
-                "projectionMatrix",
-                transforms.getProjectionMatrix(fov, window.width.toFloat(), window.height.toFloat(), zNear, zFar)
+            "projectionMatrix",
+            transforms.getProjectionMatrix(fov, window.width.toFloat(), window.height.toFloat(), zNear, zFar)
         )
         shaderProgram.setUniform("worldMatrix", transforms.getWorldMatrix(pos, rot, 1f))
         shaderProgram.setUniform("texture_sampler", 0)

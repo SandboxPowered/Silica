@@ -142,19 +142,18 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             fun createPacket(packetId: Int): PacketBase? =
                 if (packetId !in idToConstructor) null else idToConstructor[packetId].get()
 
-            inline infix fun <reified P : PacketBase> Int.means(packetSupplier: Supplier<P>): FlowBuilder {
+            inline infix fun <reified P : PacketBase> Int.means(packetSupplier: Supplier<P>) {
                 val id = classToId.put(P::class.java, this)
                 require(id == -1) { "Packet ${P::class.java} is already registered to ID $id" }
                 idToConstructor[this] = packetSupplier
-                return this@FlowBuilder
             }
         }
 
         val client = FlowBuilder(NetworkFlow.CLIENTBOUND)
         val server = FlowBuilder(NetworkFlow.SERVERBOUND)
 
-        fun client(block: FlowBuilder.() -> Unit): FlowBuilder = client.apply(block)
-        fun server(block: FlowBuilder.() -> Unit): FlowBuilder = server.apply(block)
+        inline fun client(block: FlowBuilder.() -> Unit): FlowBuilder = client.apply(block)
+        inline fun server(block: FlowBuilder.() -> Unit): FlowBuilder = server.apply(block)
     }
 }
 

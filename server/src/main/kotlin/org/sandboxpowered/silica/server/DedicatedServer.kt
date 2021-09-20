@@ -21,7 +21,6 @@ import org.sandboxpowered.silica.util.extensions.onSignal
 import org.sandboxpowered.silica.world.SilicaWorld
 import java.io.File
 import java.nio.charset.StandardCharsets
-import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Duration
 

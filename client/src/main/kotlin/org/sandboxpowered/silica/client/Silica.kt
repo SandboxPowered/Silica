@@ -1,6 +1,5 @@
 package org.sandboxpowered.silica.client
 
-import akka.actor.typed.javadsl.*
 import com.github.zafarkhaja.semver.Version
 import com.google.common.base.Joiner
 import org.lwjgl.glfw.GLFW

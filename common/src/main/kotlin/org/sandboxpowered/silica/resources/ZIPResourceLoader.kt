@@ -19,11 +19,11 @@ class ZIPResourceLoader(override val name: String, private val file: File) : Abs
     }
 
     override fun findResources(
-            type: ResourceType,
-            namespace: String,
-            path: String,
-            depth: Int,
-            filter: Predicate<String>
+        type: ResourceType,
+        namespace: String,
+        path: String,
+        depth: Int,
+        filter: Predicate<String>
     ): Set<Identifier> {
         TODO("Not yet implemented")
     }
