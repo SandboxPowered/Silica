@@ -7,6 +7,10 @@ import org.junit.jupiter.params.ParameterizedTest.DISPLAY_NAME_PLACEHOLDER
 import org.junit.jupiter.params.ParameterizedTest.INDEX_PLACEHOLDER
 import org.junit.jupiter.params.provider.MethodSource
 import org.sandboxpowered.silica.state.block.BlockState
+import org.sandboxpowered.silica.util.extensions.component1
+import org.sandboxpowered.silica.util.extensions.component2
+import org.sandboxpowered.silica.util.extensions.component3
+import org.sandboxpowered.silica.util.math.Position
 import java.util.stream.Stream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -19,7 +23,7 @@ internal class BlocTreeTest {
 
     @MethodSource("world layers")
     @ParameterizedTest(name = "[$INDEX_PLACEHOLDER] $DISPLAY_NAME_PLACEHOLDER")
-    fun `A tree filled with layers should store correct info`(blocks: Sequence<Pair<Triple<Int, Int, Int>, BlockState>>) {
+    fun `A tree filled with layers should store correct info`(blocks: Sequence<Pair<Position, BlockState>>) {
         val tree = BlocTree(-8, 0, -8, 16, air)
         var count = 0
 
@@ -38,39 +42,39 @@ internal class BlocTreeTest {
     }
 
     @Suppress("unused")
-    private fun `world layers`(): Stream<Sequence<Pair<Triple<Int, Int, Int>, BlockState>>> = Stream.of(sequence {
+    private fun `world layers`(): Stream<Sequence<Pair<Position, BlockState>>> = Stream.of(sequence {
         var dy = 0
         iterateCube(-8, dy, -8, w = 16, h = 1) { x, y, z ->
-            yield(Triple(x, y, z) to bedrock)
+            yield(Position(x, y, z) to bedrock)
         }
         ++dy
         iterateCube(-8, dy, -8, w = 16, h = 3, d = 16) { x, y, z ->
-            yield(Triple(x, y, z) to if (x % 2 == z % 2) stone else dirt)
+            yield(Position(x, y, z) to if (x % 2 == z % 2) stone else dirt)
         }
         dy += 3
         iterateCube(-8, dy, -8, w = 16, h = 1) { x, y, z ->
-            yield(Triple(x, y, z) to dirt)
+            yield(Position(x, y, z) to dirt)
         }
         ++dy
         iterateCube(-8, dy, -8, w = 16, h = 1) { x, y, z ->
-            yield(Triple(x, y, z) to grass)
+            yield(Position(x, y, z) to grass)
         }
     }, sequence {
         var dy = 0
         iterateCube(-8, dy, -8, w = 16, h = 1) { x, y, z ->
-            yield(Triple(x, y, z) to bedrock)
+            yield(Position(x, y, z) to bedrock)
         }
         ++dy
         iterateCube(-8, dy, -8, w = 16, h = 3) { x, y, z ->
-            yield(Triple(x, y, z) to stone)
+            yield(Position(x, y, z) to stone)
         }
         dy += 3
         iterateCube(-8, dy, -8, w = 16, h = 1) { x, y, z ->
-            yield(Triple(x, y, z) to dirt)
+            yield(Position(x, y, z) to dirt)
         }
         ++dy
         iterateCube(-8, dy, -8, w = 16, h = 1) { x, y, z ->
-            yield(Triple(x, y, z) to grass)
+            yield(Position(x, y, z) to grass)
         }
     })
 
@@ -90,7 +94,7 @@ internal class BlocTreeTest {
 
     @MethodSource("illegal pos")
     @ParameterizedTest(name = "[$INDEX_PLACEHOLDER] $DISPLAY_NAME_PLACEHOLDER ${ParameterizedTest.ARGUMENTS_PLACEHOLDER}")
-    fun `Trying to set a block outside of the tree's bounds should throw an ISE`(pos: Triple<Int, Int, Int>) {
+    fun `Trying to set a block outside of the tree's bounds should throw an ISE`(pos: Position) {
         val tree = BlocTree(-8, 0, -8, 16, air)
         val (x, y, z) = pos
         Assertions.assertThrows(IllegalArgumentException::class.java) {
@@ -99,12 +103,12 @@ internal class BlocTreeTest {
     }
 
     @Suppress("unused")
-    private fun `illegal pos`(): Stream<Triple<Int, Int, Int>> = Stream.of(
-        Triple(2, -1, 2),
-        Triple(2, 16, 2),
-        Triple(-9, 5, 2),
-        Triple(8, 5, 2),
-        Triple(2, 5, -9),
-        Triple(2, 5, 8),
+    private fun `illegal pos`(): Stream<Position> = Stream.of(
+        Position(2, -1, 2),
+        Position(2, 16, 2),
+        Position(-9, 5, 2),
+        Position(8, 5, 2),
+        Position(2, 5, -9),
+        Position(2, 5, 8),
     )
 }
