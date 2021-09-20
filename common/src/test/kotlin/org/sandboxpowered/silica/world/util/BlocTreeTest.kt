@@ -3,8 +3,7 @@ package org.sandboxpowered.silica.world.util
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.ParameterizedTest.DISPLAY_NAME_PLACEHOLDER
-import org.junit.jupiter.params.ParameterizedTest.INDEX_PLACEHOLDER
+import org.junit.jupiter.params.ParameterizedTest.*
 import org.junit.jupiter.params.provider.MethodSource
 import org.sandboxpowered.silica.state.block.BlockState
 import org.sandboxpowered.silica.util.extensions.component1
@@ -92,7 +91,7 @@ internal class BlocTreeTest {
     }
 
     @MethodSource("illegal pos")
-    @ParameterizedTest(name = "[$INDEX_PLACEHOLDER] $DISPLAY_NAME_PLACEHOLDER ${ParameterizedTest.ARGUMENTS_PLACEHOLDER}")
+    @ParameterizedTest(name = "[$INDEX_PLACEHOLDER] $DISPLAY_NAME_PLACEHOLDER $ARGUMENTS_PLACEHOLDER")
     fun `Trying to set a block outside of the tree's bounds should throw an ISE`(pos: Position) {
         val tree = BlocTree(-8, 0, -8, 16, air)
         val (x, y, z) = pos
