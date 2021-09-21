@@ -8,7 +8,8 @@ import akka.actor.typed.javadsl.*
 import it.unimi.dsi.fastutil.objects.Object2LongMap
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap
 import org.apache.commons.io.FileUtils
-import org.sandboxpowered.silica.StateManager
+import org.sandboxpowered.silica.StateMappingManager
+import org.sandboxpowered.silica.StateMappingManager.ErrorType.UNKNOWN
 import org.sandboxpowered.silica.resources.ZIPResourceLoader
 import org.sandboxpowered.silica.util.Side
 import org.sandboxpowered.silica.util.Util
@@ -26,47 +27,46 @@ import java.time.Duration
 
 class DedicatedServer(args: Args) : SilicaServer() {
     private var logger = getLogger<DedicatedServer>()
-    override val stateManager = StateManager()
+    override val stateRemapper = StateMappingManager()
     private val acceptVanillaConnections: Boolean
     override lateinit var world: ActorRef<SilicaWorld.Command>
     override lateinit var network: ActorRef<Network>
-    private val stateManagerErrors: Map<StateManager.ErrorType, Set<String>>
+    private val stateRemappingErrors: Map<StateMappingManager.ErrorType, Set<String>>
 
     class Args()
 
     init {
-//        Guice.createInjector(SilicaImplementationModule())
         val mcArchive = Util.ensureMinecraftVersion(MINECRAFT_VERSION, Side.SERVER)
         dataManager.add(ZIPResourceLoader("Minecraft $MINECRAFT_VERSION", mcArchive))
 
         properties = ServerProperties.fromFile(Paths.get("server.properties"))
-        stateManagerErrors = stateManager.load()
-        acceptVanillaConnections = stateManagerErrors.isEmpty()
+        stateRemappingErrors = stateRemapper.load()
+        acceptVanillaConnections = stateRemappingErrors.isEmpty()
     }
 
     fun run() {
         if (acceptVanillaConnections) {
             logger.info("Accepting vanilla connections")
         } else {
-            val unknown = stateManagerErrors[StateManager.ErrorType.UNKNOWN]
+            val unknown = stateRemappingErrors[UNKNOWN]
             if (unknown != null && unknown.isNotEmpty()) {
-                logger.info("Found ${unknown.size} custom BlockStates")
+                logger.warn("Found ${unknown.size} custom BlockStates")
                 unknown.forEach {
-                    logger.info("   $it")
+                    logger.warn("   $it")
                 }
             }
-            val missing = stateManagerErrors[StateManager.ErrorType.MISSING]
+            val missing = stateRemappingErrors[StateMappingManager.ErrorType.MISSING]
             if (missing != null && missing.isNotEmpty()) {
-                logger.info("Missing ${missing.size} vanilla BlockStates. Exported to missing.txt")
+                logger.error("Missing ${missing.size} vanilla BlockStates. Exported to missing.txt")
                 val builder = StringBuilder()
                 missing.sorted().forEach {
                     builder.append(it).append("\n")
                 }
                 FileUtils.writeStringToFile(File("missing.txt"), builder.toString(), StandardCharsets.UTF_8)
             }
-            logger.info("Rejecting vanilla connections")
+            logger.error("Rejecting vanilla connections")
         }
-        logger.debug("Loaded namespaces: [${dataManager.getNamespaces().join(",")}]")
+        logger.info("Loaded namespaces: [${dataManager.getNamespaces().join(",")}]")
         val system = ActorSystem.create(
             DedicatedServerGuardian.create(this, this::world::set, this::network::set),
             "dedicatedServerGuardian"
@@ -138,6 +138,7 @@ class DedicatedServer(args: Args) : SilicaServer() {
 
                 @Suppress("ReplacePutWithAssignment") // boxing
                 currentlyTicking.put(world, System.nanoTime())
+                @Suppress("ReplacePutWithAssignment") // boxing
                 currentlyTicking.put(network, System.nanoTime())
                 lastTickTime = System.currentTimeMillis()
                 world.tell(SilicaWorld.Command.Tick(tick.delta, context.messageAdapter { Command.Tock(it.done) }))

@@ -11,15 +11,16 @@ import org.sandboxpowered.silica.registry.SilicaRegistry
 import org.sandboxpowered.silica.state.block.BlockState
 import org.sandboxpowered.silica.state.property.Property
 import org.sandboxpowered.silica.util.Util.getLogger
+import org.sandboxpowered.silica.util.extensions.fromJson
 import org.sandboxpowered.silica.util.extensions.getResourceAsString
 import kotlin.system.measureTimeMillis
 
-class StateManager {
+class StateMappingManager {
     private val rawMap: Object2ObjectMap<String, Object2IntMap<String>> = Object2ObjectOpenHashMap()
     private val stateMap: Object2IntMap<BlockState> = Object2IntOpenHashMap()
     private val idMap: Int2ObjectMap<BlockState> = Int2ObjectOpenHashMap()
 
-    private val logger = getLogger<StateManager>()
+    private val logger = getLogger<StateMappingManager>()
 
     fun load(): Map<ErrorType, Set<String>> {
         val errorMap = Object2ObjectOpenHashMap<ErrorType, ObjectOpenHashSet<String>>()
@@ -91,7 +92,7 @@ class StateManager {
             if (missing.isNotEmpty())
                 errorMap[ErrorType.MISSING] = missing
         }.apply {
-            logger.info("Took {}ms to collect vanilla state mappings", this)
+            logger.debug("Took {}ms to collect vanilla state mappings", this)
         }
         return errorMap
     }
@@ -103,8 +104,4 @@ class StateManager {
         MISSING,
         UNKNOWN
     }
-}
-
-private inline fun <reified T> Gson.fromJson(s: String): T {
-    return fromJson(s, T::class.java)
 }

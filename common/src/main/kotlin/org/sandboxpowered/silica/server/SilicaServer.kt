@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.server
 
 import akka.actor.typed.ActorRef
-import org.sandboxpowered.silica.StateManager
+import org.sandboxpowered.silica.StateMappingManager
 import org.sandboxpowered.silica.command.Commands
 import org.sandboxpowered.silica.resources.ClasspathResourceLoader
 import org.sandboxpowered.silica.resources.ResourceManager
@@ -19,7 +19,7 @@ abstract class SilicaServer {
     val commands: Commands
     open var properties: ServerProperties? = null
     var dataManager: ResourceManager
-    abstract val stateManager: StateManager
+    abstract val stateRemapper: StateMappingManager
     abstract val world: ActorRef<SilicaWorld.Command>
     abstract val network: ActorRef<Network>
 

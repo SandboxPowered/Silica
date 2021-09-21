@@ -9,7 +9,7 @@ import org.sandboxpowered.silica.state.property.Property
 class BlockState(base: Block, properties: ImmutableMap<Property<*>, Comparable<*>>) :
     BaseState<Block, BlockState>(base, properties) {
     val isAir: Boolean
-        get() = this.block.isAir(this)
+        get() = this.block.isAir
 
     val block: Block
         get() = base

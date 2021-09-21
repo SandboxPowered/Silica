@@ -33,9 +33,7 @@ object Main {
                 return
             }
             DedicatedServer(
-                DedicatedServer.Args(
-
-                )
+                DedicatedServer.Args()
             ).run()
         }
     }

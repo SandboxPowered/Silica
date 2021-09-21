@@ -245,7 +245,7 @@ private class PlayConnectionActor(
         for (x in -4..4) {
             for (z in -4..4) {
                 val time = measureTimeMillis {
-                    packetHandler.sendPacket(ChunkData(x, z, world.blocks, server.stateManager::toVanillaId))
+                    packetHandler.sendPacket(ChunkData(x, z, world.blocks, server.stateRemapper::toVanillaId))
                 }
                 logger.info("Took {}ms to create Chunk Data for {} {}", time, x, z)
                 packetHandler.sendPacket(UpdateLight(x, z, true))

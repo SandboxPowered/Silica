@@ -9,9 +9,8 @@ import org.sandboxpowered.silica.state.block.BlockState
 import org.sandboxpowered.silica.util.Identifier
 
 open class BaseBlock(override val identifier: Identifier) : Block {
-    override fun isAir(state: BlockState): Boolean {
-        return identifier.path == "air"
-    }
+    override val isAir: Boolean
+        get() = identifier.path == "air"
 
     protected open fun appendProperties(builder: StateProvider.Builder<Block, BlockState>) = Unit
 

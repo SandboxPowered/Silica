@@ -5,7 +5,7 @@ import org.sandboxpowered.silica.state.StateProvider
 import org.sandboxpowered.silica.state.block.BlockState
 
 sealed interface Block : RegistryEntry<Block> {
-    fun isAir(state: BlockState): Boolean
+    val isAir: Boolean
 
     val defaultState: BlockState
     val stateProvider: StateProvider<Block, BlockState>

@@ -141,7 +141,7 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
                 get() = Iterables.unmodifiableIterable(classToId.keys)
 
             fun createPacket(packetId: Int): PacketBase? =
-                if (packetId !in idToConstructor) null else idToConstructor[packetId].get()
+                if (!idToConstructor.containsKey(packetId)) null else idToConstructor[packetId].get()
 
             inline infix fun <reified P : PacketBase> Int.packet(packetSupplier: Supplier<P>) {
                 val id = classToId.put(P::class.java, this)
@@ -157,5 +157,3 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
         inline fun server(block: FlowBuilder.() -> Unit): FlowBuilder = server.apply(block)
     }
 }
-
-private operator fun <T> Int2ObjectMap<T>.contains(packetId: Int): Boolean = containsKey(packetId)

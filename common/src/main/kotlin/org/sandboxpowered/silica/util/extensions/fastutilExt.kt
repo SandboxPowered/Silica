@@ -62,6 +62,8 @@ operator fun Int2ShortFunction.set(index: Int, value: Short) {
     this.put(index, value)
 }
 
+operator fun <T> Int2ObjectMap<T>.contains(packetId: Int): Boolean = containsKey(packetId)
+
 operator fun Int2BooleanMap.Entry.component1() = this.intKey
 operator fun Int2BooleanMap.Entry.component2() = this.booleanValue
 

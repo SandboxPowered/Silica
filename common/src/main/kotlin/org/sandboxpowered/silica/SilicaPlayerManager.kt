@@ -16,6 +16,7 @@ import org.sandboxpowered.silica.component.PlayerComponent
 import org.sandboxpowered.silica.component.PositionComponent
 import org.sandboxpowered.silica.component.VanillaPlayerInput
 import org.sandboxpowered.silica.util.extensions.add
+import org.sandboxpowered.silica.util.extensions.set
 import java.util.*
 
 @All(PlayerComponent::class, PositionComponent::class)
@@ -114,12 +115,4 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
     private companion object {
         private const val UNKNOWN_ID = -1
     }
-}
-
-private operator fun <V> Int2ObjectFunction<V>.set(key: Int, value: V) {
-    put(key, value)
-}
-
-private operator fun <K> Object2IntFunction<K>.set(key: K, value: Int) {
-    put(key, value)
 }

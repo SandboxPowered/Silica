@@ -21,6 +21,7 @@ import org.sandboxpowered.silica.network.*
 import org.sandboxpowered.silica.network.play.clientbound.KeepAliveClient
 import org.sandboxpowered.silica.network.play.clientbound.PlayerInfo
 import org.sandboxpowered.silica.util.extensions.onMessage
+import org.sandboxpowered.silica.util.math.Position
 import java.util.*
 
 sealed class Network {
@@ -37,6 +38,8 @@ sealed class Network {
     ) : Network()
 
     class SendToAll(val packet: PacketPlay) : Network()
+    class SendToNearby(val position: Position, val distance: Int, val packet: PacketPlay) : Network()
+    class SendToWatching(val position: Position, val packet: PacketPlay) : Network()
 
     companion object {
         fun actor(server: SilicaServer): Behavior<Network> = Behaviors.setup {
@@ -59,6 +62,8 @@ private class NetworkActor(
         .onMessage(this::handleCreateConnection)
         .onMessage(this::handleDisconnected)
         .onMessage(this::handleSendToAll)
+        .onMessage(this::handleSendToNearby)
+        .onMessage(this::handleSendToWatching)
         .build()
 
     private var ticks: Int = 0
@@ -90,6 +95,24 @@ private class NetworkActor(
     }
 
     private fun handleSendToAll(send: Network.SendToAll): Behavior<Network> {
+        connections.values.forEach {
+            it.tell(PlayConnection.SendPacket(send.packet))
+        }
+
+        return Behaviors.same()
+    }
+
+    private fun handleSendToNearby(send: Network.SendToNearby): Behavior<Network> {
+        //TODO only send to connections within distance.
+        connections.values.forEach {
+            it.tell(PlayConnection.SendPacket(send.packet))
+        }
+
+        return Behaviors.same()
+    }
+
+    private fun handleSendToWatching(send: Network.SendToWatching): Behavior<Network> {
+        //TODO only send to connections with a registered interest in the position.
         connections.values.forEach {
             it.tell(PlayConnection.SendPacket(send.packet))
         }

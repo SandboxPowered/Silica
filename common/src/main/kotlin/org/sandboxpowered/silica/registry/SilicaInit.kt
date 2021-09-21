@@ -1,8 +1,11 @@
 package org.sandboxpowered.silica.registry
 
 import org.sandboxpowered.silica.block.*
+import org.sandboxpowered.silica.item.BaseItem
+import org.sandboxpowered.silica.item.BlockItem
 import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.content.Colour
+import org.sandboxpowered.silica.util.Identifier.Companion.of as id
 
 object SilicaInit {
     private val EMPTY = BlockArchetype()
@@ -14,27 +17,27 @@ object SilicaInit {
     private val TRAPDOOR = EMPTY suffix "_trapdoor" block ::TrapdoorBlock
     private val BUTTON = EMPTY suffix "_button" block ::ButtonBlock
     private val LEAVES = EMPTY suffix "_leaves" block ::LeavesBlock
+    private val GRASS = EMPTY block ::GrassBlock
 
     private val BLOCK_S = BLOCK suffix "s"
     private val BLOCK_ORE = BLOCK suffix "_ore"
     private val BLOCK_DEEPSLATE_ORE = BLOCK_ORE prefix "deepslate_"
 
     fun init() {
-        register(BaseBlock(Identifier.of("air")))
-        register(BaseBlock(Identifier.of("bedrock")))
-        register(BaseBlock(Identifier.of("dirt")))
-        register(GrassBlock(Identifier.of("grass_block")))
-        register(GrassBlock(Identifier.of("mycelium")))
-        register(GrassBlock(Identifier.of("podzol")))
+        SilicaRegistries.ITEM_REGISTRY.register(BaseItem(id("air")))
 
-        register(BaseBlock(Identifier.of("sand")))
-        register(BaseBlock(Identifier.of("gravel")))
+        register(BaseBlock(id("air")))
+        register(BaseBlock(id("bedrock")))
+        register(BaseBlock(id("dirt")))
 
-        register(BaseBlock(Identifier.of("glass")))
+        register(BaseBlock(id("sand")))
+        register(BaseBlock(id("gravel")))
 
-        register(NoteBlock(Identifier.of("note_block")))
-        register(FireBlock(Identifier.of("fire")))
-        register(GlassPaneBlock(Identifier.of("glass_pane")))
+        register(BaseBlock(id("glass")))
+
+        register(NoteBlock(id("note_block")))
+        register(FireBlock(id("fire")))
+        register(GlassPaneBlock(id("glass_pane")))
 
         blocks {
             Colour.NAME_ARRAY defines {
@@ -43,6 +46,9 @@ object SilicaInit {
                 archetypes(BLOCK suffix "_stained_glass")
                 archetypes(EMPTY suffix "_stained_glass_pane" block ::GlassPaneBlock)
                 archetypes(EMPTY suffix "_bed" block ::BedBlock)
+            }
+            arrayOf("grass_block", "mycelium", "podzol") defines {
+                archetypes(GRASS)
             }
             arrayOf("oak", "spruce", "birch", "jungle", "dark_oak", "acacia", "warped", "crimson") defines {
                 archetypes(
@@ -112,6 +118,9 @@ object SilicaInit {
 
     private fun register(block: Block) {
         SilicaRegistries.BLOCK_REGISTRY.register(block)
+        if (!block.isAir) {
+            SilicaRegistries.ITEM_REGISTRY.register(BlockItem(block.identifier, block))
+        }
     }
 
     inline fun blocks(block: Blocks.() -> Unit) {
@@ -135,7 +144,7 @@ object SilicaInit {
             generic.archetypes.forEach {
                 val provider = it.blockProvider
                 if (it.notOn?.contains(name) != true && provider != null) {
-                    register(provider(Identifier.of(it.replacementString?.template(name) ?: name)))
+                    register(provider(id(it.replacementString?.template(name) ?: name)))
                 }
             }
         }

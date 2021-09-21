@@ -18,6 +18,14 @@ class VanillaInputSystem : IteratingSystem() {
 
     override fun process(entityId: Int) {
         // TODO: check if in range
-        positionMapper[entityId].pos.set(playerInputMapper[entityId].wantedPosition)
+        val input = playerInputMapper[entityId]
+        val newPos = input.wantedPosition
+        val oldPos = positionMapper[entityId].pos
+
+        if (newPos != oldPos) {
+            println("Player ${input.gameProfile.name} moved to $newPos")
+        }
+
+        oldPos.set(newPos)
     }
 }

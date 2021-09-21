@@ -86,8 +86,7 @@ class SilicaWorld private constructor(private val side: Side, private val server
             artemisWorld.create(archetype)
         }
         blocks[pos.x, pos.y, pos.z] = state
-        // TODO: only send to nearby players
-        server.network.tell(Network.SendToAll(BlockChange(pos, server.stateManager.toVanillaId(state))))
+        server.network.tell(Network.SendToWatching(pos, BlockChange(pos, server.stateRemapper.toVanillaId(state))))
     }
 
     override fun getFluidState(pos: Position): FluidState {

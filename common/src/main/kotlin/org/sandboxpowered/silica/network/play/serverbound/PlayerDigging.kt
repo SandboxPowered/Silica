@@ -30,7 +30,7 @@ class PlayerDigging(private var status: Int, private var location: Position?, pr
                 packetHandler.sendPacket(
                     AcknowledgePlayerDigging(
                         pos,
-                        context.server.stateManager.toVanillaId(it.getBlockState(pos)),
+                        context.server.stateRemapper.toVanillaId(it.getBlockState(pos)),
                         status,
                         true
                     )
