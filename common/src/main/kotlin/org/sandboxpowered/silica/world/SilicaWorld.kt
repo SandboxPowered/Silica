@@ -51,7 +51,7 @@ class SilicaWorld private constructor(private val side: Side, private val server
 
     init {
         val config = WorldConfigurationBuilder()
-        config.with(VanillaInputSystem())
+        config.with(VanillaInputSystem(server))
         config.with(SilicaPlayerManager(10))
         val entityMap = Entity3dMapSystem(
             OcTree(
@@ -65,6 +65,7 @@ class SilicaWorld private constructor(private val side: Side, private val server
         )
         config.with(entityMap)
         artemisWorld = ArtemisWorld(config.build().registerAs<Entity3dMap>(entityMap))
+        artemisWorld.create()
     }
 
     override fun getBlockState(pos: Position): BlockState {
@@ -207,7 +208,7 @@ class SilicaWorld private constructor(private val side: Side, private val server
 
         // TODO: TMP !!
         private fun enqueueGeneration(to: ActorRef<in CommandGenerate>) {
-            iterateCube(-5, 0, -5, w = 10, h = 1) { dx, dy, dz ->
+            iterateCube(-10, 0, -10, w = 20, h = 1) { dx, dy, dz ->
                 val x = dx * 16
                 val z = dz * 16
                 to.tell(CommandGenerate(x, dy, z, world.blocks[x, dy, z, 16, 16, 16], context.system.ignoreRef()))

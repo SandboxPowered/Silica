@@ -61,6 +61,10 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             0x21 packet ::KeepAliveClient
             0x08 packet ::AcknowledgePlayerDigging
             0x0C packet ::BlockChange
+            0x04 packet ::SpawnPlayer
+            0x29 packet ::UpdateEntityPosition
+            0x2A packet ::UpdateEntityPositionRotation
+            0x2B packet ::UpdateEntityRotation
         }
     }),
     STATUS(1, {

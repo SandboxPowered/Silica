@@ -214,6 +214,40 @@ private class PlayConnectionActor(
                 )
             )
         )
+        server.network.tell(
+            Network.SendToAllExcept(
+                receive.input.gameProfile.id,
+                SpawnPlayer(
+                    receive.input.playerId,
+                    receive.input.gameProfile.id,
+                    currentPos.x,
+                    currentPos.y,
+                    currentPos.z,
+                    0, 0
+                )
+            )
+        )
+        server.world.tell(SilicaWorld.Command.DelayedCommand.PerformSilica {
+            val system = it.artemisWorld.getSystem<SilicaPlayerManager>()
+            system.onlinePlayers.forEach { t ->
+                if (t != playerInput.gameProfile.id) {
+                    val input = system.getVanillaInput(system.getPlayerId(t))
+                    server.network.tell(
+                        Network.SendToAllExcept(
+                            input.gameProfile.id,
+                            SpawnPlayer(
+                                input.playerId,
+                                input.gameProfile.id,
+                                input.wantedPosition.x,
+                                input.wantedPosition.y,
+                                input.wantedPosition.z,
+                                0, 0
+                            )
+                        )
+                    )
+                }
+            }
+        })
         packetHandler.sendPacket(UpdateChunkPosition(0, 0))
 
         server.world.tell(
@@ -247,7 +281,7 @@ private class PlayConnectionActor(
                 val time = measureTimeMillis {
                     packetHandler.sendPacket(ChunkData(x, z, world.blocks, server.stateRemapper::toVanillaId))
                 }
-                logger.info("Took {}ms to create Chunk Data for {} {}", time, x, z)
+//                logger.debug("Took {}ms to create Chunk Data for {} {}", time, x, z)
                 packetHandler.sendPacket(UpdateLight(x, z, true))
             }
         }

@@ -11,6 +11,10 @@ import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.ChannelOption
 import io.netty.channel.EventLoopGroup
+import io.netty.channel.ServerChannel
+import io.netty.channel.epoll.Epoll
+import io.netty.channel.epoll.EpollEventLoopGroup
+import io.netty.channel.epoll.EpollServerSocketChannel
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
@@ -37,7 +41,9 @@ sealed class Network {
         val replyTo: ActorRef<in Boolean>
     ) : Network()
 
+    class SendTo(val target: UUID, val packet: PacketPlay) : Network()
     class SendToAll(val packet: PacketPlay) : Network()
+    class SendToAllExcept(val except: UUID, val packet: PacketPlay) : Network()
     class SendToNearby(val position: Position, val distance: Int, val packet: PacketPlay) : Network()
     class SendToWatching(val position: Position, val packet: PacketPlay) : Network()
 
@@ -61,9 +67,11 @@ private class NetworkActor(
         .onMessage(this::handleStart)
         .onMessage(this::handleCreateConnection)
         .onMessage(this::handleDisconnected)
+        .onMessage(this::handleSendTo)
         .onMessage(this::handleSendToAll)
         .onMessage(this::handleSendToNearby)
         .onMessage(this::handleSendToWatching)
+        .onMessage(this::handleSendToAllExcept)
         .build()
 
     private var ticks: Int = 0
@@ -94,9 +102,24 @@ private class NetworkActor(
         return Behaviors.same()
     }
 
+    private fun handleSendTo(send: Network.SendTo): Behavior<Network> {
+        connections[send.target]?.tell(PlayConnection.SendPacket(send.packet))
+
+        return Behaviors.same()
+    }
+
     private fun handleSendToAll(send: Network.SendToAll): Behavior<Network> {
         connections.values.forEach {
             it.tell(PlayConnection.SendPacket(send.packet))
+        }
+
+        return Behaviors.same()
+    }
+
+    private fun handleSendToAllExcept(send: Network.SendToAllExcept): Behavior<Network> {
+        connections.forEach { (k, v) ->
+            if (k != send.except)
+                v.tell(PlayConnection.SendPacket(send.packet))
         }
 
         return Behaviors.same()
@@ -122,14 +145,24 @@ private class NetworkActor(
 
     private fun handleStart(start: Network.Start): Behavior<Network> {
         val properties = server.properties!!
-        val bossGroup: EventLoopGroup = NioEventLoopGroup()
-        val workerGroup: EventLoopGroup = NioEventLoopGroup()
+        val group: EventLoopGroup
+        val kclass: Class<out ServerChannel>
+        if (Epoll.isAvailable()) {
+            logger.info("using epoll socket channel")
+            kclass = EpollServerSocketChannel::class.java
+            group = EpollEventLoopGroup()
+        } else {
+            logger.info("using nio socket channel")
+            kclass = NioServerSocketChannel::class.java
+            group = NioEventLoopGroup()
+        }
         try {
             val bootstrap = ServerBootstrap()
-            bootstrap.group(bossGroup, workerGroup)
-                .channel(NioServerSocketChannel::class.java)
+            bootstrap.group(group)
+                .channel(kclass)
                 .childHandler(object : ChannelInitializer<SocketChannel>() {
                     override fun initChannel(ch: SocketChannel) {
+                        ch.config().setOption(ChannelOption.TCP_NODELAY, true)
                         ch.pipeline()
                             .addLast("timeout", ReadTimeoutHandler(30))
                             .addLast("splitter", LengthSplitter())
@@ -144,7 +177,7 @@ private class NetworkActor(
                 })
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
-            val future = bootstrap.bind(properties.serverIp.ifEmpty { "0.0.0.0" }, properties.serverPort)
+            val future = bootstrap.bind(properties.serverIp.ifEmpty { "0.0.0.0" }, properties.serverPort).syncUninterruptibly()
             future.addListener {
                 if (it.isDone) {
                     when {
@@ -156,8 +189,7 @@ private class NetworkActor(
             }
         } catch (e: InterruptedException) {
             e.printStackTrace()
-            workerGroup.shutdownGracefully()
-            bossGroup.shutdownGracefully()
+            group.shutdownGracefully()
         }
 
         return Behaviors.same()

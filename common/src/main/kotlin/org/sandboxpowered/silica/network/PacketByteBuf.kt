@@ -295,7 +295,10 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
 
     override fun writeByte(i: Int): ByteBuf = source.writeByte(i)
 
+    fun writeByte(b: Byte): ByteBuf = source.writeByte(b.toInt())
+
     override fun writeShort(i: Int): ByteBuf = source.writeShort(i)
+    fun writeShort(s: Short): ByteBuf = source.writeShort(s.toInt())
 
     override fun writeShortLE(i: Int): ByteBuf = source.writeShortLE(i)
 

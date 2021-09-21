@@ -20,11 +20,22 @@ class PacketHandler(val connection: Connection) : SimpleChannelInboundHandler<Pa
         this.playConnection = playConnection
     }
 
+    override fun exceptionCaught(ctx: ChannelHandlerContext?, cause: Throwable?) {
+        cause?.printStackTrace()
+        disconnect()
+    }
+
     override fun channelActive(ctx: ChannelHandlerContext) {
         super.channelActive(ctx)
         channel = ctx.channel()
         address = channel.remoteAddress()
         setProtocol(Protocol.HANDSHAKE)
+    }
+
+    fun disconnect() {
+        if (channel.isOpen) {
+            channel.close().awaitUninterruptibly()
+        }
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
@@ -34,7 +45,7 @@ class PacketHandler(val connection: Connection) : SimpleChannelInboundHandler<Pa
                 connection.profile
             )
         )
-        super.channelInactive(ctx)
+        disconnect()
     }
 
     fun setProtocol(connectionProtocol: Protocol) {

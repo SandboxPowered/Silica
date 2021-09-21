@@ -11,10 +11,7 @@ import com.mojang.authlib.GameProfile
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.*
-import org.sandboxpowered.silica.component.HitboxComponent
-import org.sandboxpowered.silica.component.PlayerComponent
-import org.sandboxpowered.silica.component.PositionComponent
-import org.sandboxpowered.silica.component.VanillaPlayerInput
+import org.sandboxpowered.silica.component.*
 import org.sandboxpowered.silica.util.extensions.add
 import org.sandboxpowered.silica.util.extensions.set
 import java.util.*
@@ -61,6 +58,7 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
 
         builder.add<PlayerComponent>()
         builder.add<PositionComponent>()
+        builder.add<RotationComponent>()
         builder.add<HitboxComponent>()
         builder.add<VanillaPlayerInput>()
 
