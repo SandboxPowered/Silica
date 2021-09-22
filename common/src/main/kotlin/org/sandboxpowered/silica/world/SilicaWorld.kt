@@ -8,19 +8,17 @@ import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import com.artemis.WorldConfigurationBuilder
 import com.mojang.authlib.GameProfile
-import org.sandboxpowered.silica.ecs.system.SilicaPlayerManager
 import org.sandboxpowered.silica.content.block.BlockEntityProvider
 import org.sandboxpowered.silica.ecs.component.BlockPositionComponent
+import org.sandboxpowered.silica.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.ecs.component.VanillaPlayerInput
-import org.sandboxpowered.silica.vanilla.network.play.clientbound.BlockChange
+import org.sandboxpowered.silica.ecs.system.Entity3dMap
+import org.sandboxpowered.silica.ecs.system.Entity3dMapSystem
+import org.sandboxpowered.silica.ecs.system.SilicaPlayerManager
+import org.sandboxpowered.silica.ecs.system.VanillaInputSystem
 import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.server.Network
 import org.sandboxpowered.silica.server.SilicaServer
-import org.sandboxpowered.silica.world.state.block.BlockState
-import org.sandboxpowered.silica.world.state.fluid.FluidState
-import org.sandboxpowered.silica.ecs.system.Entity3dMap
-import org.sandboxpowered.silica.ecs.system.Entity3dMapSystem
-import org.sandboxpowered.silica.ecs.system.VanillaInputSystem
 import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.Side
 import org.sandboxpowered.silica.util.extensions.add
@@ -28,7 +26,10 @@ import org.sandboxpowered.silica.util.extensions.getSystem
 import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.util.extensions.registerAs
 import org.sandboxpowered.silica.util.math.Position
+import org.sandboxpowered.silica.vanilla.network.play.clientbound.BlockChange
 import org.sandboxpowered.silica.world.gen.TerrainGenerator
+import org.sandboxpowered.silica.world.state.block.BlockState
+import org.sandboxpowered.silica.world.state.fluid.FluidState
 import org.sandboxpowered.silica.world.util.BlocTree
 import org.sandboxpowered.silica.world.util.IntTree
 import org.sandboxpowered.silica.world.util.OcTree
@@ -137,11 +138,11 @@ class SilicaWorld private constructor(private val side: Side, private val server
                 inline fun <T : Any> createPlayer(
                     gameProfile: GameProfile,
                     replyTo: ActorRef<T>,
-                    crossinline transform: (VanillaPlayerInput, Array<GameProfile>) -> T
+                    crossinline transform: (VanillaPlayerInput, PlayerInventoryComponent, Array<GameProfile>) -> T
                 ) = AskSilica(
                     {
                         val playerManager = it.artemisWorld.getSystem<SilicaPlayerManager>()
-                        transform(playerManager.create(gameProfile), playerManager.getOnlinePlayerProfiles())
+                        transform(playerManager.create(gameProfile), playerManager.createInventory(gameProfile), playerManager.getOnlinePlayerProfiles())
                     },
                     replyTo
                 )

@@ -37,6 +37,9 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
     @Wire
     private lateinit var playerInputMapper: ComponentMapper<VanillaPlayerInput>
 
+    @Wire
+    private lateinit var inventoryMapper: ComponentMapper<PlayerInventoryComponent>
+
     override fun processSystem() {
 
     }
@@ -109,6 +112,10 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
 
     fun getOnlinePlayerProfiles(): Array<GameProfile> {
         return onlinePlayerProfiles.values.toTypedArray()
+    }
+
+    fun createInventory(gameProfile: GameProfile): PlayerInventoryComponent {
+        return inventoryMapper[uuidToEntityId.getInt(gameProfile.id)]
     }
 
     private companion object {

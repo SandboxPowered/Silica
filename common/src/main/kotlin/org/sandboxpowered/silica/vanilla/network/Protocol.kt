@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.Object2IntMap
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
+import org.sandboxpowered.silica.util.Util.getLogger
 import org.sandboxpowered.silica.vanilla.network.handshake.clientbound.PingRequest
 import org.sandboxpowered.silica.vanilla.network.handshake.clientbound.StatusRequest
 import org.sandboxpowered.silica.vanilla.network.handshake.serverbound.PongResponse
@@ -19,7 +20,6 @@ import org.sandboxpowered.silica.vanilla.network.login.serverbound.HandshakeRequ
 import org.sandboxpowered.silica.vanilla.network.login.serverbound.LoginStart
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.*
 import org.sandboxpowered.silica.vanilla.network.play.serverbound.*
-import org.sandboxpowered.silica.util.Util.getLogger
 import java.util.function.Supplier
 import kotlin.collections.set
 
@@ -43,10 +43,11 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             0x2C packet ::HandSwingAnimation
             0x1B packet ::EntityAction
             0x2E packet ::PlayerBlockPlacement
+            0x25 packet ::HeldItemChangeServerbound
         }
         client {
             0x26 packet ::JoinGame
-            0x48 packet ::HeldItemChange
+            0x48 packet ::HeldItemChangeClientbound
             0x65 packet ::DeclareRecipes
             0X66 packet ::DeclareTags
             0x1B packet ::EntityStatus

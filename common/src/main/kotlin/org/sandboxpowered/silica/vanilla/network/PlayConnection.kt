@@ -6,17 +6,18 @@ import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import com.mojang.authlib.GameProfile
-import org.sandboxpowered.silica.ecs.system.SilicaPlayerManager
+import org.sandboxpowered.silica.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.ecs.component.VanillaPlayerInput
+import org.sandboxpowered.silica.ecs.system.SilicaPlayerManager
 import org.sandboxpowered.silica.nbt.NBTCompound
 import org.sandboxpowered.silica.nbt.nbt
 import org.sandboxpowered.silica.nbt.setTag
-import org.sandboxpowered.silica.vanilla.network.play.clientbound.*
 import org.sandboxpowered.silica.server.Network
 import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.extensions.getSystem
 import org.sandboxpowered.silica.util.extensions.onMessage
+import org.sandboxpowered.silica.vanilla.network.play.clientbound.*
 import org.sandboxpowered.silica.world.SilicaWorld
 import org.sandboxpowered.silica.world.util.BlocTree
 import java.time.Duration
@@ -26,7 +27,12 @@ sealed class PlayConnection {
     class ReceivePacket(val packet: PacketPlay) : PlayConnection()
     class SendPacket(val packet: PacketPlay) : PlayConnection()
     class ReceiveWorld(val blocks: BlocTree) : PlayConnection()
-    class ReceivePlayer(val gameProfiles: Array<GameProfile>, val input: VanillaPlayerInput) : PlayConnection()
+    class ReceivePlayer(
+        val gameProfiles: Array<GameProfile>,
+        val input: VanillaPlayerInput,
+        val inventoryComponent: PlayerInventoryComponent
+    ) : PlayConnection()
+
     class Disconnected(val profile: GameProfile) : PlayConnection()
 
     class FailedPlayerCreation(val reason: String) : PlayConnection()
@@ -60,10 +66,12 @@ private class PlayConnectionActor(
 
     // TODO: apply at the right time + unsafe to keep a ref to a component
     private lateinit var playerInput: VanillaPlayerInput
+    private lateinit var playerInventoryComponent: PlayerInventoryComponent
 
     private val playContext by lazy {
         PlayContext(
             server,
+            { server.world.tell(SilicaWorld.Command.DelayedCommand.PerformSilica { _ -> it(playerInventoryComponent.inventory) }) },
             { server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { _ -> it(playerInput) }) },
             { server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { world -> it(world) }) })
     }
@@ -92,8 +100,8 @@ private class PlayConnectionActor(
                 SilicaWorld.Command.DelayedCommand.createPlayer(
                     packetHandler.connection.profile,
                     it
-                ) { input, profiles ->
-                    PlayConnection.ReceivePlayer(profiles, input)
+                ) { input, inventory, profiles ->
+                    PlayConnection.ReceivePlayer(profiles, input, inventory)
                 }
             },
             { receive, throwable ->
@@ -106,6 +114,7 @@ private class PlayConnectionActor(
 
     private fun handleReceivePlayer(receive: PlayConnection.ReceivePlayer): Behavior<PlayConnection> {
         this.playerInput = receive.input
+        this.playerInventoryComponent = receive.inventoryComponent
         val overworld = Identifier.of("minecraft", "overworld")
         val overworldType: NBTCompound
         val codec = nbt {
@@ -183,7 +192,7 @@ private class PlayConnectionActor(
                 true
             )
         )
-        packetHandler.sendPacket(HeldItemChange(0.toByte()))
+        packetHandler.sendPacket(HeldItemChangeClientbound(playerInventoryComponent.inventory.selectedSlot.toByte()))
         packetHandler.sendPacket(DeclareRecipes())
         packetHandler.sendPacket(DeclareTags())
         packetHandler.sendPacket(EntityStatus())

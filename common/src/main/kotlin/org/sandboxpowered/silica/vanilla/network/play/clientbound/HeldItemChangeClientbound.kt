@@ -5,15 +5,16 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 
-class HeldItemChange(private var slot: Byte = 0) : PacketPlay {
+class HeldItemChangeClientbound(private var slot: Byte = 0) : PacketPlay {
 
     override fun read(buf: PacketByteBuf) {
         slot = buf.readByte()
     }
 
     override fun write(buf: PacketByteBuf) {
-        buf.writeByte(slot.toInt())
+        buf.writeByte(slot)
     }
 
-    override fun handle(packetHandler: PacketHandler, context: PlayContext) {}
+    override fun handle(packetHandler: PacketHandler, context: PlayContext) {
+    }
 }
