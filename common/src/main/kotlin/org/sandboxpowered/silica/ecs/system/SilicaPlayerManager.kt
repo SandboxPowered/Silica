@@ -61,6 +61,7 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
         builder.add<RotationComponent>()
         builder.add<HitboxComponent>()
         builder.add<VanillaPlayerInput>()
+        builder.add<PlayerInventoryComponent>()
 
         playerArchetype = builder.build(world, "player")
     }

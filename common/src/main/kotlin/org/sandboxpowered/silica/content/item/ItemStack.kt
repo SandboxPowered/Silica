@@ -3,9 +3,10 @@ package org.sandboxpowered.silica.content.item
 import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.util.Identifier.Companion.of as id
 
-class ItemStack(val item: Item, private var _count: Int) {
+class ItemStack(private val _item: Item, private var _count: Int) {
     companion object {
-        val EMPTY = ItemStack(SilicaRegistries.ITEM_REGISTRY[id("air")].get(), 0)
+        private val AIR = SilicaRegistries.ITEM_REGISTRY[id("air")].get()
+        val EMPTY = ItemStack(AIR, 0)
 
         fun of(item: Item): ItemStack {
             return of(item, 1)
@@ -16,9 +17,12 @@ class ItemStack(val item: Item, private var _count: Int) {
         }
     }
 
+    val item: Item
+        get() = if (isEmpty) AIR else _item
+
     val isEmpty: Boolean
         get() {
-            return _count <= 0 || item.identifier.path == "air"
+            return _count <= 0 || _item.identifier.path == "air"
         }
 
     var count: Int
