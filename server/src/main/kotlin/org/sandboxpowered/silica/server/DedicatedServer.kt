@@ -8,8 +8,8 @@ import akka.actor.typed.javadsl.*
 import it.unimi.dsi.fastutil.objects.Object2LongMap
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap
 import org.apache.commons.io.FileUtils
-import org.sandboxpowered.silica.StateMappingManager
-import org.sandboxpowered.silica.StateMappingManager.ErrorType.UNKNOWN
+import org.sandboxpowered.silica.vanilla.StateMappingManager
+import org.sandboxpowered.silica.vanilla.StateMappingManager.ErrorType.UNKNOWN
 import org.sandboxpowered.silica.resources.ZIPResourceLoader
 import org.sandboxpowered.silica.util.Side
 import org.sandboxpowered.silica.util.Util

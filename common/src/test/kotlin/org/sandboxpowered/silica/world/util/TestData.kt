@@ -3,8 +3,8 @@ package org.sandboxpowered.silica.world.util
 import com.google.common.collect.ImmutableMap
 import io.mockk.every
 import io.mockk.mockk
-import org.sandboxpowered.silica.block.Block
-import org.sandboxpowered.silica.state.block.BlockState
+import org.sandboxpowered.silica.content.block.Block
+import org.sandboxpowered.silica.world.state.block.BlockState
 import org.sandboxpowered.silica.util.Identifier
 
 object TestData {

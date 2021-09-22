@@ -21,9 +21,9 @@ import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.handler.timeout.ReadTimeoutHandler
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
-import org.sandboxpowered.silica.network.*
-import org.sandboxpowered.silica.network.play.clientbound.KeepAliveClient
-import org.sandboxpowered.silica.network.play.clientbound.PlayerInfo
+import org.sandboxpowered.silica.vanilla.network.*
+import org.sandboxpowered.silica.vanilla.network.play.clientbound.KeepAliveClient
+import org.sandboxpowered.silica.vanilla.network.play.clientbound.PlayerInfo
 import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.util.math.Position
 import java.util.*

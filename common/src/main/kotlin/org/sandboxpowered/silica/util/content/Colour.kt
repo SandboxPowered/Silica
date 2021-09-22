@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.util.content
 
-import org.sandboxpowered.silica.state.property.StringSerializable
+import org.sandboxpowered.silica.world.state.property.StringSerializable
 
 enum class Colour(override val asString: String) : StringSerializable {
     BLACK("black"),

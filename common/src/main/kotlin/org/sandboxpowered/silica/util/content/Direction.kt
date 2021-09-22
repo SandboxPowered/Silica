@@ -3,7 +3,7 @@ package org.sandboxpowered.silica.util.content
 import com.google.common.collect.Iterators
 import org.jetbrains.annotations.Range
 import org.joml.Vector3i
-import org.sandboxpowered.silica.state.property.StringSerializable
+import org.sandboxpowered.silica.world.state.property.StringSerializable
 import java.util.function.Predicate
 import kotlin.math.abs
 

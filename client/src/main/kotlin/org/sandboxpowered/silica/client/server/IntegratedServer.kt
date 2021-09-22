@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.client.server
 
 import akka.actor.typed.ActorRef
-import org.sandboxpowered.silica.StateMappingManager
+import org.sandboxpowered.silica.vanilla.StateMappingManager
 import org.sandboxpowered.silica.server.Network
 import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.world.SilicaWorld

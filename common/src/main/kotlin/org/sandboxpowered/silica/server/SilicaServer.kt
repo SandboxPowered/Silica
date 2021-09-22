@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.server
 
 import akka.actor.typed.ActorRef
-import org.sandboxpowered.silica.StateMappingManager
+import org.sandboxpowered.silica.vanilla.StateMappingManager
 import org.sandboxpowered.silica.command.Commands
 import org.sandboxpowered.silica.resources.ClasspathResourceLoader
 import org.sandboxpowered.silica.resources.ResourceManager

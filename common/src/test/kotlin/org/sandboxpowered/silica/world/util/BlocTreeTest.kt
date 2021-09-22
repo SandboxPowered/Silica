@@ -5,7 +5,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.ParameterizedTest.*
 import org.junit.jupiter.params.provider.MethodSource
-import org.sandboxpowered.silica.state.block.BlockState
+import org.sandboxpowered.silica.world.state.block.BlockState
 import org.sandboxpowered.silica.util.extensions.component1
 import org.sandboxpowered.silica.util.extensions.component2
 import org.sandboxpowered.silica.util.extensions.component3

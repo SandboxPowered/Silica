@@ -2,9 +2,9 @@ package org.sandboxpowered.silica.world.util
 
 import net.mostlyoriginal.api.utils.pooling.ObjectPool
 import net.mostlyoriginal.api.utils.pooling.Poolable
-import org.sandboxpowered.silica.state.block.BlockState
+import org.sandboxpowered.silica.world.state.block.BlockState
 import org.sandboxpowered.silica.util.extensions.getPool
-import kotlin.math.pow
+import org.sandboxpowered.silica.util.extensions.pow
 
 /**
  * Octree for optimized queries in 3d space, but for BlockStates
@@ -52,7 +52,7 @@ class BlocTree private constructor(
         this.bounds.set(x, y, z, size)
         this.parent = parent
         this.default = default
-        this.nonAirBlockStates = if (default.isAir) 0 else size.toDouble().pow(3).toInt()
+        this.nonAirBlockStates = if (default.isAir) 0 else size.pow(3)
 
         return this
     }

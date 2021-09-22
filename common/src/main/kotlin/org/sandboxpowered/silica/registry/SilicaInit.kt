@@ -1,8 +1,8 @@
 package org.sandboxpowered.silica.registry
 
-import org.sandboxpowered.silica.block.*
-import org.sandboxpowered.silica.item.BaseItem
-import org.sandboxpowered.silica.item.BlockItem
+import org.sandboxpowered.silica.content.block.*
+import org.sandboxpowered.silica.content.item.BaseItem
+import org.sandboxpowered.silica.content.item.BlockItem
 import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.content.Colour
 import org.sandboxpowered.silica.util.Identifier.Companion.of as id

@@ -1,8 +1,8 @@
 package org.sandboxpowered.silica.registry
 
-import org.sandboxpowered.silica.block.Block
-import org.sandboxpowered.silica.fluid.Fluid
-import org.sandboxpowered.silica.item.Item
+import org.sandboxpowered.silica.content.block.Block
+import org.sandboxpowered.silica.content.fluid.Fluid
+import org.sandboxpowered.silica.content.item.Item
 import org.sandboxpowered.silica.util.Identifier.Companion.of as id
 
 object SilicaRegistries {
