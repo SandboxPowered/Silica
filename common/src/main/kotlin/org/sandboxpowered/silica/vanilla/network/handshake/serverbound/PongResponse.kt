@@ -7,11 +7,7 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 
 class PongResponse(private var time: Long) : Packet {
 
-    constructor() : this(0)
-
-    override fun read(buf: PacketByteBuf) {
-        time = buf.readLong()
-    }
+    constructor(buf: PacketByteBuf) : this(buf.readLong())
 
     override fun write(buf: PacketByteBuf) {
         buf.writeLong(time)

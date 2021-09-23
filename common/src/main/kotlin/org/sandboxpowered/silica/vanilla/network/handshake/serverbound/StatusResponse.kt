@@ -5,16 +5,12 @@ import org.sandboxpowered.silica.vanilla.network.Packet
 import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 
-class StatusResponse(private var responseJson: String?) : Packet {
+class StatusResponse(private var responseJson: String) : Packet {
 
-    constructor() : this(null)
-
-    override fun read(buf: PacketByteBuf) {
-        responseJson = buf.readString()
-    }
+    constructor(buf: PacketByteBuf) : this(buf.readString())
 
     override fun write(buf: PacketByteBuf) {
-        buf.writeString(responseJson!!)
+        buf.writeString(responseJson)
     }
 
     override fun handle(packetHandler: PacketHandler, connection: Connection) {}

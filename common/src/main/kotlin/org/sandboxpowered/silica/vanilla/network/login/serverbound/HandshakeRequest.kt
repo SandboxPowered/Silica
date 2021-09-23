@@ -8,23 +8,16 @@ import org.sandboxpowered.silica.vanilla.network.Protocol.Companion.getProtocolF
 
 class HandshakeRequest(
     private var protocolVersion: Int,
-    private var hostName: String?,
+    private var hostName: String,
     private var port: UShort,
     private var intention: Int,
 ) : Packet {
 
-    constructor() : this(0, null, 0u, 0)
-
-    override fun read(buf: PacketByteBuf) {
-        protocolVersion = buf.readVarInt()
-        hostName = buf.readString(255)
-        port = buf.readUShort()
-        intention = buf.readVarInt()
-    }
+    constructor(buf: PacketByteBuf) : this(buf.readVarInt(), buf.readString(255), buf.readUShort(), buf.readVarInt())
 
     override fun write(buf: PacketByteBuf) {
         buf.writeVarInt(protocolVersion)
-        buf.writeString(hostName!!)
+        buf.writeString(hostName)
         buf.writeUShort(port)
         buf.writeVarInt(intention)
     }
