@@ -12,7 +12,6 @@ class HandshakeRequest(
     private var port: UShort,
     private var intention: Int,
 ) : Packet {
-
     constructor(buf: PacketByteBuf) : this(buf.readVarInt(), buf.readString(255), buf.readUShort(), buf.readVarInt())
 
     override fun write(buf: PacketByteBuf) {

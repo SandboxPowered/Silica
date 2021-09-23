@@ -1,6 +1,7 @@
 package org.sandboxpowered.silica.vanilla.network
 
 interface PacketBase {
-    fun read(buf: PacketByteBuf) {}
+    @Deprecated("use PacketByteBuf constructor instead", ReplaceWith("Unit"))
+    fun read(buf: PacketByteBuf) = Unit
     fun write(buf: PacketByteBuf)
 }

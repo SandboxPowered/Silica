@@ -4,10 +4,10 @@ import akka.actor.typed.ActorRef
 import akka.actor.typed.Scheduler
 import akka.actor.typed.javadsl.AskPattern
 import com.mojang.authlib.GameProfile
-import org.sandboxpowered.silica.vanilla.network.login.clientbound.LoginSuccess
-import org.sandboxpowered.silica.vanilla.network.login.serverbound.EncryptionResponse
 import org.sandboxpowered.silica.server.Network.CreateConnection
 import org.sandboxpowered.silica.server.SilicaServer
+import org.sandboxpowered.silica.vanilla.network.login.clientbound.LoginSuccess
+import org.sandboxpowered.silica.vanilla.network.login.serverbound.EncryptionResponse
 import java.time.Duration
 import java.util.*
 import javax.crypto.SecretKey

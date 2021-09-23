@@ -1,12 +1,12 @@
 package org.sandboxpowered.silica.vanilla.network.play.serverbound
 
 import org.sandboxpowered.silica.content.block.Blocks
+import org.sandboxpowered.silica.util.content.Direction
+import org.sandboxpowered.silica.util.math.Position
 import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
-import org.sandboxpowered.silica.util.content.Direction
-import org.sandboxpowered.silica.util.math.Position
 
 class PlayerBlockPlacement(
     var hand: Int = -1,

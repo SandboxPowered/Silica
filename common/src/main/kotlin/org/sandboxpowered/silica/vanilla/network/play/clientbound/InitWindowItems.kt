@@ -10,14 +10,12 @@ import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 
 class InitWindowItems(
-    var window: UByte = 0u,
-    var state: Int = -1,
-    var inventory: PlayerInventory? = null,
-    var protocolMapping: VanillaProtocolMapping? = null
+    var window: UByte,
+    var state: Int,
+    var inventory: PlayerInventory?,
+    var protocolMapping: VanillaProtocolMapping?
 ) : PacketPlay {
-    override fun read(buf: PacketByteBuf) {
-        TODO("Not yet implemented")
-    }
+    constructor(buf: PacketByteBuf) : this(buf.readUByte(), buf.readVarInt(), null, null)
 
     override fun write(buf: PacketByteBuf) {
         val inventory = this.inventory!!

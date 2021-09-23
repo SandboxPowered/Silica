@@ -10,7 +10,6 @@ class EncryptionRequest(
     private var publicKey: ByteArray,
     private var verifyArray: ByteArray
 ) : Packet {
-
     constructor(buf: PacketByteBuf) : this(buf.readString(20), buf.readByteArray(), buf.readByteArray())
 
     override fun write(buf: PacketByteBuf) {

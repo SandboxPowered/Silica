@@ -24,6 +24,7 @@ import java.util.function.Function
 import java.util.function.Supplier
 import kotlin.collections.set
 
+@Suppress("unused")
 enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
     HANDSHAKE(-1, {
         server {
@@ -32,22 +33,22 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
     }),
     PLAY(0, {
         server {
-            0x00 packetDeprecated ::TeleportConfirmation
-            0x05 packetDeprecated ::ClientSettings
-            0x0A packetDeprecated ::ClientPluginChannel
-            0x0F packetDeprecated ::KeepAliveServer
-            0x11 packetDeprecated ::PlayerPosition
-            0x12 packetDeprecated ::PlayerPositionAndRotation
-            0x13 packetDeprecated ::PlayerRotation
-            0x14 packetDeprecated ::PlayerMovement
-            0x1A packetDeprecated ::PlayerDigging
+            0x00 packet ::TeleportConfirmation
+            0x05 packet ::ClientSettings
+            0x0A packet ::ClientPluginChannel
+            0x0F packet ::KeepAliveServer
+            0x11 packet ::PlayerPosition
+            0x12 packet ::PlayerPositionAndRotation
+            0x13 packet ::PlayerRotation
+            0x14 packet ::PlayerMovement
+            0x1A packet ::PlayerDigging
             0x2C packetDeprecated ::HandSwingAnimation
             0x1B packetDeprecated ::EntityAction
             0x2E packetDeprecated ::PlayerBlockPlacement
             0x25 packetDeprecated ::HeldItemChangeServerbound
         }
         client {
-            0x26 packetDeprecated ::JoinGame
+            0x26 packet ::JoinGame
             0x48 packet ::HeldItemChangeClientbound
             0x65 packetDeprecated ::DeclareRecipes
             0X66 packetDeprecated ::DeclareTags
@@ -60,14 +61,14 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             0x22 packetDeprecated ::ChunkData
             0x25 packetDeprecated ::UpdateLight
             0x20 packetDeprecated ::WorldBorder
-            0x21 packetDeprecated ::KeepAliveClient
-            0x08 packetDeprecated ::AcknowledgePlayerDigging
-            0x0C packetDeprecated ::BlockChange
+            0x21 packet ::KeepAliveClient
+            0x08 packet ::AcknowledgePlayerDigging
+            0x0C packet ::BlockChange
             0x04 packetDeprecated ::SpawnPlayer
             0x29 packetDeprecated ::UpdateEntityPosition
             0x2A packetDeprecated ::UpdateEntityPositionRotation
             0x2B packetDeprecated ::UpdateEntityRotation
-            0x14 packetDeprecated ::InitWindowItems
+            0x14 packet ::InitWindowItems
         }
     }),
     STATUS(1, {
@@ -173,5 +174,3 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
         inline fun server(block: FlowBuilder.() -> Unit): FlowBuilder = server.apply(block)
     }
 }
-
-typealias PacketFactory = (PacketByteBuf) -> PacketBase

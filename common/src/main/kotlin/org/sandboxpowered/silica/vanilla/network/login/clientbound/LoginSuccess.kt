@@ -7,7 +7,6 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import java.util.*
 
 class LoginSuccess(private var uuid: UUID, private var username: String) : Packet {
-
     constructor(buf: PacketByteBuf) : this(buf.readUUID(), buf.readString(16))
 
     override fun write(buf: PacketByteBuf) {

@@ -5,11 +5,8 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 
-class TeleportConfirmation(private var tpId: Int = 0) : PacketPlay {
-
-    override fun read(buf: PacketByteBuf) {
-        tpId = buf.readVarInt()
-    }
+class TeleportConfirmation(private var tpId: Int) : PacketPlay {
+    constructor(buf: PacketByteBuf) : this(buf.readVarInt())
 
     override fun write(buf: PacketByteBuf) {}
     override fun handle(packetHandler: PacketHandler, context: PlayContext) {}
