@@ -38,7 +38,7 @@ import java.util.*
 import com.artemis.World as ArtemisWorld
 import org.sandboxpowered.silica.world.gen.TerrainGenerator.Generate as CommandGenerate
 
-class SilicaWorld private constructor(private val side: Side, private val server: SilicaServer) : World {
+class SilicaWorld private constructor(val side: Side, val server: SilicaServer) : World {
 
     private val blocks: BlocTree = BlocTree(
         WORLD_MIN,
@@ -49,6 +49,7 @@ class SilicaWorld private constructor(private val side: Side, private val server
     )
     val artemisWorld: ArtemisWorld
     private var worldTicks = 0L
+    val vanillaWorldAdapter = VanillaWorldAdapter(this)
 
     init {
         val config = WorldConfigurationBuilder()
@@ -87,7 +88,10 @@ class SilicaWorld private constructor(private val side: Side, private val server
             val archetype = builder.build(artemisWorld) // TODO cache these per world
             artemisWorld.create(archetype)
         }
+        val oldState = blocks[pos.x, pos.y, pos.z]
         blocks[pos.x, pos.y, pos.z] = state
+
+        vanillaWorldAdapter.propagateUpdate(pos, oldState, state)
         server.network.tell(Network.SendToWatching(pos, BlockChange(pos, server.stateRemapper.toVanillaId(state))))
     }
 
@@ -142,7 +146,11 @@ class SilicaWorld private constructor(private val side: Side, private val server
                 ) = AskSilica(
                     {
                         val playerManager = it.artemisWorld.getSystem<SilicaPlayerManager>()
-                        transform(playerManager.create(gameProfile), playerManager.createInventory(gameProfile), playerManager.getOnlinePlayerProfiles())
+                        transform(
+                            playerManager.create(gameProfile),
+                            playerManager.createInventory(gameProfile),
+                            playerManager.getOnlinePlayerProfiles()
+                        )
                     },
                     replyTo
                 )

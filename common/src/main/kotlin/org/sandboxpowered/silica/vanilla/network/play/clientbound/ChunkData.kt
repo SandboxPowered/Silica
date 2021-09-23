@@ -9,7 +9,8 @@ import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.world.VanillaChunkSection
 import org.sandboxpowered.silica.vanilla.network.util.BitPackedLongArray
-import org.sandboxpowered.silica.world.state.block.BlockState
+import org.sandboxpowered.silica.world.ChunkSectionPos
+import org.sandboxpowered.silica.world.VanillaWorldAdapter
 import org.sandboxpowered.silica.world.util.BlocTree
 import java.util.*
 
@@ -21,15 +22,15 @@ class ChunkData() : PacketPlay {
     private var buffer: ByteArray = byteArrayOf()
     private var biomes: IntArray = intArrayOf()
 
-    constructor(cX: Int, cZ: Int, blocTree: BlocTree, stateToId: (BlockState) -> Int) : this() {
+    constructor(cX: Int, cZ: Int, world: BlocTree, adapter: VanillaWorldAdapter) : this() {
         this.cX = cX
         this.cZ = cZ
         biomes = IntArray(1024)
         for (i in 0..15) {
-            sections[i] = VanillaChunkSection(blocTree, cX * 16, i * 16, cZ * 16, stateToId)
+            sections[i] = adapter.getVanillaChunkSection(ChunkSectionPos(cX, i, cZ))
         }
         buffer = ByteArray(calculateSize(cX, cZ))
-        bitMask = extractData(PacketByteBuf(writeBuffer), cX, cZ, blocTree).toLongArray()
+        bitMask = extractData(PacketByteBuf(writeBuffer), cX, cZ, world).toLongArray()
     }
 
     private fun extractData(packetByteBuf: PacketByteBuf, cX: Int, cZ: Int, blocTree: BlocTree): BitSet {
