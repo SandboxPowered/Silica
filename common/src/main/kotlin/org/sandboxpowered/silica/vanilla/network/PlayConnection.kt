@@ -295,6 +295,14 @@ private class PlayConnectionActor(
             }
         }
         packetHandler.sendPacket(WorldBorder())
+        packetHandler.sendPacket(
+            InitWindowItems(
+                0u,
+                1 and 32767,
+                playerInventoryComponent.inventory,
+                server.registryProtocolMapper
+            )
+        )
 
         return Behaviors.same()
     }

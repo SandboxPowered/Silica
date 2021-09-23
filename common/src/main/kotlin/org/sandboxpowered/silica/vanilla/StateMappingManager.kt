@@ -44,7 +44,7 @@ class StateMappingManager {
 
             val errors = ObjectOpenHashSet<String>()
 
-            (SilicaRegistries.BLOCK_REGISTRY as SilicaRegistry<Block>).internalMap.forEach { (id, block) ->
+            SilicaRegistries.BLOCK_REGISTRY.internalMap.forEach { (id, block) ->
                 val blockMap = rawMap[id.toString()]
                 if (blockMap == null) {
                     errors.add(id.toString())

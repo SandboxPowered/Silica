@@ -2,6 +2,8 @@ package org.sandboxpowered.silica.content.inventory
 
 import org.sandboxpowered.silica.content.item.Item
 import org.sandboxpowered.silica.content.item.ItemStack
+import org.sandboxpowered.silica.registry.SilicaRegistries
+import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.content.item.ItemStack.Companion.EMPTY as EMPTY_STACK
 
 class PlayerInventory : Inventory {
@@ -9,10 +11,19 @@ class PlayerInventory : Inventory {
         const val HOTBAR_SIZE = 9
         const val MAIN_SIZE = 36
         const val ARMOUR_SIZE = 4
+
+        private val ITEM = SilicaRegistries.ITEM_REGISTRY[Identifier.of("stone")]
     }
 
-    val main = ArrayList<ItemStack>(MAIN_SIZE).apply { fill(EMPTY_STACK) }
-    val armour = ArrayList<ItemStack>(ARMOUR_SIZE).apply { fill(EMPTY_STACK) }
+    val main = ArrayList<ItemStack>(MAIN_SIZE).apply {
+        this.ensureCapacity(MAIN_SIZE)
+        for (i in 0 until MAIN_SIZE)
+            add(i, ItemStack.of(ITEM, i))
+    }
+    val armour = ArrayList<ItemStack>(ARMOUR_SIZE).apply {
+        this.ensureCapacity(ARMOUR_SIZE)
+        fill(EMPTY_STACK)
+    }
     var offHand = EMPTY_STACK
 
     var selectedSlot: Int = 0
@@ -37,7 +48,7 @@ class PlayerInventory : Inventory {
 
     override fun get(slot: Int): ItemStack = when (slot) {
         in 0 until MAIN_SIZE -> main[slot]
-        in MAIN_SIZE until MAIN_SIZE + ARMOUR_SIZE -> armour[slot - MAIN_SIZE]
+        in MAIN_SIZE until (MAIN_SIZE + ARMOUR_SIZE) -> armour[slot - MAIN_SIZE]
         MAIN_SIZE + ARMOUR_SIZE -> offHand
         else -> EMPTY_STACK
     }
@@ -91,5 +102,11 @@ class PlayerInventory : Inventory {
 
     override fun containsAny(vararg items: Item): Boolean {
         return main.any { items.contains(it.item) } || armour.any { items.contains(it.item) } || items.contains(offHand.item)
+    }
+
+    fun forEachIndexed(function: (Int, ItemStack) -> Unit) {
+        for (i in 0 until size) {
+            function(i, get(i))
+        }
     }
 }

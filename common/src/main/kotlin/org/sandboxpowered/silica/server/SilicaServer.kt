@@ -6,6 +6,7 @@ import org.sandboxpowered.silica.command.Commands
 import org.sandboxpowered.silica.resources.ClasspathResourceLoader
 import org.sandboxpowered.silica.resources.ResourceManager
 import org.sandboxpowered.silica.resources.ResourceType
+import org.sandboxpowered.silica.vanilla.VanillaProtocolMapping
 import org.sandboxpowered.silica.world.SilicaWorld
 import java.security.KeyPair
 import java.security.KeyPairGenerator
@@ -20,6 +21,7 @@ abstract class SilicaServer {
     open var properties: ServerProperties? = null
     var dataManager: ResourceManager
     abstract val stateRemapper: StateMappingManager
+    abstract val registryProtocolMapper: VanillaProtocolMapping
     abstract val world: ActorRef<SilicaWorld.Command>
     abstract val network: ActorRef<Network>
 

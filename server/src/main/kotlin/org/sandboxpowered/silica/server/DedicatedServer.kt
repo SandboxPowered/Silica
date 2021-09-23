@@ -8,8 +8,6 @@ import akka.actor.typed.javadsl.*
 import it.unimi.dsi.fastutil.objects.Object2LongMap
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap
 import org.apache.commons.io.FileUtils
-import org.sandboxpowered.silica.vanilla.StateMappingManager
-import org.sandboxpowered.silica.vanilla.StateMappingManager.ErrorType.UNKNOWN
 import org.sandboxpowered.silica.resources.ZIPResourceLoader
 import org.sandboxpowered.silica.util.Side
 import org.sandboxpowered.silica.util.Util
@@ -19,6 +17,9 @@ import org.sandboxpowered.silica.util.extensions.join
 import org.sandboxpowered.silica.util.extensions.messageAdapter
 import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.util.extensions.onSignal
+import org.sandboxpowered.silica.vanilla.StateMappingManager
+import org.sandboxpowered.silica.vanilla.StateMappingManager.ErrorType.UNKNOWN
+import org.sandboxpowered.silica.vanilla.VanillaProtocolMapping
 import org.sandboxpowered.silica.world.SilicaWorld
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -28,6 +29,7 @@ import java.time.Duration
 class DedicatedServer(args: Args) : SilicaServer() {
     private var logger = getLogger<DedicatedServer>()
     override val stateRemapper = StateMappingManager()
+    override val registryProtocolMapper = VanillaProtocolMapping()
     private val acceptVanillaConnections: Boolean
     override lateinit var world: ActorRef<SilicaWorld.Command>
     override lateinit var network: ActorRef<Network>
@@ -41,6 +43,7 @@ class DedicatedServer(args: Args) : SilicaServer() {
 
         properties = ServerProperties.fromFile(Paths.get("server.properties"))
         stateRemappingErrors = stateRemapper.load()
+        registryProtocolMapper.load()
         acceptVanillaConnections = stateRemappingErrors.isEmpty()
     }
 

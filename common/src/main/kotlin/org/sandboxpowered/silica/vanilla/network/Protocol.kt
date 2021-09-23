@@ -66,6 +66,7 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             0x29 packet ::UpdateEntityPosition
             0x2A packet ::UpdateEntityPositionRotation
             0x2B packet ::UpdateEntityRotation
+            0x14 packet ::InitWindowItems
         }
     }),
     STATUS(1, {

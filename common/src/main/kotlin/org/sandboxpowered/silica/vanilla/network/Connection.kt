@@ -46,7 +46,7 @@ class Connection(
             Duration.ofSeconds(3),
             scheduler
         ).whenComplete { reply: Any?, failure: Throwable? ->
-            if (failure != null) println("Couldn't create connection : " + failure.message) else if (reply is Boolean) {
+            if (failure != null) println("Couldn't create connection : ${failure.message}") else if (reply is Boolean) {
                 println("Created connection: $reply")
             }
         }
