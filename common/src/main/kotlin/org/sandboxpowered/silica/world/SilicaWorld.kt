@@ -49,7 +49,14 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
     )
     val artemisWorld: ArtemisWorld
     private var worldTicks = 0L
-    val vanillaWorldAdapter = VanillaWorldAdapter(this)
+    val listeners: MutableList<(Position, BlockState, BlockState) -> Unit> = ArrayList()
+    val vanillaWorldAdapter = VanillaWorldAdapter(this).apply {
+        addListener(this::propagateUpdate)
+    }
+
+    fun addListener(listener: (Position, BlockState, BlockState) -> Unit) {
+        listeners.add(listener)
+    }
 
     init {
         val config = WorldConfigurationBuilder()
@@ -65,6 +72,9 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
                 WORLD_SIZE, WORLD_SIZE, WORLD_SIZE
             )
         )
+        SilicaRegistries.BLOCKS_WITH_BE.forEach {
+            config.with(it.createProcessingSystem())
+        }
         config.with(entityMap)
         artemisWorld = ArtemisWorld(config.build().registerAs<Entity3dMap>(entityMap))
         artemisWorld.create()
@@ -91,7 +101,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         val oldState = blocks[pos.x, pos.y, pos.z]
         blocks[pos.x, pos.y, pos.z] = state
 
-        vanillaWorldAdapter.propagateUpdate(pos, oldState, state)
+        listeners.forEach { it(pos, oldState, state) }
         server.network.tell(Network.SendToWatching(pos, BlockChange(pos, server.stateRemapper.toVanillaId(state))))
     }
 
