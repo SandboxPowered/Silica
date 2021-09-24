@@ -3,11 +3,11 @@ package org.sandboxpowered.silica.ecs.component
 import com.artemis.PooledComponent
 
 class FurnaceLogicComponent : PooledComponent() {
-    private var fuelStart: Long = 0
-    private var smeltingStart: Long = 0
+    var fuelTime: Float = 0f
+    var smeltingTime: Float = 0f
 
     override fun reset() {
-        fuelStart = 0
-        smeltingStart = 0
+        fuelTime = 0f
+        smeltingTime = 0f
     }
 }

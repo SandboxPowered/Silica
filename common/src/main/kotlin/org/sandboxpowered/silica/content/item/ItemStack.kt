@@ -43,4 +43,14 @@ class ItemStack private constructor(private val _item: Item, private var _count:
     operator fun minusAssign(i: Int) {
         _count -= i
     }
+
+    fun duplicate(): ItemStack {
+        return of(item, count)
+    }
+
+    fun isItemEqual(registryObject: RegistryObject<Item>): Boolean {
+        if (registryObject.isEmpty)
+            return false
+        return item == registryObject.get()
+    }
 }

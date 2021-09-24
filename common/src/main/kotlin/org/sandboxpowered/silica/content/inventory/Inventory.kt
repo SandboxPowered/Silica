@@ -10,6 +10,8 @@ interface Inventory {
     operator fun get(slot: Int): ItemStack
     operator fun set(slot: Int, stack: ItemStack)
 
+    fun add(i: Int, stack: ItemStack)
+
     fun removeStack(slot: Int): ItemStack
     fun removeStack(slot: Int, amount: Int): ItemStack
 

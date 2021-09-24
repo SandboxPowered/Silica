@@ -61,6 +61,10 @@ class PlayerInventory : Inventory {
         }
     }
 
+    override fun add(i: Int, stack: ItemStack) {
+        TODO("Not yet implemented")
+    }
+
     override fun removeStack(slot: Int): ItemStack {
         when (slot) {
             in 0 until MAIN_SIZE -> {

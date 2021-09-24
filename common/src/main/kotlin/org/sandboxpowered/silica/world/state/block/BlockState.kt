@@ -15,6 +15,6 @@ class BlockState(base: Block, properties: ImmutableMap<Property<*>, Comparable<*
         get() = base
 
     companion object {
-        val factory = SilicaStateFactory.Factory.of(::BlockState)
+        val factory = ::BlockState
     }
 }
