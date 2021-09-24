@@ -6,20 +6,23 @@ import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 
 class ClientSettings(
-    private var language: String? = null, private var renderDistance: Byte = 0,
-    private var chatMode: Int = 0, private var enableColour: Boolean = false,
-    private var displayedSkin: UByte = 0u, private var hand: Int = 0,
-    private var textFiltering: Boolean = false,
+    private var language: String,
+    private var renderDistance: Byte,
+    private var chatMode: Int,
+    private var enableColour: Boolean,
+    private var displayedSkin: UByte,
+    private var hand: Int,
+    private var textFiltering: Boolean,
 ) : PacketPlay {
-    override fun read(buf: PacketByteBuf) {
-        language = buf.readString(16)
-        renderDistance = buf.readByte()
-        chatMode = buf.readVarInt()
-        enableColour = buf.readBoolean()
-        displayedSkin = buf.readUByte()
-        hand = buf.readVarInt()
-        textFiltering = buf.readBoolean()
-    }
+    constructor(buf: PacketByteBuf) : this(
+        buf.readString(16),
+        buf.readByte(),
+        buf.readVarInt(),
+        buf.readBoolean(),
+        buf.readUByte(),
+        buf.readVarInt(),
+        buf.readBoolean()
+    )
 
     override fun write(buf: PacketByteBuf) {}
     override fun handle(packetHandler: PacketHandler, context: PlayContext) {}

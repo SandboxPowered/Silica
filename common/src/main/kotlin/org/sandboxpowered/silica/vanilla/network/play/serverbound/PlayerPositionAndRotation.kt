@@ -6,19 +6,21 @@ import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 
 class PlayerPositionAndRotation(
-    private var x: Double = 0.0, private var y: Double = 0.0, private var z: Double = 0.0,
-    private var yaw: Float = 0f, private var pitch: Float = 0f,
-    private var onGround: Boolean = false,
+    private var x: Double,
+    private var y: Double,
+    private var z: Double,
+    private var yaw: Float,
+    private var pitch: Float,
+    private var onGround: Boolean,
 ) : PacketPlay {
-
-    override fun read(buf: PacketByteBuf) {
-        x = buf.readDouble()
-        y = buf.readDouble()
-        z = buf.readDouble()
-        yaw = buf.readFloat()
-        pitch = buf.readFloat()
-        onGround = buf.readBoolean()
-    }
+    constructor(buf: PacketByteBuf) : this(
+        buf.readDouble(),
+        buf.readDouble(),
+        buf.readDouble(),
+        buf.readFloat(),
+        buf.readFloat(),
+        buf.readBoolean()
+    )
 
     override fun write(buf: PacketByteBuf) {
         buf.writeDouble(x)

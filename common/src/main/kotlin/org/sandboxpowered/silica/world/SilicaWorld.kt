@@ -38,7 +38,7 @@ import java.util.*
 import com.artemis.World as ArtemisWorld
 import org.sandboxpowered.silica.world.gen.TerrainGenerator.Generate as CommandGenerate
 
-class SilicaWorld private constructor(private val side: Side, private val server: SilicaServer) : World {
+class SilicaWorld private constructor(val side: Side, val server: SilicaServer) : World {
 
     private val blocks: BlocTree = BlocTree(
         WORLD_MIN,
@@ -49,6 +49,14 @@ class SilicaWorld private constructor(private val side: Side, private val server
     )
     val artemisWorld: ArtemisWorld
     private var worldTicks = 0L
+    val listeners: MutableList<(Position, BlockState, BlockState) -> Unit> = ArrayList()
+    val vanillaWorldAdapter = VanillaWorldAdapter(this).apply {
+        addListener(this::propagateUpdate)
+    }
+
+    fun addListener(listener: (Position, BlockState, BlockState) -> Unit) {
+        listeners.add(listener)
+    }
 
     init {
         val config = WorldConfigurationBuilder()
@@ -64,6 +72,9 @@ class SilicaWorld private constructor(private val side: Side, private val server
                 WORLD_SIZE, WORLD_SIZE, WORLD_SIZE
             )
         )
+        SilicaRegistries.BLOCKS_WITH_BE.forEach {
+            config.with(it.createProcessingSystem())
+        }
         config.with(entityMap)
         artemisWorld = ArtemisWorld(config.build().registerAs<Entity3dMap>(entityMap))
         artemisWorld.create()
@@ -87,7 +98,10 @@ class SilicaWorld private constructor(private val side: Side, private val server
             val archetype = builder.build(artemisWorld) // TODO cache these per world
             artemisWorld.create(archetype)
         }
+        val oldState = blocks[pos.x, pos.y, pos.z]
         blocks[pos.x, pos.y, pos.z] = state
+
+        listeners.forEach { it(pos, oldState, state) }
         server.network.tell(Network.SendToWatching(pos, BlockChange(pos, server.stateRemapper.toVanillaId(state))))
     }
 
@@ -142,7 +156,11 @@ class SilicaWorld private constructor(private val side: Side, private val server
                 ) = AskSilica(
                     {
                         val playerManager = it.artemisWorld.getSystem<SilicaPlayerManager>()
-                        transform(playerManager.create(gameProfile), playerManager.createInventory(gameProfile), playerManager.getOnlinePlayerProfiles())
+                        transform(
+                            playerManager.create(gameProfile),
+                            playerManager.createInventory(gameProfile),
+                            playerManager.getOnlinePlayerProfiles()
+                        )
                     },
                     replyTo
                 )

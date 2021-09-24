@@ -5,11 +5,8 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 
-class KeepAliveClient(private var id: Long = 0) : PacketPlay {
-
-    override fun read(buf: PacketByteBuf) {
-        id = buf.readLong()
-    }
+class KeepAliveClient(private var id: Long) : PacketPlay {
+    constructor(buf: PacketByteBuf) : this(buf.readLong())
 
     override fun write(buf: PacketByteBuf) {
         buf.writeLong(id)

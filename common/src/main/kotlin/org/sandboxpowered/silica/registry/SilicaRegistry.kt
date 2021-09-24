@@ -8,13 +8,19 @@ import java.util.stream.Stream
 class SilicaRegistry<T : RegistryEntry<T>>(private val id: Identifier, override val type: Class<T>) : Registry<T> {
     var internalMap: MutableMap<Identifier, T> = HashMap()
     var registryEntries: MutableMap<Identifier, SilicaRegistryEntry<T>> = HashMap()
+    var listeners: MutableList<(T) -> Unit> = ArrayList()
 
     fun <X : RegistryEntry<X>> cast(): Registry<X> {
         return this as Registry<X>
     }
 
+    fun addListener(listener: (T) -> Unit) {
+        listeners.add(listener)
+    }
+
     fun register(t: T): T {
         internalMap[t.identifier] = t
+        listeners.forEach { it(t) }
         return t
     }
 

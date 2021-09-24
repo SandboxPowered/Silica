@@ -1,12 +1,12 @@
 package org.sandboxpowered.silica.vanilla.network.play.clientbound
 
+import org.sandboxpowered.silica.util.Hardcoding
+import org.sandboxpowered.silica.util.Identifier
+import org.sandboxpowered.silica.util.Identifier.Companion.of
 import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
-import org.sandboxpowered.silica.util.Hardcoding
-import org.sandboxpowered.silica.util.Identifier
-import org.sandboxpowered.silica.util.Identifier.Companion.of
 
 class DeclareTags : PacketPlay {
     override fun read(buf: PacketByteBuf) {}

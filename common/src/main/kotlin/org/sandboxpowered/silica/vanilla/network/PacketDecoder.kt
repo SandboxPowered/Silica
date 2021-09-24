@@ -10,9 +10,8 @@ class PacketDecoder(private val networkFlow: NetworkFlow) : ByteToMessageDecoder
             val buf = PacketByteBuf(inBuf)
             val packetId = buf.readVarInt()
             val protocol = ctx.channel().attr(Protocol.PROTOCOL_ATTRIBUTE_KEY).get()
-            val packet = protocol.createPacket(networkFlow, packetId)
+            val packet = protocol.createPacket(networkFlow, packetId, buf)
             if (packet != null) {
-                packet.read(buf)
                 out.add(packet)
             } else {
                 error("Unknown packet 0x${"%02x".format(packetId)}")

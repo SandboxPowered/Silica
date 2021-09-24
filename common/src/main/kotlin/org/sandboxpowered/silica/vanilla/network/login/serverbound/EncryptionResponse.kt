@@ -7,18 +7,12 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
-class EncryptionResponse(private var sharedSecret: ByteArray?, private var verifyToken: ByteArray?) : Packet {
-
-    constructor() : this(null, null)
-
-    override fun read(buf: PacketByteBuf) {
-        sharedSecret = buf.readByteArray()
-        verifyToken = buf.readByteArray()
-    }
+class EncryptionResponse(private var sharedSecret: ByteArray, private var verifyToken: ByteArray) : Packet {
+    constructor(buf: PacketByteBuf) : this(buf.readByteArray(), buf.readByteArray())
 
     override fun write(buf: PacketByteBuf) {
-        buf.writeByteArray(sharedSecret!!)
-        buf.writeByteArray(verifyToken!!)
+        buf.writeByteArray(sharedSecret)
+        buf.writeByteArray(verifyToken)
     }
 
     override fun handle(packetHandler: PacketHandler, connection: Connection) {
@@ -27,7 +21,7 @@ class EncryptionResponse(private var sharedSecret: ByteArray?, private var verif
 
     @Throws(EncryptionException::class)
     fun getSecretKey(key: Key): SecretKey {
-        val cs = decryptUsingKey(key, sharedSecret!!)
+        val cs = decryptUsingKey(key, sharedSecret)
         return try {
             SecretKeySpec(cs, "AES")
         } catch (var4: Exception) {
@@ -36,7 +30,7 @@ class EncryptionResponse(private var sharedSecret: ByteArray?, private var verif
     }
 
     fun getVerificationToken(key: Key): ByteArray {
-        return decryptUsingKey(key, verifyToken!!)
+        return decryptUsingKey(key, verifyToken)
     }
 
     fun getCipher(i: Int, key: Key): Cipher {

@@ -7,12 +7,7 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.handshake.serverbound.PongResponse
 
 class PingRequest(private var time: Long) : Packet {
-
-    constructor() : this(-1)
-
-    override fun read(buf: PacketByteBuf) {
-        time = buf.readLong()
-    }
+    constructor(buf: PacketByteBuf) : this(buf.readLong())
 
     override fun write(buf: PacketByteBuf) {
         buf.writeLong(time)

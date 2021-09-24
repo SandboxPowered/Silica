@@ -5,11 +5,9 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 
-class PlayerMovement(private var onGround: Boolean = false) : PacketPlay {
+class PlayerMovement(private var onGround: Boolean) : PacketPlay {
 
-    override fun read(buf: PacketByteBuf) {
-        onGround = buf.readBoolean()
-    }
+    constructor(buf: PacketByteBuf) : this(buf.readBoolean())
 
     override fun write(buf: PacketByteBuf) {
         buf.writeBoolean(onGround)

@@ -20,9 +20,11 @@ import org.sandboxpowered.silica.vanilla.network.login.serverbound.HandshakeRequ
 import org.sandboxpowered.silica.vanilla.network.login.serverbound.LoginStart
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.*
 import org.sandboxpowered.silica.vanilla.network.play.serverbound.*
+import java.util.function.Function
 import java.util.function.Supplier
 import kotlin.collections.set
 
+@Suppress("unused")
 enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
     HANDSHAKE(-1, {
         server {
@@ -40,32 +42,32 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             0x13 packet ::PlayerRotation
             0x14 packet ::PlayerMovement
             0x1A packet ::PlayerDigging
-            0x2C packet ::HandSwingAnimation
-            0x1B packet ::EntityAction
-            0x2E packet ::PlayerBlockPlacement
-            0x25 packet ::HeldItemChangeServerbound
+            0x2C packetDeprecated ::HandSwingAnimation
+            0x1B packetDeprecated ::EntityAction
+            0x2E packetDeprecated ::PlayerBlockPlacement
+            0x25 packetDeprecated ::HeldItemChangeServerbound
         }
         client {
             0x26 packet ::JoinGame
             0x48 packet ::HeldItemChangeClientbound
-            0x65 packet ::DeclareRecipes
-            0X66 packet ::DeclareTags
-            0x1B packet ::EntityStatus
-            0x12 packet ::DeclareCommands
-            0x38 packet ::SetPlayerPositionAndLook
-            0x39 packet ::UnlockRecipes
-            0x36 packet ::PlayerInfo
-            0x49 packet ::UpdateChunkPosition
-            0x22 packet ::ChunkData
-            0x25 packet ::UpdateLight
-            0x20 packet ::WorldBorder
+            0x65 packetDeprecated ::DeclareRecipes
+            0X66 packetDeprecated ::DeclareTags
+            0x1B packetDeprecated ::EntityStatus
+            0x12 packetDeprecated ::DeclareCommands
+            0x38 packetDeprecated ::SetPlayerPositionAndLook
+            0x39 packetDeprecated ::UnlockRecipes
+            0x36 packetDeprecated ::PlayerInfo
+            0x49 packetDeprecated ::UpdateChunkPosition
+            0x22 packetDeprecated ::ChunkData
+            0x25 packetDeprecated ::UpdateLight
+            0x20 packetDeprecated ::WorldBorder
             0x21 packet ::KeepAliveClient
             0x08 packet ::AcknowledgePlayerDigging
             0x0C packet ::BlockChange
-            0x04 packet ::SpawnPlayer
-            0x29 packet ::UpdateEntityPosition
-            0x2A packet ::UpdateEntityPositionRotation
-            0x2B packet ::UpdateEntityRotation
+            0x04 packetDeprecated ::SpawnPlayer
+            0x29 packetDeprecated ::UpdateEntityPosition
+            0x2A packetDeprecated ::UpdateEntityPositionRotation
+            0x2B packetDeprecated ::UpdateEntityRotation
             0x14 packet ::InitWindowItems
         }
     }),
@@ -127,15 +129,15 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
         NetworkFlow.SERVERBOUND -> builder.server.getId(msg.javaClass)
     }
 
-    fun createPacket(networkFlow: NetworkFlow, packetId: Int): PacketBase? = when (networkFlow) {
-        NetworkFlow.CLIENTBOUND -> builder.client.createPacket(packetId)
-        NetworkFlow.SERVERBOUND -> builder.server.createPacket(packetId)
+    fun createPacket(networkFlow: NetworkFlow, packetId: Int, buf: PacketByteBuf): PacketBase? = when (networkFlow) {
+        NetworkFlow.CLIENTBOUND -> builder.client.createPacket(packetId, buf)
+        NetworkFlow.SERVERBOUND -> builder.server.createPacket(packetId, buf)
     }
 
     class Builder {
         class FlowBuilder(val flow: NetworkFlow) {
             val classToId: Object2IntMap<Class<out PacketBase>> = Object2IntOpenHashMap()
-            val idToConstructor: Int2ObjectMap<Supplier<out PacketBase>> = Int2ObjectOpenHashMap()
+            val idToConstructor: Int2ObjectMap<Function<PacketByteBuf, out PacketBase>> = Int2ObjectOpenHashMap()
 
             init {
                 classToId.defaultReturnValue(-1)
@@ -146,10 +148,19 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             val allPackets: Iterable<Class<out PacketBase>>
                 get() = Iterables.unmodifiableIterable(classToId.keys)
 
-            fun createPacket(packetId: Int): PacketBase? =
-                if (!idToConstructor.containsKey(packetId)) null else idToConstructor[packetId].get()
+            fun createPacket(packetId: Int, buf: PacketByteBuf): PacketBase? =
+                if (!idToConstructor.containsKey(packetId)) null else idToConstructor[packetId].apply(buf)
 
-            inline infix fun <reified P : PacketBase> Int.packet(packetSupplier: Supplier<P>) {
+            @Deprecated("use PacketByteBuf constructor instead")
+            inline infix fun <reified P : PacketBase> Int.packetDeprecated(packetSupplier: Supplier<P>) {
+                packet { buf ->
+                    val packet = packetSupplier.get()
+                    packet.read(buf)
+                    packet
+                }
+            }
+
+            inline infix fun <reified P : PacketBase> Int.packet(packetSupplier: Function<PacketByteBuf, P>) {
                 val id = classToId.put(P::class.java, this)
                 require(id == -1) { "Packet ${P::class.java} is already registered to ID $id" }
                 idToConstructor[this] = packetSupplier

@@ -25,4 +25,8 @@ inline fun <reified T : Component> ArchetypeBuilder.add() {
     add(T::class.java)
 }
 
+inline fun <reified T : Component> ArchetypeBuilder.remove() {
+    remove(T::class.java)
+}
+
 inline fun <reified T : BaseSystem> World.getSystem(): T = getSystem(T::class.java)

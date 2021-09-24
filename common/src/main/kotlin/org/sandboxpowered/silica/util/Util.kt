@@ -32,11 +32,9 @@ object Util {
         }
     }
 
-    inline fun <reified T> getLogger(): Logger {
-        return LogManager.getLogger(T::class.java)
-    }
+    inline fun <reified T> getLogger(): Logger = LogManager.getLogger(T::class.java)
 
-    private val ktorClient = HttpClient() {
+    private val ktorClient = HttpClient {
         install(JsonFeature) {
             serializer = GsonSerializer()
         }
@@ -66,17 +64,15 @@ object Util {
         return file
     }
 
-    private fun findMinecraft(version: String): File? {
-        return when {
-            SystemUtils.IS_OS_WINDOWS || SystemUtils.IS_OS_LINUX -> {
-                val homeDir = when {
-                    SystemUtils.IS_OS_LINUX -> System.getenv("HOME")
-                    else -> System.getenv("APPDATA")
-                }
-                val asPath = Paths.get(homeDir, ".minecraft", "versions", version, "$version.jar")
-                if (Files.exists(asPath)) asPath.toFile() else null
+    private fun findMinecraft(version: String): File? = when {
+        SystemUtils.IS_OS_WINDOWS || SystemUtils.IS_OS_LINUX -> {
+            val homeDir = when {
+                SystemUtils.IS_OS_LINUX -> System.getenv("HOME")
+                else -> System.getenv("APPDATA")
             }
-            else -> null
+            val asPath = Paths.get(homeDir, ".minecraft", "versions", version, "$version.jar")
+            if (Files.exists(asPath)) asPath.toFile() else null
         }
+        else -> null
     }
 }

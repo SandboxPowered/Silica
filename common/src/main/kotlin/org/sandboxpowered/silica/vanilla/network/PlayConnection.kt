@@ -19,6 +19,7 @@ import org.sandboxpowered.silica.util.extensions.getSystem
 import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.*
 import org.sandboxpowered.silica.world.SilicaWorld
+import org.sandboxpowered.silica.world.VanillaWorldAdapter
 import org.sandboxpowered.silica.world.util.BlocTree
 import java.time.Duration
 import kotlin.system.measureTimeMillis
@@ -26,7 +27,7 @@ import kotlin.system.measureTimeMillis
 sealed class PlayConnection {
     class ReceivePacket(val packet: PacketPlay) : PlayConnection()
     class SendPacket(val packet: PacketPlay) : PlayConnection()
-    class ReceiveWorld(val blocks: BlocTree) : PlayConnection()
+    class ReceiveWorld(val blocks: BlocTree, val vanillaWorldAdapter: VanillaWorldAdapter) : PlayConnection()
     class ReceivePlayer(
         val gameProfiles: Array<GameProfile>,
         val input: VanillaPlayerInput,
@@ -176,8 +177,8 @@ private class PlayConnectionActor(
             JoinGame(
                 0,
                 false,
-                1.toShort(),
-                (-1).toShort(),
+                1,
+                -1,
                 1,
                 arrayOf(overworld),
                 codec,
@@ -261,7 +262,7 @@ private class PlayConnectionActor(
 
         server.world.tell(
             SilicaWorld.Command.Ask(
-                { PlayConnection.ReceiveWorld((it as SilicaWorld).getTerrain()) },
+                { PlayConnection.ReceiveWorld((it as SilicaWorld).getTerrain(), it.vanillaWorldAdapter) },
                 context.self
             )
         )
@@ -288,7 +289,7 @@ private class PlayConnectionActor(
         for (x in -4..4) {
             for (z in -4..4) {
                 val time = measureTimeMillis {
-                    packetHandler.sendPacket(ChunkData(x, z, world.blocks, server.stateRemapper::toVanillaId))
+                    packetHandler.sendPacket(ChunkData(x, z, world.blocks, world.vanillaWorldAdapter))
                 }
 //                logger.debug("Took {}ms to create Chunk Data for {} {}", time, x, z)
                 packetHandler.sendPacket(UpdateLight(x, z, true))
