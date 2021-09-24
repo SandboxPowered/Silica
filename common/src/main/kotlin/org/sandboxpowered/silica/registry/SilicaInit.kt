@@ -39,6 +39,8 @@ object SilicaInit {
         register(FireBlock(id("fire")))
         register(GlassPaneBlock(id("glass_pane")))
 
+        register(FurnaceBlock(id("furnace")))
+
         blocks {
             Colour.NAME_ARRAY defines {
                 archetypes(BLOCK suffix "_wool")
