@@ -12,7 +12,7 @@ class PlayerInventory : Inventory {
         const val MAIN_SIZE = 36
         const val ARMOUR_SIZE = 4
 
-        private val ITEM by SilicaRegistries.ITEM_REGISTRY[Identifier.of("stone")].guarentee()
+        private val ITEM by SilicaRegistries.ITEM_REGISTRY[Identifier.of("stone")].guarantee()
     }
 
     val main = ArrayList<ItemStack>(MAIN_SIZE).apply {
