@@ -13,7 +13,6 @@ import org.sandboxpowered.silica.client.util.stackPush
 import org.sandboxpowered.silica.resources.ResourceType
 import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.content.Direction
-import org.sandboxpowered.silica.world.util.iterateCube
 import java.io.InputStreamReader
 
 class OpenGLRenderer(private val silica: Silica) : Renderer {
@@ -53,7 +52,7 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
             )
         }
 
-        val modelJson = func(Identifier("block/cauldron"))
+        val modelJson = func(Identifier("block/cut_copper_stairs"))
 
         modelJson.getReferences(func).forEach {
             stitcher.add(
@@ -71,87 +70,90 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
 
         val size = 1
 
-        stackPush {
-            val build = VertexBufferObject.builder(
+        stackPush { stack ->
+            val vbo = VertexBufferObject.builder(
                 GL_TRIANGLES,
-                it.malloc(DefaultRenderingFormat.POSITION_TEXTURE.getArraySize(size * size * size * 2 * 8 * 100))
+                stack.malloc(DefaultRenderingFormat.POSITION_TEXTURE.getArraySize(
+                    6 * (modelJson.getElements().sumOf { it.faces.size } * 6)
+                ))
             )
 
-            iterateCube(0, 0, 0, size, size, size) { x, y, z ->
-                modelJson.getElements().forEach { it ->
-                    it.faces.forEach { (dir, face) ->
-                        val sprite = atlas.getSprite(modelJson.resolve(face.texture).texture)!!
-                        val (_, minUV, maxUV) = sprite
+            val x = 0
+            val y = 0
+            val z = 0
+            modelJson.getElements().forEach {
+                it.faces.forEach { (dir, face) ->
+                    val sprite = atlas.getSprite(modelJson.resolve(face.texture).texture)!!
+                    val (_, minUV, maxUV) = sprite
 
-                        val differenceBetweenX = maxUV.x() - minUV.x()
-                        val differenceBetweenY = maxUV.y() - minUV.y()
+                    val differenceBetweenX = maxUV.x() - minUV.x()
+                    val differenceBetweenY = maxUV.y() - minUV.y()
 
-                        val stitcherWidth = stitcher.width / 16f
-                        val stitcherHeight = stitcher.height / 16f
+                    val stitcherWidth = stitcher.width / 16f
+                    val stitcherHeight = stitcher.height / 16f
 
-                        val u2Sprite = face.textureData.uvs!![2] / 16f
-                        val v2Sprite = face.textureData.uvs!![3] / 16f
+                    val u2Sprite = face.textureData.uvs!![2] / 16f
+                    val v2Sprite = face.textureData.uvs!![3] / 16f
 
-                        val u2 = (face.textureData.uvs!![0] / 16f / stitcherWidth) + minUV.x()
-                        val v2 = (face.textureData.uvs!![1] / 16f / stitcherHeight) + minUV.y()
-                        val u1 = minUV.x() + (differenceBetweenX * u2Sprite)
-                        val v1 = minUV.y() + (differenceBetweenY * v2Sprite)
+                    val u2 = (face.textureData.uvs!![0] / 16f / stitcherWidth) + minUV.x()
+                    val v2 = (face.textureData.uvs!![1] / 16f / stitcherHeight) + minUV.y()
+                    val u1 = minUV.x() + (differenceBetweenX * u2Sprite)
+                    val v1 = minUV.y() + (differenceBetweenY * v2Sprite)
 
-                        when (dir) {
-                            Direction.UP -> {
-                                build.dataf(it.from.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).dataf(u1, v1)
-                                build.dataf(it.from.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).dataf(u1, v2)
-                                build.dataf(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).dataf(u2, v2)
-                                build.dataf(it.from.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).dataf(u1, v1)
-                                build.dataf(it.to.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).dataf(u2, v1)
-                                build.dataf(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).dataf(u2, v2)
-                            }
-                            Direction.DOWN -> {
-                                build.dataf(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).dataf(u1, v1)
-                                build.dataf(it.from.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).dataf(u1, v2)
-                                build.dataf(it.to.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).dataf(u2, v2)
-                                build.dataf(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).dataf(u1, v1)
-                                build.dataf(it.to.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).dataf(u2, v1)
-                                build.dataf(it.to.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).dataf(u2, v2)
-                            }
-                            Direction.WEST -> {
-                                build.dataf(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).dataf(u1, v1)
-                                build.dataf(it.from.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).dataf(u1, v2)
-                                build.dataf(it.from.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).dataf(u2, v2)
-                                build.dataf(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).dataf(u1, v1)
-                                build.dataf(it.from.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).dataf(u2, v1)
-                                build.dataf(it.from.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).dataf(u2, v2)
-                            }
-                            Direction.EAST -> {
-                                build.dataf(it.to.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).dataf(u1, v1)
-                                build.dataf(it.to.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).dataf(u1, v2)
-                                build.dataf(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).dataf(u2, v2)
-                                build.dataf(it.to.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).dataf(u1, v1)
-                                build.dataf(it.to.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).dataf(u2, v1)
-                                build.dataf(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).dataf(u2, v2)
-                            }
-                            Direction.SOUTH -> {
-                                build.dataf(it.from.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).dataf(u1, v1)
-                                build.dataf(it.from.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).dataf(u1, v2)
-                                build.dataf(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).dataf(u2, v2)
-                                build.dataf(it.from.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).dataf(u1, v1)
-                                build.dataf(it.to.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).dataf(u2, v1)
-                                build.dataf(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).dataf(u2, v2)
-                            }
-                            Direction.NORTH -> {
-                                build.dataf(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).dataf(u1, v1)
-                                build.dataf(it.from.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).dataf(u1, v2)
-                                build.dataf(it.to.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).dataf(u2, v2)
-                                build.dataf(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).dataf(u1, v1)
-                                build.dataf(it.to.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).dataf(u2, v1)
-                                build.dataf(it.to.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).dataf(u2, v2)
-                            }
+                    when (dir) {
+                        Direction.UP -> {
+                            vbo.put(it.from.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).put(u1, v1)
+                            vbo.put(it.from.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).put(u1, v2)
+                            vbo.put(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).put(u2, v2)
+                            vbo.put(it.from.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).put(u1, v1)
+                            vbo.put(it.to.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).put(u2, v1)
+                            vbo.put(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).put(u2, v2)
+                        }
+                        Direction.DOWN -> {
+                            vbo.put(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).put(u1, v1)
+                            vbo.put(it.from.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).put(u1, v2)
+                            vbo.put(it.to.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).put(u2, v2)
+                            vbo.put(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).put(u1, v1)
+                            vbo.put(it.to.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).put(u2, v1)
+                            vbo.put(it.to.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).put(u2, v2)
+                        }
+                        Direction.WEST -> {
+                            vbo.put(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).put(u1, v1)
+                            vbo.put(it.from.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).put(u1, v2)
+                            vbo.put(it.from.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).put(u2, v2)
+                            vbo.put(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).put(u1, v1)
+                            vbo.put(it.from.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).put(u2, v1)
+                            vbo.put(it.from.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).put(u2, v2)
+                        }
+                        Direction.EAST -> {
+                            vbo.put(it.to.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).put(u1, v1)
+                            vbo.put(it.to.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).put(u1, v2)
+                            vbo.put(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).put(u2, v2)
+                            vbo.put(it.to.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).put(u1, v1)
+                            vbo.put(it.to.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).put(u2, v1)
+                            vbo.put(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).put(u2, v2)
+                        }
+                        Direction.SOUTH -> {
+                            vbo.put(it.from.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).put(u1, v1)
+                            vbo.put(it.from.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).put(u1, v2)
+                            vbo.put(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).put(u2, v2)
+                            vbo.put(it.from.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).put(u1, v1)
+                            vbo.put(it.to.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).put(u2, v1)
+                            vbo.put(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).put(u2, v2)
+                        }
+                        Direction.NORTH -> {
+                            vbo.put(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).put(u1, v1)
+                            vbo.put(it.from.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).put(u1, v2)
+                            vbo.put(it.to.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).put(u2, v2)
+                            vbo.put(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).put(u1, v1)
+                            vbo.put(it.to.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).put(u2, v1)
+                            vbo.put(it.to.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).put(u2, v2)
                         }
                     }
                 }
             }
 
-            obj = build.build()
+            obj = vbo.build()
         }
 
         GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f)

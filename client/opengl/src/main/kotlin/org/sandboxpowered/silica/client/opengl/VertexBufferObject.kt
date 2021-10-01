@@ -33,35 +33,35 @@ class VertexBufferObject(val type: Int, val size: Int, data: ByteBuffer?) {
             return VertexBufferObject(type, size, byteBuffer)
         }
 
-        fun datab(vararg data: Byte): Builder {
+        fun put(vararg data: Byte): Builder {
             size += data.size * java.lang.Byte.BYTES
             byteBuffer.put(data)
             return this
         }
 
-        fun datas(vararg data: Short): Builder {
+        fun put(vararg data: Short): Builder {
             size += data.size * java.lang.Short.BYTES
             rawShortBuffer.put(data)
             return this
         }
 
-        fun datai(vararg data: Int): Builder {
+        fun put(vararg data: Int): Builder {
             size += data.size * Integer.BYTES
             rawIntBuffer.put(data)
             return this
         }
 
-        fun dataf(data: Vector3f): Builder {
-            return dataf(data.x, data.y, data.z)
+        fun put(data: Vector3f): Builder {
+            return put(data.x, data.y, data.z)
         }
 
-        fun dataf(vararg data: Float): Builder {
+        fun put(vararg data: Float): Builder {
             size += data.size * java.lang.Float.BYTES
             rawFloatBuffer.put(data)
             return this
         }
 
-        fun datad(vararg data: Double): Builder {
+        fun put(vararg data: Double): Builder {
             size += data.size * java.lang.Double.BYTES
             rawDoubleBuffer.put(data)
             return this
