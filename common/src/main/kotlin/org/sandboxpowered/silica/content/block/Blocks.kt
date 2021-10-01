@@ -10,6 +10,5 @@ object Blocks {
     val BEDROCK by blocks().guaranteed
     val STONE by blocks().guaranteed
     val DIRT by blocks().guaranteed
-    val IRON_FURNACE by blocks("ic2")
     val GRASS_BLOCK by blocks().guaranteed
 }
