@@ -53,7 +53,7 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
             )
         }
 
-        val modelJson = func(Identifier("block/lectern"))
+        val modelJson = func(Identifier("block/cauldron"))
 
         modelJson.getReferences(func).forEach {
             stitcher.add(
@@ -92,10 +92,10 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
                         val u2Sprite = face.textureData.uvs!![2] / 16f
                         val v2Sprite = face.textureData.uvs!![3] / 16f
 
-                        val u1 = (face.textureData.uvs!![0] / 16f / stitcherWidth) + minUV.x()
-                        val v1 = (face.textureData.uvs!![1] / 16f / stitcherHeight) + minUV.y()
-                        val u2 = minUV.x() + (differenceBetweenX * u2Sprite)
-                        val v2 = minUV.y() + (differenceBetweenY * v2Sprite)
+                        val u2 = (face.textureData.uvs!![0] / 16f / stitcherWidth) + minUV.x()
+                        val v2 = (face.textureData.uvs!![1] / 16f / stitcherHeight) + minUV.y()
+                        val u1 = minUV.x() + (differenceBetweenX * u2Sprite)
+                        val v1 = minUV.y() + (differenceBetweenY * v2Sprite)
 
                         when (dir) {
                             Direction.UP -> {
