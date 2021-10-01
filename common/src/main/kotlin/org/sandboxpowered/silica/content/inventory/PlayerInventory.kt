@@ -2,8 +2,8 @@ package org.sandboxpowered.silica.content.inventory
 
 import org.sandboxpowered.silica.content.item.Item
 import org.sandboxpowered.silica.content.item.ItemStack
-import org.sandboxpowered.silica.registry.SilicaRegistries
-import org.sandboxpowered.silica.util.Identifier
+import org.sandboxpowered.silica.registry.SilicaRegistries.blocks
+import org.sandboxpowered.silica.registry.SilicaRegistries.items
 import org.sandboxpowered.silica.content.item.ItemStack.Companion.EMPTY as EMPTY_STACK
 
 class PlayerInventory : Inventory {
@@ -12,13 +12,13 @@ class PlayerInventory : Inventory {
         const val MAIN_SIZE = 36
         const val ARMOUR_SIZE = 4
 
-        private val ITEM by SilicaRegistries.ITEM_REGISTRY[Identifier.of("stone")].guarantee()
+        private val STONE by items().guaranteed
     }
 
     val main = ArrayList<ItemStack>(MAIN_SIZE).apply {
         this.ensureCapacity(MAIN_SIZE)
         for (i in 0 until MAIN_SIZE)
-            add(i, ItemStack.of(ITEM, i))
+            add(i, ItemStack.of(STONE, i))
     }
     val armour = ArrayList<ItemStack>(ARMOUR_SIZE).apply {
         this.ensureCapacity(ARMOUR_SIZE)

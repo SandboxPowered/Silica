@@ -2,12 +2,11 @@ package org.sandboxpowered.silica.content.item
 
 import org.sandboxpowered.silica.content.block.Block
 import org.sandboxpowered.silica.registry.RegistryObject
-import org.sandboxpowered.silica.registry.SilicaRegistries
-import org.sandboxpowered.silica.util.Identifier.Companion.of as id
+import org.sandboxpowered.silica.registry.SilicaRegistries.items
 
 class ItemStack private constructor(private val _item: Item, private var _count: Int) {
     companion object {
-        private val AIR by SilicaRegistries.ITEM_REGISTRY[id("air")].guarantee()
+        private val AIR by items().guaranteed
 
         val EMPTY by lazy { of(AIR, 0) }
 

@@ -10,6 +10,7 @@ import org.sandboxpowered.silica.ecs.component.BlockPositionComponent
 import org.sandboxpowered.silica.ecs.component.FurnaceLogicComponent
 import org.sandboxpowered.silica.ecs.component.ResizableInventoryComponent
 import org.sandboxpowered.silica.registry.SilicaRegistries
+import org.sandboxpowered.silica.registry.SilicaRegistries.items
 import org.sandboxpowered.silica.util.Identifier
 import kotlin.math.min
 
@@ -48,10 +49,10 @@ class FurnaceProcessingSystem : DelayedIteratingSystem() {
 
     // TODO replace with actual recipes
 
-    private val ironOre by SilicaRegistries.ITEM_REGISTRY[Identifier.of("iron_ore")].guarantee()
-    private val ironIngot by SilicaRegistries.ITEM_REGISTRY[Identifier.of("iron_ingot")].guarantee()
+    private val iron_ore by items().guaranteed
+    private val iron_ingot by items().guaranteed
     private val outputStack: ItemStack by lazy {
-        ItemStack.of(ironIngot, 2)
+        ItemStack.of(iron_ingot, 2)
     }
 
     override fun processExpired(entityId: Int) {
@@ -61,10 +62,10 @@ class FurnaceProcessingSystem : DelayedIteratingSystem() {
         var isBurning = logic.fuelTime > 0
         val (inputItem, fuelItem, outputItem) = inventory
         if ((isBurning || !fuelItem.isEmpty) && !inputItem.isEmpty) {
-            val isValidItemForRecipe = inputItem.isItemEqual(ironOre)
+            val isValidItemForRecipe = inputItem.isItemEqual(iron_ore)
             if (!isValidItemForRecipe) {
                 val canAcceptRecipeOutput =
-                    outputItem.isEmpty || (outputItem.isItemEqual(ironIngot) && outputItem.count + outputStack.count <= 64)
+                    outputItem.isEmpty || (outputItem.isItemEqual(iron_ingot) && outputItem.count + outputStack.count <= 64)
                 if (!isBurning && canAcceptRecipeOutput) {
                     logic.fuelTime = fuelTime / 20f
                     fuelItem -= 1

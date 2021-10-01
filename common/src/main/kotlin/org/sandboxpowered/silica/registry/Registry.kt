@@ -3,6 +3,7 @@ package org.sandboxpowered.silica.registry
 import org.jetbrains.annotations.ApiStatus
 import org.sandboxpowered.silica.util.Identifier
 import java.util.stream.Stream
+import kotlin.reflect.KProperty
 
 interface Registry<T : RegistryEntry<T>> : Iterable<T> {
     fun stream(): Stream<T>
@@ -12,5 +13,20 @@ interface Registry<T : RegistryEntry<T>> : Iterable<T> {
 
     @ApiStatus.Experimental
     fun getUnsafe(id: Identifier): T?
+
     val type: Class<T>
+}
+
+class RegistryDelegate<T : RegistryEntry<T>>(private val registry: Registry<T>, private val domain: String) {
+    operator fun getValue(thisRef: Any?, property: KProperty<*>): T? {
+        return registry[Identifier.of(domain, property.name.lowercase())].orNull()
+    }
+
+    val guaranteed = NonNullRegistryDelegate(registry, domain)
+
+    class NonNullRegistryDelegate<T : RegistryEntry<T>>(private val registry: Registry<T>, private val domain: String) {
+        operator fun getValue(thisRef: Any?, property: KProperty<*>): T {
+            return registry[Identifier.of(domain, property.name.lowercase())].get()
+        }
+    }
 }

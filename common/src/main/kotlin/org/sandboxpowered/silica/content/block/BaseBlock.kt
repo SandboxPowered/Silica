@@ -13,7 +13,7 @@ open class BaseBlock(final override val identifier: Identifier) : Block {
     override val isAir: Boolean
         get() = identifier.path == "air"
 
-    override val item: Item? by SilicaRegistries.ITEM_REGISTRY[identifier]
+    override val item: Item? by SilicaRegistries.ITEM_REGISTRY[identifier].guaranteed
 
     protected open fun appendProperties(builder: StateProvider.Builder<Block, BlockState>) = Unit
 
