@@ -87,7 +87,7 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
         shaderProgram.createUniform("texture_sampler")
 
         val decoder =
-            PNGDecoder(silica.assetManager.open(ResourceType.ASSETS, Identifier.of("textures/block/stone.png")))
+            PNGDecoder(silica.assetManager.open(ResourceType.ASSETS, Identifier("textures/block/stone.png")))
         val buf = ByteBuffer.allocateDirect(4 * decoder.width * decoder.height)
         decoder.decode(buf, decoder.width * 4, PNGDecoder.Format.RGBA)
         buf.flip()

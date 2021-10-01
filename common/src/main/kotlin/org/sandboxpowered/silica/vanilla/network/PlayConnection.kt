@@ -116,7 +116,7 @@ private class PlayConnectionActor(
     private fun handleReceivePlayer(receive: PlayConnection.ReceivePlayer): Behavior<PlayConnection> {
         this.playerInput = receive.input
         this.playerInventoryComponent = receive.inventoryComponent
-        val overworld = Identifier.of("minecraft", "overworld")
+        val overworld = Identifier("minecraft", "overworld")
         val overworldType: NBTCompound
         val codec = nbt {
             setTag("minecraft:dimension_type") {

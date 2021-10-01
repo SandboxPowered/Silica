@@ -550,7 +550,7 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         return this
     }
 
-    fun readIdentity(): Identifier = Identifier.of(readString())
+    fun readIdentity(): Identifier = Identifier(readString())
 
     fun writeIdentity(identity: Identifier): ByteBuf {
         writeString(identity.toString())

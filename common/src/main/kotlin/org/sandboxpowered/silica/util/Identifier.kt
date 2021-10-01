@@ -29,15 +29,15 @@ class Identifier private constructor(val namespace: String, val path: String) : 
     override fun hashCode(): Int = Objects.hashCode(namespace, path)
 
     companion object {
-        fun of(id: String): Identifier {
+        operator fun invoke(id: String): Identifier {
             val identity = id.split(":")
             return when (identity.size) {
-                1 -> of("minecraft", id)
-                2 -> of(identity[0], identity[1])
+                1 -> invoke("minecraft", id)
+                2 -> invoke(identity[0], identity[1])
                 else -> error("Couldn't parse $id")
             }
         }
 
-        fun of(namespace: String, path: String): Identifier = Identifier(namespace, path)
+        operator fun invoke(namespace: String, path: String): Identifier = Identifier(namespace, path)
     }
 }

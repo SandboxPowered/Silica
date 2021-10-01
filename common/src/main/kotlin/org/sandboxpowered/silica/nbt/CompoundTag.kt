@@ -61,7 +61,7 @@ class CompoundTag : NBTCompound {
 
     override fun getCompoundTag(key: String) = tags[key].tag() as? CompoundTag ?: CompoundTag()
 
-    override fun getIdentifier(key: String): Identifier = Identifier.of(getString(key))
+    override fun getIdentifier(key: String): Identifier = Identifier(getString(key))
 
     override fun getPosition(key: String): Position = getTag(key).let {
         it as CompoundTag

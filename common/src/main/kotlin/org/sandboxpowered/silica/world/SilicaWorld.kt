@@ -45,7 +45,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         WORLD_MIN,
         WORLD_MIN,
         WORLD_SIZE,
-        SilicaRegistries.BLOCK_REGISTRY[Identifier.of("air")].get().defaultState
+        SilicaRegistries.BLOCK_REGISTRY[Identifier("air")].get().defaultState
     )
     val artemisWorld: ArtemisWorld
     private var worldTicks = 0L

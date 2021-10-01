@@ -6,7 +6,6 @@ import org.sandboxpowered.silica.content.item.BlockItem
 import org.sandboxpowered.silica.content.item.Item
 import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.content.Colour
-import org.sandboxpowered.silica.util.Identifier.Companion.of as id
 
 object SilicaInit {
     private val EMPTY = BlockArchetype()
@@ -25,25 +24,25 @@ object SilicaInit {
     private val BLOCK_DEEPSLATE_ORE = BLOCK_ORE prefix "deepslate_"
 
     fun init() {
-        SilicaRegistries.ITEM_REGISTRY.register(BaseItem(id("air")))
-        SilicaRegistries.ITEM_REGISTRY.register(BaseItem(id("coal"), Item.Properties.create {
+        SilicaRegistries.ITEM_REGISTRY.register(BaseItem(Identifier("air")))
+        SilicaRegistries.ITEM_REGISTRY.register(BaseItem(Identifier("coal"), Item.Properties.create {
             fuelTime = 1600
         }))
 
-        register(BaseBlock(id("air")))
-        register(BaseBlock(id("bedrock")))
-        register(BaseBlock(id("dirt")))
+        register(BaseBlock(Identifier("air")))
+        register(BaseBlock(Identifier("bedrock")))
+        register(BaseBlock(Identifier("dirt")))
 
-        register(BaseBlock(id("sand")))
-        register(BaseBlock(id("gravel")))
+        register(BaseBlock(Identifier("sand")))
+        register(BaseBlock(Identifier("gravel")))
 
-        register(BaseBlock(id("glass")))
+        register(BaseBlock(Identifier("glass")))
 
-        register(NoteBlock(id("note_block")))
-        register(FireBlock(id("fire")))
-        register(GlassPaneBlock(id("glass_pane")))
+        register(NoteBlock(Identifier("note_block")))
+        register(FireBlock(Identifier("fire")))
+        register(GlassPaneBlock(Identifier("glass_pane")))
 
-        register(FurnaceBlock(id("furnace")))
+        register(FurnaceBlock(Identifier("furnace")))
 
         blocks {
             Colour.NAME_ARRAY defines {
@@ -152,7 +151,7 @@ object SilicaInit {
             generic.archetypes.forEach {
                 val provider = it.blockProvider
                 if (it.notOn?.contains(name) != true && provider != null) {
-                    register(provider(id(it.replacementString?.template(name) ?: name)))
+                    register(provider(Identifier(it.replacementString?.template(name) ?: name)))
                 }
             }
         }

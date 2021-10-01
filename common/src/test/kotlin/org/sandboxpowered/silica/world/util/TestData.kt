@@ -9,7 +9,7 @@ import org.sandboxpowered.silica.util.Identifier
 
 object TestData {
     fun block(name: String, isAir: Boolean = false): Block = mockk(name, relaxed = true) {
-        every { identifier } returns Identifier.of(name)
+        every { identifier } returns Identifier(name)
         every { isAir } returns isAir
     }
 
