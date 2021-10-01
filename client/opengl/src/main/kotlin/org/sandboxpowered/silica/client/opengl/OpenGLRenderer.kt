@@ -7,6 +7,7 @@ import org.lwjgl.opengl.GL30.*
 import org.sandboxpowered.silica.client.*
 import org.sandboxpowered.silica.client.model.JSONModel
 import org.sandboxpowered.silica.client.model.jsonModelGson
+import org.sandboxpowered.silica.client.opengl.texture.OpenGLTextureAtlas
 import org.sandboxpowered.silica.client.texture.TextureAtlas
 import org.sandboxpowered.silica.client.texture.TextureStitcher
 import org.sandboxpowered.silica.client.util.stackPush
@@ -29,7 +30,7 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
 
     private val zFar = 1000f
 
-    private lateinit var obj: VertexBufferObject
+    private lateinit var obj: OpenGLVBO
     private val transforms = Transforms()
 
     private lateinit var atlas: TextureAtlas
@@ -71,7 +72,7 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
         val size = 1
 
         stackPush { stack ->
-            val vbo = VertexBufferObject.builder(
+            val vbo = OpenGLVBO.builder(
                 GL_TRIANGLES,
                 stack.malloc(DefaultRenderingFormat.POSITION_TEXTURE.getArraySize(
                     6 * (modelJson.getElements().sumOf { it.faces.size } * 6)
@@ -85,9 +86,6 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
                 it.faces.forEach { (dir, face) ->
                     val sprite = atlas.getSprite(modelJson.resolve(face.texture).texture)!!
                     val (_, minUV, maxUV) = sprite
-
-                    val differenceBetweenX = maxUV.x() - minUV.x()
-                    val differenceBetweenY = maxUV.y() - minUV.y()
 
                     val stitcherWidth = stitcher.width / 16f
                     val stitcherHeight = stitcher.height / 16f
@@ -168,8 +166,8 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT)
         GL11.glEnable(GL_DEPTH_TEST)
         GL11.glEnable(GL_TEXTURE_2D)
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
         GlobalUniform.update(silica)
 
@@ -177,7 +175,7 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
         atlas.bind()
 
         DefaultRenderingFormat.POSITION_TEXTURE.begin(silica.assetManager)
-        DefaultRenderingFormat.POSITION_TEXTURE.shader?.setUniform("diffuseMap", 0);
+        DefaultRenderingFormat.POSITION_TEXTURE.shader!!["diffuseMap"] = 0
         DefaultRenderingFormat.POSITION_TEXTURE.render(obj)
         DefaultRenderingFormat.POSITION_TEXTURE.end()
 
@@ -188,6 +186,8 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
         atlas.destroy()
 
         obj.destroy()
+
+        DefaultRenderingFormat.POSITION_TEXTURE.shader!!.destroy()
     }
 
     class OpenGLRenderingFactory : RenderingFactory {

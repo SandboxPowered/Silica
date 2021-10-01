@@ -1,9 +1,10 @@
-package org.sandboxpowered.silica.client.opengl
+package org.sandboxpowered.silica.client.opengl.shader
 
-import org.joml.Matrix4f
-import org.joml.Vector2f
-import org.joml.Vector3f
+import org.joml.Matrix4fc
+import org.joml.Vector2fc
+import org.joml.Vector3fc
 import org.lwjgl.opengl.GL20.*
+import org.sandboxpowered.silica.client.shader.Shader
 import org.sandboxpowered.silica.client.util.stackPush
 import org.sandboxpowered.silica.resources.ResourceManager
 import org.sandboxpowered.silica.resources.ResourceType.ASSETS
@@ -14,17 +15,17 @@ import java.io.InputStreamReader
 import java.util.stream.Collectors
 
 
-class IodineShader(val vertexFile: String, val fragmentFile: String) {
+class OpenGLShader(vertexFile: String, fragmentFile: String) : Shader {
     companion object {
-        operator fun invoke(manager: ResourceManager, id: Identifier): IodineShader {
+        operator fun invoke(manager: ResourceManager, id: Identifier): OpenGLShader {
             val vertexFile = streamToString(manager.open(ASSETS, Identifier(id.namespace, "shaders/${id.path}.vert")))
                 ?: error("Failed to find vertex file for shader $id")
             val fragmentFile = streamToString(manager.open(ASSETS, Identifier(id.namespace, "shaders/${id.path}.frag")))
                 ?: error("Failed to find fragment file for shader $id")
-            return IodineShader(vertexFile, fragmentFile)
+            return OpenGLShader(vertexFile, fragmentFile)
         }
 
-        fun streamToString(stream: InputStream?): String? {
+        private fun streamToString(stream: InputStream?): String? {
             if (stream == null) return null
             InputStreamReader(stream).use { isr ->
                 BufferedReader(isr).use { reader ->
@@ -34,26 +35,17 @@ class IodineShader(val vertexFile: String, val fragmentFile: String) {
         }
     }
 
-    private var vertexID = 0
-    private var fragmentID = 0
-    var programID = 0
+    val programID = glCreateProgram()
+    private val vertexID = glCreateShader(GL_VERTEX_SHADER)
+    private val fragmentID = glCreateShader(GL_FRAGMENT_SHADER)
 
     init {
-        create()
-    }
-
-    private fun create() {
-        programID = glCreateProgram()
-        vertexID = glCreateShader(GL_VERTEX_SHADER)
-
         glShaderSource(vertexID, vertexFile)
         glCompileShader(vertexID)
 
         if (glGetShaderi(vertexID, GL_COMPILE_STATUS) == GL_FALSE) {
             error("Vertex Shader: ${glGetShaderInfoLog(vertexID)}")
         }
-
-        fragmentID = glCreateShader(GL_FRAGMENT_SHADER)
 
         glShaderSource(fragmentID, fragmentFile)
         glCompileShader(fragmentID)
@@ -79,47 +71,31 @@ class IodineShader(val vertexFile: String, val fragmentFile: String) {
         glDeleteShader(fragmentID)
     }
 
-    fun getUniformLocation(name: String): Int {
-        return glGetUniformLocation(programID, name)
+    private fun location(name: String): Int = glGetUniformLocation(programID, name)
+
+    override fun set(uniform: String, value: Float) = glUniform1f(location(uniform), value)
+
+    override fun set(uniform: String, value: Int) = glUniform1i(location(uniform), value)
+
+    override fun set(uniform: String, value: Boolean) = set(uniform, if (value) 1 else 0)
+
+    override fun set(uniform: String, value: Vector2fc) =
+        glUniform2f(location(uniform), value.x(), value.y())
+
+    override fun set(uniform: String, value: Vector3fc) =
+        glUniform3f(location(uniform), value.x(), value.y(), value.z())
+
+    override fun set(uniform: String, value: Matrix4fc) = stackPush {
+        val matrix = it.mallocFloat(16)
+        value[matrix]
+        glUniformMatrix4fv(location(uniform), false, matrix)
     }
 
-    fun setUniform(name: String, value: Float) {
-        glUniform1f(getUniformLocation(name), value)
-    }
+    override fun bind() = glUseProgram(programID)
 
-    fun setUniform(name: String, value: Int) {
-        glUniform1i(getUniformLocation(name), value)
-    }
+    override fun unbind() = glUseProgram(0)
 
-    fun setUniform(name: String, value: Boolean) {
-        setUniform(name, if (value) 1 else 0)
-    }
-
-    fun setUniform(name: String, value: Vector2f) {
-        glUniform2f(getUniformLocation(name), value.x(), value.y())
-    }
-
-    fun setUniform(name: String, value: Vector3f) {
-        glUniform3f(getUniformLocation(name), value.x(), value.y(), value.z())
-    }
-
-    fun setUniform(name: String, value: Matrix4f) {
-        stackPush {
-            val matrix = it.mallocFloat(16)
-            value[matrix]
-            glUniformMatrix4fv(getUniformLocation(name), false, matrix)
-        }
-    }
-
-    fun bind() {
-        glUseProgram(programID)
-    }
-
-    fun unbind() {
-        glUseProgram(0)
-    }
-
-    fun destroy() {
+    override fun destroy() {
         glDetachShader(programID, vertexID)
         glDetachShader(programID, fragmentID)
         glDeleteShader(vertexID)

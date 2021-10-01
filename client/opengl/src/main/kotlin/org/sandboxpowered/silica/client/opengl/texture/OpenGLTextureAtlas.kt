@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.client.opengl
+package org.sandboxpowered.silica.client.opengl.texture
 
 import org.joml.Vector2f
 import org.joml.Vector2fc

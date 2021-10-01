@@ -4,6 +4,7 @@ import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL15
 import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30
+import org.sandboxpowered.silica.client.opengl.shader.OpenGLShader
 import org.sandboxpowered.silica.resources.ResourceManager
 import org.sandboxpowered.silica.util.Identifier
 
@@ -11,24 +12,24 @@ class RenderingFormat(identity: Identifier, vararg attributes: Attribute) {
     private val identity: Identifier
     val attributes: Array<Attribute>
 
-    var shader: IodineShader? = null
+    var shader: OpenGLShader? = null
         private set
 
     fun begin(manager: ResourceManager) {
         if (shader == null) {
-            shader = IodineShader(manager, identity)
+            shader = OpenGLShader(manager, identity)
         }
         shader?.bind()
     }
 
-    fun render(vbo: VertexBufferObject) {
-        shader?.setUniform("model", GlobalUniform.MODEL)
-        shader?.setUniform("view", GlobalUniform.VIEW)
-        shader?.setUniform("projection", GlobalUniform.PROJECTION)
-        shader?.setUniform("heightScale", GlobalUniform.HEIGHT_SCALE)
-        shader?.setUniform("viewPos", GlobalUniform.POSITION)
-        vbo.bindVAO()
-        vbo.bindVBO()
+    fun render(vbo: OpenGLVBO) {
+        val shader = shader!!
+        shader["model"] = GlobalUniform.MODEL
+        shader["view"] = GlobalUniform.VIEW
+        shader["projection"] = GlobalUniform.PROJECTION
+        shader["heightScale"] = GlobalUniform.HEIGHT_SCALE
+        shader["viewPos"] = GlobalUniform.POSITION
+        vbo.bind()
         setupFormat()
         GL11.glDrawArrays(vbo.type, 0, vbo.size / dataSize)
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0)
@@ -47,9 +48,7 @@ class RenderingFormat(identity: Identifier, vararg attributes: Attribute) {
         out
     }
 
-    fun getArraySize(vertices: Int): Int {
-        return dataSize * vertices
-    }
+    fun getArraySize(vertices: Int): Int = dataSize * vertices
 
     fun setupFormat() {
         val stride = dataSize

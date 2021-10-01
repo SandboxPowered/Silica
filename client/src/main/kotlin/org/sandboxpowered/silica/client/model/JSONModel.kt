@@ -156,16 +156,14 @@ data class JSONElement(
         face.textureData.uvs = fs
     }
 
-    private fun getRotatedMatrix(direction: Direction): FloatArray {
-        return when (direction) {
-            Direction.DOWN -> floatArrayOf(from.x(), 16.0f - to.z(), to.x(), 16.0f - from.z())
+    private fun getRotatedMatrix(direction: Direction): FloatArray = when (direction) {
+        Direction.DOWN -> floatArrayOf(from.x(), 16.0f - to.z(), to.x(), 16.0f - from.z())
             Direction.UP -> floatArrayOf(from.x(), from.z(), to.x(), to.z())
             Direction.NORTH -> floatArrayOf(16.0f - to.x(), 16.0f - to.y(), 16.0f - from.x(), 16.0f - from.y())
             Direction.SOUTH -> floatArrayOf(from.x(), 16.0f - to.y(), to.x(), 16.0f - from.y())
             Direction.WEST -> floatArrayOf(from.z(), 16.0f - to.y(), to.z(), 16.0f - from.y())
             Direction.EAST -> floatArrayOf(16.0f - to.z(), 16.0f - to.y(), 16.0f - from.z(), 16.0f - from.y())
         }
-    }
 
     class Deserializer : JsonDeserializer<JSONElement> {
         override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): JSONElement {
@@ -203,13 +201,8 @@ data class JSONElement(
             return Direction.Axis.valueOf(jsonObject["axis"].asString.uppercase())
         }
 
-        private fun validateFaces(
-            jsonDeserializationContext: JsonDeserializationContext,
-            jsonObject: JsonObject
-        ): Map<Direction, JSONFace> {
-            val map: Map<Direction, JSONFace> = getFaces(jsonDeserializationContext, jsonObject)
-            return map.ifEmpty { error("Expected between 1 and 6 unique faces, got 0") }
-        }
+        private fun validateFaces(context: JsonDeserializationContext, obj: JsonObject): Map<Direction, JSONFace> =
+            getFaces(context, obj).ifEmpty { error("Expected between 1 and 6 unique faces, got 0") }
 
         private fun getFaces(context: JsonDeserializationContext, jsonObject: JsonObject): Map<Direction, JSONFace> {
             val map: MutableMap<Direction, JSONFace> = EnumMap(Direction::class.java)
