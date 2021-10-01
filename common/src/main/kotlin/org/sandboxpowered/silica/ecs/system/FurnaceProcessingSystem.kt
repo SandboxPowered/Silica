@@ -59,12 +59,10 @@ class FurnaceProcessingSystem : DelayedIteratingSystem() {
         val logic = logicMapper[entityId]
 
         var isBurning = logic.fuelTime > 0
-        val inputItem = inventory[0]
-        val fuelItem = inventory[1]
+        val (inputItem, fuelItem, outputItem) = inventory
         if ((isBurning || !fuelItem.isEmpty) && !inputItem.isEmpty) {
             val isValidItemForRecipe = inputItem.isItemEqual(ironOre)
             if (!isValidItemForRecipe) {
-                val outputItem = inventory[2]
                 val canAcceptRecipeOutput =
                     outputItem.isEmpty || (outputItem.isItemEqual(ironIngot) && outputItem.count + outputStack.count <= 64)
                 if (!isBurning && canAcceptRecipeOutput) {
@@ -92,3 +90,7 @@ class FurnaceProcessingSystem : DelayedIteratingSystem() {
         // TODO update blockstate in world
     }
 }
+
+private operator fun ResizableInventory.component1(): ItemStack = get(0)
+private operator fun ResizableInventory.component2(): ItemStack = get(1)
+private operator fun ResizableInventory.component3(): ItemStack = get(2)

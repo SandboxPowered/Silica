@@ -3,16 +3,13 @@ package org.sandboxpowered.silica.registry
 import org.sandboxpowered.silica.util.Identifier
 import java.util.*
 import java.util.function.Supplier
-import java.util.stream.Stream
 
 class SilicaRegistry<T : RegistryEntry<T>>(private val id: Identifier, override val type: Class<T>) : Registry<T> {
     var internalMap: MutableMap<Identifier, T> = HashMap()
     var registryEntries: MutableMap<Identifier, SilicaRegistryEntry<T>> = HashMap()
     var listeners: MutableList<(T) -> Unit> = ArrayList()
 
-    fun <X : RegistryEntry<X>> cast(): Registry<X> {
-        return this as Registry<X>
-    }
+    fun <X : RegistryEntry<X>> cast(): Registry<X> = this as Registry<X>
 
     fun addListener(listener: (T) -> Unit) {
         listeners.add(listener)
@@ -24,30 +21,20 @@ class SilicaRegistry<T : RegistryEntry<T>>(private val id: Identifier, override 
         return t
     }
 
-    override fun iterator(): MutableIterator<T> {
-        return internalMap.values.iterator()
-    }
+    override fun iterator() = internalMap.values.iterator()
 
-    override fun contains(id: Identifier): Boolean {
-        return internalMap.containsKey(id)
-    }
+    override fun contains(id: Identifier) = internalMap.containsKey(id)
 
-    override fun getId(element: T): Identifier {
-        return element.identifier
-    }
+    override fun getId(element: T) = element.identifier
 
-    override fun getUnsafe(id: Identifier): T? {
-        return internalMap[id]
-    }
+    override fun getUnsafe(id: Identifier) = internalMap[id]
 
-    override fun get(id: Identifier): RegistryObject<T> {
-        return registryEntries.computeIfAbsent(id) { SilicaRegistryEntry(this, it) }
-    }
+    override fun get(id: Identifier) =
+        registryEntries.computeIfAbsent(id) { SilicaRegistryEntry(this, it) }
 
-    override fun stream(): Stream<T> {
-        return registryEntries.values.stream().filter { obj: SilicaRegistryEntry<T> -> obj.isPresent }
+    override fun stream() =
+        registryEntries.values.stream().filter { obj: SilicaRegistryEntry<T> -> obj.isPresent }
             .map { obj: SilicaRegistryEntry<T> -> obj.get() }
-    }
 
     fun clearCache() {
         registryEntries.forEach { (_, entry: SilicaRegistryEntry<T>) -> entry.clearCache() }
@@ -85,18 +72,14 @@ class SilicaRegistry<T : RegistryEntry<T>>(private val id: Identifier, override 
         override val isEmpty: Boolean
             get() = !isPresent
 
-        override fun get(): T = internal ?: throw NullPointerException()
+        override fun get() = internal ?: throw NullPointerException()
 
-        override fun asOptional(): Optional<T> = Optional.ofNullable(internal)
+        override fun asOptional() = Optional.ofNullable(internal)
 
-        override fun or(supplier: RegistryObject<T>): RegistryObject<T> {
-            if (!this.isPresent)
-                return supplier
-            return this
-        }
+        override fun or(supplier: RegistryObject<T>) = if (!this.isPresent) supplier else this
 
-        override fun <X : Throwable> orElseThrow(supplier: Supplier<X>): T = internal ?: throw supplier.get()
+        override fun <X : Throwable> orElseThrow(supplier: Supplier<X>) = internal ?: throw supplier.get()
 
-        override fun orElseGet(supplier: Supplier<T>): T = internal ?: supplier.get()
+        override fun orElseGet(supplier: Supplier<T>) = internal ?: supplier.get()
     }
 }

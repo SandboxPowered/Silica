@@ -20,6 +20,8 @@ class Connection(
     var ping = 0
     lateinit var profile: GameProfile
         private set
+    val motd: String
+        get() = server.motdCache
     private var secretKey: SecretKey? = null
     var packetHandler: PacketHandler? = null
     fun handleEncryptionResponse(encryptionResponse: EncryptionResponse) {
@@ -39,6 +41,8 @@ class Connection(
         //        packetHandler.sendPacket(new EncryptionRequest("", server.getKeyPair().getPublic().getEncoded(), server.getVerificationArray()));
         packetHandler!!.sendPacket(LoginSuccess(profile.id, username))
         packetHandler!!.setProtocol(Protocol.PLAY)
+        server.motd.addPlayer(username)
+        server.updateMOTDCache()
         println("Sending")
         AskPattern.ask(
             network,

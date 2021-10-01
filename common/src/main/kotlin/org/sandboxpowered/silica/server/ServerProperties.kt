@@ -10,6 +10,7 @@ class ServerProperties(private val properties: Properties) {
     val serverPort = get("server-port", 25565)
     val serverIp = get("server-ip", "")
     val maxTickTime = get("max-tick-time", 60000)
+    val maxPlayers = get("max-players", 20)
 
     private fun getStringRaw(string: String): String? {
         return properties[string] as String?

@@ -72,7 +72,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
                 WORLD_SIZE, WORLD_SIZE, WORLD_SIZE
             )
         )
-        SilicaRegistries.BLOCKS_WITH_BE.forEach {
+        SilicaRegistries.BLOCKS_WITH_ENTITY.forEach {
             config.with(it.createProcessingSystem())
         }
         config.with(entityMap)
