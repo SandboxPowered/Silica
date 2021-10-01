@@ -48,10 +48,10 @@ class FurnaceProcessingSystem : DelayedIteratingSystem() {
 
     // TODO replace with actual recipes
 
-    private val ironOre = SilicaRegistries.ITEM_REGISTRY[Identifier.of("iron_ore")]
-    private val ironIngot = SilicaRegistries.ITEM_REGISTRY[Identifier.of("iron_ingot")]
+    private val ironOre by SilicaRegistries.ITEM_REGISTRY[Identifier.of("iron_ore")].nonnull()
+    private val ironIngot by SilicaRegistries.ITEM_REGISTRY[Identifier.of("iron_ingot")].nonnull()
     private val outputStack: ItemStack by lazy {
-        ItemStack.of(ironIngot.get(), 2)
+        ItemStack.of(ironIngot, 2)
     }
 
     override fun processExpired(entityId: Int) {

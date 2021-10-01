@@ -72,7 +72,7 @@ class SilicaRegistry<T : RegistryEntry<T>>(private val id: Identifier, override 
         override val isEmpty: Boolean
             get() = !isPresent
 
-        override fun get() = internal ?: throw NullPointerException()
+        override fun get() = internal ?: throw NoSuchElementException()
 
         override fun asOptional() = Optional.ofNullable(internal)
 
@@ -81,5 +81,7 @@ class SilicaRegistry<T : RegistryEntry<T>>(private val id: Identifier, override 
         override fun <X : Throwable> orElseThrow(supplier: Supplier<X>) = internal ?: throw supplier.get()
 
         override fun orElseGet(supplier: Supplier<T>) = internal ?: supplier.get()
+
+        override fun orNull(): T? = internal
     }
 }

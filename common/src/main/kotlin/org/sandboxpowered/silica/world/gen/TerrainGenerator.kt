@@ -47,22 +47,16 @@ interface ChunkFiller {
 }
 
 private class SimpleFiller : ChunkFiller {
-    private val air by lazy { Blocks.AIR.get().defaultState }
-    private val bedrock by lazy { Blocks.BEDROCK.get().defaultState }
-    private val stone by lazy { Blocks.STONE.get().defaultState }
-    private val dirt by lazy { Blocks.DIRT.get().defaultState }
-    private val grass by lazy { Blocks.GRASS_BLOCK.get().defaultState }
-
     override fun fill(sx: Int, sy: Int, sz: Int, chunk: BlocTree) {
         if (sy > 0) return
 
         iterateCube(sx, sy, sz, w = 16, h = 7) { x, y, z ->
             chunk[x, y, z] = when (y) {
-                0 -> bedrock
-                1, 2, 3 -> stone
-                4, 5 -> dirt
-                6 -> grass
-                else -> air
+                0 -> Blocks.BEDROCK.defaultState
+                1, 2, 3 -> Blocks.STONE.defaultState
+                4, 5 -> Blocks.DIRT.defaultState
+                6 -> Blocks.GRASS_BLOCK.defaultState
+                else -> Blocks.AIR.defaultState
             }
         }
     }

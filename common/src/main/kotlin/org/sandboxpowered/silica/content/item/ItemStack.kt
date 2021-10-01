@@ -1,25 +1,25 @@
 package org.sandboxpowered.silica.content.item
 
+import org.sandboxpowered.silica.content.block.Block
 import org.sandboxpowered.silica.registry.RegistryObject
 import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.util.Identifier.Companion.of as id
 
 class ItemStack private constructor(private val _item: Item, private var _count: Int) {
     companion object {
-        private val AIR = SilicaRegistries.ITEM_REGISTRY[id("air")].get()
-        val EMPTY = ItemStack(AIR, 0)
+        private val AIR by SilicaRegistries.ITEM_REGISTRY[id("air")].nonnull()
 
-        fun of(item: Item): ItemStack {
-            return of(item, 1)
-        }
+        val EMPTY by lazy { of(AIR, 0) }
 
-        fun of(item: RegistryObject<Item>, count: Int): ItemStack {
-            return ItemStack(item.get(), count)
-        }
+        fun of(block: Block): ItemStack = of(block.item, 1)
 
-        fun of(item: Item, count: Int): ItemStack {
-            return ItemStack(item, count)
-        }
+        fun of(obj: RegistryObject<Item>): ItemStack = of(obj, 1)
+
+        fun of(obj: RegistryObject<Item>, count: Int): ItemStack = of(obj.orNull(), count)
+
+        fun of(item: Item?): ItemStack = of(item, 1)
+
+        fun of(item: Item?, count: Int): ItemStack = ItemStack(item ?: AIR, count)
     }
 
     val item: Item
@@ -48,9 +48,8 @@ class ItemStack private constructor(private val _item: Item, private var _count:
         return of(item, count)
     }
 
-    fun isItemEqual(registryObject: RegistryObject<Item>): Boolean {
-        if (registryObject.isEmpty)
-            return false
-        return item == registryObject.get()
-    }
+    fun isItemEqual(obj: RegistryObject<Item>): Boolean =
+        if (obj.isEmpty) false else item == obj.get()
+
+    fun isItemEqual(item: Item): Boolean = this.item == item
 }

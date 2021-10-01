@@ -3,6 +3,7 @@ package org.sandboxpowered.silica.registry
 import org.sandboxpowered.silica.util.Identifier
 import java.util.*
 import java.util.function.Supplier
+import kotlin.reflect.KProperty
 
 interface RegistryObject<T : RegistryEntry<T>> : Supplier<T> {
     fun asOptional(): Optional<T>
@@ -11,11 +12,25 @@ interface RegistryObject<T : RegistryEntry<T>> : Supplier<T> {
     override fun get(): T
 
     val isPresent: Boolean
+
     val isEmpty: Boolean
+
     fun or(supplier: RegistryObject<T>): RegistryObject<T>
+
     val id: Identifier
+
+    fun orNull(): T?
+
     fun orElseGet(supplier: Supplier<T>): T
 
     fun <X : Throwable> orElseThrow(supplier: Supplier<X>): T
+
+    operator fun getValue(thisRef: Any?, property: KProperty<*>): T? = orNull()
+    fun nonnull() = NonnullObjectDelegate(this)
+
     val registry: Registry<T>
+
+    class NonnullObjectDelegate<T : RegistryEntry<T>>(private val obj: RegistryObject<T>) {
+        operator fun getValue(thisRef: Any?, property: KProperty<*>): T = obj.get()
+    }
 }

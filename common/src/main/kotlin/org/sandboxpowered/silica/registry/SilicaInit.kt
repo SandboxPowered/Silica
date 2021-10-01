@@ -25,7 +25,7 @@ object SilicaInit {
     private val BLOCK_DEEPSLATE_ORE = BLOCK_ORE prefix "deepslate_"
 
     fun init() {
-        SilicaRegistries.ITEM_REGISTRY.register(BaseItem(id("air"), Item.Properties.create {}))
+        SilicaRegistries.ITEM_REGISTRY.register(BaseItem(id("air")))
         SilicaRegistries.ITEM_REGISTRY.register(BaseItem(id("coal"), Item.Properties.create {
             fuelTime = 1600
         }))
