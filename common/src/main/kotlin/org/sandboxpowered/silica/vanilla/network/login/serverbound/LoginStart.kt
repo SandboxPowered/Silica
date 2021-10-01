@@ -5,7 +5,7 @@ import org.sandboxpowered.silica.vanilla.network.Packet
 import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 
-class LoginStart(private var username: String) : Packet {
+class LoginStart(private val username: String) : Packet {
     constructor(buf: PacketByteBuf) : this(buf.readString(16))
 
     override fun write(buf: PacketByteBuf) {

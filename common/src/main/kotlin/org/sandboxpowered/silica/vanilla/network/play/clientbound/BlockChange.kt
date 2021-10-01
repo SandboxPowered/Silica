@@ -6,7 +6,7 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 
-class BlockChange(var location: Position, var blockId: Int) : PacketPlay {
+class BlockChange(val location: Position, val blockId: Int) : PacketPlay {
     constructor(buf: PacketByteBuf) : this(buf.readPosition(), buf.readVarInt())
 
     override fun write(buf: PacketByteBuf) {

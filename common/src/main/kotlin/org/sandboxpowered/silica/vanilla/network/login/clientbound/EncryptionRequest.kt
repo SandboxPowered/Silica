@@ -6,9 +6,9 @@ import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 
 class EncryptionRequest(
-    private var serverId: String,
-    private var publicKey: ByteArray,
-    private var verifyArray: ByteArray
+    private val serverId: String,
+    private val publicKey: ByteArray,
+    private val verifyArray: ByteArray
 ) : Packet {
     constructor(buf: PacketByteBuf) : this(buf.readString(20), buf.readByteArray(), buf.readByteArray())
 

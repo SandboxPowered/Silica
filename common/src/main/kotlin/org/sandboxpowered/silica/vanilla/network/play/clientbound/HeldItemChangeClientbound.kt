@@ -5,7 +5,7 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 
-class HeldItemChangeClientbound(private var slot: Byte) : PacketPlay {
+class HeldItemChangeClientbound(private val slot: Byte) : PacketPlay {
     constructor(buf: PacketByteBuf) : this(buf.readByte())
 
     override fun write(buf: PacketByteBuf) {

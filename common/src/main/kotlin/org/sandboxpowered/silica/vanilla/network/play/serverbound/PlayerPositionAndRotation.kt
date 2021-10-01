@@ -6,12 +6,12 @@ import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 
 class PlayerPositionAndRotation(
-    private var x: Double,
-    private var y: Double,
-    private var z: Double,
-    private var yaw: Float,
-    private var pitch: Float,
-    private var onGround: Boolean,
+    private val x: Double,
+    private val y: Double,
+    private val z: Double,
+    private val yaw: Float,
+    private val pitch: Float,
+    private val onGround: Boolean,
 ) : PacketPlay {
     constructor(buf: PacketByteBuf) : this(
         buf.readDouble(),

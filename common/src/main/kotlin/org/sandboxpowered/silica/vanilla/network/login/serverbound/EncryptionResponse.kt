@@ -7,7 +7,7 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
-class EncryptionResponse(private var sharedSecret: ByteArray, private var verifyToken: ByteArray) : Packet {
+class EncryptionResponse(private val sharedSecret: ByteArray, private val verifyToken: ByteArray) : Packet {
     constructor(buf: PacketByteBuf) : this(buf.readByteArray(), buf.readByteArray())
 
     override fun write(buf: PacketByteBuf) {

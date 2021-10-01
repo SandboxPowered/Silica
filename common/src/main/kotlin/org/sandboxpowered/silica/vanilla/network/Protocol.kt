@@ -54,7 +54,7 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             0X66 packetDeprecated ::DeclareTags
             0x1B packetDeprecated ::EntityStatus
             0x12 packetDeprecated ::DeclareCommands
-            0x38 packetDeprecated ::SetPlayerPositionAndLook
+            0x38 packet ::SetPlayerPositionAndLook
             0x39 packetDeprecated ::UnlockRecipes
             0x36 packetDeprecated ::PlayerInfo
             0x49 packetDeprecated ::UpdateChunkPosition

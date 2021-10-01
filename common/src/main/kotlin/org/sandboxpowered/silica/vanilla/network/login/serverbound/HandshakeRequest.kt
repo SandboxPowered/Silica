@@ -7,10 +7,10 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.Protocol.Companion.getProtocolFromId
 
 class HandshakeRequest(
-    private var protocolVersion: Int,
-    private var hostName: String,
-    private var port: UShort,
-    private var intention: Int,
+    private val protocolVersion: Int,
+    private val hostName: String,
+    private val port: UShort,
+    private val intention: Int,
 ) : Packet {
     constructor(buf: PacketByteBuf) : this(buf.readVarInt(), buf.readString(255), buf.readUShort(), buf.readVarInt())
 

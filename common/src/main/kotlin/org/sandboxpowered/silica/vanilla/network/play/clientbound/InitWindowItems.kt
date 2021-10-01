@@ -10,10 +10,10 @@ import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 
 class InitWindowItems(
-    var window: UByte,
-    var state: Int,
-    var inventory: PlayerInventory?,
-    var protocolMapping: VanillaProtocolMapping?
+    val window: UByte,
+    val state: Int,
+    val inventory: PlayerInventory?,
+    val protocolMapping: VanillaProtocolMapping?
 ) : PacketPlay {
     constructor(buf: PacketByteBuf) : this(buf.readUByte(), buf.readVarInt(), null, null)
 

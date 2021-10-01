@@ -5,7 +5,7 @@ import org.sandboxpowered.silica.vanilla.network.Packet
 import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 
-class PongResponse(private var time: Long) : Packet {
+class PongResponse(private val time: Long) : Packet {
     constructor(buf: PacketByteBuf) : this(buf.readLong())
 
     override fun write(buf: PacketByteBuf) {

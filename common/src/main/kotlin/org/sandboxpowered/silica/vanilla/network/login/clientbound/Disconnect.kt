@@ -5,7 +5,7 @@ import org.sandboxpowered.silica.vanilla.network.Packet
 import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 
-class Disconnect(private var reason: String) : Packet {
+class Disconnect(private val reason: String) : Packet {
     constructor(buf: PacketByteBuf) : this(buf.readString())
 
     override fun write(buf: PacketByteBuf) {

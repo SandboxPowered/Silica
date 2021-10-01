@@ -6,9 +6,9 @@ import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 
 class PlayerRotation(
-    private var yaw: Float,
-    private var pitch: Float,
-    private var onGround: Boolean,
+    private val yaw: Float,
+    private val pitch: Float,
+    private val onGround: Boolean,
 ) : PacketPlay {
     constructor(buf: PacketByteBuf) : this(buf.readFloat(), buf.readFloat(), buf.readBoolean())
 
