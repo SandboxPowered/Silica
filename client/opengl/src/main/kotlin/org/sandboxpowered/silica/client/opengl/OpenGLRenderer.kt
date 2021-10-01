@@ -6,11 +6,16 @@ import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL30.*
 import org.sandboxpowered.silica.client.*
+import org.sandboxpowered.silica.client.model.JSONModel
+import org.sandboxpowered.silica.client.model.jsonModelGson
 import org.sandboxpowered.silica.client.texture.TextureAtlas
 import org.sandboxpowered.silica.client.texture.TextureStitcher
+import org.sandboxpowered.silica.client.util.stackPush
 import org.sandboxpowered.silica.resources.ResourceType
 import org.sandboxpowered.silica.util.Identifier
-import org.sandboxpowered.silica.util.extensions.getResourceAsString
+import org.sandboxpowered.silica.util.content.Direction
+import org.sandboxpowered.silica.world.util.iterateCube
+import java.io.InputStreamReader
 
 class OpenGLRenderer(private val silica: Silica) : Renderer {
 
@@ -26,8 +31,7 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
 
     private val zFar = 1000f
 
-    private lateinit var shaderProgram: ShaderProgram
-    private lateinit var mesh: Mesh
+    private lateinit var obj: VertexBufferObject
     private val transforms = Transforms()
 
     private lateinit var atlas: TextureAtlas
@@ -35,80 +39,29 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
     override fun init() {
         GL.createCapabilities()
 
-        val positions = floatArrayOf(
-            // VO
-            0.0f, 1.0f, 1.0f,
-            // V1
-            0.0f, 0.0f, 1.0f,
-            // V2
-            1.0f, 0.0f, 1.0f,
-            // V3
-            1.0f, 1.0f, 1.0f,
-            // V4
-            0.0f, 1.0f, 0.0f,
-            // V5
-            1.0f, 1.0f, 0.0f,
-            // V6
-            0.0f, 0.0f, 0.0f,
-            // V7
-            1.0f, 0.0f, 0.0f,
-        )
-        val texCoords = floatArrayOf(
-            0.0f, 0.0f,
-            0.0f, 1.0f,
-            1.0f, 1.0f,
-            1.0f, 0.0f,
-            1.0f, 0.0f,
-            1.0f, 1.0f,
-            0.0f, 1.0f,
-            0.0f, 0.0f,
-        )
-        val indices = intArrayOf(
-            // Front face
-            0, 1, 3, 3, 1, 2,
-            // Back face
-            7, 6, 4, 7, 4, 5,
-            // Left face
-            6, 1, 0, 6, 0, 4,
-            // Right face
-            3, 2, 7, 5, 3, 7,
-            // Top Face
-            4, 0, 3, 5, 4, 3,
-            // Bottom face
-            2, 1, 6, 2, 6, 7,
-        )
-        mesh = Mesh(positions, texCoords, indices)
-
-        shaderProgram = ShaderProgram()
-        shaderProgram.createVertexShader(javaClass.getResourceAsString("/assets/silica/shaders/vertex.glsl"))
-        shaderProgram.createFragmentShader(javaClass.getResourceAsString("/assets/silica/shaders/fragment.glsl"))
-        shaderProgram.link()
-        shaderProgram.createUniform("projectionMatrix")
-        shaderProgram.createUniform("worldMatrix")
-        shaderProgram.createUniform("texture_sampler")
-
         val maxSize = glGetInteger(GL_MAX_TEXTURE_SIZE)
         val stitcher = TextureStitcher(maxSize, maxSize, false)
 
-        val textures = arrayOf(
-            Identifier("block/stone"),
-            Identifier("block/dirt"),
-            Identifier("block/sand"),
-            Identifier("block/gravel"),
-            Identifier("block/iron_block"),
-            Identifier("block/diamond_block"),
-            Identifier("block/gold_block"),
-            Identifier("block/pink_wool"),
-            Identifier("block/bedrock")
-        )
-
-        textures.forEach {
-            stitcher.add(
-                TextureAtlas.SpriteData(
-                    it,
+        val func: (Identifier) -> JSONModel = {
+            jsonModelGson.fromJson(
+                InputStreamReader(
                     silica.assetManager.open(
                         ResourceType.ASSETS,
-                        Identifier(it.namespace, "textures/${it.path}.png")
+                        Identifier(it.namespace, "models/${it.path}.json")
+                    )
+                ),
+                JSONModel::class.java
+            )
+        }
+
+        val modelJson = func(Identifier("block/stone"))
+
+        modelJson.getReferences(func).forEach {
+            stitcher.add(
+                TextureAtlas.SpriteData(
+                    it.texture, silica.assetManager.open(
+                        ResourceType.ASSETS,
+                        Identifier(it.texture.namespace, "textures/${it.texture.path}.png")
                     )
                 )
             )
@@ -117,11 +70,180 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
         stitcher.stitch()
         atlas = OpenGLTextureAtlas(stitcher)
 
+        val size = 1
+
+        stackPush {
+            val builder = VertexBufferObject.builder(
+                GL_TRIANGLES,
+                it.malloc(DefaultRenderingFormat.POSITION_TEXTURE.getArraySize(size * size * size * 2 * 8 * 100))
+            )
+
+            iterateCube(0,0,0,size,size,size) { x, y, z ->
+                modelJson.getElements().forEach { element ->
+                    element.faces.forEach { (dir, face) ->
+                        val sprite = atlas.getSprite(modelJson.resolve(face.texture).texture)!!
+                        val (_, minUV, maxUV) = sprite
+
+                        val differenceBetweenX = maxUV.x() - minUV.x()
+                        val differenceBetweenY = maxUV.y() - minUV.y()
+
+                        val u2Sprite = (face.textureData.uvs?.get(2) ?: 1f) / 16f
+                        val v2Sprite = (face.textureData.uvs?.get(3) ?: 1f) / 16f
+
+                        val u1 = (face.textureData.uvs?.get(0) ?: 0f) / 16f / stitcher.width + minUV.x()
+                        val v1 = (face.textureData.uvs?.get(1) ?: 0f) / 16f / stitcher.height + minUV.y()
+                        val u2 = minUV.x() + (differenceBetweenX * u2Sprite)
+                        val v2 = minUV.y() + (differenceBetweenY * v2Sprite)
+
+                        when (dir) {
+                            Direction.UP -> {
+                                builder.dataf(
+                                    element.from.x / 16f + x,
+                                    element.to.y / 16f + y,
+                                    element.from.z / 16f + z
+                                ).dataf(u1, v1)
+                                builder.dataf(element.from.x / 16f + x, element.to.y / 16f + y, element.to.z / 16f + z)
+                                    .dataf(u1, v2)
+                                builder.dataf(element.to.x / 16f + x, element.to.y / 16f + y, element.to.z / 16f + z)
+                                    .dataf(u2, v2)
+                                builder.dataf(
+                                    element.from.x / 16f + x,
+                                    element.to.y / 16f + y,
+                                    element.from.z / 16f + z
+                                ).dataf(u1, v1)
+                                builder.dataf(element.to.x / 16f + x, element.to.y / 16f + y, element.from.z / 16f + z)
+                                    .dataf(u2, v1)
+                                builder.dataf(element.to.x / 16f + x, element.to.y / 16f + y, element.to.z / 16f + z)
+                                    .dataf(u2, v2)
+                            }
+                            Direction.DOWN -> {
+                                builder.dataf(
+                                    element.from.x / 16f + x,
+                                    element.from.y / 16f + y,
+                                    element.from.z / 16f + z
+                                ).dataf(u1, v1)
+                                builder.dataf(
+                                    element.from.x / 16f + x,
+                                    element.from.y / 16f + y,
+                                    element.to.z / 16f + z
+                                ).dataf(u1, v2)
+                                builder.dataf(element.to.x / 16f + x, element.from.y / 16f + y, element.to.z / 16f + z)
+                                    .dataf(u2, v2)
+                                builder.dataf(
+                                    element.from.x / 16f + x,
+                                    element.from.y / 16f + y,
+                                    element.from.z / 16f + z
+                                ).dataf(u1, v1)
+                                builder.dataf(
+                                    element.to.x / 16f + x,
+                                    element.from.y / 16f + y,
+                                    element.from.z / 16f + z
+                                ).dataf(u2, v1)
+                                builder.dataf(element.to.x / 16f + x, element.from.y / 16f + y, element.to.z / 16f + z)
+                                    .dataf(u2, v2)
+                            }
+                            Direction.WEST -> {
+                                builder.dataf(
+                                    element.from.x / 16f + x,
+                                    element.from.y / 16f + y,
+                                    element.from.z / 16f + z
+                                ).dataf(u1, v1)
+                                builder.dataf(
+                                    element.from.x / 16f + x,
+                                    element.to.y / 16f + y,
+                                    element.from.z / 16f + z
+                                ).dataf(u1, v2)
+                                builder.dataf(element.from.x / 16f + x, element.to.y / 16f + y, element.to.z / 16f + z)
+                                    .dataf(u2, v2)
+                                builder.dataf(
+                                    element.from.x / 16f + x,
+                                    element.from.y / 16f + y,
+                                    element.from.z / 16f + z
+                                ).dataf(u1, v1)
+                                builder.dataf(
+                                    element.from.x / 16f + x,
+                                    element.from.y / 16f + y,
+                                    element.to.z / 16f + z
+                                ).dataf(u2, v1)
+                                builder.dataf(element.from.x / 16f + x, element.to.y / 16f + y, element.to.z / 16f + z)
+                                    .dataf(u2, v2)
+                            }
+                            Direction.EAST -> {
+                                builder.dataf(
+                                    element.to.x / 16f + x,
+                                    element.from.y / 16f + y,
+                                    element.from.z / 16f + z
+                                ).dataf(u1, v1)
+                                builder.dataf(element.to.x / 16f + x, element.to.y / 16f + y, element.from.z / 16f + z)
+                                    .dataf(u1, v2)
+                                builder.dataf(element.to.x / 16f + x, element.to.y / 16f + y, element.to.z / 16f + z)
+                                    .dataf(u2, v2)
+                                builder.dataf(
+                                    element.to.x / 16f + x,
+                                    element.from.y / 16f + y,
+                                    element.from.z / 16f + z
+                                ).dataf(u1, v1)
+                                builder.dataf(element.to.x / 16f + x, element.from.y / 16f + y, element.to.z / 16f + z)
+                                    .dataf(u2, v1)
+                                builder.dataf(element.to.x / 16f + x, element.to.y / 16f + y, element.to.z / 16f + z)
+                                    .dataf(u2, v2)
+                            }
+                            Direction.SOUTH -> {
+                                builder.dataf(
+                                    element.from.x / 16f + x,
+                                    element.from.y / 16f + y,
+                                    element.to.z / 16f + z
+                                ).dataf(u1, v1)
+                                builder.dataf(element.from.x / 16f + x, element.to.y / 16f + y, element.to.z / 16f + z)
+                                    .dataf(u1, v2)
+                                builder.dataf(element.to.x / 16f + x, element.to.y / 16f + y, element.to.z / 16f + z)
+                                    .dataf(u2, v2)
+                                builder.dataf(
+                                    element.from.x / 16f + x,
+                                    element.from.y / 16f + y,
+                                    element.to.z / 16f + z
+                                ).dataf(u1, v1)
+                                builder.dataf(element.to.x / 16f + x, element.from.y / 16f + y, element.to.z / 16f + z)
+                                    .dataf(u2, v1)
+                                builder.dataf(element.to.x / 16f + x, element.to.y / 16f + y, element.to.z / 16f + z)
+                                    .dataf(u2, v2)
+                            }
+                            Direction.NORTH -> {
+                                builder.dataf(
+                                    element.from.x / 16f + x,
+                                    element.from.y / 16f + y,
+                                    element.from.z / 16f + z
+                                ).dataf(u1, v1)
+                                builder.dataf(
+                                    element.from.x / 16f + x,
+                                    element.to.y / 16f + y,
+                                    element.from.z / 16f + z
+                                ).dataf(u1, v2)
+                                builder.dataf(element.to.x / 16f + x, element.to.y / 16f + y, element.from.z / 16f + z)
+                                    .dataf(u2, v2)
+                                builder.dataf(
+                                    element.from.x / 16f + x,
+                                    element.from.y / 16f + y,
+                                    element.from.z / 16f + z
+                                ).dataf(u1, v1)
+                                builder.dataf(
+                                    element.to.x / 16f + x,
+                                    element.from.y / 16f + y,
+                                    element.from.z / 16f + z
+                                ).dataf(u2, v1)
+                                builder.dataf(element.to.x / 16f + x, element.to.y / 16f + y, element.from.z / 16f + z)
+                                    .dataf(u2, v2)
+                            }
+                        }
+                    }
+                }
+            }
+
+            obj = builder.build()
+        }
+
         GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
     }
-
-    private var pos = Vector3f(-0.5f, -0.5f, -2f)
-    private var rot = Vector3f()
 
     override fun frame() {
         if (window.resized) {
@@ -131,35 +253,25 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
 
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT)
         GL11.glEnable(GL_DEPTH_TEST)
+        GL11.glEnable(GL_TEXTURE_2D)
 
-        rot.y += 0.1f
-        rot.x += 0.1f
+        GlobalUniform.update(silica)
 
-        shaderProgram.bind()
-        shaderProgram.setUniform(
-            "projectionMatrix",
-            transforms.getProjectionMatrix(fov, window.width.toFloat(), window.height.toFloat(), zNear, zFar)
-        )
-        shaderProgram.setUniform("worldMatrix", transforms.getWorldMatrix(pos, rot, 1f))
-        shaderProgram.setUniform("texture_sampler", 0)
         glActiveTexture(GL_TEXTURE0)
         atlas.bind()
 
-        glBindVertexArray(mesh.vaoId)
-        glDrawElements(GL_TRIANGLES, mesh.vertexCount, GL_UNSIGNED_INT, 0)
-
-        glBindVertexArray(0)
+        DefaultRenderingFormat.POSITION_TEXTURE.begin(silica.assetManager)
+        DefaultRenderingFormat.POSITION_TEXTURE.shader?.setUniform("diffuseMap", 0);
+        DefaultRenderingFormat.POSITION_TEXTURE.render(obj)
+        DefaultRenderingFormat.POSITION_TEXTURE.end()
 
         glBindTexture(GL_TEXTURE_2D, 0)
-        shaderProgram.unbind()
     }
 
     override fun cleanup() {
         atlas.destroy()
 
-        shaderProgram.cleanup()
-
-        mesh.cleanup()
+        obj.destroy()
     }
 
     class OpenGLRenderingFactory : RenderingFactory {

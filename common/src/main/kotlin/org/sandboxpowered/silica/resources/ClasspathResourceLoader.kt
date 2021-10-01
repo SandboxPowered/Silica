@@ -11,7 +11,7 @@ import java.util.function.Predicate
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
-class ClasspathResourceLoader(override val name: String) : ResourceLoader {
+class ClasspathResourceLoader(override val name: String, var namespaces: Array<String>) : ResourceLoader {
 
     private fun findInputStream(type: ResourceType, file: Identifier): InputStream? {
         val pathString = getPath(type, file)
@@ -27,6 +27,10 @@ class ClasspathResourceLoader(override val name: String) : ResourceLoader {
     private fun isValidUrl(fileName: String, url: URL?): Boolean {
         contract { returns(true) implies (url != null) }
         return url != null && (url.protocol == "jar" || isValidPath(File(url.file), fileName))
+    }
+
+    private fun getPath(type: ResourceType, identifier: Identifier): String {
+        return "/${type.folder}/${identifier.namespace}/${identifier.path}"
     }
 
     override fun contains(type: ResourceType, file: Identifier): Boolean {
@@ -59,7 +63,6 @@ class ClasspathResourceLoader(override val name: String) : ResourceLoader {
     }
 
     override fun getNamespaces(type: ResourceType): Set<String> {
-//        TODO("Not yet implemented")
-        return emptySet()
+        return setOf(*namespaces)
     }
 }

@@ -49,6 +49,6 @@ abstract class SilicaServer {
         serverRandom.nextBytes(verificationArray)
         commands = Commands()
         dataManager = ResourceManager(ResourceType.DATA)
-        dataManager.add(ClasspathResourceLoader("Silica"))
+        dataManager.add(ClasspathResourceLoader("Silica", arrayOf("silica")))
     }
 }

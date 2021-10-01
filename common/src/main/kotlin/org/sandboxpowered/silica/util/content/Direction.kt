@@ -34,7 +34,7 @@ enum class Direction(
 
     companion object {
         val ALL = values()
-        val NAME_MAP = ALL.associateBy { it.name }
+        val NAME_MAP = ALL.associateBy { it.asString }
         val ID_TO_DIRECTION = ALL.sortedWith(Comparator.comparingInt { it.id }).toTypedArray()
         val HORIZONTAL = ALL.filter { it.axis.isHorizontal }
             .sortedWith(Comparator.comparingInt { it.horizontalId })
@@ -49,6 +49,8 @@ enum class Direction(
             require(idx in 0..5) { "Horizontal Direction id can only be within 0-3 got $idx" }
             return HORIZONTAL[abs(idx % 3)]
         }
+
+        fun byName(name: String): Direction? = NAME_MAP[name.lowercase()]
     }
 
 

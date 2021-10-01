@@ -58,7 +58,7 @@ class Silica(private val args: Args) : Runnable {
             System.setProperty("org.lwjgl.util.DebugStack", "true")
         }
         /* Configure LWJGL MemoryStack to 1024KB */
-        Configuration.STACK_SIZE.set(1024)
+        Configuration.STACK_SIZE.set(65536)
     }
 
     override fun run() {
@@ -104,7 +104,7 @@ class Silica(private val args: Args) : Runnable {
         if (list.isNotEmpty())
             return true
         assetManager = ResourceManager(ResourceType.ASSETS)
-        assetManager.add(ClasspathResourceLoader("Silica"))
+        assetManager.add(ClasspathResourceLoader("Silica", arrayOf("silica")))
 
         val mcArchive = Util.ensureMinecraftVersion(MINECRAFT_VERSION, Side.CLIENT)
         assetManager.add(ZIPResourceLoader("Minecraft $MINECRAFT_VERSION", mcArchive))

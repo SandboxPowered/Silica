@@ -20,7 +20,13 @@ interface TextureAtlas : Texture {
         val id: Identifier
         val minUV: Vector2fc
         val maxUV: Vector2fc
+
+        operator fun component1(): Identifier
+        operator fun component2(): Vector2fc
+        operator fun component3(): Vector2fc
     }
+
+    data class Reference(val atlas: Identifier, val texture: Identifier)
 
     data class SpriteData(
         val id: Identifier,
