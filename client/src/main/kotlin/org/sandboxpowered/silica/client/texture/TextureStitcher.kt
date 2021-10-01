@@ -64,6 +64,8 @@ class TextureStitcher(private val maxWidth: Int, private val maxHeight: Int, pri
 
             branch.fit(data)
             branches.add(branch)
+        } else {
+            error("Ran out of texture space")
         }
     }
 

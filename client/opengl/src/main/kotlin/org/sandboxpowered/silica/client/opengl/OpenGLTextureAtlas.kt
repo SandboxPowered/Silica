@@ -33,7 +33,6 @@ class OpenGLTextureAtlas(private val stitcher: TextureStitcher) : TextureAtlas {
     override fun getSprite(id: Identifier): Sprite? = sprites[id]
 }
 
-
 data class OpenGLSprite(
     override val id: Identifier,
     override val minUV: Vector2fc,
