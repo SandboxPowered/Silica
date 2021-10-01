@@ -34,7 +34,7 @@ class PlayerBlockPlacement(
     override fun handle(packetHandler: PacketHandler, context: PlayContext) {
         // TODO
         context.mutateWorld {
-            it.setBlockState(location!!.shift(Direction.byId(face)), Blocks.STONE.get().defaultState)
+            it.setBlockState(location!!.shift(Direction.byId(face)), Blocks.STONE.defaultState)
         }
     }
 }

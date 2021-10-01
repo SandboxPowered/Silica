@@ -26,7 +26,7 @@ interface RegistryObject<T : RegistryEntry<T>> : Supplier<T> {
     fun <X : Throwable> orElseThrow(supplier: Supplier<X>): T
 
     operator fun getValue(thisRef: Any?, property: KProperty<*>): T? = orNull()
-    fun nonnull() = NonnullObjectDelegate(this)
+    fun guarentee() = NonnullObjectDelegate(this)
 
     val registry: Registry<T>
 

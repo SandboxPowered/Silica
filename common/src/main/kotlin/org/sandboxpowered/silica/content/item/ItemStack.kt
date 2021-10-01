@@ -7,7 +7,7 @@ import org.sandboxpowered.silica.util.Identifier.Companion.of as id
 
 class ItemStack private constructor(private val _item: Item, private var _count: Int) {
     companion object {
-        private val AIR by SilicaRegistries.ITEM_REGISTRY[id("air")].nonnull()
+        private val AIR by SilicaRegistries.ITEM_REGISTRY[id("air")].guarentee()
 
         val EMPTY by lazy { of(AIR, 0) }
 

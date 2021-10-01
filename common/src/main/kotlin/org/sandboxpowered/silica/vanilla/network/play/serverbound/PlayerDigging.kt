@@ -20,7 +20,7 @@ class PlayerDigging(private val status: Int, private val location: Position, pri
     override fun handle(packetHandler: PacketHandler, context: PlayContext) {
         println("Player Digging: $status $location $face")
         context.mutateWorld {
-            it.setBlockState(location, Blocks.AIR.get().defaultState)
+            it.setBlockState(location, Blocks.AIR.defaultState)
             packetHandler.sendPacket(
                 AcknowledgePlayerDigging(
                     location,
