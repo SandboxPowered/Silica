@@ -1,16 +1,16 @@
 package org.sandboxpowered.silica.client.opengl
 
 import com.github.zafarkhaja.semver.Version
-import de.matthiasmann.twl.utils.PNGDecoder
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL30.*
 import org.sandboxpowered.silica.client.*
+import org.sandboxpowered.silica.client.texture.TextureAtlas
+import org.sandboxpowered.silica.client.texture.TextureStitcher
 import org.sandboxpowered.silica.resources.ResourceType
 import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.extensions.getResourceAsString
-import java.nio.ByteBuffer
 
 class OpenGLRenderer(private val silica: Silica) : Renderer {
 
@@ -29,7 +29,8 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
     private lateinit var shaderProgram: ShaderProgram
     private lateinit var mesh: Mesh
     private val transforms = Transforms()
-    private var textureId = -1
+
+    private lateinit var atlas: TextureAtlas
 
     override fun init() {
         GL.createCapabilities()
@@ -86,21 +87,35 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
         shaderProgram.createUniform("worldMatrix")
         shaderProgram.createUniform("texture_sampler")
 
-        val decoder =
-            PNGDecoder(silica.assetManager.open(ResourceType.ASSETS, Identifier("textures/block/stone.png")))
-        val buf = ByteBuffer.allocateDirect(4 * decoder.width * decoder.height)
-        decoder.decode(buf, decoder.width * 4, PNGDecoder.Format.RGBA)
-        buf.flip()
+        val maxSize = glGetInteger(GL_MAX_TEXTURE_SIZE)
+        val stitcher = TextureStitcher(maxSize, maxSize, false)
 
-        textureId = glGenTextures()
-        glBindTexture(GL_TEXTURE_2D, textureId)
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
-        GL11.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, decoder.width, decoder.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf)
+        val textures = arrayOf(
+            Identifier("block/stone"),
+            Identifier("block/dirt"),
+            Identifier("block/sand"),
+            Identifier("block/gravel"),
+            Identifier("block/iron_block"),
+            Identifier("block/diamond_block"),
+            Identifier("block/gold_block"),
+            Identifier("block/pink_wool"),
+            Identifier("block/bedrock")
+        )
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+        textures.forEach {
+            stitcher.add(
+                TextureAtlas.SpriteData(
+                    it,
+                    silica.assetManager.open(
+                        ResourceType.ASSETS,
+                        Identifier(it.namespace, "textures/${it.path}.png")
+                    )
+                )
+            )
+        }
 
-        glGenerateMipmap(GL_TEXTURE_2D)
+        stitcher.stitch()
+        atlas = OpenGLTextureAtlas(stitcher)
 
         GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
     }
@@ -128,17 +143,20 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
         shaderProgram.setUniform("worldMatrix", transforms.getWorldMatrix(pos, rot, 1f))
         shaderProgram.setUniform("texture_sampler", 0)
         glActiveTexture(GL_TEXTURE0)
-        glBindTexture(GL_TEXTURE_2D, textureId)
+        atlas.bind()
 
         glBindVertexArray(mesh.vaoId)
         glDrawElements(GL_TRIANGLES, mesh.vertexCount, GL_UNSIGNED_INT, 0)
 
         glBindVertexArray(0)
 
+        glBindTexture(GL_TEXTURE_2D, 0)
         shaderProgram.unbind()
     }
 
     override fun cleanup() {
+        atlas.destroy()
+
         shaderProgram.cleanup()
 
         mesh.cleanup()

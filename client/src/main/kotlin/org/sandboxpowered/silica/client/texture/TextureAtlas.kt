@@ -8,7 +8,7 @@ import org.sandboxpowered.silica.util.Identifier
 import java.io.InputStream
 import java.nio.ByteBuffer
 
-interface TextureAtlas {
+interface TextureAtlas : Texture {
     companion object {
         val BLOCK_ATLAS = Identifier("minecraft", "block_atlas_location")
         val MISSING_TEXTURE = Identifier("minecraft", "block/stone")

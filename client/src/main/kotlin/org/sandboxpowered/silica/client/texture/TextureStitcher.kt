@@ -119,7 +119,9 @@ class TextureStitcher(private val maxWidth: Int, private val maxHeight: Int, pri
         }
 
         fun loopBranches(function: (Branch) -> Unit) {
-            subBranches?.forEach(function)
+            if (spriteData != null) function(this) else subBranches?.forEach {
+                it.loopBranches(function)
+            }
         }
 
         private var subBranches: MutableList<Branch>? = null

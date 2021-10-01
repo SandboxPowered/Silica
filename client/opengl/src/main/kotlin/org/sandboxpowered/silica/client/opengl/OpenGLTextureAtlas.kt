@@ -31,6 +31,10 @@ class OpenGLTextureAtlas(private val stitcher: TextureStitcher) : TextureAtlas {
     }
 
     override fun getSprite(id: Identifier): Sprite? = sprites[id]
+
+    override fun bind() = glBindTexture(GL_TEXTURE_2D, glId)
+
+    override fun destroy() = glDeleteTextures(glId)
 }
 
 data class OpenGLSprite(
