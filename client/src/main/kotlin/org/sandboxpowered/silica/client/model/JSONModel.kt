@@ -147,6 +147,26 @@ data class JSONElement(
     val rotation: JSONRotation?,
     val shade: Boolean
 ) {
+    init {
+        initTextures()
+    }
+
+    private fun initTextures() = faces.filter { (_, face) -> face.textureData.uvs == null }.forEach { (dir, face) ->
+        val fs = getRotatedMatrix(dir)
+        face.textureData.uvs = fs
+    }
+
+    private fun getRotatedMatrix(direction: Direction): FloatArray {
+        return when (direction) {
+            Direction.DOWN -> floatArrayOf(from.x(), 16.0f - to.z(), to.x(), 16.0f - from.z())
+            Direction.UP -> floatArrayOf(from.x(), from.z(), to.x(), to.z())
+            Direction.NORTH -> floatArrayOf(16.0f - to.x(), 16.0f - to.y(), 16.0f - from.x(), 16.0f - from.y())
+            Direction.SOUTH -> floatArrayOf(from.x(), 16.0f - to.y(), to.x(), 16.0f - from.y())
+            Direction.WEST -> floatArrayOf(from.z(), 16.0f - to.y(), to.z(), 16.0f - from.y())
+            Direction.EAST -> floatArrayOf(16.0f - to.z(), 16.0f - to.y(), 16.0f - from.z(), 16.0f - from.y())
+        }
+    }
+
     class Deserializer : JsonDeserializer<JSONElement> {
         override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): JSONElement {
             val obj = json.asJsonObject
@@ -238,7 +258,7 @@ data class JSONFace(val cullFace: Direction?, val tintIndex: Int, val texture: S
     }
 }
 
-data class JSONTexture(val rotation: Int, val uvs: FloatArray?) {
+data class JSONTexture(val rotation: Int, var uvs: FloatArray?) {
     class Deserializer : JsonDeserializer<JSONTexture> {
         override fun deserialize(json: JsonElement, type: Type, context: JsonDeserializationContext): JSONTexture {
             val obj = json.asJsonObject

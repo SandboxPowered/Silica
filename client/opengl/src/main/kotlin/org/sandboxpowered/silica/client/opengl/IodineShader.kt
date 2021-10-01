@@ -38,7 +38,11 @@ class IodineShader(val vertexFile: String, val fragmentFile: String) {
     private var fragmentID = 0
     var programID = 0
 
-    fun create() {
+    init {
+        create()
+    }
+
+    private fun create() {
         programID = glCreateProgram()
         vertexID = glCreateShader(GL_VERTEX_SHADER)
 

@@ -8,8 +8,10 @@ uniform mat4 view;
 uniform mat4 model;
 out vec2 outTexCoord;
 
+out vec3 vertPos;
+
 void main() {
-    gl_Position = projection * view * model * vec4(position, 1.0);
+    gl_Position = projection * view * vec4(position, 1.0);
     vertPos = position;
     outTexCoord = texCoord;
 }

@@ -1,7 +1,6 @@
 package org.sandboxpowered.silica.client.opengl
 
 import com.github.zafarkhaja.semver.Version
-import org.joml.Vector3f
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL30.*
@@ -54,7 +53,7 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
             )
         }
 
-        val modelJson = func(Identifier("block/stone"))
+        val modelJson = func(Identifier("block/lectern"))
 
         modelJson.getReferences(func).forEach {
             stitcher.add(
@@ -73,173 +72,86 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
         val size = 1
 
         stackPush {
-            val builder = VertexBufferObject.builder(
+            val build = VertexBufferObject.builder(
                 GL_TRIANGLES,
                 it.malloc(DefaultRenderingFormat.POSITION_TEXTURE.getArraySize(size * size * size * 2 * 8 * 100))
             )
 
-            iterateCube(0,0,0,size,size,size) { x, y, z ->
-                modelJson.getElements().forEach { element ->
-                    element.faces.forEach { (dir, face) ->
+            iterateCube(0, 0, 0, size, size, size) { x, y, z ->
+                modelJson.getElements().forEach { it ->
+                    it.faces.forEach { (dir, face) ->
                         val sprite = atlas.getSprite(modelJson.resolve(face.texture).texture)!!
                         val (_, minUV, maxUV) = sprite
 
                         val differenceBetweenX = maxUV.x() - minUV.x()
                         val differenceBetweenY = maxUV.y() - minUV.y()
 
-                        val u2Sprite = (face.textureData.uvs?.get(2) ?: 1f) / 16f
-                        val v2Sprite = (face.textureData.uvs?.get(3) ?: 1f) / 16f
+                        val stitcherWidth = stitcher.width / 16f
+                        val stitcherHeight = stitcher.height / 16f
 
-                        val u1 = (face.textureData.uvs?.get(0) ?: 0f) / 16f / stitcher.width + minUV.x()
-                        val v1 = (face.textureData.uvs?.get(1) ?: 0f) / 16f / stitcher.height + minUV.y()
+                        val u2Sprite = face.textureData.uvs!![2] / 16f
+                        val v2Sprite = face.textureData.uvs!![3] / 16f
+
+                        val u1 = (face.textureData.uvs!![0] / 16f / stitcherWidth) + minUV.x()
+                        val v1 = (face.textureData.uvs!![1] / 16f / stitcherHeight) + minUV.y()
                         val u2 = minUV.x() + (differenceBetweenX * u2Sprite)
                         val v2 = minUV.y() + (differenceBetweenY * v2Sprite)
 
                         when (dir) {
                             Direction.UP -> {
-                                builder.dataf(
-                                    element.from.x / 16f + x,
-                                    element.to.y / 16f + y,
-                                    element.from.z / 16f + z
-                                ).dataf(u1, v1)
-                                builder.dataf(element.from.x / 16f + x, element.to.y / 16f + y, element.to.z / 16f + z)
-                                    .dataf(u1, v2)
-                                builder.dataf(element.to.x / 16f + x, element.to.y / 16f + y, element.to.z / 16f + z)
-                                    .dataf(u2, v2)
-                                builder.dataf(
-                                    element.from.x / 16f + x,
-                                    element.to.y / 16f + y,
-                                    element.from.z / 16f + z
-                                ).dataf(u1, v1)
-                                builder.dataf(element.to.x / 16f + x, element.to.y / 16f + y, element.from.z / 16f + z)
-                                    .dataf(u2, v1)
-                                builder.dataf(element.to.x / 16f + x, element.to.y / 16f + y, element.to.z / 16f + z)
-                                    .dataf(u2, v2)
+                                build.dataf(it.from.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).dataf(u1, v1)
+                                build.dataf(it.from.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).dataf(u1, v2)
+                                build.dataf(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).dataf(u2, v2)
+                                build.dataf(it.from.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).dataf(u1, v1)
+                                build.dataf(it.to.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).dataf(u2, v1)
+                                build.dataf(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).dataf(u2, v2)
                             }
                             Direction.DOWN -> {
-                                builder.dataf(
-                                    element.from.x / 16f + x,
-                                    element.from.y / 16f + y,
-                                    element.from.z / 16f + z
-                                ).dataf(u1, v1)
-                                builder.dataf(
-                                    element.from.x / 16f + x,
-                                    element.from.y / 16f + y,
-                                    element.to.z / 16f + z
-                                ).dataf(u1, v2)
-                                builder.dataf(element.to.x / 16f + x, element.from.y / 16f + y, element.to.z / 16f + z)
-                                    .dataf(u2, v2)
-                                builder.dataf(
-                                    element.from.x / 16f + x,
-                                    element.from.y / 16f + y,
-                                    element.from.z / 16f + z
-                                ).dataf(u1, v1)
-                                builder.dataf(
-                                    element.to.x / 16f + x,
-                                    element.from.y / 16f + y,
-                                    element.from.z / 16f + z
-                                ).dataf(u2, v1)
-                                builder.dataf(element.to.x / 16f + x, element.from.y / 16f + y, element.to.z / 16f + z)
-                                    .dataf(u2, v2)
+                                build.dataf(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).dataf(u1, v1)
+                                build.dataf(it.from.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).dataf(u1, v2)
+                                build.dataf(it.to.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).dataf(u2, v2)
+                                build.dataf(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).dataf(u1, v1)
+                                build.dataf(it.to.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).dataf(u2, v1)
+                                build.dataf(it.to.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).dataf(u2, v2)
                             }
                             Direction.WEST -> {
-                                builder.dataf(
-                                    element.from.x / 16f + x,
-                                    element.from.y / 16f + y,
-                                    element.from.z / 16f + z
-                                ).dataf(u1, v1)
-                                builder.dataf(
-                                    element.from.x / 16f + x,
-                                    element.to.y / 16f + y,
-                                    element.from.z / 16f + z
-                                ).dataf(u1, v2)
-                                builder.dataf(element.from.x / 16f + x, element.to.y / 16f + y, element.to.z / 16f + z)
-                                    .dataf(u2, v2)
-                                builder.dataf(
-                                    element.from.x / 16f + x,
-                                    element.from.y / 16f + y,
-                                    element.from.z / 16f + z
-                                ).dataf(u1, v1)
-                                builder.dataf(
-                                    element.from.x / 16f + x,
-                                    element.from.y / 16f + y,
-                                    element.to.z / 16f + z
-                                ).dataf(u2, v1)
-                                builder.dataf(element.from.x / 16f + x, element.to.y / 16f + y, element.to.z / 16f + z)
-                                    .dataf(u2, v2)
+                                build.dataf(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).dataf(u1, v1)
+                                build.dataf(it.from.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).dataf(u1, v2)
+                                build.dataf(it.from.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).dataf(u2, v2)
+                                build.dataf(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).dataf(u1, v1)
+                                build.dataf(it.from.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).dataf(u2, v1)
+                                build.dataf(it.from.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).dataf(u2, v2)
                             }
                             Direction.EAST -> {
-                                builder.dataf(
-                                    element.to.x / 16f + x,
-                                    element.from.y / 16f + y,
-                                    element.from.z / 16f + z
-                                ).dataf(u1, v1)
-                                builder.dataf(element.to.x / 16f + x, element.to.y / 16f + y, element.from.z / 16f + z)
-                                    .dataf(u1, v2)
-                                builder.dataf(element.to.x / 16f + x, element.to.y / 16f + y, element.to.z / 16f + z)
-                                    .dataf(u2, v2)
-                                builder.dataf(
-                                    element.to.x / 16f + x,
-                                    element.from.y / 16f + y,
-                                    element.from.z / 16f + z
-                                ).dataf(u1, v1)
-                                builder.dataf(element.to.x / 16f + x, element.from.y / 16f + y, element.to.z / 16f + z)
-                                    .dataf(u2, v1)
-                                builder.dataf(element.to.x / 16f + x, element.to.y / 16f + y, element.to.z / 16f + z)
-                                    .dataf(u2, v2)
+                                build.dataf(it.to.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).dataf(u1, v1)
+                                build.dataf(it.to.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).dataf(u1, v2)
+                                build.dataf(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).dataf(u2, v2)
+                                build.dataf(it.to.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).dataf(u1, v1)
+                                build.dataf(it.to.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).dataf(u2, v1)
+                                build.dataf(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).dataf(u2, v2)
                             }
                             Direction.SOUTH -> {
-                                builder.dataf(
-                                    element.from.x / 16f + x,
-                                    element.from.y / 16f + y,
-                                    element.to.z / 16f + z
-                                ).dataf(u1, v1)
-                                builder.dataf(element.from.x / 16f + x, element.to.y / 16f + y, element.to.z / 16f + z)
-                                    .dataf(u1, v2)
-                                builder.dataf(element.to.x / 16f + x, element.to.y / 16f + y, element.to.z / 16f + z)
-                                    .dataf(u2, v2)
-                                builder.dataf(
-                                    element.from.x / 16f + x,
-                                    element.from.y / 16f + y,
-                                    element.to.z / 16f + z
-                                ).dataf(u1, v1)
-                                builder.dataf(element.to.x / 16f + x, element.from.y / 16f + y, element.to.z / 16f + z)
-                                    .dataf(u2, v1)
-                                builder.dataf(element.to.x / 16f + x, element.to.y / 16f + y, element.to.z / 16f + z)
-                                    .dataf(u2, v2)
+                                build.dataf(it.from.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).dataf(u1, v1)
+                                build.dataf(it.from.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).dataf(u1, v2)
+                                build.dataf(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).dataf(u2, v2)
+                                build.dataf(it.from.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).dataf(u1, v1)
+                                build.dataf(it.to.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).dataf(u2, v1)
+                                build.dataf(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).dataf(u2, v2)
                             }
                             Direction.NORTH -> {
-                                builder.dataf(
-                                    element.from.x / 16f + x,
-                                    element.from.y / 16f + y,
-                                    element.from.z / 16f + z
-                                ).dataf(u1, v1)
-                                builder.dataf(
-                                    element.from.x / 16f + x,
-                                    element.to.y / 16f + y,
-                                    element.from.z / 16f + z
-                                ).dataf(u1, v2)
-                                builder.dataf(element.to.x / 16f + x, element.to.y / 16f + y, element.from.z / 16f + z)
-                                    .dataf(u2, v2)
-                                builder.dataf(
-                                    element.from.x / 16f + x,
-                                    element.from.y / 16f + y,
-                                    element.from.z / 16f + z
-                                ).dataf(u1, v1)
-                                builder.dataf(
-                                    element.to.x / 16f + x,
-                                    element.from.y / 16f + y,
-                                    element.from.z / 16f + z
-                                ).dataf(u2, v1)
-                                builder.dataf(element.to.x / 16f + x, element.to.y / 16f + y, element.from.z / 16f + z)
-                                    .dataf(u2, v2)
+                                build.dataf(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).dataf(u1, v1)
+                                build.dataf(it.from.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).dataf(u1, v2)
+                                build.dataf(it.to.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).dataf(u2, v2)
+                                build.dataf(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).dataf(u1, v1)
+                                build.dataf(it.to.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).dataf(u2, v1)
+                                build.dataf(it.to.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).dataf(u2, v2)
                             }
                         }
                     }
                 }
             }
 
-            obj = builder.build()
+            obj = build.build()
         }
 
         GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
