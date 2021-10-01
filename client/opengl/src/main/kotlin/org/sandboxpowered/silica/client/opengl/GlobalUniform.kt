@@ -10,7 +10,7 @@ object GlobalUniform {
     val VIEW = Matrix4fStack(50)
     val PROJECTION = Matrix4fStack(50)
     val HEIGHT_SCALE = 0f
-    val POSITION = Vector3f(-2.5f, 1.5f, -3f)
+    val POSITION = Vector3f(-1f, 1.5f, -3f)
     var time = 0
 
     fun update(client: Silica) {
@@ -20,7 +20,7 @@ object GlobalUniform {
         VIEW.clear()
         PROJECTION.clear()
         PROJECTION.setPerspective(
-            Math.toRadians(75.0).toFloat(),
+            Math.toRadians(60.0).toFloat(),
             client.window.width.toFloat() / client.window.height.toFloat(),
             0.1f,
             100f

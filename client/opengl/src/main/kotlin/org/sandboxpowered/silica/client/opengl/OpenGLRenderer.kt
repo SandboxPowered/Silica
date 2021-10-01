@@ -52,7 +52,7 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
             )
         }
 
-        val modelJson = func(Identifier("block/cut_copper_stairs"))
+        val modelJson = func(Identifier("block/cactus"))
 
         modelJson.getReferences(func).forEach {
             stitcher.add(
@@ -97,8 +97,8 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
 
                     val u2 = (face.textureData.uvs!![0] / 16f / stitcherWidth) + minUV.x()
                     val v2 = (face.textureData.uvs!![1] / 16f / stitcherHeight) + minUV.y()
-                    val u1 = minUV.x() + (differenceBetweenX * u2Sprite)
-                    val v1 = minUV.y() + (differenceBetweenY * v2Sprite)
+                    val u1 = minUV.x() + u2Sprite / stitcherWidth
+                    val v1 = minUV.y() + v2Sprite / stitcherHeight
 
                     when (dir) {
                         Direction.UP -> {
@@ -168,6 +168,8 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT)
         GL11.glEnable(GL_DEPTH_TEST)
         GL11.glEnable(GL_TEXTURE_2D)
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         GlobalUniform.update(silica)
 

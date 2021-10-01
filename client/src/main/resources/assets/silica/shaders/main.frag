@@ -7,5 +7,7 @@ out vec4 outColor;
 uniform sampler2D diffuseMap;
 
 void main() {
-    outColor = texture(diffuseMap, outTexCoord);
+    vec4 texColor = texture(diffuseMap, outTexCoord);
+    if (texColor.a < 0.05) discard;
+    outColor = texColor;
 }
