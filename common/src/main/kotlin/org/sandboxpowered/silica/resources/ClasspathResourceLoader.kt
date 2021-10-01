@@ -1,6 +1,5 @@
 package org.sandboxpowered.silica.resources
 
-import org.sandboxpowered.silica.resources.ResourceLoader.Companion.getPath
 import org.sandboxpowered.silica.resources.ResourceLoader.Companion.isValidPath
 import org.sandboxpowered.silica.util.Identifier
 import java.io.File

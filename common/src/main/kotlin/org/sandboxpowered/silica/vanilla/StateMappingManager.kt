@@ -5,14 +5,12 @@ import com.google.gson.JsonArray
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.*
-import org.sandboxpowered.silica.content.block.Block
 import org.sandboxpowered.silica.registry.SilicaRegistries
-import org.sandboxpowered.silica.registry.SilicaRegistry
-import org.sandboxpowered.silica.world.state.block.BlockState
-import org.sandboxpowered.silica.world.state.property.Property
 import org.sandboxpowered.silica.util.Util.getLogger
 import org.sandboxpowered.silica.util.extensions.fromJson
 import org.sandboxpowered.silica.util.extensions.getResourceAsString
+import org.sandboxpowered.silica.world.state.block.BlockState
+import org.sandboxpowered.silica.world.state.property.Property
 import kotlin.system.measureTimeMillis
 
 class StateMappingManager {

@@ -56,7 +56,7 @@ class RenderingFormat(identity: Identifier, vararg attributes: Attribute) {
         var offset = 0
         val programID: Int = shader!!.programID
         for (attribute in attributes) {
-            val attrib = attribute.attributeLocation
+            val attrib = GL20.glGetAttribLocation(programID, attribute.attributeName)
             GL20.glEnableVertexAttribArray(attrib)
             attribute.specifyVertexAttributes(attrib, stride, offset)
             offset += attribute.dataSize
@@ -64,20 +64,19 @@ class RenderingFormat(identity: Identifier, vararg attributes: Attribute) {
     }
 
     enum class DataType(val id: Int, val key: String, val size: Int) {
-        BYTE(GL11.GL_BYTE, "Byte", java.lang.Byte.BYTES),
-        UBYTE(GL11.GL_UNSIGNED_BYTE, "Unsigned Byte", java.lang.Byte.BYTES),
-        SHORT(GL11.GL_SHORT, "Short", java.lang.Short.BYTES),
-        USHORT(GL11.GL_UNSIGNED_SHORT, "Unsigned Short", java.lang.Short.BYTES),
-        INT(GL11.GL_INT, "Int", Integer.BYTES),
-        UINT(GL11.GL_UNSIGNED_INT, "Unsigned Int", Integer.BYTES),
-        FLOAT(GL11.GL_FLOAT, "Float", java.lang.Float.BYTES),
-        DOUBLE(GL11.GL_DOUBLE, "Double", java.lang.Double.BYTES);
+        BYTE(GL11.GL_BYTE, "Byte", Byte.SIZE_BYTES),
+        UBYTE(GL11.GL_UNSIGNED_BYTE, "Unsigned Byte", UByte.SIZE_BYTES),
+        SHORT(GL11.GL_SHORT, "Short", Short.SIZE_BYTES),
+        USHORT(GL11.GL_UNSIGNED_SHORT, "Unsigned Short", UShort.SIZE_BYTES),
+        INT(GL11.GL_INT, "Int", Int.SIZE_BYTES),
+        UINT(GL11.GL_UNSIGNED_INT, "Unsigned Int", UInt.SIZE_BYTES),
+        FLOAT(GL11.GL_FLOAT, "Float", Float.SIZE_BYTES),
+        DOUBLE(GL11.GL_DOUBLE, "Double", Double.SIZE_BYTES);
 
     }
 
     class Attribute(
         val attributeName: String,
-        val attributeLocation: Int,
         private val vertexSize: Int,
         private val type: DataType,
         private val normalized: Boolean

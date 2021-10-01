@@ -6,9 +6,9 @@ import org.sandboxpowered.silica.content.block.BlockProperties.WALL_SHAPE_NORTH
 import org.sandboxpowered.silica.content.block.BlockProperties.WALL_SHAPE_SOUTH
 import org.sandboxpowered.silica.content.block.BlockProperties.WALL_SHAPE_WEST
 import org.sandboxpowered.silica.content.block.BlockProperties.WATERLOGGED
+import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.world.state.StateProvider
 import org.sandboxpowered.silica.world.state.block.BlockState
-import org.sandboxpowered.silica.util.Identifier
 
 class WallBlock(identifier: Identifier) : BaseBlock(identifier) {
     override fun appendProperties(builder: StateProvider.Builder<Block, BlockState>) {

@@ -2,7 +2,6 @@ package org.sandboxpowered.silica.content.inventory
 
 import org.sandboxpowered.silica.content.item.Item
 import org.sandboxpowered.silica.content.item.ItemStack
-import org.sandboxpowered.silica.registry.SilicaRegistries.blocks
 import org.sandboxpowered.silica.registry.SilicaRegistries.items
 import org.sandboxpowered.silica.content.item.ItemStack.Companion.EMPTY as EMPTY_STACK
 

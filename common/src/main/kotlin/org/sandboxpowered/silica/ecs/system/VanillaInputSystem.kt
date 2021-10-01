@@ -7,15 +7,15 @@ import com.artemis.systems.IteratingSystem
 import org.sandboxpowered.silica.ecs.component.PositionComponent
 import org.sandboxpowered.silica.ecs.component.RotationComponent
 import org.sandboxpowered.silica.ecs.component.VanillaPlayerInput
-import org.sandboxpowered.silica.vanilla.network.PacketPlay
-import org.sandboxpowered.silica.vanilla.network.play.clientbound.UpdateEntityPosition
-import org.sandboxpowered.silica.vanilla.network.play.clientbound.UpdateEntityPositionRotation
-import org.sandboxpowered.silica.vanilla.network.play.clientbound.UpdateEntityRotation
 import org.sandboxpowered.silica.server.Network
 import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.util.extensions.component1
 import org.sandboxpowered.silica.util.extensions.component2
 import org.sandboxpowered.silica.util.extensions.component3
+import org.sandboxpowered.silica.vanilla.network.PacketPlay
+import org.sandboxpowered.silica.vanilla.network.play.clientbound.UpdateEntityPosition
+import org.sandboxpowered.silica.vanilla.network.play.clientbound.UpdateEntityPositionRotation
+import org.sandboxpowered.silica.vanilla.network.play.clientbound.UpdateEntityRotation
 
 @All(VanillaPlayerInput::class, PositionComponent::class, RotationComponent::class)
 class VanillaInputSystem(val server: SilicaServer) : IteratingSystem() {

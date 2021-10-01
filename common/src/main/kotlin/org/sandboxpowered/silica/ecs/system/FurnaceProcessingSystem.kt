@@ -9,9 +9,7 @@ import org.sandboxpowered.silica.content.item.ItemStack
 import org.sandboxpowered.silica.ecs.component.BlockPositionComponent
 import org.sandboxpowered.silica.ecs.component.FurnaceLogicComponent
 import org.sandboxpowered.silica.ecs.component.ResizableInventoryComponent
-import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.registry.SilicaRegistries.items
-import org.sandboxpowered.silica.util.Identifier
 import kotlin.math.min
 
 
