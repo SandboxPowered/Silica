@@ -1,5 +1,6 @@
 package org.sandboxpowered.silica.client.texture
 
+import org.joml.Vector2fc
 import org.lwjgl.stb.STBImage.*
 import org.sandboxpowered.silica.client.util.stackPush
 import org.sandboxpowered.silica.client.util.streamToBuffer
@@ -13,11 +14,12 @@ interface TextureAtlas {
         val MISSING_TEXTURE = Identifier("minecraft", "block/stone")
     }
 
-    fun getSprite(id: Identifier): Sprite
+    fun getSprite(id: Identifier): Sprite?
 
     interface Sprite {
-
-
+        val id: Identifier
+        val minUV: Vector2fc
+        val maxUV: Vector2fc
     }
 
     data class SpriteData(
@@ -28,6 +30,8 @@ interface TextureAtlas {
         val hdr: Boolean,
         val image: ByteBuffer
     ) {
+        val isSquare: Boolean = width == height
+
         companion object {
             operator fun invoke(id: Identifier, inputStream: InputStream): SpriteData {
                 return stackPush {
