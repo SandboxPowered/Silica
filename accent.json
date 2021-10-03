@@ -1,0 +1,9 @@
+{
+  "files": [
+    {
+      "format": "json",
+      "source": "common/src/main/resources/assets/silica/lang/en_us.json",
+      "target": "common/src/main/resources/assets/silica/lang/%slug%.json"
+    }
+  ]
+}
