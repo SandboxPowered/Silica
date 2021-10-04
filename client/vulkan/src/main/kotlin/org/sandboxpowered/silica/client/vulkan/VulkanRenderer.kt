@@ -96,10 +96,10 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     private var currentFrame: Int = 0
 
     private val vertices = arrayOf(
-        Vertex(Vector2f(-0.5f, -0.5f), Vector3f(1.0f, 0.0f, 0.0f)),
-        Vertex(Vector2f(0.5f, -0.5f), Vector3f(0.0f, 1.0f, 0.0f)),
-        Vertex(Vector2f(0.5f, 0.5f), Vector3f(0.0f, 0.0f, 1.0f)),
-        Vertex(Vector2f(-0.5f, 0.5f), Vector3f(1.0f, 1.0f, 1.0f))
+        Vertex(Vector2f(-0.5f, -0.5f), Vector3f(1f, 0f, 0f)),
+        Vertex(Vector2f(0.5f, -0.5f), Vector3f(0f, 1f, 0f)),
+        Vertex(Vector2f(0.5f, 0.5f), Vector3f(0f, 0f, 1f)),
+        Vertex(Vector2f(-0.5f, 0.5f), Vector3f(1f, 1f, 1f))
     )
 
     private val indices = shortArrayOf(
@@ -635,7 +635,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
             renderArea.extent(swapChainExtent)
             renderPassInfo.renderArea(renderArea)
             val clearValues = VkClearValue.callocStack(1, it)
-            clearValues.color().float32(it.floats(0.0f, 0.0f, 0.0f, 1.0f))
+            clearValues.color().float32(it.floats(0f, 0f, 0f, 1f))
             renderPassInfo.pClearValues(clearValues)
 
             for (i in 0 until bufferCount) {

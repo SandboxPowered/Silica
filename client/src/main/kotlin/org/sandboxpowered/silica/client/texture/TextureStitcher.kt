@@ -36,9 +36,7 @@ class TextureStitcher(private val maxWidth: Int, private val maxHeight: Int, pri
     }
 
     private fun fit(data: TextureAtlas.SpriteData) {
-        for (branch in branches) {
-            if (branch.fit(data)) return
-        }
+        for (branch in branches) if (branch.fit(data)) return
         stretchToFit(data)
     }
 
@@ -75,53 +73,46 @@ class TextureStitcher(private val maxWidth: Int, private val maxHeight: Int, pri
         }
     }
 
-    class Branch(val x: Int, val y: Int, val width: Int, val height: Int) {
+    class Branch(val x: Int, val y: Int, private val width: Int, private val height: Int) {
         fun fit(data: TextureAtlas.SpriteData): Boolean {
             if (spriteData != null) return false
             val (_, dataWidth, dataHeight) = data
-            if (dataWidth <= width && dataHeight <= height) {
-                if (dataWidth == width && dataHeight == height) {
-                    spriteData = data
-                    return true
-                } else {
-                    var branches = subBranches
-                    if (branches == null) {
-                        branches = ArrayList(1)
-                        branches.add(Branch(x, y, dataWidth, dataHeight))
+            if (dataWidth > width || dataHeight > height) return false
 
-                        val slotWidth = width - dataWidth
-                        val slotHeight = height - dataHeight
-
-                        if (slotHeight > 0 && slotWidth > 0) {
-                            val maxHeight = max(height, slotWidth)
-                            val maxWidth = max(width, slotHeight)
-                            if (maxHeight >= maxWidth) {
-                                branches.add(Branch(x, y + dataHeight, dataWidth, slotHeight))
-                                branches.add(Branch(x + dataWidth, y, slotWidth, height))
-                            } else {
-                                branches.add(Branch(x + dataWidth, y, slotWidth, dataHeight))
-                                branches.add(Branch(x, y + dataHeight, width, slotHeight))
-                            }
-                        } else if (slotWidth == 0) {
-                            branches.add(Branch(x, y + dataHeight, dataWidth, slotHeight))
-                        } else if (slotHeight == 0) {
-                            branches.add(Branch(x + dataWidth, y, slotWidth, dataHeight))
-                        }
-
-                        this.subBranches = branches
-                    }
-
-                    return branches.firstOrNull { it.fit(data) } != null
-                }
-            } else {
-                return false
+            if (dataWidth == width && dataHeight == height) {
+                spriteData = data
+                return true
             }
+
+            var branches = subBranches
+            if (branches == null) {
+                branches = ArrayList(1)
+                branches.add(Branch(x, y, dataWidth, dataHeight))
+
+                val slotWidth = width - dataWidth
+                val slotHeight = height - dataHeight
+
+                if (slotHeight > 0 && slotWidth > 0) {
+                    val maxHeight = max(height, slotWidth)
+                    val maxWidth = max(width, slotHeight)
+                    if (maxHeight >= maxWidth) {
+                        branches.add(Branch(x, y + dataHeight, dataWidth, slotHeight))
+                        branches.add(Branch(x + dataWidth, y, slotWidth, height))
+                    } else {
+                        branches.add(Branch(x + dataWidth, y, slotWidth, dataHeight))
+                        branches.add(Branch(x, y + dataHeight, width, slotHeight))
+                    }
+                } else if (slotWidth == 0) branches.add(Branch(x, y + dataHeight, dataWidth, slotHeight))
+                else if (slotHeight == 0) branches.add(Branch(x + dataWidth, y, slotWidth, dataHeight))
+
+                this.subBranches = branches
+            }
+
+            return branches.firstOrNull { it.fit(data) } != null
         }
 
         fun loopBranches(function: (Branch) -> Unit) {
-            if (spriteData != null) function(this) else subBranches?.forEach {
-                it.loopBranches(function)
-            }
+            if (spriteData != null) function(this) else subBranches?.forEach { it.loopBranches(function) }
         }
 
         private var subBranches: MutableList<Branch>? = null

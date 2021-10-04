@@ -57,7 +57,7 @@ class Silica(private val args: Args) : Runnable {
             System.setProperty("org.lwjgl.util.DebugAllocator", "true")
             System.setProperty("org.lwjgl.util.DebugStack", "true")
         }
-        /* Configure LWJGL MemoryStack to 1024KB */
+        /* Configure LWJGL MemoryStack to 65536KB */
         Configuration.STACK_SIZE.set(65536)
     }
 

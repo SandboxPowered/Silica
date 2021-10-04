@@ -90,7 +90,7 @@ class StateMappingManager {
             if (missing.isNotEmpty())
                 errorMap[ErrorType.MISSING] = missing
         }.apply {
-            logger.debug("Took {}ms to collect vanilla state mappings", this)
+            logger.debug("Took ${this}ms to collect vanilla state mappings")
         }
         return errorMap
     }

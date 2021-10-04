@@ -4,7 +4,11 @@ import com.github.zafarkhaja.semver.Version
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL30.*
-import org.sandboxpowered.silica.client.*
+import org.sandboxpowered.silica.client.Renderer
+import org.sandboxpowered.silica.client.RenderingFactory
+import org.sandboxpowered.silica.client.Silica
+import org.sandboxpowered.silica.client.Window
+import org.sandboxpowered.silica.client.model.BakedQuadCreator
 import org.sandboxpowered.silica.client.model.JSONModel
 import org.sandboxpowered.silica.client.model.jsonModelGson
 import org.sandboxpowered.silica.client.opengl.texture.OpenGLTextureAtlas
@@ -13,7 +17,7 @@ import org.sandboxpowered.silica.client.texture.TextureStitcher
 import org.sandboxpowered.silica.client.util.stackPush
 import org.sandboxpowered.silica.resources.ResourceType
 import org.sandboxpowered.silica.util.Identifier
-import org.sandboxpowered.silica.util.content.Direction
+import org.sandboxpowered.silica.util.extensions.minus
 import java.io.InputStreamReader
 
 class OpenGLRenderer(private val silica: Silica) : Renderer {
@@ -24,14 +28,7 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
     override val name: String = "OpenGL"
     override val version: Version = Version.forIntegers(0, 1, 0)
 
-    private val fov = Math.toRadians(60.0).toFloat()
-
-    private val zNear = 0.01f
-
-    private val zFar = 1000f
-
     private lateinit var obj: OpenGLVBO
-    private val transforms = Transforms()
 
     private lateinit var atlas: TextureAtlas
 
@@ -53,7 +50,7 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
             )
         }
 
-        val modelJson = func(Identifier("block/cactus"))
+        val modelJson = func(Identifier("block/cauldron"))
 
         modelJson.getReferences(func).forEach {
             stitcher.add(
@@ -69,84 +66,33 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
         stitcher.stitch()
         atlas = OpenGLTextureAtlas(stitcher)
 
-        val size = 1
-
         stackPush { stack ->
             val vbo = OpenGLVBO.builder(
-                GL_TRIANGLES,
-                stack.malloc(DefaultRenderingFormat.POSITION_TEXTURE.getArraySize(
-                    6 * (modelJson.getElements().sumOf { it.faces.size } * 6)
-                ))
+                GL_QUADS,
+                stack.malloc(DefaultRenderingFormat.POSITION_TEXTURE.getArraySize(300))
             )
 
-            val x = 0
-            val y = 0
-            val z = 0
             modelJson.getElements().forEach {
                 it.faces.forEach { (dir, face) ->
                     val sprite = atlas.getSprite(modelJson.resolve(face.texture).texture)!!
                     val (_, minUV, maxUV) = sprite
 
-                    val stitcherWidth = stitcher.width / 16f
-                    val stitcherHeight = stitcher.height / 16f
+                    val uvDifference = maxUV - minUV
 
-                    val u2Sprite = face.textureData.uvs!![2] / 16f
-                    val v2Sprite = face.textureData.uvs!![3] / 16f
+                    val quad = BakedQuadCreator.CREATOR.bake(it.from, it.to, face, sprite, dir, it.rotation, it.shade)
 
-                    val u2 = (face.textureData.uvs!![0] / 16f / stitcherWidth) + minUV.x()
-                    val v2 = (face.textureData.uvs!![1] / 16f / stitcherHeight) + minUV.y()
-                    val u1 = minUV.x() + u2Sprite / stitcherWidth
-                    val v1 = minUV.y() + v2Sprite / stitcherHeight
+                    val vertexCount = quad.vertexData.size / 8
 
-                    when (dir) {
-                        Direction.UP -> {
-                            vbo.put(it.from.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).put(u1, v1)
-                            vbo.put(it.from.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).put(u1, v2)
-                            vbo.put(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).put(u2, v2)
-                            vbo.put(it.from.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).put(u1, v1)
-                            vbo.put(it.to.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).put(u2, v1)
-                            vbo.put(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).put(u2, v2)
-                        }
-                        Direction.DOWN -> {
-                            vbo.put(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).put(u1, v1)
-                            vbo.put(it.from.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).put(u1, v2)
-                            vbo.put(it.to.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).put(u2, v2)
-                            vbo.put(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).put(u1, v1)
-                            vbo.put(it.to.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).put(u2, v1)
-                            vbo.put(it.to.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).put(u2, v2)
-                        }
-                        Direction.WEST -> {
-                            vbo.put(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).put(u1, v1)
-                            vbo.put(it.from.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).put(u1, v2)
-                            vbo.put(it.from.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).put(u2, v2)
-                            vbo.put(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).put(u1, v1)
-                            vbo.put(it.from.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).put(u2, v1)
-                            vbo.put(it.from.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).put(u2, v2)
-                        }
-                        Direction.EAST -> {
-                            vbo.put(it.to.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).put(u1, v1)
-                            vbo.put(it.to.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).put(u1, v2)
-                            vbo.put(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).put(u2, v2)
-                            vbo.put(it.to.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).put(u1, v1)
-                            vbo.put(it.to.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).put(u2, v1)
-                            vbo.put(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).put(u2, v2)
-                        }
-                        Direction.SOUTH -> {
-                            vbo.put(it.from.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).put(u1, v1)
-                            vbo.put(it.from.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).put(u1, v2)
-                            vbo.put(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).put(u2, v2)
-                            vbo.put(it.from.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).put(u1, v1)
-                            vbo.put(it.to.x / 16f + x, it.from.y / 16f + y, it.to.z / 16f + z).put(u2, v1)
-                            vbo.put(it.to.x / 16f + x, it.to.y / 16f + y, it.to.z / 16f + z).put(u2, v2)
-                        }
-                        Direction.NORTH -> {
-                            vbo.put(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).put(u1, v1)
-                            vbo.put(it.from.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).put(u1, v2)
-                            vbo.put(it.to.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).put(u2, v2)
-                            vbo.put(it.from.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).put(u1, v1)
-                            vbo.put(it.to.x / 16f + x, it.from.y / 16f + y, it.from.z / 16f + z).put(u2, v1)
-                            vbo.put(it.to.x / 16f + x, it.to.y / 16f + y, it.from.z / 16f + z).put(u2, v2)
-                        }
+                    for (vert in 0 until vertexCount) {
+                        val idx = vert * 8
+
+                        vbo.put(quad.vertexData[idx])
+                        vbo.put(quad.vertexData[idx + 1])
+                        vbo.put(quad.vertexData[idx + 2])
+                        vbo.put(minUV.x() + (quad.vertexData[idx + 3] / 16f) * uvDifference.x())
+                        vbo.put(minUV.y() + (quad.vertexData[idx + 4] / 16f) * uvDifference.y())
+
+                        // TODO: control this through shader and do animated textures through shader
                     }
                 }
             }
@@ -154,7 +100,7 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
             obj = vbo.build()
         }
 
-        GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
+        GL11.glClearColor(0.15f, 0.2f, 0.25f, 0f)
     }
 
     override fun frame() {

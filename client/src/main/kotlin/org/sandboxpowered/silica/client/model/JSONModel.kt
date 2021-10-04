@@ -40,10 +40,10 @@ data class JSONModel(
             var parent: JSONModel? = modelFunction(model.parent!!)
             if (parent == null) {
                 // no parent
-                System.out.printf("no parent found for %s this is so sad%n", model)
+                println("no parent found for $model this is so sad")
             }
             if (models.contains(parent)) {
-                System.out.printf("found parent loop from %s %s%n", model, parent)
+                println("found parent loop from $model<->$parent")
                 parent = null
             }
             model.parentModel = parent
@@ -82,7 +82,7 @@ data class JSONModel(
         while (true) {
             val obj = resolveTexture(tex)
             if (obj is TextureAtlas.Reference) return obj
-            require(obj is String) { String.format("Unknown element %s", obj) }
+            require(obj is String) { "Unknown element $obj" }
             tex = obj
             if (list.contains(tex)) {
                 //We've hit a loop
@@ -157,13 +157,13 @@ data class JSONElement(
     }
 
     private fun getRotatedMatrix(direction: Direction): FloatArray = when (direction) {
-        Direction.DOWN -> floatArrayOf(from.x(), 16.0f - to.z(), to.x(), 16.0f - from.z())
-            Direction.UP -> floatArrayOf(from.x(), from.z(), to.x(), to.z())
-            Direction.NORTH -> floatArrayOf(16.0f - to.x(), 16.0f - to.y(), 16.0f - from.x(), 16.0f - from.y())
-            Direction.SOUTH -> floatArrayOf(from.x(), 16.0f - to.y(), to.x(), 16.0f - from.y())
-            Direction.WEST -> floatArrayOf(from.z(), 16.0f - to.y(), to.z(), 16.0f - from.y())
-            Direction.EAST -> floatArrayOf(16.0f - to.z(), 16.0f - to.y(), 16.0f - from.z(), 16.0f - from.y())
-        }
+        Direction.DOWN -> floatArrayOf(from.x(), 16f - to.z(), to.x(), 16f - from.z())
+        Direction.UP -> floatArrayOf(from.x(), from.z(), to.x(), to.z())
+        Direction.NORTH -> floatArrayOf(16f - to.x(), 16f - to.y(), 16f - from.x(), 16f - from.y())
+        Direction.SOUTH -> floatArrayOf(from.x(), 16f - to.y(), to.x(), 16f - from.y())
+        Direction.WEST -> floatArrayOf(from.z(), 16f - to.y(), to.z(), 16f - from.y())
+        Direction.EAST -> floatArrayOf(16f - to.z(), 16f - to.y(), 16f - from.z(), 16f - from.y())
+    }
 
     class Deserializer : JsonDeserializer<JSONElement> {
         override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): JSONElement {
@@ -190,7 +190,7 @@ data class JSONElement(
         @Throws(JsonParseException::class)
         private fun getRotationAngle(obj: JsonObject): Float {
             val angle = obj.getAsJsonPrimitive("angle").asFloat
-            return if (angle != 0.0f && abs(angle) != 22.5f && abs(angle) != 45.0f) {
+            return if (angle != 0f && abs(angle) != 22.5f && abs(angle) != 45f) {
                 throw JsonParseException("Invalid rotation $angle, not one of -45/-22.5/0/22.5/45")
             } else {
                 angle
@@ -252,6 +252,20 @@ data class JSONFace(val cullFace: Direction?, val tintIndex: Int, val texture: S
 }
 
 data class JSONTexture(val rotation: Int, var uvs: FloatArray?) {
+    private fun getRotatedUVIndex(rotation: Int): Int = (rotation + this.rotation / 90) % 4
+
+    fun getDirectionIndex(offset: Int): Int = (offset + 4 - rotation / 90) % 4
+
+    fun getU(rotation: Int): Float {
+        val i = getRotatedUVIndex(rotation)
+        return uvs!![if (i != 0 && i != 1) 2 else 0]
+    }
+
+    fun getV(rotation: Int): Float {
+        val i = getRotatedUVIndex(rotation)
+        return uvs!![if (i != 0 && i != 3) 3 else 1]
+    }
+
     class Deserializer : JsonDeserializer<JSONTexture> {
         override fun deserialize(json: JsonElement, type: Type, context: JsonDeserializationContext): JSONTexture {
             val obj = json.asJsonObject

@@ -11,7 +11,7 @@ import java.nio.ByteBuffer
 interface TextureAtlas : Texture {
     companion object {
         val BLOCK_ATLAS = Identifier("minecraft", "block_atlas_location")
-        val MISSING_TEXTURE = Identifier("minecraft", "block/stone")
+        val MISSING_TEXTURE = Identifier("silica", "missing_texture")
     }
 
     fun getSprite(id: Identifier): Sprite?

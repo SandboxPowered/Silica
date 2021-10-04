@@ -13,3 +13,7 @@ val Int.toPowerOfTwo: Int
         for (t in 0..4) sub = sub or (sub shr 2.0.pow(t).toInt())
         return sub + 1
     }
+
+fun Pair<Float, Float>.lerp(delta: Float): Float = first + delta * (second - first)
+
+fun ClosedRange<Float>.lerp(delta: Float): Float = start + delta * (endInclusive - start)
