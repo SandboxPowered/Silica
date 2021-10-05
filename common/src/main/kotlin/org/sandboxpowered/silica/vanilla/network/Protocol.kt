@@ -46,6 +46,7 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             0x1B packet ::C2SEntityAction
             0x2E packet ::C2SPlayerBlockPlacement
             0x25 packet ::C2SHeldItemChange
+            0x17 packet ::C2SPickItem
         }
         client {
             0x26 packet ::S2CJoinGame

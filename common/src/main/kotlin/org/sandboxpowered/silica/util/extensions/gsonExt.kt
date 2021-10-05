@@ -8,6 +8,9 @@ inline fun <reified T> GsonBuilder.registerTypeAdapter(deserializer: JsonDeseria
 inline fun <reified T> GsonBuilder.registerTypeAdapter(serializer: JsonSerializer<T>): GsonBuilder =
     registerTypeAdapter(T::class.java, serializer)
 
+inline fun <reified T> GsonBuilder.registerTypeAdapter(typeAdapter: TypeAdapter<T>): GsonBuilder =
+    registerTypeAdapter(T::class.java, typeAdapter)
+
 inline fun <reified T> JsonDeserializationContext.deserialize(element: JsonElement): T =
     deserialize(element, T::class.java)
 

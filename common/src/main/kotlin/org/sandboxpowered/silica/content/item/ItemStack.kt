@@ -8,17 +8,17 @@ class ItemStack private constructor(private val _item: Item, private var _count:
     companion object {
         private val AIR by items().guaranteed
 
-        val EMPTY by lazy { of(AIR, 0) }
+        val EMPTY by lazy { ItemStack(AIR, 0) }
 
-        fun of(block: Block): ItemStack = of(block.item, 1)
+        operator fun invoke(block: Block): ItemStack = invoke(block.item, 1)
 
-        fun of(obj: RegistryObject<Item>): ItemStack = of(obj, 1)
+        operator fun invoke(obj: RegistryObject<Item>): ItemStack = invoke(obj, 1)
 
-        fun of(obj: RegistryObject<Item>, count: Int): ItemStack = of(obj.orNull(), count)
+        operator fun invoke(obj: RegistryObject<Item>, count: Int): ItemStack = invoke(obj.orNull(), count)
 
-        fun of(item: Item?): ItemStack = of(item, 1)
+        operator fun invoke(item: Item?): ItemStack = invoke(item, 1)
 
-        fun of(item: Item?, count: Int): ItemStack = ItemStack(item ?: AIR, count)
+        operator fun invoke(item: Item?, count: Int): ItemStack = ItemStack(item ?: AIR, count)
     }
 
     val item: Item
@@ -44,7 +44,7 @@ class ItemStack private constructor(private val _item: Item, private var _count:
     }
 
     fun duplicate(): ItemStack {
-        return of(item, count)
+        return ItemStack(_item, _count)
     }
 
     fun isItemEqual(obj: RegistryObject<Item>): Boolean =

@@ -50,7 +50,7 @@ class FurnaceProcessingSystem : DelayedIteratingSystem() {
     private val iron_ore by items().guaranteed
     private val iron_ingot by items().guaranteed
     private val outputStack: ItemStack by lazy {
-        ItemStack.of(iron_ingot, 2)
+        ItemStack(iron_ingot, 2)
     }
 
     override fun processExpired(entityId: Int) {

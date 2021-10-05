@@ -11,13 +11,13 @@ class PlayerInventory : Inventory {
         const val MAIN_SIZE = 36
         const val ARMOUR_SIZE = 4
 
-        private val STONE by items().guaranteed
+        val STONE by items().guaranteed
     }
 
     val main = ArrayList<ItemStack>(MAIN_SIZE).apply {
         this.ensureCapacity(MAIN_SIZE)
         for (i in 0 until MAIN_SIZE)
-            add(i, ItemStack.of(STONE, i))
+            add(i, ItemStack(STONE, i))
     }
     val armour = ArrayList<ItemStack>(ARMOUR_SIZE).apply {
         this.ensureCapacity(ARMOUR_SIZE)

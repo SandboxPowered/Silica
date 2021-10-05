@@ -15,14 +15,14 @@ class VkError(message: String) : RuntimeException(message) {
         }
 
         fun <T> checkError(error: String, value: T?, filter: (T?) -> Boolean) {
-            if (filter.invoke(value)) {
+            if (filter(value)) {
                 throw VkError(error)
             }
         }
 
         fun checkErrorRun(error: String, value: Int, onError: (Int) -> Unit) {
             if (value != VK10.VK_SUCCESS) {
-                onError.invoke(value)
+                onError(value)
                 throw VkError(error)
             }
         }
