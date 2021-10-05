@@ -23,7 +23,7 @@ class Connection(
     val motd: String
         get() = server.motdCache
     private var secretKey: SecretKey? = null
-    var packetHandler: PacketHandler? = null
+    lateinit var packetHandler: PacketHandler
     fun handleEncryptionResponse(encryptionResponse: C2SEncryptionResponse) {
         val privateKey = server.keyPair!!.private
         try {
@@ -39,14 +39,14 @@ class Connection(
     fun handleLoginStart(username: String) {
         profile = GameProfile(UUID.randomUUID(), username)
         //        packetHandler.sendPacket(new EncryptionRequest("", server.getKeyPair().getPublic().getEncoded(), server.getVerificationArray()));
-        packetHandler!!.sendPacket(S2CLoginSuccess(profile.id, username))
-        packetHandler!!.setProtocol(Protocol.PLAY)
-        server.motd.addPlayer(username)
+        packetHandler.sendPacket(S2CLoginSuccess(profile.id, username))
+        packetHandler.setProtocol(Protocol.PLAY)
+        server.motd.addPlayer(profile)
         server.updateMOTDCache()
         println("Sending")
         AskPattern.ask(
             network,
-            { ref: ActorRef<Any?>? -> CreateConnection(profile, packetHandler!!, ref!!) },
+            { ref: ActorRef<Any?>? -> CreateConnection(profile, packetHandler, ref!!) },
             Duration.ofSeconds(3),
             scheduler
         ).whenComplete { reply: Any?, failure: Throwable? ->

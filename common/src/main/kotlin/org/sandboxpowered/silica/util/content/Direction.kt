@@ -23,12 +23,10 @@ enum class Direction(
     WEST(4, 5, 1, "west", AxisDirection.NEGATIVE, Axis.X, Vector3i(-1, 0, 0)),
     EAST(5, 4, 3, "east", AxisDirection.POSITIVE, Axis.X, Vector3i(1, 0, 0));
 
-    val offsetX: Int
-        get() = this.offset.x
-    val offsetY: Int
-        get() = this.offset.y
-    val offsetZ: Int
-        get() = this.offset.z
+    val opposite: Direction by lazy { byId(invertedId) }
+    val offsetX: Int = this.offset.x
+    val offsetY: Int = this.offset.y
+    val offsetZ: Int = this.offset.z
 
     override fun toString(): String = this.asString
 

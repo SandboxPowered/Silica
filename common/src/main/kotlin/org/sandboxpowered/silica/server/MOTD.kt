@@ -1,6 +1,7 @@
 package org.sandboxpowered.silica.server
 
 import com.google.gson.*
+import com.mojang.authlib.GameProfile
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import org.sandboxpowered.silica.util.extensions.plusAssign
@@ -13,11 +14,11 @@ data class MOTD(
     var description: Component,
     var favicon: String
 ) {
-    fun addPlayer(player: String) {
+    fun addPlayer(player: GameProfile) {
         if (players.sample.add(player)) players.online++
     }
 
-    fun removePlayer(player: String) {
+    fun removePlayer(player: GameProfile) {
         if (players.sample.remove(player)) players.online--
     }
 }
@@ -25,7 +26,7 @@ data class MOTD(
 data class Players(
     var max: Int,
     var online: Int,
-    var sample: MutableList<String>
+    var sample: MutableList<GameProfile>
 )
 
 data class Version(
@@ -52,8 +53,8 @@ class MOTDSerializer : JsonSerializer<MOTD> {
             this["sample"] = JsonArray().apply {
                 src.players.sample.forEach {
                     this += JsonObject().apply {
-                        this["name"] = it
-                        //TODO add id
+                        this["name"] = it.name
+                        this["id"] = it.id.toString()
                     }
                 }
             }

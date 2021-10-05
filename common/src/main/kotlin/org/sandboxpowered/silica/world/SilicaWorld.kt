@@ -8,6 +8,8 @@ import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import com.artemis.WorldConfigurationBuilder
 import com.mojang.authlib.GameProfile
+import org.joml.Vector2i
+import org.joml.Vector2ic
 import org.sandboxpowered.silica.content.block.BlockEntityProvider
 import org.sandboxpowered.silica.ecs.component.BlockPositionComponent
 import org.sandboxpowered.silica.ecs.component.PlayerInventoryComponent
@@ -21,6 +23,7 @@ import org.sandboxpowered.silica.server.Network
 import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.Side
+import org.sandboxpowered.silica.util.content.Direction
 import org.sandboxpowered.silica.util.extensions.add
 import org.sandboxpowered.silica.util.extensions.getSystem
 import org.sandboxpowered.silica.util.extensions.onMessage
@@ -52,6 +55,9 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
     val vanillaWorldAdapter = VanillaWorldAdapter(this).apply {
         addListener(this::propagateUpdate)
     }
+    override val worldHeight: Vector2ic = Vector2i(0, 255)
+    override val isClient: Boolean = side == Side.CLIENT
+    override val isServer: Boolean = side == Side.SERVER
 
     fun addListener(listener: (Position, BlockState, BlockState) -> Unit) {
         listeners.add(listener)
@@ -83,7 +89,8 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         return blocks[pos.x, pos.y, pos.z]
     }
 
-    override fun setBlockState(pos: Position, state: BlockState) {
+    override fun setBlockState(pos: Position, state: BlockState, vararg flags: WorldWriter.Flag): Boolean {
+        if (isOutOfHeightLimit(pos)) return false
         //TODO see if theres generally any better way of doing this.
         val system = artemisWorld.getSystem<Entity3dMapSystem>()
         val ents = system.getBlockEntities(pos)
@@ -100,8 +107,19 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         val oldState = blocks[pos.x, pos.y, pos.z]
         blocks[pos.x, pos.y, pos.z] = state
 
+        if (WorldWriter.Flag.NOTIFY_NEIGHBORS in flags) {
+            Direction.ALL.forEach { updateNeighbor(pos, state, it.opposite, pos.shift(it)) }
+        }
+
         listeners.forEach { it(pos, oldState, state) }
         server.network.tell(Network.SendToWatching(pos, S2CBlockChange(pos, server.stateRemapper[state])))
+        return true
+    }
+
+    private fun updateNeighbor(pos: Position, state: BlockState, opposite: Direction, neighbor: Position) {
+        val neighborState = getBlockState(neighbor)
+
+        neighborState.block.onNeighborUpdate(this, neighbor, neighborState, pos, state, opposite)
     }
 
     override fun getFluidState(pos: Position): FluidState {
