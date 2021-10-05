@@ -4,17 +4,12 @@ import org.sandboxpowered.silica.util.math.Position
 import org.sandboxpowered.silica.world.state.block.BlockState
 
 interface WorldWriter {
-    fun setBlockState(pos: Position, state: BlockState): Boolean = setBlockState(pos, state, Flag.DEFAULT)
+    fun setBlockState(pos: Position, state: BlockState): Boolean = setBlockState(pos, state, *Flag.DEFAULT)
 
     fun setBlockState(pos: Position, state: BlockState, vararg flags: Flag): Boolean
 
     @Suppress("unused")
     enum class Flag(val flag: Int) {
-        /**
-         * The default setBlockState behavior. Same as [NOTIFY_NEIGHBORS or NOTIFY_LISTENERS]
-         */
-        DEFAULT(3),
-
         /**
          * Sends a neighbor update event to surrounding blocks.
          */
@@ -26,7 +21,7 @@ interface WorldWriter {
         NOTIFY_LISTENERS(2),
 
         /**
-         * Used in conjunction with {@link #NOTIFY_LISTENERS} to suppress the render pass on clients.
+         * Used in conjunction with [NOTIFY_LISTENERS] to suppress the render pass on clients.
          */
         NO_REDRAW(4),
 
@@ -53,6 +48,13 @@ interface WorldWriter {
         /**
          * Signals that lighting updates should be skipped.
          */
-        SKIP_LIGHTING_UPDATES(128)
+        SKIP_LIGHTING_UPDATES(128);
+
+        companion object {
+            /**
+             * The default setBlockState behavior. Same as [NOTIFY_NEIGHBORS] and [NOTIFY_LISTENERS]
+             */
+            val DEFAULT = arrayOf(NOTIFY_NEIGHBORS, NOTIFY_LISTENERS)
+        }
     }
 }
