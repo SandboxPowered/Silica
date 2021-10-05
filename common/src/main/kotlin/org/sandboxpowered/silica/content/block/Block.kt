@@ -22,7 +22,7 @@ sealed interface Block : RegistryEntry<Block>, Translatable {
         origin: Position,
         originState: BlockState,
         side: Direction
-    )
+    ) = Unit
 
     val defaultState: BlockState
     val stateProvider: StateProvider<Block, BlockState>
