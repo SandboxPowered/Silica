@@ -32,6 +32,8 @@ class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
 
     private lateinit var atlas: TextureAtlas
 
+    private val map = HashMap<Identifier, JSONModel>()
+
     override fun init() {
         GL.createCapabilities()
 
@@ -39,18 +41,20 @@ class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
         val stitcher = TextureStitcher(maxSize, maxSize, false)
 
         val func: (Identifier) -> JSONModel = {
-            jsonModelGson.fromJson(
-                InputStreamReader(
-                    silica.assetManager.open(
-                        ResourceType.ASSETS,
-                        Identifier(it.namespace, "models/${it.path}.json")
-                    )
-                ),
-                JSONModel::class.java
-            )
+            map.computeIfAbsent(it) {
+                jsonModelGson.fromJson(
+                    InputStreamReader(
+                        silica.assetManager.open(
+                            ResourceType.ASSETS,
+                            Identifier(it.namespace, "models/${it.path}.json")
+                        )
+                    ),
+                    JSONModel::class.java
+                )
+            }
         }
 
-        val modelJson = func(Identifier("block/cauldron"))
+        val modelJson = func(Identifier("block/lectern"))
 
         modelJson.getReferences(func).forEach {
             stitcher.add(
