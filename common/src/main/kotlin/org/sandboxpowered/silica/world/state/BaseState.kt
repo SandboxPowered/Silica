@@ -17,36 +17,21 @@ open class BaseState<B : RegistryEntry<B>, S : PropertyContainer<S>>(
 
     override fun <T : Comparable<T>> get(property: Property<T>): T {
         val value = properties[property]
-        return if (value == null) {
-            throw IllegalArgumentException(
-                String.format(
-                    "Cannot get property %s as it does not exist in %s",
-                    property,
-                    base
-                )
-            )
-        } else {
-            property.valueType.cast(value)
-        }
+        require(value != null) { "Cannot get property $property as it does not exist in $base" }
+        return property.valueType.cast(value)
     }
 
     override fun <T : Comparable<T>> set(property: Property<T>, value: T): S {
         val currentValue = properties[property]
-        return if (currentValue == null) {
-            throw error { "Cannot set property $property as it does not exist in $base" }
-        } else {
-            val state = getState(property, value)
-            state ?: error { "Cannot set property $property to $value on $base, it is not an allowed value" }
-        }
+        require(currentValue != null) { "Cannot set property $property as it does not exist in $base" }
+        val state = getState(property, value)
+        return state ?: error("Cannot set property $property to $value on $base, it is not an allowed value")
     }
 
-    override fun <T : Comparable<T>> contains(property: Property<T>): Boolean {
-        return properties.containsKey(property)
-    }
+    override fun <T : Comparable<T>> contains(property: Property<T>): Boolean = property in properties
 
     override fun <T : Comparable<T>> cycle(property: Property<T>): S {
-        val currentValue = properties[property]
-            ?: error { "Cannot set property $property as it does not exist in $base" }
+        val currentValue = properties[property] ?: error("Cannot set property $property as it does not exist in $base")
         return set(property, findNextInCollection(property.values, currentValue as T))
     }
 
