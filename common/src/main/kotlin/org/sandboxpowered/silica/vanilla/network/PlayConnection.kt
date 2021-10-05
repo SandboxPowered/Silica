@@ -174,7 +174,7 @@ private class PlayConnectionActor(
             }
         }
         packetHandler.sendPacket(
-            JoinGame(
+            S2CJoinGame(
                 0,
                 false,
                 1,
@@ -193,15 +193,15 @@ private class PlayConnectionActor(
                 true
             )
         )
-        packetHandler.sendPacket(HeldItemChangeClientbound(playerInventoryComponent.inventory.selectedSlot.toByte()))
-        packetHandler.sendPacket(DeclareRecipes())
-        packetHandler.sendPacket(DeclareTags())
-        packetHandler.sendPacket(EntityStatus())
-        packetHandler.sendPacket(DeclareCommands())
-        packetHandler.sendPacket(UnlockRecipes())
+        packetHandler.sendPacket(S2CHeldItemChange(playerInventoryComponent.inventory.selectedSlot.toByte()))
+        packetHandler.sendPacket(S2CDeclareRecipes())
+        packetHandler.sendPacket(S2CDeclareTags())
+        packetHandler.sendPacket(S2CEntityStatus())
+        packetHandler.sendPacket(S2CDeclareCommands())
+        packetHandler.sendPacket(S2CUnlockRecipes())
         val currentPos = receive.input.wantedPosition
         packetHandler.sendPacket(
-            SetPlayerPositionAndLook(
+            S2CSetPlayerPositionAndLook(
                 currentPos.x,
                 currentPos.y,
                 currentPos.z,
@@ -219,7 +219,7 @@ private class PlayConnectionActor(
         }
         server.network.tell(
             Network.SendToAll(
-                PlayerInfo.addPlayer(
+                S2CPlayerInfo.addPlayer(
                     receive.gameProfiles, gamemodes, pings
                 )
             )
@@ -227,7 +227,7 @@ private class PlayConnectionActor(
         server.network.tell(
             Network.SendToAllExcept(
                 receive.input.gameProfile.id,
-                SpawnPlayer(
+                S2CSpawnPlayer(
                     receive.input.playerId,
                     receive.input.gameProfile.id,
                     currentPos.x,
@@ -245,7 +245,7 @@ private class PlayConnectionActor(
                     server.network.tell(
                         Network.SendToAllExcept(
                             input.gameProfile.id,
-                            SpawnPlayer(
+                            S2CSpawnPlayer(
                                 input.playerId,
                                 input.gameProfile.id,
                                 input.wantedPosition.x,
@@ -258,7 +258,7 @@ private class PlayConnectionActor(
                 }
             }
         })
-        packetHandler.sendPacket(UpdateChunkPosition(0, 0))
+        packetHandler.sendPacket(S2CUpdateChunkPosition(0, 0))
 
         server.world.tell(
             SilicaWorld.Command.Ask(
@@ -289,20 +289,19 @@ private class PlayConnectionActor(
         for (x in -4..4) {
             for (z in -4..4) {
                 val time = measureTimeMillis {
-                    packetHandler.sendPacket(ChunkData(x, z, world.blocks, world.vanillaWorldAdapter))
+                    packetHandler.sendPacket(S2CChunkData(x, z, world.blocks, world.vanillaWorldAdapter))
                 }
 //                logger.debug("Took {}ms to create Chunk Data for {} {}", time, x, z)
-                packetHandler.sendPacket(UpdateLight(x, z, true))
+                packetHandler.sendPacket(S2CUpdateLight(x, z, true))
             }
         }
-        packetHandler.sendPacket(WorldBorder())
+        packetHandler.sendPacket(S2CWorldBorder())
         packetHandler.sendPacket(
-            InitWindowItems(
+            S2CInitWindowItems(
                 0u,
                 1 and 32767,
-                playerInventoryComponent.inventory,
-                server.registryProtocolMapper
-            )
+                playerInventoryComponent.inventory
+            ) { server.registryProtocolMapper["minecraft:item"][it.identifier] }
         )
 
         return Behaviors.same()

@@ -6,12 +6,10 @@ import com.google.common.collect.ImmutableSortedMap
 import org.sandboxpowered.silica.registry.RegistryEntry
 import org.sandboxpowered.silica.world.state.property.Property
 
-typealias StateFactory<B, S> = (base: B, properties: ImmutableMap<Property<*>, Comparable<*>>) -> S
-
 class SilicaStateFactory<B : RegistryEntry<B>, S : PropertyContainer<S>>(
     override val baseObject: B,
     map: Map<String, Property<*>>,
-    stateCreator: StateFactory<B, S>
+    stateCreator: (base: B, properties: ImmutableMap<Property<*>, Comparable<*>>) -> S
 ) : StateProvider<B, S> {
     private val propertiesByName: ImmutableSortedMap<String, Property<*>> = ImmutableSortedMap.copyOf(map)
     override val validStates: ImmutableList<S>

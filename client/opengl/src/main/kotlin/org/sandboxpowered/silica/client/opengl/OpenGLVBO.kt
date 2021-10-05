@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.client.opengl
 
-import org.joml.Vector3fc
+import org.joml.*
 import org.lwjgl.opengl.GL15.*
 import org.lwjgl.opengl.GL30.glBindVertexArray
 import org.lwjgl.opengl.GL30.glGenVertexArrays
@@ -47,8 +47,6 @@ class OpenGLVBO(val type: Int, val size: Int, data: ByteBuffer) : VertexBufferOb
             return this
         }
 
-        override fun put(data: Vector3fc): OpenGLVBOBuilder = put(data.x(), data.y(), data.z())
-
         override fun put(vararg data: Float): OpenGLVBOBuilder {
             size += data.size * java.lang.Float.BYTES
             rawFloatBuffer.put(data)
@@ -59,6 +57,22 @@ class OpenGLVBO(val type: Int, val size: Int, data: ByteBuffer) : VertexBufferOb
             size += data.size * java.lang.Double.BYTES
             rawDoubleBuffer.put(data)
             return this
+        }
+
+        override fun put(data: Vector2ic): OpenGLVBOBuilder = put(data.x(), data.y())
+
+        override fun put(data: Vector3ic): OpenGLVBOBuilder = put(data.x(), data.y(), data.z())
+
+        override fun put(data: Vector2fc): OpenGLVBOBuilder = put(data.x(), data.y())
+
+        override fun put(data: Vector3fc): OpenGLVBOBuilder = put(data.x(), data.y(), data.z())
+
+        override fun put(data: Vector2dc): OpenGLVBOBuilder = put(data.x(), data.y())
+
+        override fun put(data: Vector3dc): OpenGLVBOBuilder = put(data.x(), data.y(), data.z())
+
+        override fun vertex(x: Float, y: Float, z: Float, u: Float, v: Float): OpenGLVBOBuilder {
+            return put(x, y, z, u, v)
         }
 
         init {

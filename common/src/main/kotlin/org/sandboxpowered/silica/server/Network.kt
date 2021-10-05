@@ -24,8 +24,8 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.util.math.Position
 import org.sandboxpowered.silica.vanilla.network.*
-import org.sandboxpowered.silica.vanilla.network.play.clientbound.KeepAliveClient
-import org.sandboxpowered.silica.vanilla.network.play.clientbound.PlayerInfo
+import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CKeepAliveClient
+import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CPlayerInfo
 import java.util.*
 
 sealed class Network {
@@ -49,13 +49,13 @@ sealed class Network {
 
     companion object {
         fun actor(server: SilicaServer): Behavior<Network> = Behaviors.setup {
-            NetworkActor(server, it)
+            DedicatedServerNetworkActor(server, it)
         }
     }
 }
 
 // TODO: clean shutdown
-private class NetworkActor(
+private class DedicatedServerNetworkActor(
     private val server: SilicaServer, // TODO: remove this one when I can
     context: ActorContext<Network>
 ) : AbstractBehavior<Network>(context) {
@@ -77,20 +77,20 @@ private class NetworkActor(
     private var ticks: Int = 0
 
     private fun handleTick(tick: Network.Tick): Behavior<Network> {
-        var latencyPacket: PlayerInfo? = null
+        var latencyPacket: S2CPlayerInfo? = null
         if (ticks % 20 == 0) {
             val uuids = connections.keys.toTypedArray()
             val pings = IntArray(uuids.size)
             uuids.forEachIndexed { index, uuid ->
                 pings[index] = 1
             }
-            latencyPacket = PlayerInfo.updateLatency(
+            latencyPacket = S2CPlayerInfo.updateLatency(
                 uuids,
                 pings
             )
         }
         connections.values.forEach {
-            it.tell(PlayConnection.SendPacket(KeepAliveClient(System.currentTimeMillis())))
+            it.tell(PlayConnection.SendPacket(S2CKeepAliveClient(System.currentTimeMillis())))
             if (ticks % 20 == 0) {
                 it.tell(PlayConnection.SendPacket(latencyPacket!!))
             }

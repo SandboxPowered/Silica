@@ -3,7 +3,7 @@ package org.sandboxpowered.silica.client.opengl
 import org.joml.Matrix4fStack
 import org.joml.Vector3f
 import org.joml.Vector3fc
-import org.sandboxpowered.silica.client.Silica
+import org.sandboxpowered.silica.client.SilicaClient
 
 object GlobalUniform {
     val MODEL = Matrix4fStack(50)
@@ -13,7 +13,7 @@ object GlobalUniform {
     val POSITION = Vector3f(-1f, 1.5f, -3f)
     var time = 0
 
-    fun update(client: Silica) {
+    fun update(client: SilicaClient) {
         time++
 
         MODEL.clear()

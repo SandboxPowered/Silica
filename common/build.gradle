@@ -52,6 +52,8 @@ dependencies {
     api "io.ktor:ktor-client-cio:$ktorVersion"
     api "io.ktor:ktor-client-serialization:$ktorVersion"
     api "io.ktor:ktor-client-gson:$ktorVersion"
+
+    implementation "net.kyori:adventure-api:4.9.2"
 }
 
 

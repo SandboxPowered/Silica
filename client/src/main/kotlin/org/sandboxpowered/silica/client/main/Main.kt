@@ -2,8 +2,8 @@ package org.sandboxpowered.silica.client.main
 
 import joptsimple.OptionParser
 import joptsimple.OptionSpec
-import org.sandboxpowered.silica.client.Silica
-import org.sandboxpowered.silica.client.Silica.Args
+import org.sandboxpowered.silica.client.SilicaClient
+import org.sandboxpowered.silica.client.SilicaClient.Args
 import org.sandboxpowered.silica.util.Util.getLogger
 import org.sandboxpowered.silica.util.extensions.ofType
 
@@ -34,7 +34,7 @@ object Main {
             logger.warn("Ignoring arguments: {}", unknownOptions)
         }
         try {
-            Silica(
+            SilicaClient(
                 Args(
                     options.valueOf(widthSpec),
                     options.valueOf(heightSpec),

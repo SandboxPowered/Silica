@@ -43,7 +43,7 @@ class BakedQuadCreator {
         vertexPositions: FloatArray,
         rotation: JSONRotation?
     ) {
-        val corner = CubeFace.byDirection(side).getCorner(cornerIdx)
+        val corner = CubeFace.getCorner(side, cornerIdx)
         val pos = Vector3f(vertexPositions[corner.x], vertexPositions[corner.y], vertexPositions[corner.z])
         rotateVertex(pos, rotation)
 

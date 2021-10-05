@@ -8,16 +8,16 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.Object2IntMap
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import org.sandboxpowered.silica.util.Util.getLogger
-import org.sandboxpowered.silica.vanilla.network.handshake.clientbound.PingRequest
-import org.sandboxpowered.silica.vanilla.network.handshake.clientbound.StatusRequest
-import org.sandboxpowered.silica.vanilla.network.handshake.serverbound.PongResponse
-import org.sandboxpowered.silica.vanilla.network.handshake.serverbound.StatusResponse
-import org.sandboxpowered.silica.vanilla.network.login.clientbound.Disconnect
-import org.sandboxpowered.silica.vanilla.network.login.clientbound.EncryptionRequest
-import org.sandboxpowered.silica.vanilla.network.login.clientbound.LoginSuccess
-import org.sandboxpowered.silica.vanilla.network.login.serverbound.EncryptionResponse
-import org.sandboxpowered.silica.vanilla.network.login.serverbound.HandshakeRequest
-import org.sandboxpowered.silica.vanilla.network.login.serverbound.LoginStart
+import org.sandboxpowered.silica.vanilla.network.handshake.clientbound.C2SPingRequest
+import org.sandboxpowered.silica.vanilla.network.handshake.clientbound.C2SStatusRequest
+import org.sandboxpowered.silica.vanilla.network.handshake.serverbound.S2CPongResponse
+import org.sandboxpowered.silica.vanilla.network.handshake.serverbound.S2CStatusResponse
+import org.sandboxpowered.silica.vanilla.network.login.clientbound.S2CDisconnect
+import org.sandboxpowered.silica.vanilla.network.login.clientbound.S2CEncryptionRequest
+import org.sandboxpowered.silica.vanilla.network.login.clientbound.S2CLoginSuccess
+import org.sandboxpowered.silica.vanilla.network.login.serverbound.C2SEncryptionResponse
+import org.sandboxpowered.silica.vanilla.network.login.serverbound.C2SHandshakeRequest
+import org.sandboxpowered.silica.vanilla.network.login.serverbound.C2SLoginStart
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.*
 import org.sandboxpowered.silica.vanilla.network.play.serverbound.*
 import java.util.function.Function
@@ -28,68 +28,68 @@ import kotlin.collections.set
 enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
     HANDSHAKE(-1, {
         server {
-            0x00 packet ::HandshakeRequest
+            0x00 packet ::C2SHandshakeRequest
         }
     }),
     PLAY(0, {
         server {
-            0x00 packet ::TeleportConfirmation
-            0x05 packet ::ClientSettings
-            0x0A packet ::ClientPluginChannel
-            0x0F packet ::KeepAliveServer
-            0x11 packet ::PlayerPosition
-            0x12 packet ::PlayerPositionAndRotation
-            0x13 packet ::PlayerRotation
-            0x14 packet ::PlayerMovement
-            0x1A packet ::PlayerDigging
-            0x2C packetDeprecated ::HandSwingAnimation
-            0x1B packetDeprecated ::EntityAction
-            0x2E packetDeprecated ::PlayerBlockPlacement
-            0x25 packetDeprecated ::HeldItemChangeServerbound
+            0x00 packet ::C2STeleportConfirmation
+            0x05 packet ::C2SClientSettings
+            0x0A packet ::C2SClientPluginChannel
+            0x0F packet ::C2SKeepAliveServer
+            0x11 packet ::C2SPlayerPosition
+            0x12 packet ::C2SPlayerPositionAndRotation
+            0x13 packet ::C2SPlayerRotation
+            0x14 packet ::C2SPlayerMovement
+            0x1A packet ::C2SPlayerDigging
+            0x2C packet ::C2SHandSwingAnimation
+            0x1B packet ::C2SEntityAction
+            0x2E packet ::C2SPlayerBlockPlacement
+            0x25 packet ::C2SHeldItemChange
         }
         client {
-            0x26 packet ::JoinGame
-            0x48 packet ::HeldItemChangeClientbound
-            0x65 packetDeprecated ::DeclareRecipes
-            0X66 packetDeprecated ::DeclareTags
-            0x1B packetDeprecated ::EntityStatus
-            0x12 packetDeprecated ::DeclareCommands
-            0x38 packet ::SetPlayerPositionAndLook
-            0x39 packetDeprecated ::UnlockRecipes
-            0x36 packetDeprecated ::PlayerInfo
-            0x49 packetDeprecated ::UpdateChunkPosition
-            0x22 packetDeprecated ::ChunkData
-            0x25 packetDeprecated ::UpdateLight
-            0x20 packetDeprecated ::WorldBorder
-            0x21 packet ::KeepAliveClient
-            0x08 packet ::AcknowledgePlayerDigging
-            0x0C packet ::BlockChange
-            0x04 packetDeprecated ::SpawnPlayer
-            0x29 packetDeprecated ::UpdateEntityPosition
-            0x2A packetDeprecated ::UpdateEntityPositionRotation
-            0x2B packetDeprecated ::UpdateEntityRotation
-            0x14 packet ::InitWindowItems
+            0x26 packet ::S2CJoinGame
+            0x48 packet ::S2CHeldItemChange
+            0x65 packetDeprecated ::S2CDeclareRecipes
+            0X66 packetDeprecated ::S2CDeclareTags
+            0x1B packetDeprecated ::S2CEntityStatus
+            0x12 packetDeprecated ::S2CDeclareCommands
+            0x38 packet ::S2CSetPlayerPositionAndLook
+            0x39 packetDeprecated ::S2CUnlockRecipes
+            0x36 packetDeprecated ::S2CPlayerInfo
+            0x49 packetDeprecated ::S2CUpdateChunkPosition
+            0x22 packetDeprecated ::S2CChunkData
+            0x25 packetDeprecated ::S2CUpdateLight
+            0x20 packetDeprecated ::S2CWorldBorder
+            0x21 packet ::S2CKeepAliveClient
+            0x08 packet ::S2CAcknowledgePlayerDigging
+            0x0C packet ::S2CBlockChange
+            0x04 packetDeprecated ::S2CSpawnPlayer
+            0x29 packetDeprecated ::S2CUpdateEntityPosition
+            0x2A packetDeprecated ::S2CUpdateEntityPositionRotation
+            0x2B packetDeprecated ::S2CUpdateEntityRotation
+            0x14 packet ::S2CInitWindowItems
         }
     }),
     STATUS(1, {
         server {
-            0x00 packet ::StatusRequest
-            0x01 packet ::PingRequest
+            0x00 packet ::C2SStatusRequest
+            0x01 packet ::C2SPingRequest
         }
         client {
-            0x00 packet ::StatusResponse
-            0x01 packet ::PongResponse
+            0x00 packet ::S2CStatusResponse
+            0x01 packet ::S2CPongResponse
         }
     }),
     LOGIN(2, {
         server {
-            0x00 packet ::LoginStart
-            0x01 packet ::EncryptionResponse
+            0x00 packet ::C2SLoginStart
+            0x01 packet ::C2SEncryptionResponse
         }
         client {
-            0x00 packet ::Disconnect
-            0x01 packet ::EncryptionRequest
-            0x02 packet ::LoginSuccess
+            0x00 packet ::S2CDisconnect
+            0x01 packet ::S2CEncryptionRequest
+            0x02 packet ::S2CLoginSuccess
         }
     });
 

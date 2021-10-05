@@ -7,13 +7,21 @@ import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.vanilla.StateMappingManager
 import org.sandboxpowered.silica.vanilla.VanillaProtocolMapping
 import org.sandboxpowered.silica.world.SilicaWorld
-import java.nio.file.Paths
 
-class IntegratedServer(
-    override val world: ActorRef<SilicaWorld.Command>,
-    override val network: ActorRef<Network>
-) : SilicaServer() {
+class IntegratedServer() : SilicaServer() {
     override val stateRemapper = StateMappingManager()
     override val registryProtocolMapper = VanillaProtocolMapping()
-    override val properties = ServerProperties.fromFile(Paths.get("server.properties"))
+    override val properties = IntegratedServerProperties()
+
+    override lateinit var world: ActorRef<SilicaWorld.Command>
+    override lateinit var network: ActorRef<Network>
+
+    class IntegratedServerProperties : ServerProperties {
+        override val onlineMode = true
+        override val motd: String = "Singleplayer"
+        override val serverPort: Int = 0
+        override val serverIp: String = ""
+        override val maxTickTime: Int = 60000
+        override val maxPlayers: Int = 20
+    }
 }

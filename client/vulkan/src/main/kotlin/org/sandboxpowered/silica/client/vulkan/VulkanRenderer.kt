@@ -22,7 +22,7 @@ import org.lwjgl.vulkan.KHRSwapchain.*
 import org.lwjgl.vulkan.VK10.*
 import org.sandboxpowered.silica.client.Renderer
 import org.sandboxpowered.silica.client.RenderingFactory
-import org.sandboxpowered.silica.client.Silica
+import org.sandboxpowered.silica.client.SilicaClient
 import org.sandboxpowered.silica.client.util.ints
 import org.sandboxpowered.silica.client.util.stackPush
 import org.sandboxpowered.silica.client.vulkan.SPIRVUtil.Companion.compileShaderFile
@@ -42,7 +42,7 @@ import java.util.stream.IntStream
 private val Version.vKVersion: Int
     get() = VK_MAKE_VERSION(majorVersion, minorVersion, patchVersion)
 
-class VulkanRenderer(private val silica: Silica) : Renderer {
+class VulkanRenderer(private val silica: SilicaClient) : Renderer {
 
     override val name: String = "Vulkan"
     override val version: Version = Version.forIntegers(0, 1, 0)
@@ -1361,7 +1361,7 @@ class VulkanRenderer(private val silica: Silica) : Renderer {
     class VulkanRenderingFactory : RenderingFactory {
         override val priority: Int = 600
         override val name: String = "vulkan"
-        override fun createRenderer(silica: Silica): Renderer = VulkanRenderer(silica)
+        override fun createRenderer(silica: SilicaClient): Renderer = VulkanRenderer(silica)
     }
 }
 

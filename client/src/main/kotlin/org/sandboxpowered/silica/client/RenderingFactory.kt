@@ -4,5 +4,5 @@ interface RenderingFactory {
     val priority: Int
     val name: String
 
-    fun createRenderer(silica: Silica): Renderer
+    fun createRenderer(silica: SilicaClient): Renderer
 }

@@ -5,6 +5,7 @@ import com.google.common.collect.HashBasedTable
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.Table
 import org.sandboxpowered.silica.registry.RegistryEntry
+import org.sandboxpowered.silica.util.extensions.set
 import org.sandboxpowered.silica.world.state.property.Property
 
 open class BaseState<B : RegistryEntry<B>, S : PropertyContainer<S>>(
@@ -57,11 +58,7 @@ open class BaseState<B : RegistryEntry<B>, S : PropertyContainer<S>>(
                 val comparable = comparableIterator.next()
                 if (comparable !== value) {
                     map[createPropertiesCollectionWith(property, comparable)]?.let {
-                        table.put(
-                            property,
-                            comparable,
-                            it
-                        )
+                        table[property, comparable] = it
                     }
                 }
             }
@@ -69,24 +66,13 @@ open class BaseState<B : RegistryEntry<B>, S : PropertyContainer<S>>(
         possibleStates = if (table.isEmpty) table else ArrayTable.create(table)
     }
 
-    private fun createPropertiesCollectionWith(
-        property: Property<*>,
-        comparable: Comparable<*>
-    ): Map<Property<*>, Comparable<*>> {
-        val map: MutableMap<Property<*>, Comparable<*>> = HashMap(
-            properties
-        )
-        map[property] = comparable
-        return map
-    }
+    private fun createPropertiesCollectionWith(property: Property<*>, comparable: Comparable<*>) =
+        HashMap(properties).apply { set(property, comparable) }
 
-    private fun <T : Comparable<T>, V : T> getState(property: Property<T>, value: V): S? {
-        return possibleStates[property, value] // TODO: replace with global state holder object rather than holding every possible state within all states.
-    }
+    private fun <T : Comparable<T>, V : T> getState(property: Property<T>, value: V): S? =
+        possibleStates[property, value] // TODO: replace with global state holder object rather than holding every possible state within all states.
 
-    override fun toString(): String {
-        return "${javaClass.simpleName}{base=$base, properties=$properties}"
-    }
+    override fun toString(): String = "${javaClass.simpleName}{base=$base, properties=$properties}"
 
     private fun <T> findNextInCollection(collection: Collection<T>, value: T): T {
         val iterator = collection.iterator()

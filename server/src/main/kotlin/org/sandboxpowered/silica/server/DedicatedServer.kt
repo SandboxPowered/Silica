@@ -34,7 +34,7 @@ class DedicatedServer(args: Args) : SilicaServer() {
     override lateinit var world: ActorRef<SilicaWorld.Command>
     override lateinit var network: ActorRef<Network>
     private val stateRemappingErrors: Map<StateMappingManager.ErrorType, Set<String>>
-    override val properties = ServerProperties.fromFile(Paths.get("server.properties"))
+    override val properties = DedicatedServerProperties.fromFile(Paths.get("server.properties"))
 
     class Args()
 

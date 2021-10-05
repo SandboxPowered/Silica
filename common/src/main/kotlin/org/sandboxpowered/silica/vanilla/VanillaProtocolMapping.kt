@@ -12,7 +12,9 @@ class VanillaProtocolMapping {
     private val gson = Gson()
     private val registryMap = HashMap<String, RegistryReference>()
 
-    operator fun get(string: String): RegistryReference? = registryMap[string]
+    operator fun get(string: String): RegistryReference {
+        return registryMap[string] ?: error("Unable to find $string registry")
+    }
 
     fun load() {
         val string = javaClass.getResourceAsString("/data/silica/registries.json")

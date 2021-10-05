@@ -26,7 +26,7 @@ import org.sandboxpowered.silica.util.extensions.getSystem
 import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.util.extensions.registerAs
 import org.sandboxpowered.silica.util.math.Position
-import org.sandboxpowered.silica.vanilla.network.play.clientbound.BlockChange
+import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CBlockChange
 import org.sandboxpowered.silica.world.gen.TerrainGenerator
 import org.sandboxpowered.silica.world.state.block.BlockState
 import org.sandboxpowered.silica.world.state.fluid.FluidState
@@ -39,7 +39,6 @@ import com.artemis.World as ArtemisWorld
 import org.sandboxpowered.silica.world.gen.TerrainGenerator.Generate as CommandGenerate
 
 class SilicaWorld private constructor(val side: Side, val server: SilicaServer) : World {
-
     private val blocks: BlocTree = BlocTree(
         WORLD_MIN,
         WORLD_MIN,
@@ -102,7 +101,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         blocks[pos.x, pos.y, pos.z] = state
 
         listeners.forEach { it(pos, oldState, state) }
-        server.network.tell(Network.SendToWatching(pos, BlockChange(pos, server.stateRemapper.toVanillaId(state))))
+        server.network.tell(Network.SendToWatching(pos, S2CBlockChange(pos, server.stateRemapper.toVanillaId(state))))
     }
 
     override fun getFluidState(pos: Position): FluidState {

@@ -4,8 +4,8 @@ import joptsimple.OptionParser
 import joptsimple.OptionSpec
 import org.apache.logging.log4j.LogManager
 import org.sandboxpowered.silica.server.DedicatedServer
+import org.sandboxpowered.silica.server.DedicatedServerProperties.Companion.fromFile
 import org.sandboxpowered.silica.server.ServerEula
-import org.sandboxpowered.silica.server.ServerProperties.Companion.fromFile
 import org.sandboxpowered.silica.util.Util.getLogger
 import java.nio.file.Paths
 

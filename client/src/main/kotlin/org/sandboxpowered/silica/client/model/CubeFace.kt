@@ -42,9 +42,7 @@ enum class CubeFace(vararg corners: Corner) {
 
     private val cornerArray = corners
 
-    open fun getCorner(corner: Int): Corner {
-        return cornerArray[corner]
-    }
+    operator fun get(corner: Int): Corner = cornerArray[corner]
 
     companion object {
         private val DIRECTION_LOOKUP = Array(6) {
@@ -59,7 +57,7 @@ enum class CubeFace(vararg corners: Corner) {
             }
         }
 
-        fun byDirection(direction: Direction): CubeFace = DIRECTION_LOOKUP[direction.id]
+        fun getCorner(direction: Direction, corner: Int): Corner = DIRECTION_LOOKUP[direction.id][corner]
     }
 
     data class Corner(val x: Int, val y: Int, val z: Int)

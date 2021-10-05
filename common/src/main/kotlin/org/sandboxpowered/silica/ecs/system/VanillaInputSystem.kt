@@ -13,9 +13,9 @@ import org.sandboxpowered.silica.util.extensions.component1
 import org.sandboxpowered.silica.util.extensions.component2
 import org.sandboxpowered.silica.util.extensions.component3
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
-import org.sandboxpowered.silica.vanilla.network.play.clientbound.UpdateEntityPosition
-import org.sandboxpowered.silica.vanilla.network.play.clientbound.UpdateEntityPositionRotation
-import org.sandboxpowered.silica.vanilla.network.play.clientbound.UpdateEntityRotation
+import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityPosition
+import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityPositionRotation
+import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityRotation
 
 @All(VanillaPlayerInput::class, PositionComponent::class, RotationComponent::class)
 class VanillaInputSystem(val server: SilicaServer) : IteratingSystem() {
@@ -63,12 +63,12 @@ class VanillaInputSystem(val server: SilicaServer) : IteratingSystem() {
 
         if (hasRotated) {
             packet = if (hasMoved && !teleport) {
-                UpdateEntityPositionRotation(entityId, dx.toInt(), dy.toInt(), dz.toInt(), yaw, pitch, false)
+                S2CUpdateEntityPositionRotation(entityId, dx.toInt(), dy.toInt(), dz.toInt(), yaw, pitch, false)
             } else {
-                UpdateEntityRotation(entityId, yaw, pitch, false)
+                S2CUpdateEntityRotation(entityId, yaw, pitch, false)
             }
         } else if (hasMoved) {
-            packet = UpdateEntityPosition(entityId, dx.toInt(), dy.toInt(), dz.toInt(), false)
+            packet = S2CUpdateEntityPosition(entityId, dx.toInt(), dy.toInt(), dz.toInt(), false)
         }
 
         if (packet != null) {

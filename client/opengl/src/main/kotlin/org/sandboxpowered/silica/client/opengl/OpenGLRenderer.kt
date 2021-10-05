@@ -6,7 +6,7 @@ import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL30.*
 import org.sandboxpowered.silica.client.Renderer
 import org.sandboxpowered.silica.client.RenderingFactory
-import org.sandboxpowered.silica.client.Silica
+import org.sandboxpowered.silica.client.SilicaClient
 import org.sandboxpowered.silica.client.Window
 import org.sandboxpowered.silica.client.model.BakedQuadCreator
 import org.sandboxpowered.silica.client.model.JSONModel
@@ -20,7 +20,7 @@ import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.extensions.minus
 import java.io.InputStreamReader
 
-class OpenGLRenderer(private val silica: Silica) : Renderer {
+class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
 
     private val window: Window
         get() = silica.window
@@ -86,12 +86,13 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
                     for (vert in 0 until vertexCount) {
                         val idx = vert * 8
 
-                        vbo.put(quad.vertexData[idx])
-                        vbo.put(quad.vertexData[idx + 1])
-                        vbo.put(quad.vertexData[idx + 2])
-                        vbo.put(minUV.x() + (quad.vertexData[idx + 3] / 16f) * uvDifference.x())
-                        vbo.put(minUV.y() + (quad.vertexData[idx + 4] / 16f) * uvDifference.y())
-
+                        vbo.vertex(
+                            quad.vertexData[idx],
+                            quad.vertexData[idx + 1],
+                            quad.vertexData[idx + 2],
+                            minUV.x() + (quad.vertexData[idx + 3] / 16f) * uvDifference.x(),
+                            minUV.y() + (quad.vertexData[idx + 4] / 16f) * uvDifference.y()
+                        )
                         // TODO: control this through shader and do animated textures through shader
                     }
                 }
@@ -140,6 +141,6 @@ class OpenGLRenderer(private val silica: Silica) : Renderer {
         override val priority: Int = 600
         override val name: String = "opengl"
 
-        override fun createRenderer(silica: Silica): Renderer = OpenGLRenderer(silica)
+        override fun createRenderer(silica: SilicaClient): Renderer = OpenGLRenderer(silica)
     }
 }

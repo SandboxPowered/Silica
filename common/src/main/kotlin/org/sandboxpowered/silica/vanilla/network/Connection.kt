@@ -6,8 +6,8 @@ import akka.actor.typed.javadsl.AskPattern
 import com.mojang.authlib.GameProfile
 import org.sandboxpowered.silica.server.Network.CreateConnection
 import org.sandboxpowered.silica.server.SilicaServer
-import org.sandboxpowered.silica.vanilla.network.login.clientbound.LoginSuccess
-import org.sandboxpowered.silica.vanilla.network.login.serverbound.EncryptionResponse
+import org.sandboxpowered.silica.vanilla.network.login.clientbound.S2CLoginSuccess
+import org.sandboxpowered.silica.vanilla.network.login.serverbound.C2SEncryptionResponse
 import java.time.Duration
 import java.util.*
 import javax.crypto.SecretKey
@@ -24,7 +24,7 @@ class Connection(
         get() = server.motdCache
     private var secretKey: SecretKey? = null
     var packetHandler: PacketHandler? = null
-    fun handleEncryptionResponse(encryptionResponse: EncryptionResponse) {
+    fun handleEncryptionResponse(encryptionResponse: C2SEncryptionResponse) {
         val privateKey = server.keyPair!!.private
         try {
             check(server.verificationArray.contentEquals(encryptionResponse.getVerificationToken(privateKey))) { "Protocol error" }
@@ -39,7 +39,7 @@ class Connection(
     fun handleLoginStart(username: String) {
         profile = GameProfile(UUID.randomUUID(), username)
         //        packetHandler.sendPacket(new EncryptionRequest("", server.getKeyPair().getPublic().getEncoded(), server.getVerificationArray()));
-        packetHandler!!.sendPacket(LoginSuccess(profile.id, username))
+        packetHandler!!.sendPacket(S2CLoginSuccess(profile.id, username))
         packetHandler!!.setProtocol(Protocol.PLAY)
         server.motd.addPlayer(username)
         server.updateMOTDCache()
