@@ -146,7 +146,7 @@ class DedicatedServer(args: Args) : SilicaServer() {
             } else {
                 if (skippedTicks > 0) {
                     val lastTickOffset = System.currentTimeMillis() - lastTickTime
-                    logger.warn("Skipped $skippedTicks ticks! took {}ms", lastTickOffset)
+                    logger.warn("Skipped $skippedTicks ticks! took ${lastTickOffset}ms")
                     skippedTicks = 0
                 }
 
