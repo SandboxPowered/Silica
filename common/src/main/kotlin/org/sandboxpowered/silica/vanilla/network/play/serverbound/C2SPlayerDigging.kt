@@ -24,7 +24,7 @@ class C2SPlayerDigging(private val status: Int, private val location: Position, 
             packetHandler.sendPacket(
                 S2CAcknowledgePlayerDigging(
                     location,
-                    context.server.stateRemapper.toVanillaId(it.getBlockState(location)),
+                    context.server.stateRemapper[it.getBlockState(location)],
                     status,
                     true
                 )

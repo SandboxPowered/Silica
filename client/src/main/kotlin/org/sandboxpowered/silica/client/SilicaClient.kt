@@ -4,7 +4,10 @@ import com.github.zafarkhaja.semver.Version
 import com.google.common.base.Joiner
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.system.Configuration
-import org.sandboxpowered.silica.resources.*
+import org.sandboxpowered.silica.resources.ClasspathResourceLoader
+import org.sandboxpowered.silica.resources.ResourceManager
+import org.sandboxpowered.silica.resources.ResourceType
+import org.sandboxpowered.silica.resources.ZIPResourceLoader
 import org.sandboxpowered.silica.util.FileFilters
 import org.sandboxpowered.silica.util.Side
 import org.sandboxpowered.silica.util.Util
@@ -14,7 +17,6 @@ import org.sandboxpowered.silica.util.extensions.join
 import org.sandboxpowered.silica.util.extensions.listFiles
 import org.sandboxpowered.silica.util.extensions.notExists
 import java.io.File
-import java.io.IOException
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executors
@@ -62,8 +64,7 @@ class SilicaClient(private val args: Args) : Runnable {
     }
 
     override fun run() {
-        if (init())
-            return
+        if (init()) return
         while (!window.shouldClose()) {
             renderer.frame()
             window.update()
@@ -101,8 +102,7 @@ class SilicaClient(private val args: Args) : Runnable {
         for (string in list) {
             logger.error("GLFW error collected during initialization: {}", string)
         }
-        if (list.isNotEmpty())
-            return true
+        if (list.isNotEmpty()) return true
         assetManager = ResourceManager(ResourceType.ASSETS)
         assetManager.add(ClasspathResourceLoader("Silica", arrayOf("silica")))
 
@@ -110,23 +110,12 @@ class SilicaClient(private val args: Args) : Runnable {
         assetManager.add(ZIPResourceLoader("Minecraft $MINECRAFT_VERSION", mcArchive))
 
         File("resourcepacks").apply {
-            if (notExists()) {
-                mkdirs()
-            } else if (isFile) {
+            if (notExists()) mkdirs()
+            else if (isFile) {
                 delete()
                 mkdirs()
             }
-        }.listFiles(FileFilters.ZIP) { file ->
-            try {
-                if (file.isDirectory) {
-                    assetManager.add(DirectoryResourceLoader(file.name, file))
-                } else {
-                    assetManager.add(ZIPResourceLoader(file.name, file))
-                }
-            } catch (e: IOException) {
-                logger.error("Failed loading resource source {}", file.name)
-            }
-        }
+        }.listFiles(FileFilters.ZIP) { assetManager.add(ZIPResourceLoader(it.name, it)) }
 
         logger.debug("Loaded namespaces: [${assetManager.getNamespaces().join(",")}]")
         window = Window("Sandbox Silica", args.width, args.height, renderer)

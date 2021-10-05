@@ -1,7 +1,6 @@
 package org.sandboxpowered.silica.util
 
 object Hardcoding {
-    @JvmField
     val BLOCK_TAGS = arrayOf(
         Identifier("minecraft", "banners"),
         Identifier("minecraft", "soul_fire_base_blocks"),
@@ -134,13 +133,11 @@ object Hardcoding {
         Identifier("minecraft", "needs_iron_tool"),
     )
 
-    @JvmField
     val FLUID_TAGS = arrayOf(
         Identifier("minecraft", "lava"),
         Identifier("minecraft", "water")
     )
 
-    @JvmField
     val ENTITY_TAGS = arrayOf(
         Identifier("minecraft", "skeletons"),
         Identifier("minecraft", "raiders"),
@@ -154,7 +151,6 @@ object Hardcoding {
         Identifier("minecraft", "axolotl_hunt_targets"),
     )
 
-    @JvmField
     val ITEM_TAGS = arrayOf(
         Identifier("minecraft", "enderman_holdable"),
         Identifier("minecraft", "banners"),
@@ -270,7 +266,6 @@ object Hardcoding {
         Identifier("minecraft", "cluster_max_harvestables"),
     )
 
-    @JvmField
     val GAME_EVENT_TAGS = arrayOf(
         Identifier("minecraft", "vibrations"),
         Identifier("minecraft", "ignore_vibrations_sneaking"),

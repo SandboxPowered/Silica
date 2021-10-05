@@ -101,7 +101,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         blocks[pos.x, pos.y, pos.z] = state
 
         listeners.forEach { it(pos, oldState, state) }
-        server.network.tell(Network.SendToWatching(pos, S2CBlockChange(pos, server.stateRemapper.toVanillaId(state))))
+        server.network.tell(Network.SendToWatching(pos, S2CBlockChange(pos, server.stateRemapper[state])))
     }
 
     override fun getFluidState(pos: Position): FluidState {

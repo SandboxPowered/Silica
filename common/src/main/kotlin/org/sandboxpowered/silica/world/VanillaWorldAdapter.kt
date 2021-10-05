@@ -13,7 +13,7 @@ class VanillaWorldAdapter(val world: SilicaWorld) {
         }
     }
 
-    private fun remapToVanillaProtocol(state: BlockState): Int = world.server.stateRemapper.toVanillaId(state)
+    private fun remapToVanillaProtocol(state: BlockState): Int = world.server.stateRemapper[state]
 
     fun propagateUpdate(pos: Position, oldState: BlockState, newState: BlockState) {
         val chunkPos = pos.toChunkSection

@@ -1,6 +1,5 @@
 package org.sandboxpowered.silica.util
 
-import com.google.common.util.concurrent.MoreExecutors
 import com.google.gson.JsonObject
 import io.ktor.client.*
 import io.ktor.client.features.json.*
@@ -9,28 +8,16 @@ import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.SystemUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.joml.Math
 import org.sandboxpowered.silica.util.extensions.downloadFile
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 object Util {
 
     const val MINECRAFT_VERSION = "1.17.1"
 
     private const val LAUNCHMETA_JSON = "https://launchermeta.mojang.com/mc/game/version_manifest.json"
-
-    fun createService(string: String): ExecutorService {
-        val i = Math.clamp(1, 32, Runtime.getRuntime().availableProcessors())
-        return if (i == 1) {
-            MoreExecutors.newDirectExecutorService()
-        } else {
-            Executors.newFixedThreadPool(i)
-        }
-    }
 
     inline fun <reified T> getLogger(): Logger = LogManager.getLogger(T::class.java)
 
