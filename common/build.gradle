@@ -53,7 +53,11 @@ dependencies {
     api "io.ktor:ktor-client-serialization:$ktorVersion"
     api "io.ktor:ktor-client-gson:$ktorVersion"
 
-    implementation "net.kyori:adventure-api:4.9.2"
+    api "net.kyori:adventure-api:4.9.2"
+    api "net.kyori:adventure-nbt:4.9.2"
+    api "net.kyori:adventure-text-minimessage:4.1.0-SNAPSHOT"
+    api "net.kyori:adventure-text-serializer-gson:4.9.2"
+    api "net.kyori:adventure-text-serializer-plain:4.9.2"
 }
 
 

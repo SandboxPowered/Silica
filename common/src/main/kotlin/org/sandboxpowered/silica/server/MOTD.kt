@@ -1,12 +1,17 @@
 package org.sandboxpowered.silica.server
 
-import com.google.gson.annotations.SerializedName
+import com.google.gson.*
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
+import org.sandboxpowered.silica.util.extensions.plusAssign
+import org.sandboxpowered.silica.util.extensions.set
+import java.lang.reflect.Type
 
 data class MOTD(
-    @SerializedName("version") val version: Version,
-    @SerializedName("players") val players: Players,
-    @SerializedName("description") val description: Description,
-    @SerializedName("favicon") var favicon: String
+    val version: Version,
+    val players: Players,
+    var description: Component,
+    var favicon: String
 ) {
     fun addPlayer(player: String) {
         if (players.sample.add(player)) players.online++
@@ -17,17 +22,44 @@ data class MOTD(
     }
 }
 
-data class Description(
-    @SerializedName("text") var text: String
-)
-
 data class Players(
-    @SerializedName("max") var max: Int,
-    @SerializedName("online") var online: Int,
-    @SerializedName("sample") var sample: MutableList<String>
+    var max: Int,
+    var online: Int,
+    var sample: MutableList<String>
 )
 
 data class Version(
-    @SerializedName("name") var name: String,
-    @SerializedName("protocol") var protocol: Int
+    var name: String,
+    var protocol: Int
 )
+
+class MOTDDeserializer : JsonDeserializer<MOTD> {
+    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): MOTD {
+        TODO("Not yet implemented")
+    }
+}
+
+class MOTDSerializer : JsonSerializer<MOTD> {
+    override fun serialize(src: MOTD, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
+        val obj = JsonObject()
+        obj["version"] = JsonObject().apply {
+            this["name"] = src.version.name
+            this["protocol"] = src.version.protocol
+        }
+        obj["players"] = JsonObject().apply {
+            this["max"] = src.players.max
+            this["online"] = src.players.online
+            this["sample"] = JsonArray().apply {
+                src.players.sample.forEach {
+                    this += JsonObject().apply {
+                        this["name"] = it
+                        //TODO add id
+                    }
+                }
+            }
+        }
+        obj["description"] = GsonComponentSerializer.gson().serializeToTree(src.description)
+        obj["favicon"] = src.favicon
+        return obj
+    }
+}

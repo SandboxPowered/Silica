@@ -7,6 +7,8 @@ import io.netty.buffer.ByteBufOutputStream
 import io.netty.handler.codec.DecoderException
 import io.netty.handler.codec.EncoderException
 import io.netty.util.ByteProcessor
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import org.sandboxpowered.silica.nbt.NBTCompound
 import org.sandboxpowered.silica.nbt.readNbt
 import org.sandboxpowered.silica.nbt.write
@@ -592,6 +594,14 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
     fun readPosition(): Position = Position.unpack(readLong())
 
     fun writePosition(pos: Position): ByteBuf = writeLong(pos.packed)
+
+    fun writeText(reason: Component) {
+        writeString(GsonComponentSerializer.gson().serialize(reason))
+    }
+
+    fun readText(): Component {
+        return GsonComponentSerializer.gson().deserialize(readString())
+    }
 
     companion object {
         @JvmStatic
