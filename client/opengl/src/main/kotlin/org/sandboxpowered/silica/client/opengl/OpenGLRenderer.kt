@@ -15,7 +15,7 @@ import org.sandboxpowered.silica.client.opengl.texture.OpenGLTextureAtlas
 import org.sandboxpowered.silica.client.texture.TextureAtlas
 import org.sandboxpowered.silica.client.texture.TextureStitcher
 import org.sandboxpowered.silica.client.util.stackPush
-import org.sandboxpowered.silica.resources.ResourceType
+import org.sandboxpowered.silica.resources.ResourceType.ASSETS
 import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.extensions.minus
 import java.io.InputStreamReader
@@ -45,7 +45,7 @@ class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
                 jsonModelGson.fromJson(
                     InputStreamReader(
                         silica.assetManager.open(
-                            ResourceType.ASSETS,
+                            ASSETS,
                             Identifier(it.namespace, "models/${it.path}.json")
                         )
                     ),
@@ -59,8 +59,9 @@ class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
         modelJson.getReferences(func).forEach {
             stitcher.add(
                 TextureAtlas.SpriteData(
-                    it.texture, silica.assetManager.open(
-                        ResourceType.ASSETS,
+                    it.texture,
+                    silica.assetManager.open(
+                        ASSETS,
                         Identifier(it.texture.namespace, "textures/${it.texture.path}.png")
                     )
                 )

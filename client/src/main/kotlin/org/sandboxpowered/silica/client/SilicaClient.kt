@@ -33,6 +33,7 @@ class SilicaClient(private val args: Args) : Runnable {
 
     private fun close() {
         window.cleanup()
+        system.terminate()
     }
 
     private val DEBUG: Boolean = Configuration.DEBUG.get(false)
@@ -67,6 +68,8 @@ class SilicaClient(private val args: Args) : Runnable {
         class Tick(val delta: Float) : Command()
         class Tock(val done: ActorRef<*>) : Command()
     }
+
+    lateinit var system: ActorSystem<Command>
 
     private fun init(): Boolean {
         val serviceLoader = ServiceLoader.load(RenderingFactory::class.java)
@@ -113,7 +116,7 @@ class SilicaClient(private val args: Args) : Runnable {
         window = Window("Sandbox Silica", args.width, args.height, renderer)
         renderer.init()
 
-        ActorSystem.create(SilicaClientGuardian.create(this, this::world::set), "clientGuardian")
+        system = ActorSystem.create(SilicaClientGuardian.create(this, this::world::set), "clientGuardian")
 
         return false
     }
