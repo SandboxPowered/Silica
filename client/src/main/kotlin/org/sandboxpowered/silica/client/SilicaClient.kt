@@ -1,5 +1,7 @@
 package org.sandboxpowered.silica.client
 
+import akka.actor.typed.ActorRef
+import akka.actor.typed.ActorSystem
 import com.github.zafarkhaja.semver.Version
 import com.google.common.base.Joiner
 import org.lwjgl.glfw.GLFW
@@ -16,12 +18,9 @@ import org.sandboxpowered.silica.util.Util.getLogger
 import org.sandboxpowered.silica.util.extensions.join
 import org.sandboxpowered.silica.util.extensions.listFiles
 import org.sandboxpowered.silica.util.extensions.notExists
+import org.sandboxpowered.silica.world.SilicaWorld
 import java.io.File
 import java.util.*
-import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicInteger
-import kotlin.math.max
 
 
 class SilicaClient(private val args: Args) : Runnable {
@@ -30,25 +29,13 @@ class SilicaClient(private val args: Args) : Runnable {
     lateinit var window: Window
     lateinit var assetManager: ResourceManager
     lateinit var renderer: Renderer
+    lateinit var world: ActorRef<SilicaWorld.Command>
 
     private fun close() {
         window.cleanup()
     }
 
     private val DEBUG: Boolean = Configuration.DEBUG.get(false)
-
-    private val executorService = Executors.newFixedThreadPool(max(1, Runtime.getRuntime().availableProcessors() / 2)) {
-        val t = Thread(it)
-        t.priority = Thread.MIN_PRIORITY
-        t.name = "Chunk builder"
-        t.isDaemon = true
-        t
-    }
-    private val chunkBuildTasksCount = AtomicInteger()
-    private val updateAndRenderRunnables: Queue<DelayedRunnable> = ConcurrentLinkedQueue()
-
-    private class DelayedRunnable(val runnable: Runnable, val name: String, val delay: Int) {
-    }
 
     init {
         if (DEBUG) {
@@ -75,6 +62,11 @@ class SilicaClient(private val args: Args) : Runnable {
     data class Args(val width: Int, val height: Int, val renderer: String)
 
     class InvalidRendererException(message: String) : RuntimeException(message)
+
+    sealed class Command {
+        class Tick(val delta: Float) : Command()
+        class Tock(val done: ActorRef<*>) : Command()
+    }
 
     private fun init(): Boolean {
         val serviceLoader = ServiceLoader.load(RenderingFactory::class.java)
@@ -120,6 +112,8 @@ class SilicaClient(private val args: Args) : Runnable {
         logger.debug("Loaded namespaces: [${assetManager.getNamespaces().join(",")}]")
         window = Window("Sandbox Silica", args.width, args.height, renderer)
         renderer.init()
+
+        ActorSystem.create(SilicaClientGuardian.create(this, this::world::set), "clientGuardian")
 
         return false
     }
