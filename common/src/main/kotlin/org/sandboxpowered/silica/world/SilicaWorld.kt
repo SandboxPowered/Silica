@@ -72,7 +72,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
             )
         )
         SilicaRegistries.BLOCKS_WITH_ENTITY.forEach {
-            config.with(it.createProcessingSystem())
+            it.createProcessingSystem().let { system -> config.with(system) }
         }
         config.with(entityMap)
         artemisWorld = ArtemisWorld(config.build().registerAs<Entity3dMap>(entityMap))

@@ -6,5 +6,5 @@ import com.artemis.BaseEntitySystem
 interface BlockEntityProvider : Block {
     fun createArchetype(): ArchetypeBuilder
 
-    fun createProcessingSystem(): BaseEntitySystem
+    fun createProcessingSystem(): BaseEntitySystem? = null
 }
