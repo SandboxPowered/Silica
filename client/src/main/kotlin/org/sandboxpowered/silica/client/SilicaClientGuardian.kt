@@ -2,6 +2,7 @@ package org.sandboxpowered.silica.client
 
 import akka.actor.typed.ActorRef
 import akka.actor.typed.Behavior
+import akka.actor.typed.Terminated
 import akka.actor.typed.javadsl.*
 import it.unimi.dsi.fastutil.objects.Object2LongMap
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap
@@ -11,10 +12,11 @@ import org.sandboxpowered.silica.util.Side
 import org.sandboxpowered.silica.util.Util
 import org.sandboxpowered.silica.util.extensions.messageAdapter
 import org.sandboxpowered.silica.util.extensions.onMessage
+import org.sandboxpowered.silica.util.extensions.onSignal
 import org.sandboxpowered.silica.world.SilicaWorld
 import java.time.Duration
 
-class SilicaClientGuardian(
+class SilicaClientGuardian private constructor(
     val client: SilicaClient,
     context: ActorContext<Command>,
     timerScheduler: TimerScheduler<Command>,
@@ -41,13 +43,19 @@ class SilicaClientGuardian(
 
     init {
         context.watch(world)
-        timerScheduler.startTimerWithFixedDelay("serverTick", Command.Tick(50f), Duration.ofMillis(50))
+        timerScheduler.startTimerAtFixedRate("serverTick", Command.Tick(50f), Duration.ofMillis(50))
     }
 
     override fun createReceive(): Receive<Command> = newReceiveBuilder()
         .onMessage(this::handleTick)
         .onMessage(this::handleTock)
+        .onSignal(this::terminated)
         .build()
+
+    private fun terminated(terminated: Terminated): Behavior<Command> {
+        logger.warn("${terminated.ref.path()} terminated")
+        return Behaviors.stopped()
+    }
 
     private fun handleTock(tock: Command.Tock): Behavior<Command> {
         val startTime = currentlyTicking.removeLong(tock.done)

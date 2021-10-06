@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.objects.Object2LongMap
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.apache.commons.io.FileUtils
+import org.sandboxpowered.silica.akka.Reaper
 import org.sandboxpowered.silica.resources.ZIPResourceLoader
 import org.sandboxpowered.silica.util.Side
 import org.sandboxpowered.silica.util.Util
@@ -26,6 +27,7 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.time.Duration
+import kotlin.system.exitProcess
 
 class DedicatedServer(args: Args) : SilicaServer() {
     private var logger = getLogger<DedicatedServer>()
@@ -36,8 +38,9 @@ class DedicatedServer(args: Args) : SilicaServer() {
     override lateinit var network: ActorRef<Network>
     private val stateRemappingErrors: Map<StateMappingManager.ErrorType, Set<String>>
     override val properties = DedicatedServerProperties.fromFile(Paths.get("server.properties"))
+    private lateinit var system: ActorSystem<Command>
 
-    class Args()
+    class Args
 
     init {
         val mcArchive = Util.ensureMinecraftVersion(MINECRAFT_VERSION, Side.SERVER)
@@ -56,6 +59,11 @@ class DedicatedServer(args: Args) : SilicaServer() {
         stateRemappingErrors = stateRemapper.load()
         registryProtocolMapper.load()
         acceptVanillaConnections = stateRemappingErrors.isEmpty()
+    }
+
+    override fun shutdown() {
+        system.terminate()
+        exitProcess(0)
     }
 
     fun run() {
@@ -81,11 +89,10 @@ class DedicatedServer(args: Args) : SilicaServer() {
             logger.error("Rejecting vanilla connections")
         }
         logger.info("Loaded namespaces: [${dataManager.getNamespaces().join(",")}]")
-        val system = ActorSystem.create(
+        system = ActorSystem.create(
             DedicatedServerGuardian.create(this, this::world::set, this::network::set),
             "dedicatedServerGuardian"
         )
-//        system.terminate()
     }
 
     sealed class Command {
@@ -96,7 +103,7 @@ class DedicatedServer(args: Args) : SilicaServer() {
     private class DedicatedServerGuardian private constructor(
         val server: SilicaServer, // don't like this
         context: ActorContext<Command>,
-        timerScheduler: TimerScheduler<Command>,
+        val timerScheduler: TimerScheduler<Command>,
         worldInit: (ActorRef<SilicaWorld.Command>) -> Unit,
         networkInit: (ActorRef<Network>) -> Unit
     ) : AbstractBehavior<Command>(context) {
@@ -118,13 +125,17 @@ class DedicatedServer(args: Args) : SilicaServer() {
         private val world: ActorRef<in SilicaWorld.Command> =
             context.spawn(SilicaWorld.actor(Side.SERVER, server), "world").apply(worldInit)
         private val network: ActorRef<in Network> = context.spawn(Network.actor(server), "network").apply(networkInit)
+        private val reaper: ActorRef<in Reaper.Command> = context.spawn(Reaper.actor(server), "reaper")
         private val currentlyTicking: Object2LongMap<ActorRef<*>> = Object2LongOpenHashMap(3)
 
         init {
             context.watch(world)
             context.watch(network)
             // TODO: compare to startTimerAtFixedRate
-            timerScheduler.startTimerWithFixedDelay("serverTick", Command.Tick(50f), Duration.ofMillis(50))
+            timerScheduler.startTimerAtFixedRate("serverTick", Command.Tick(50f), Duration.ofMillis(50))
+
+            reaper.tell(Reaper.Command.MarkForReaping(world))
+            reaper.tell(Reaper.Command.MarkForReaping(network))
 
             // TODO: wait for everything to be ready
             network.tell(Network.Start(context.system.ignoreRef()))
@@ -140,7 +151,11 @@ class DedicatedServer(args: Args) : SilicaServer() {
             if (currentlyTicking.isNotEmpty()) {
                 val lastTickOffset = System.currentTimeMillis() - lastTickTime
                 if (server.properties.maxTickTime != -1 && lastTickOffset >= server.properties.maxTickTime) {
-                    TODO("Terminate server after taking too long")
+                    logger.error("Single tick took >=${server.properties.maxTickTime}ms! took ${lastTickOffset}ms")
+                    context.stop(world)
+                    context.stop(network)
+                    server.shutdown()
+                    return Behaviors.stopped()
                 }
                 ++skippedTicks
             } else {

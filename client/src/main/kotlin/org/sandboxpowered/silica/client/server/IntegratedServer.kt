@@ -24,4 +24,8 @@ class IntegratedServer() : SilicaServer() {
         override val maxTickTime: Int = 60000
         override val maxPlayers: Int = 20
     }
+
+    override fun shutdown() {
+        TODO("Not yet implemented")
+    }
 }

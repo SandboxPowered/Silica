@@ -43,6 +43,8 @@ abstract class SilicaServer {
         motdCache = gson.toJson(motd)
     }
 
+    abstract fun shutdown()
+
     init {
         try {
             val keyPairGenerator = KeyPairGenerator.getInstance("RSA")
