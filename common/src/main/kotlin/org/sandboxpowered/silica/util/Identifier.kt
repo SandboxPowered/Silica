@@ -26,12 +26,19 @@ class Identifier(val namespace: String, val path: String) : Comparable<Identifie
 
     override fun hashCode(): Int = Objects.hashCode(namespace, path)
 
+    fun affix(prefix: String, suffix: String) = Identifier(namespace, "$prefix$path$suffix")
+
+    fun prefix(prefix: String) = Identifier(namespace, "$prefix$path")
+
+    fun suffix(suffix: String) = Identifier(namespace, "$path$suffix")
+
+    operator fun plus(suffix: String) = this.suffix(suffix)
+
     companion object {
-        operator fun invoke(id: String): Identifier {
-            val identity = id.split(":")
-            return when (identity.size) {
+        operator fun invoke(id: String): Identifier = id.split(":").let {
+            when (it.size) {
                 1 -> Identifier("minecraft", id)
-                2 -> Identifier(identity[0], identity[1])
+                2 -> Identifier(it[0], it[1])
                 else -> error("Couldn't parse $id")
             }
         }

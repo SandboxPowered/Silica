@@ -40,12 +40,12 @@ class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
         val stitcher = TextureStitcher(maxSize, maxSize, false)
 
         val func: (Identifier) -> BlockModelFormat = {
-            map.computeIfAbsent(it) {
+            map.computeIfAbsent(it) { id ->
                 BlockModelFormat(
                     InputStreamReader(
                         silica.assetManager.open(
                             ASSETS,
-                            Identifier(it.namespace, "models/${it.path}.json")
+                            id.affix("models/", ".json")
                         )
                     )
                 )
@@ -60,7 +60,7 @@ class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
                     it.texture,
                     silica.assetManager.open(
                         ASSETS,
-                        Identifier(it.texture.namespace, "textures/${it.texture.path}.png")
+                        it.texture.affix("textures/", ".png")
                     )
                 )
             )

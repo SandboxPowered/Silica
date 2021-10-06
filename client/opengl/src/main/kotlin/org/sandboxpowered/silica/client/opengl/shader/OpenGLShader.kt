@@ -18,9 +18,9 @@ import java.util.stream.Collectors
 class OpenGLShader(vertexFile: String, fragmentFile: String) : Shader {
     companion object {
         operator fun invoke(manager: ResourceManager, id: Identifier): OpenGLShader {
-            val vertexFile = streamToString(manager.open(ASSETS, Identifier(id.namespace, "shaders/${id.path}.vert")))
+            val vertexFile = streamToString(manager.open(ASSETS, id.affix("shaders/", ".vert")))
                 ?: error("Failed to find vertex file for shader $id")
-            val fragmentFile = streamToString(manager.open(ASSETS, Identifier(id.namespace, "shaders/${id.path}.frag")))
+            val fragmentFile = streamToString(manager.open(ASSETS, id.affix("shaders/", ".frag")))
                 ?: error("Failed to find fragment file for shader $id")
             return OpenGLShader(vertexFile, fragmentFile)
         }
