@@ -24,11 +24,9 @@ class SilicaClientGuardian(
         fun create(
             client: SilicaClient,
             worldInit: (ActorRef<SilicaWorld.Command>) -> Unit
-        ): Behavior<Command> {
-            return Behaviors.withTimers { timer ->
-                Behaviors.setup {
-                    SilicaClientGuardian(client, it, timer, worldInit)
-                }
+        ): Behavior<Command> = Behaviors.withTimers { timer ->
+            Behaviors.setup {
+                SilicaClientGuardian(client, it, timer, worldInit)
             }
         }
     }

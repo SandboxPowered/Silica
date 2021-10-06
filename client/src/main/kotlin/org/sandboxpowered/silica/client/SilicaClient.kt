@@ -90,13 +90,12 @@ class SilicaClient(private val args: Args) : Runnable {
         }
         logger.debug("Using Renderer: ${renderer.name}")
         val list: MutableList<String?> = ArrayList()
-        GLFW.glfwSetErrorCallback { i: Int, l: Long ->
-            list.add(String.format("GLFW error during init: [0x%X]%s", i, l))
+        GLFW.glfwSetErrorCallback { error: Int, description: Long ->
+            list += String.format("GLFW error during init: [0x%X]%s", error, description)
         }
         check(GLFW.glfwInit()) { "Failed to initialize GLFW, errors: " + Joiner.on(",").join(list) }
-        for (string in list) {
-            logger.error("GLFW error collected during initialization: {}", string)
-        }
+        for (string in list) logger.error("GLFW error collected during initialization: {}", string)
+
         if (list.isNotEmpty()) return true
         assetManager = ResourceManager(ResourceType.ASSETS)
         assetManager.add(ClasspathResourceLoader("Silica", arrayOf("silica")))
