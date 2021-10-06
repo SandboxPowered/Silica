@@ -22,10 +22,10 @@ class BakedQuadCreator {
     fun bake(
         from: Vector3fc,
         to: Vector3fc,
-        face: JSONFace,
+        face: BlockModelFormat.Face,
         texture: TextureAtlas.Sprite,
         side: Direction,
-        rotation: JSONRotation?,
+        rotation: BlockModelFormat.Rotation?,
         shade: Boolean
     ): BakedQuad {
         //TODO support uv locking
@@ -39,9 +39,9 @@ class BakedQuadCreator {
         vertices: FloatArray,
         cornerIdx: Int,
         side: Direction,
-        textureData: JSONTexture,
+        textureData: BlockModelFormat.Texture,
         vertexPositions: FloatArray,
-        rotation: JSONRotation?
+        rotation: BlockModelFormat.Rotation?
     ) {
         val corner = CubeFace.getCorner(side, cornerIdx)
         val pos = Vector3f(vertexPositions[corner.x], vertexPositions[corner.y], vertexPositions[corner.z])
@@ -56,7 +56,7 @@ class BakedQuadCreator {
         //TODO generate normals & other data
     }
 
-    private fun rotateVertex(vec: Vector3f, rot: JSONRotation?) {
+    private fun rotateVertex(vec: Vector3f, rot: BlockModelFormat.Rotation?) {
         if (rot == null) return
         val (dir, scale) = when (rot.axis) {
             Direction.Axis.X -> Vector3f(1f, 0f, 0f) to Vector3f(0f, 1f, 1f)

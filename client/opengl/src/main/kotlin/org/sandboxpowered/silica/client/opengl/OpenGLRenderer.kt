@@ -9,8 +9,8 @@ import org.sandboxpowered.silica.client.RenderingFactory
 import org.sandboxpowered.silica.client.SilicaClient
 import org.sandboxpowered.silica.client.Window
 import org.sandboxpowered.silica.client.model.BakedQuadCreator
-import org.sandboxpowered.silica.client.model.JSONModel
-import org.sandboxpowered.silica.client.model.jsonModelGson
+import org.sandboxpowered.silica.client.model.BlockModelFormat
+import org.sandboxpowered.silica.client.model.blockModelFormatGson
 import org.sandboxpowered.silica.client.opengl.texture.OpenGLTextureAtlas
 import org.sandboxpowered.silica.client.texture.TextureAtlas
 import org.sandboxpowered.silica.client.texture.TextureStitcher
@@ -32,7 +32,7 @@ class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
 
     private lateinit var atlas: TextureAtlas
 
-    private val map = HashMap<Identifier, JSONModel>()
+    private val map = HashMap<Identifier, BlockModelFormat>()
 
     override fun init() {
         GL.createCapabilities()
@@ -40,16 +40,16 @@ class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
         val maxSize = glGetInteger(GL_MAX_TEXTURE_SIZE)
         val stitcher = TextureStitcher(maxSize, maxSize, false)
 
-        val func: (Identifier) -> JSONModel = {
+        val func: (Identifier) -> BlockModelFormat = {
             map.computeIfAbsent(it) {
-                jsonModelGson.fromJson(
+                blockModelFormatGson.fromJson(
                     InputStreamReader(
                         silica.assetManager.open(
                             ASSETS,
                             Identifier(it.namespace, "models/${it.path}.json")
                         )
                     ),
-                    JSONModel::class.java
+                    BlockModelFormat::class.java
                 )
             }
         }
