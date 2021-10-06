@@ -1,6 +1,8 @@
 package org.sandboxpowered.silica.util.extensions
 
 import com.google.gson.*
+import com.google.gson.stream.JsonReader
+import java.io.Reader
 
 inline fun <reified T> GsonBuilder.registerTypeAdapter(deserializer: JsonDeserializer<T>): GsonBuilder =
     registerTypeAdapter(T::class.java, deserializer)
@@ -15,6 +17,9 @@ inline fun <reified T> JsonDeserializationContext.deserialize(element: JsonEleme
     deserialize(element, T::class.java)
 
 inline fun <reified T> Gson.fromJson(s: String): T = fromJson(s, T::class.java)
+inline fun <reified T> Gson.fromJson(s: Reader): T = fromJson(s, T::class.java)
+inline fun <reified T> Gson.fromJson(s: JsonReader): T = fromJson(s, T::class.java)
+inline fun <reified T> Gson.fromJson(s: JsonElement): T = fromJson(s, T::class.java)
 
 fun JsonObject.getNullable(key: String): JsonElement? = if (has(key)) get(key) else null
 

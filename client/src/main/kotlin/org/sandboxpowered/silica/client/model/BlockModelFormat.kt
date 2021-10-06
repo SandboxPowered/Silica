@@ -8,19 +8,10 @@ import org.sandboxpowered.silica.client.texture.TextureAtlas
 import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.content.Direction
 import org.sandboxpowered.silica.util.extensions.*
+import java.io.Reader
 import java.lang.reflect.Type
 import java.util.*
 import kotlin.math.abs
-
-
-val blockModelFormatGson = GsonBuilder()
-    .setLenient()
-    .registerTypeAdapter(BlockModelFormat.Deserializer())
-    .registerTypeAdapter(BlockModelFormat.Texture.Deserializer())
-    .registerTypeAdapter(BlockModelFormat.Face.Deserializer())
-    .registerTypeAdapter(BlockModelFormat.Element.Deserializer())
-    .registerTypeAdapter(IdentifierDeserializer())
-    .create()
 
 data class BlockModelFormat(
     val ambientOcclusion: Boolean,
@@ -28,6 +19,20 @@ data class BlockModelFormat(
     private val textures: Map<String, Any>,
     val parent: Identifier?
 ) {
+    companion object {
+        private val blockModelFormatGson = GsonBuilder()
+            .setLenient()
+            .registerTypeAdapter(Deserializer())
+            .registerTypeAdapter(Texture.Deserializer())
+            .registerTypeAdapter(Face.Deserializer())
+            .registerTypeAdapter(Element.Deserializer())
+            .registerTypeAdapter(IdentifierDeserializer())
+            .create()
+
+        operator fun invoke(reader: Reader): BlockModelFormat =
+            reader.use { blockModelFormatGson.fromJson(it) }
+    }
+
     private var parentModel: BlockModelFormat? = null
 
     fun getReferences(modelFunction: (Identifier) -> BlockModelFormat): Collection<TextureAtlas.Reference> {

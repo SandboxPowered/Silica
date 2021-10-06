@@ -10,7 +10,6 @@ import org.sandboxpowered.silica.client.SilicaClient
 import org.sandboxpowered.silica.client.Window
 import org.sandboxpowered.silica.client.model.BakedQuadCreator
 import org.sandboxpowered.silica.client.model.BlockModelFormat
-import org.sandboxpowered.silica.client.model.blockModelFormatGson
 import org.sandboxpowered.silica.client.opengl.texture.OpenGLTextureAtlas
 import org.sandboxpowered.silica.client.texture.TextureAtlas
 import org.sandboxpowered.silica.client.texture.TextureStitcher
@@ -42,14 +41,13 @@ class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
 
         val func: (Identifier) -> BlockModelFormat = {
             map.computeIfAbsent(it) {
-                blockModelFormatGson.fromJson(
+                BlockModelFormat(
                     InputStreamReader(
                         silica.assetManager.open(
                             ASSETS,
                             Identifier(it.namespace, "models/${it.path}.json")
                         )
-                    ),
-                    BlockModelFormat::class.java
+                    )
                 )
             }
         }
