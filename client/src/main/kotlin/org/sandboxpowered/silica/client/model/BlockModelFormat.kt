@@ -2,7 +2,6 @@ package org.sandboxpowered.silica.client.model
 
 import com.google.common.collect.Lists
 import com.google.gson.*
-import com.google.gson.JsonParseException
 import org.joml.Vector3f
 import org.sandboxpowered.silica.client.texture.TextureAtlas
 import org.sandboxpowered.silica.util.Identifier
@@ -185,19 +184,14 @@ data class BlockModelFormat(
                 )
             }
 
-            @Throws(JsonParseException::class)
             private fun getRotationAngle(obj: JsonObject): Float {
                 val angle = obj.getAsJsonPrimitive("angle").asFloat
-                return if (angle != 0f && abs(angle) != 22.5f && abs(angle) != 45f) {
-                    throw JsonParseException("Invalid rotation $angle, not one of -45/-22.5/0/22.5/45")
-                } else {
-                    angle
-                }
+                require(angle == 0f || abs(angle) == 22.5f || abs(angle) == 45f) { "Invalid rotation $angle, not one of -45/-22.5/0/22.5/45" }
+                return angle
             }
 
-            private fun getAxis(jsonObject: JsonObject): Direction.Axis {
-                return Direction.Axis.valueOf(jsonObject["axis"].asString.uppercase())
-            }
+            private fun getAxis(jsonObject: JsonObject): Direction.Axis =
+                Direction.Axis.valueOf(jsonObject["axis"].asString.uppercase())
 
             private fun validateFaces(context: JsonDeserializationContext, obj: JsonObject): Map<Direction, Face> =
                 getFaces(context, obj).ifEmpty { error("Expected between 1 and 6 unique faces, got 0") }
@@ -215,18 +209,15 @@ data class BlockModelFormat(
             private fun errorOutOfBounds(jsonObject: JsonObject, member: String): Vector3f {
                 val vector3f: Vector3f = toVec(jsonObject, member)
                 if (isVecWithinBounds(vector3f)) return vector3f
-                error("'$member' specifier exceeds the allowed boundaries: $vector3f")
+                error("$member specifier exceeds the allowed boundaries: $vector3f")
             }
 
             private fun toVec(jsonObject: JsonObject, member: String): Vector3f {
                 val array = jsonObject.getAsJsonArray(member)
-                return if (array.size() != 3) {
-                    error("Expected 3 $member values, found: ${array.size()}")
-                } else {
-                    val vec = FloatArray(3)
-                    for (i in vec.indices) vec[i] = array[i].asFloat
-                    Vector3f(vec[0], vec[1], vec[2])
-                }
+                require(array.size() == 3) { "Expected 3 $member values, found: ${array.size()}" }
+                val vec = FloatArray(3)
+                for (i in vec.indices) vec[i] = array[i].asFloat
+                return Vector3f(vec[0], vec[1], vec[2])
             }
 
             private fun isVecWithinBounds(vec: Vector3f): Boolean =
@@ -252,8 +243,6 @@ data class BlockModelFormat(
     data class Texture(val rotation: Int, var uvs: FloatArray?) {
         private fun getRotatedUVIndex(rotation: Int): Int = (rotation + this.rotation / 90) % 4
 
-        fun getDirectionIndex(offset: Int): Int = (offset + 4 - rotation / 90) % 4
-
         fun getU(rotation: Int): Float {
             val i = getRotatedUVIndex(rotation)
             return uvs!![if (i != 0 && i != 1) 2 else 0]
@@ -274,25 +263,20 @@ data class BlockModelFormat(
 
             private fun deserializeRotation(jsonObject: JsonObject): Int {
                 val rotation: Int = jsonObject.getInt("rotation", 0)
-                if (rotation >= 0 && rotation % 90 == 0 && rotation / 90 <= 3) return rotation
-                else error("Invalid rotation $rotation found, only 0/90/180/270 allowed")
+                require(rotation >= 0 && rotation % 90 == 0 && rotation / 90 <= 3) { "Invalid rotation $rotation found, only 0/90/180/270 allowed" }
+                return rotation
             }
 
             private fun deserializeUVs(jsonObject: JsonObject): FloatArray? {
-                return if (!jsonObject.has("uv")) {
-                    null
-                } else {
+                return if (jsonObject.has("uv")) {
                     val jsonArray: JsonArray = jsonObject.getAsJsonArray("uv")
-                    if (jsonArray.size() != 4) {
-                        throw JsonParseException("Expected 4 uv values, found: " + jsonArray.size())
-                    } else {
-                        val uvs = FloatArray(4)
-                        for (i in uvs.indices) {
-                            uvs[i] = jsonArray.get(i).asFloat
-                        }
-                        uvs
+                    require(jsonArray.size() == 4) { "Expected 4 uv values, found: ${jsonArray.size()}" }
+                    val uvs = FloatArray(4)
+                    for (i in uvs.indices) {
+                        uvs[i] = jsonArray.get(i).asFloat
                     }
-                }
+                    return uvs
+                } else null
             }
         }
 
@@ -320,7 +304,6 @@ data class BlockModelFormat(
 }
 
 class IdentifierDeserializer : JsonDeserializer<Identifier> {
-    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): Identifier {
-        return Identifier(json.asString)
-    }
+    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): Identifier =
+        Identifier(json.asString)
 }

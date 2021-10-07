@@ -53,9 +53,9 @@ class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
             }
         }
 
-        val modelJson = func(Identifier("block/lectern"))
+        val blockModel = func(Identifier("block/lectern"))
 
-        modelJson.getReferences(func).forEach {
+        blockModel.getReferences(func).forEach {
             stitcher.add(
                 TextureAtlas.SpriteData(
                     it.texture,
@@ -71,18 +71,15 @@ class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
         atlas = OpenGLTextureAtlas(stitcher)
 
         stackPush { stack ->
-            val vbo = OpenGLVBO.builder(
-                GL_QUADS,
-                stack.malloc(DefaultRenderingFormat.POSITION_TEXTURE.getArraySize(300))
-            )
+            val vbo = OpenGLVBO.builder(GL_QUADS, stack.malloc(RenderingFormats.POSITION_TEXTURE.getArraySize(300)))
 
             iterateCube(0, 0, 0, 16, 16, 16) { x, y, z ->
 
             }
 
-            modelJson.getElements().forEach {
+            blockModel.getElements().forEach {
                 it.faces.forEach { (dir, face) ->
-                    val sprite = atlas.getSprite(modelJson.resolve(face.texture).texture)!!
+                    val sprite = atlas.getSprite(blockModel.resolve(face.texture).texture)!!
                     val (_, minUV, maxUV) = sprite
 
                     val uvDifference = maxUV - minUV
@@ -129,10 +126,10 @@ class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
         glActiveTexture(GL_TEXTURE0)
         atlas.bind()
 
-        DefaultRenderingFormat.POSITION_TEXTURE.begin(silica.assetManager)
-        DefaultRenderingFormat.POSITION_TEXTURE.shader!!["diffuseMap"] = 0
-        DefaultRenderingFormat.POSITION_TEXTURE.render(obj)
-        DefaultRenderingFormat.POSITION_TEXTURE.end()
+        RenderingFormats.POSITION_TEXTURE.begin(silica.assetManager)
+        RenderingFormats.POSITION_TEXTURE.shader!!["diffuseMap"] = 0
+        RenderingFormats.POSITION_TEXTURE.render(obj)
+        RenderingFormats.POSITION_TEXTURE.end()
 
         glBindTexture(GL_TEXTURE_2D, 0)
     }
@@ -142,7 +139,7 @@ class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
 
         obj.destroy()
 
-        DefaultRenderingFormat.POSITION_TEXTURE.shader!!.destroy()
+        RenderingFormats.POSITION_TEXTURE.shader!!.destroy()
     }
 
     class OpenGLRenderingFactory : RenderingFactory {
