@@ -17,6 +17,7 @@ import org.sandboxpowered.silica.client.util.stackPush
 import org.sandboxpowered.silica.resources.ResourceType.ASSETS
 import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.extensions.minus
+import org.sandboxpowered.silica.world.util.iterateCube
 import java.io.InputStreamReader
 
 class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
@@ -74,6 +75,10 @@ class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
                 GL_QUADS,
                 stack.malloc(DefaultRenderingFormat.POSITION_TEXTURE.getArraySize(300))
             )
+
+            iterateCube(0, 0, 0, 16, 16, 16) { x, y, z ->
+
+            }
 
             modelJson.getElements().forEach {
                 it.faces.forEach { (dir, face) ->

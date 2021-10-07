@@ -26,8 +26,7 @@ class ChunkUtils {
     }
 
     companion object {
-        private const val EMPTY_VOXEL: Byte = 0
-        private const val CHUNK_SIZE_SHIFT = 5 // 4 - 16, 5 - 32
+        private const val CHUNK_SIZE_SHIFT = 4 // Equivalent of 2^value E.G (4 = 16, 5 = 32)
         private const val CHUNK_SIZE = 1 shl CHUNK_SIZE_SHIFT
         private const val MAX_ACTIVE_CHUNKS = 65536
         private const val MAX_RENDER_DISTANCE_CHUNKS = 40
@@ -36,7 +35,7 @@ class ChunkUtils {
         private val allChunks: MutableList<RenderChunk> = ArrayList()
         private val frontierChunks: MutableList<RenderChunk> = ArrayList()
         private val executorService =
-            Executors.newFixedThreadPool(4.coerceAtLeast(Runtime.getRuntime().availableProcessors() / 2)) { r ->
+            Executors.newFixedThreadPool(1.coerceAtLeast(Runtime.getRuntime().availableProcessors() / 2)) { r ->
                 val thread = Thread(r)
                 thread.priority = Thread.MIN_PRIORITY
                 thread.name = "Chunk builder"
@@ -60,10 +59,12 @@ class ChunkUtils {
         private const val pyY = 0f
         private const val pyZ = 0f
         private const val pyW = 0f
+
         private val playerPosition: Vector3d = Vector3d()
         private val inView = Comparator.comparing { chunk: RenderChunk -> chunkNotInFrustum(chunk) }
         private val byDistance = Comparator.comparingDouble { chunk: RenderChunk -> distToChunk(chunk) }
         private val inViewAndDistance = inView.thenComparing(byDistance)
+
         fun shutdown() {
             executorService.shutdown()
             try {

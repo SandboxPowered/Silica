@@ -1,13 +1,11 @@
 package org.sandboxpowered.silica.content.item
 
 import org.sandboxpowered.silica.content.block.Block
+import org.sandboxpowered.silica.content.item.Items.AIR
 import org.sandboxpowered.silica.registry.RegistryObject
-import org.sandboxpowered.silica.registry.SilicaRegistries.items
 
 class ItemStack private constructor(private val _item: Item, private var _count: Int) {
     companion object {
-        private val AIR by items().guaranteed
-
         val EMPTY by lazy { ItemStack(AIR, 0) }
 
         operator fun invoke(block: Block): ItemStack = invoke(block.item, 1)

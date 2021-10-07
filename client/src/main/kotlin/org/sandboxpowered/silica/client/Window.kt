@@ -63,10 +63,6 @@ class Window(private var windowName: String, var width: Int, var height: Int, va
         renderer.initWindowHints()
         internalPointer = glfwCreateWindow(width, height, windowName, MemoryUtil.NULL, MemoryUtil.NULL)
         if (internalPointer == MemoryUtil.NULL) throw UnknownError("Failed to create the GLFW window")
-        glfwSetKeyCallback(internalPointer) { window, key, scancode, action, mods ->
-            if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
-                glfwSetWindowShouldClose(window, true)
-        }
         glfwSetWindowSizeCallback(internalPointer) { window, newWidth, newHeight ->
             if (window == internalPointer) {
                 width = newWidth

@@ -6,6 +6,7 @@ import com.github.zafarkhaja.semver.Version
 import com.google.common.base.Joiner
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.system.Configuration
+import org.sandboxpowered.silica.client.input.Keyboard
 import org.sandboxpowered.silica.resources.ClasspathResourceLoader
 import org.sandboxpowered.silica.resources.ResourceManager
 import org.sandboxpowered.silica.resources.ResourceType
@@ -27,6 +28,7 @@ class SilicaClient(private val args: Args) : Runnable {
     val version: Version = Version.forIntegers(0, 1, 0)
     private val logger = getLogger<SilicaClient>()
     lateinit var window: Window
+    lateinit var keyboard: Keyboard
     lateinit var assetManager: ResourceManager
     lateinit var renderer: Renderer
     lateinit var world: ActorRef<SilicaWorld.Command>
@@ -89,11 +91,11 @@ class SilicaClient(private val args: Args) : Runnable {
             }
         }
         logger.debug("Using Renderer: ${renderer.name}")
-        val list: MutableList<String?> = ArrayList()
+        val list = ArrayList<String>()
         GLFW.glfwSetErrorCallback { error: Int, description: Long ->
             list += String.format("GLFW error during init: [0x%X]%s", error, description)
         }
-        check(GLFW.glfwInit()) { "Failed to initialize GLFW, errors: " + Joiner.on(",").join(list) }
+        check(GLFW.glfwInit()) { "Failed to initialize GLFW, errors: ${Joiner.on(",").join(list)}" }
         for (string in list) logger.error("GLFW error collected during initialization: {}", string)
 
         if (list.isNotEmpty()) return true
@@ -113,6 +115,7 @@ class SilicaClient(private val args: Args) : Runnable {
 
         logger.debug("Loaded namespaces: [${assetManager.getNamespaces().join(",")}]")
         window = Window("Sandbox Silica", args.width, args.height, renderer)
+        keyboard = Keyboard(window)
         renderer.init()
 
         system = ActorSystem.create(SilicaClientGuardian.create(this, this::world::set), "clientGuardian")
