@@ -21,7 +21,6 @@ import org.sandboxpowered.silica.util.extensions.listFiles
 import org.sandboxpowered.silica.util.extensions.notExists
 import org.sandboxpowered.silica.world.SilicaWorld
 import java.io.File
-import java.util.*
 
 
 class SilicaClient(private val args: Args) : Runnable {
@@ -62,7 +61,7 @@ class SilicaClient(private val args: Args) : Runnable {
         close()
     }
 
-    data class Args(val width: Int, val height: Int, val renderer: String)
+    data class Args(val width: Int, val height: Int, val renderer: RenderingFactory)
 
     class InvalidRendererException(message: String) : RuntimeException(message)
 
@@ -74,22 +73,7 @@ class SilicaClient(private val args: Args) : Runnable {
     lateinit var system: ActorSystem<Command>
 
     private fun init(): Boolean {
-        val serviceLoader = ServiceLoader.load(RenderingFactory::class.java)
-        val renderers = serviceLoader.toList()
-
-        renderer = when {
-            args.renderer.isNotEmpty() -> {
-                val factory = renderers.find { it.name == args.renderer }
-                factory?.createRenderer(this)
-                    ?: throw InvalidRendererException("${args.renderer} renderer is not supported")
-            }
-            renderers.isEmpty() -> throw UnknownError("No renderers defined")
-            renderers.size == 1 -> renderers[0].createRenderer(this)
-            else -> {
-                val sorted = renderers.sortedBy { it.priority }
-                sorted[0].createRenderer(this)
-            }
-        }
+        renderer = args.renderer.createRenderer(this)
         logger.debug("Using Renderer: ${renderer.name}")
         val list = ArrayList<String>()
         GLFW.glfwSetErrorCallback { error: Int, description: Long ->

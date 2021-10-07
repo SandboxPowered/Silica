@@ -1,4 +1,71 @@
+plugins {
+    id 'application'
+}
+
 dependencies {
     api "org.lwjgl:lwjgl-opengl"
     runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
+    compileOnly "org.graalvm.nativeimage:svm:21.2.0"
+}
+
+ext {
+    mainClassName = "org.sandboxpowered.silica.client.opengl.main.Main"
+    currentPlatform = getCurrentPlatform()
+    nativeImageDirName = "native-image-$currentPlatform"
+}
+
+run {
+    jvmArgs = ["-agentlib:native-image-agent=config-merge-dir=src/main/resources/META-INF/native-image"]
+}
+
+private static String getCurrentPlatform() {
+    def currentOS = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.currentOperatingSystem;
+    if (currentOS.isWindows()) {
+        return 'windows'
+    } else if (currentOS.isLinux()) {
+        return 'linux'
+    } else if (currentOS.isMacOsX()) {
+        return 'macos'
+    }
+    return 'unknown'
+}
+
+application {
+    mainClass = project.mainClassName
+    applicationName = project.name  //name of the resulting native executable
+}
+
+task removeUnneededDllFiles {
+    doLast {
+        ant.move(todir: "$buildDir/tmp/$nativeImageDirName") {
+            fileset(dir: "$buildDir/$nativeImageDirName") {
+                include name: '*.dll'
+                include name: '*.txt'
+            }
+        }
+    }
+}
+
+graalvmNative {
+    binaries {
+        main {
+            imageName = project.name
+            mainClass = project.mainClassName
+            verbose = true
+            fallback = false
+
+            buildArgs.add('--initialize-at-run-time=org.lwjgl,io.netty')
+            buildArgs.add('--initialize-at-build-time=org.slf4j.impl.StaticLoggerBinder,org.slf4j.LoggerFactory,ch.qos.logback.classic.Logger,ch.qos.logback.core.spi.AppenderAttachableImpl,ch.qos.logback.core.status.StatusBase,ch.qos.logback.classic.Level,ch.qos.logback.core.status.InfoStatus,ch.qos.logback.classic.PatternLayout,ch.qos.logback.core.CoreConstants')
+            buildArgs.add('--native-image-info')
+            buildArgs.add('--trace-class-initialization=io.netty.buffer.AbstractReferenceCountedByteBuf,io.netty.util.AbstractReferenceCounted')
+            buildArgs.add('--allow-incomplete-classpath')
+            buildArgs.add("-H:Path=$buildDir/$nativeImageDirName")
+            buildArgs.add("-H:ReflectionConfigurationFiles=$projectDir/src/main/resources/META-INF/native-image/reflection_config.json")
+            buildArgs.add("-H:TempDirectory=$buildDir/tmp/$nativeImageDirName")
+        }
+    }
+}
+
+tasks.named("nativeCompile") {
+    finalizedBy removeUnneededDllFiles
 }
