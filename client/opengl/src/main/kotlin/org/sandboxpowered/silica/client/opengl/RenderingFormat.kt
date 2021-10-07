@@ -29,6 +29,7 @@ class RenderingFormat(identity: Identifier, vararg attributes: Attribute) {
         shader["projection"] = GlobalUniform.PROJECTION
         shader["heightScale"] = GlobalUniform.HEIGHT_SCALE
         shader["viewPos"] = GlobalUniform.POSITION
+        shader["sunDir"] = GlobalUniform.SUN_DIRECTION
         vbo.bind()
         setupFormat()
         GL11.glDrawArrays(vbo.type, 0, vbo.size / dataSize)

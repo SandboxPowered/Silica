@@ -4,10 +4,12 @@ import com.google.common.collect.Lists
 import com.google.gson.*
 import org.joml.Vector3f
 import org.sandboxpowered.silica.client.texture.TextureAtlas
+import org.sandboxpowered.silica.resources.ResourceManager
+import org.sandboxpowered.silica.resources.ResourceType
 import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.content.Direction
 import org.sandboxpowered.silica.util.extensions.*
-import java.io.Reader
+import java.io.InputStreamReader
 import java.lang.reflect.Type
 import java.util.*
 import kotlin.math.abs
@@ -28,8 +30,9 @@ data class BlockModelFormat(
             .registerTypeAdapter(IdentifierDeserializer())
             .create()
 
-        operator fun invoke(reader: Reader): BlockModelFormat =
-            reader.use { blockModelFormatGson.fromJson(it) }
+        operator fun invoke(manager: ResourceManager, id: Identifier): BlockModelFormat =
+            InputStreamReader(manager.open(ResourceType.ASSETS, id.affix("models/", ".json")))
+                .use { blockModelFormatGson.fromJson(it) }
     }
 
     private var parentModel: BlockModelFormat? = null

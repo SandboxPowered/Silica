@@ -9,16 +9,14 @@ import org.sandboxpowered.silica.client.RenderingFactory
 import org.sandboxpowered.silica.client.SilicaClient
 import org.sandboxpowered.silica.client.Window
 import org.sandboxpowered.silica.client.model.BakedQuadCreator
+import org.sandboxpowered.silica.client.model.BakedQuadCreator.Companion.FLOATS_PER_VERTEX
 import org.sandboxpowered.silica.client.model.BlockModelFormat
 import org.sandboxpowered.silica.client.opengl.texture.OpenGLTextureAtlas
 import org.sandboxpowered.silica.client.texture.TextureAtlas
 import org.sandboxpowered.silica.client.texture.TextureStitcher
 import org.sandboxpowered.silica.client.util.stackPush
-import org.sandboxpowered.silica.resources.ResourceType.ASSETS
 import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.extensions.minus
-import org.sandboxpowered.silica.world.util.iterateCube
-import java.io.InputStreamReader
 
 class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
 
@@ -41,30 +39,13 @@ class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
         val stitcher = TextureStitcher(maxSize, maxSize, false)
 
         val func: (Identifier) -> BlockModelFormat = {
-            map.computeIfAbsent(it) { id ->
-                BlockModelFormat(
-                    InputStreamReader(
-                        silica.assetManager.open(
-                            ASSETS,
-                            id.affix("models/", ".json")
-                        )
-                    )
-                )
-            }
+            map.computeIfAbsent(it) { id -> BlockModelFormat(silica.assetManager, id) }
         }
 
         val blockModel = func(Identifier("block/lectern"))
 
         blockModel.getReferences(func).forEach {
-            stitcher.add(
-                TextureAtlas.SpriteData(
-                    it.texture,
-                    silica.assetManager.open(
-                        ASSETS,
-                        it.texture.affix("textures/", ".png")
-                    )
-                )
-            )
+            stitcher.add(TextureAtlas.SpriteReference(it.texture, silica.assetManager))
         }
 
         stitcher.stitch()
@@ -72,10 +53,6 @@ class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
 
         stackPush { stack ->
             val vbo = OpenGLVBO.builder(GL_QUADS, stack.malloc(RenderingFormats.POSITION_TEXTURE.getArraySize(300)))
-
-            iterateCube(0, 0, 0, 16, 16, 16) { x, y, z ->
-
-            }
 
             blockModel.getElements().forEach {
                 it.faces.forEach { (dir, face) ->
@@ -86,18 +63,27 @@ class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
 
                     val quad = BakedQuadCreator.CREATOR.bake(it.from, it.to, face, sprite, dir, it.rotation, it.shade)
 
-                    val vertexCount = quad.vertexData.size / 8
+                    val vertexCount = quad.vertexData.size / FLOATS_PER_VERTEX
 
                     for (vert in 0 until vertexCount) {
-                        val idx = vert * 8
+                        val idx = vert * FLOATS_PER_VERTEX
 
                         vbo.vertex(
                             quad.vertexData[idx],
                             quad.vertexData[idx + 1],
                             quad.vertexData[idx + 2],
                             minUV.x() + (quad.vertexData[idx + 3] / 16f) * uvDifference.x(),
-                            minUV.y() + (quad.vertexData[idx + 4] / 16f) * uvDifference.y()
+                            minUV.y() + (quad.vertexData[idx + 4] / 16f) * uvDifference.y(),
+                            quad.vertexData[idx + 5],
+                            quad.vertexData[idx + 6],
+                            quad.vertexData[idx + 7],
                         )
+                        vbo.put(quad.vertexData[idx + 8])
+                        vbo.put(quad.vertexData[idx + 9])
+                        vbo.put(quad.vertexData[idx + 10])
+                        vbo.put(quad.vertexData[idx + 11])
+                        vbo.put(quad.vertexData[idx + 12])
+                        vbo.put(quad.vertexData[idx + 13])
                         // TODO: control this through shader and do animated textures through shader
                     }
                 }
@@ -123,11 +109,11 @@ class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
 
         GlobalUniform.update(silica)
 
-        glActiveTexture(GL_TEXTURE0)
         atlas.bind()
 
         RenderingFormats.POSITION_TEXTURE.begin(silica.assetManager)
         RenderingFormats.POSITION_TEXTURE.shader!!["diffuseMap"] = 0
+        RenderingFormats.POSITION_TEXTURE.shader!!["normalMap"] = 1
         RenderingFormats.POSITION_TEXTURE.render(obj)
         RenderingFormats.POSITION_TEXTURE.end()
 

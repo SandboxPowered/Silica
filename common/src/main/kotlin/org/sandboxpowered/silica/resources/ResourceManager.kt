@@ -18,6 +18,8 @@ class ResourceManager(private val resourceType: ResourceType) {
         return loaders.firstOrNull { it.contains(type, file) }?.open(type, file)
             ?: error("Resource [$file] not found in ${type.folder}")
     }
+    fun tryOpen(type: ResourceType, file: Identifier): InputStream? =
+        if(contains(type, file)) open(type, file) else null
 
     fun getNamespaces(): Set<String> {
         return when (loaders.size) {

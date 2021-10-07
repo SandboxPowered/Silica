@@ -7,26 +7,26 @@ import kotlin.math.max
 
 class TextureStitcher(private val maxWidth: Int, private val maxHeight: Int, private val onlySquare: Boolean) {
     companion object {
-        val spriteDataComparator: Comparator<TextureAtlas.SpriteData> = Comparator
-            .comparingInt<TextureAtlas.SpriteData> { it.height }
+        val spriteDataComparator: Comparator<TextureAtlas.SpriteReference> = Comparator
+            .comparingInt<TextureAtlas.SpriteReference> { it.height }
             .thenComparingInt { it.width }
-            .thenComparing(TextureAtlas.SpriteData::id)
+            .thenComparing(TextureAtlas.SpriteReference::id)
         val logger = getLogger<TextureStitcher>()
     }
 
-    private val dataSet: MutableSet<TextureAtlas.SpriteData> = HashSet(256)
+    private val dataSet: MutableSet<TextureAtlas.SpriteReference> = HashSet(256)
     private val branches: MutableList<Branch> = ArrayList(256)
 
     var width: Int = 0
     var height: Int = 0
 
-    fun add(data: TextureAtlas.SpriteData) {
-        if (!onlySquare || data.isSquare) dataSet.add(data)
+    fun add(data: TextureAtlas.SpriteReference) {
+        if (!onlySquare || data.albedo.isSquare) dataSet.add(data)
         else logger.warn("Attempted to register non-square texture ${data.id} to square-only stitcher [${data.width}x${data.height}]")
     }
 
     fun stitch() {
-        val dataList: List<TextureAtlas.SpriteData> = ArrayList(dataSet)
+        val dataList: List<TextureAtlas.SpriteReference> = ArrayList(dataSet)
         dataList.sortedWith(spriteDataComparator)
 
         dataList.forEach(this::fit)
@@ -35,12 +35,12 @@ class TextureStitcher(private val maxWidth: Int, private val maxHeight: Int, pri
         height = height.toPowerOfTwo
     }
 
-    private fun fit(data: TextureAtlas.SpriteData) {
+    private fun fit(data: TextureAtlas.SpriteReference) {
         for (branch in branches) if (branch.fit(data)) return
         stretchToFit(data)
     }
 
-    private fun stretchToFit(data: TextureAtlas.SpriteData) {
+    private fun stretchToFit(data: TextureAtlas.SpriteReference) {
         val newWidth = (width + data.width).toPowerOfTwo
         val newHeight = (height + data.height).toPowerOfTwo
         val withinWidth = newWidth <= maxWidth
@@ -67,14 +67,14 @@ class TextureStitcher(private val maxWidth: Int, private val maxHeight: Int, pri
         }
     }
 
-    fun loopBranches(function: (TextureAtlas.SpriteData, Int, Int) -> Unit) {
+    fun loopBranches(function: (TextureAtlas.SpriteReference, Int, Int) -> Unit) {
         branches.forEach { mainBranch ->
             mainBranch.loopBranches { function(it.sprite, it.x, it.y) }
         }
     }
 
     class Branch(val x: Int, val y: Int, private val width: Int, private val height: Int) {
-        fun fit(data: TextureAtlas.SpriteData): Boolean {
+        fun fit(data: TextureAtlas.SpriteReference): Boolean {
             if (spriteData != null) return false
             val (_, dataWidth, dataHeight) = data
             if (dataWidth > width || dataHeight > height) return false
@@ -116,9 +116,9 @@ class TextureStitcher(private val maxWidth: Int, private val maxHeight: Int, pri
         }
 
         private var subBranches: MutableList<Branch>? = null
-        private var spriteData: TextureAtlas.SpriteData? = null
+        private var spriteData: TextureAtlas.SpriteReference? = null
 
-        val sprite: TextureAtlas.SpriteData
+        val sprite: TextureAtlas.SpriteReference
             get() = spriteData!!
     }
 }

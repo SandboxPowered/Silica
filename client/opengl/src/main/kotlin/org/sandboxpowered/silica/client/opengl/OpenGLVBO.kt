@@ -71,8 +71,8 @@ class OpenGLVBO(val type: Int, val size: Int, data: ByteBuffer) : VertexBufferOb
 
         override fun put(data: Vector3dc): OpenGLVBOBuilder = put(data.x(), data.y(), data.z())
 
-        override fun vertex(x: Float, y: Float, z: Float, u: Float, v: Float): OpenGLVBOBuilder {
-            return put(x, y, z, u, v)
+        override fun vertex(x: Float, y: Float, z: Float, u: Float, v: Float, nx: Float, ny: Float, nz: Float): OpenGLVBOBuilder {
+            return put(x, y, z, u, v, nx, ny, nz)
         }
 
         init {

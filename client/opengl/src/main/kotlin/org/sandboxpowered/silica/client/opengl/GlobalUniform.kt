@@ -11,6 +11,7 @@ object GlobalUniform {
     val PROJECTION = Matrix4fStack(50)
     val HEIGHT_SCALE = 0f
     val POSITION = Vector3f(-1f, 1.5f, -3f)
+    val SUN_DIRECTION = Vector3f(1f, 1f, 1f).normalize()
     var time = 0
 
     fun update(client: SilicaClient) {

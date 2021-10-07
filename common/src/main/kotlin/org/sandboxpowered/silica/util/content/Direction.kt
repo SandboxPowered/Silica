@@ -3,6 +3,7 @@ package org.sandboxpowered.silica.util.content
 import com.google.common.collect.Iterators
 import org.jetbrains.annotations.Range
 import org.joml.Vector3i
+import org.joml.Vector3ic
 import org.sandboxpowered.silica.world.state.property.StringSerializable
 import java.util.function.Predicate
 import kotlin.math.abs
@@ -14,7 +15,7 @@ enum class Direction(
     override val asString: String,
     val axisDirection: AxisDirection,
     val axis: Axis,
-    val offset: Vector3i,
+    val offset: Vector3ic,
 ) : StringSerializable {
     DOWN(0, 1, -1, "down", AxisDirection.NEGATIVE, Axis.Y, Vector3i(0, -1, 0)),
     UP(1, 0, -1, "up", AxisDirection.POSITIVE, Axis.Y, Vector3i(0, 1, 0)),
@@ -24,9 +25,9 @@ enum class Direction(
     EAST(5, 4, 3, "east", AxisDirection.POSITIVE, Axis.X, Vector3i(1, 0, 0));
 
     val opposite: Direction by lazy { byId(invertedId) }
-    val offsetX: Int = this.offset.x
-    val offsetY: Int = this.offset.y
-    val offsetZ: Int = this.offset.z
+    val offsetX: Int = this.offset.x()
+    val offsetY: Int = this.offset.y()
+    val offsetZ: Int = this.offset.z()
 
     override fun toString(): String = this.asString
 

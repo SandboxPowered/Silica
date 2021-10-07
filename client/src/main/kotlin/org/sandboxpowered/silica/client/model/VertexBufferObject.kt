@@ -17,7 +17,7 @@ interface VertexBufferObject {
         fun put(data: Vector3fc): Builder
         fun put(data: Vector2dc): Builder
         fun put(data: Vector3dc): Builder
-        fun vertex(x: Float, y: Float, z: Float, u: Float, v: Float): Builder
+        fun vertex(x: Float, y: Float, z: Float, u: Float, v: Float, nx: Float, ny: Float, nz: Float): Builder
         fun build(): VertexBufferObject
     }
 }

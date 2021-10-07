@@ -100,7 +100,7 @@ class SilicaClient(private val args: Args) : Runnable {
 
         if (list.isNotEmpty()) return true
         assetManager = ResourceManager(ResourceType.ASSETS)
-        assetManager.add(ClasspathResourceLoader("Silica", arrayOf("silica")))
+        assetManager.add(ClasspathResourceLoader("Silica", arrayOf("silica", "minecraft")))
 
         val mcArchive = Util.ensureMinecraftVersion(MINECRAFT_VERSION, Side.CLIENT)
         assetManager.add(ZIPResourceLoader("Minecraft $MINECRAFT_VERSION", mcArchive))
