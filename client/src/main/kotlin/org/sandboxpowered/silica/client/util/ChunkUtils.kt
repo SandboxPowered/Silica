@@ -27,7 +27,7 @@ class ChunkUtils {
 
     companion object {
         private const val CHUNK_SIZE_SHIFT = 4 // Equivalent of 2^value E.G (4 = 16, 5 = 32)
-        private const val CHUNK_SIZE = 1 shl CHUNK_SIZE_SHIFT
+        const val CHUNK_SIZE = 1 shl CHUNK_SIZE_SHIFT
         private const val MAX_ACTIVE_CHUNKS = 65536
         private const val MAX_RENDER_DISTANCE_CHUNKS = 40
         private const val MAX_RENDER_DISTANCE_METERS = MAX_RENDER_DISTANCE_CHUNKS shl CHUNK_SIZE_SHIFT

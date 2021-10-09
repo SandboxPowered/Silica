@@ -7,6 +7,9 @@ import com.google.common.base.Joiner
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.system.Configuration
 import org.sandboxpowered.silica.client.input.Keyboard
+import org.sandboxpowered.silica.client.mesh.ChunkPos
+import org.sandboxpowered.silica.client.mesh.MeshRouter
+import org.sandboxpowered.silica.client.model.ModelLoader
 import org.sandboxpowered.silica.resources.ClasspathResourceLoader
 import org.sandboxpowered.silica.resources.ResourceManager
 import org.sandboxpowered.silica.resources.ResourceType
@@ -20,6 +23,7 @@ import org.sandboxpowered.silica.util.extensions.join
 import org.sandboxpowered.silica.util.extensions.listFiles
 import org.sandboxpowered.silica.util.extensions.notExists
 import org.sandboxpowered.silica.world.SilicaWorld
+import org.sandboxpowered.silica.world.util.iterateCube
 import java.io.File
 import java.util.*
 
@@ -32,6 +36,8 @@ class SilicaClient(private val args: Args) : Runnable {
     lateinit var assetManager: ResourceManager
     lateinit var renderer: Renderer
     lateinit var world: ActorRef<SilicaWorld.Command>
+    lateinit var meshRouter: ActorRef<MeshRouter.Command>
+    lateinit var modelLoader: ModelLoader
 
     private fun close() {
         window.cleanup()
@@ -116,10 +122,25 @@ class SilicaClient(private val args: Args) : Runnable {
         logger.debug("Loaded namespaces: [${assetManager.getNamespaces().join(",")}]")
         window = Window("Sandbox Silica", args.width, args.height, renderer)
         keyboard = Keyboard(window)
+        val stitcher = renderer.createTextureStitcher()
+
+        modelLoader = ModelLoader(this, stitcher)
+
         renderer.init()
 
-        system = ActorSystem.create(SilicaClientGuardian.create(this, this::world::set), "clientGuardian")
+        system = ActorSystem.create(
+            SilicaClientGuardian.create(this, this::world::set, this::meshRouter::set),
+            "clientGuardian"
+        )
 
         return false
+    }
+
+    fun guardianStarted() {
+        iterateCube(-8, 0, -8, 8, 16, 8) { x, y, z ->
+            world.tell(SilicaWorld.Command.Ask({
+                MeshRouter.Command.RequestConstruction(ChunkPos(x, y, z), it)
+            }, meshRouter))
+        }
     }
 }

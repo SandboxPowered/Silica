@@ -7,6 +7,7 @@ import akka.actor.typed.javadsl.*
 import it.unimi.dsi.fastutil.objects.Object2LongMap
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap
 import org.sandboxpowered.silica.client.SilicaClient.Command
+import org.sandboxpowered.silica.client.mesh.MeshRouter
 import org.sandboxpowered.silica.client.server.IntegratedServer
 import org.sandboxpowered.silica.util.Side
 import org.sandboxpowered.silica.util.Util
@@ -20,15 +21,17 @@ class SilicaClientGuardian private constructor(
     val client: SilicaClient,
     context: ActorContext<Command>,
     timerScheduler: TimerScheduler<Command>,
-    worldInit: (ActorRef<SilicaWorld.Command>) -> Unit
+    worldInit: (ActorRef<SilicaWorld.Command>) -> Unit,
+    meshRouterInit: (ActorRef<MeshRouter.Command>) -> Unit
 ) : AbstractBehavior<Command>(context) {
     companion object {
         fun create(
             client: SilicaClient,
-            worldInit: (ActorRef<SilicaWorld.Command>) -> Unit
+            worldInit: (ActorRef<SilicaWorld.Command>) -> Unit,
+            meshRouterInit: (ActorRef<MeshRouter.Command>) -> Unit
         ): Behavior<Command> = Behaviors.withTimers { timer ->
             Behaviors.setup {
-                SilicaClientGuardian(client, it, timer, worldInit)
+                SilicaClientGuardian(client, it, timer, worldInit, meshRouterInit)
             }
         }
     }
@@ -39,11 +42,15 @@ class SilicaClientGuardian private constructor(
     private val server: IntegratedServer = IntegratedServer()
     private val world: ActorRef<in SilicaWorld.Command> =
         context.spawn(SilicaWorld.actor(Side.CLIENT, server), "world").apply(worldInit).apply { server.world = this }
+    private val meshRouter: ActorRef<in MeshRouter.Command> = context.spawn(MeshRouter.actor(client), "meshRouter")
+        .apply(meshRouterInit)
     private val currentlyTicking: Object2LongMap<ActorRef<*>> = Object2LongOpenHashMap(3)
 
     init {
         context.watch(world)
+        context.watch(meshRouter)
         timerScheduler.startTimerAtFixedRate("serverTick", Command.Tick(50f), Duration.ofMillis(50))
+        client.guardianStarted()
     }
 
     override fun createReceive(): Receive<Command> = newReceiveBuilder()
