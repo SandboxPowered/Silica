@@ -8,6 +8,7 @@ import java.io.FilenameFilter
 import java.nio.IntBuffer
 import java.nio.charset.StandardCharsets
 import java.util.*
+import java.util.concurrent.CompletionStage
 
 fun File.notExists(): Boolean = !exists()
 
@@ -45,3 +46,7 @@ fun <T> T?.ifPresent(consumer: (T) -> Unit) {
 }
 
 operator fun IntBuffer.set(index: Int, value: Int): IntBuffer = put(index, value)
+
+fun <T> CompletionStage<T>.onException(handle: (exception: Throwable) -> Unit) {
+    handle { _, e -> if (e != null) handle(e) }
+}
