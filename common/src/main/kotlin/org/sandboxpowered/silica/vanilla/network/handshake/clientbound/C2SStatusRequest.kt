@@ -12,6 +12,8 @@ class C2SStatusRequest() : Packet {
     override fun write(buf: PacketByteBuf) {}
 
     override fun handle(packetHandler: PacketHandler, connection: Connection) {
-        packetHandler.sendPacket(S2CStatusResponse(connection.motd))
+        connection.getMotd {
+            packetHandler.sendPacket(S2CStatusResponse(it))
+        }
     }
 }

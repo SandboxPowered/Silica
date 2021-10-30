@@ -6,6 +6,7 @@ import akka.actor.typed.javadsl.AbstractBehavior
 import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
+import com.google.gson.GsonBuilder
 import com.mojang.authlib.GameProfile
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelInitializer
@@ -21,7 +22,9 @@ import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.handler.timeout.ReadTimeoutHandler
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
+import net.kyori.adventure.text.Component
 import org.sandboxpowered.silica.util.extensions.onMessage
+import org.sandboxpowered.silica.util.extensions.registerTypeAdapter
 import org.sandboxpowered.silica.util.math.Position
 import org.sandboxpowered.silica.vanilla.network.*
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CKeepAliveClient
@@ -47,6 +50,9 @@ sealed class Network {
     class SendToNearby(val position: Position, val distance: Int, val packet: PacketPlay) : Network()
     class SendToWatching(val position: Position, val packet: PacketPlay) : Network()
 
+    class UpdateMotd(val mutation: (MOTD) -> Unit): Network()
+    class QueryMotd(val replyTo: ActorRef<in String>): Network()
+
     companion object {
         fun actor(server: SilicaServer): Behavior<Network> = Behaviors.setup {
             DedicatedServerNetworkActor(server, it)
@@ -62,6 +68,18 @@ private class DedicatedServerNetworkActor(
     private val logger = context.log
     private val connections: Object2ObjectMap<UUID, ActorRef<PlayConnection>> = Object2ObjectOpenHashMap()
 
+    private val gson = GsonBuilder()
+        .registerTypeAdapter(MOTDDeserializer())
+        .registerTypeAdapter(MOTDSerializer())
+        .create()
+
+    private val motd = MOTD(Version("Sandbox Silica", -1), Players(0, 0, ArrayList()), Component.empty(), "")
+    private var motdCache: String = gson.toJson(motd)
+
+    private fun updateMotdCache() {
+        motdCache = gson.toJson(motd)
+    }
+
     override fun createReceive(): Receive<Network> = newReceiveBuilder()
         .onMessage(this::handleTick)
         .onMessage(this::handleStart)
@@ -72,6 +90,8 @@ private class DedicatedServerNetworkActor(
         .onMessage(this::handleSendToNearby)
         .onMessage(this::handleSendToWatching)
         .onMessage(this::handleSendToAllExcept)
+        .onMessage(this::handleUpdateMotd)
+        .onMessage(this::handleQueryMotd)
         .build()
 
     private var ticks: Int = 0
@@ -198,7 +218,7 @@ private class DedicatedServerNetworkActor(
 
     private fun handleCreateConnection(createConnection: Network.CreateConnection): Behavior<Network> {
         // TODO: store ref & dispose of the actor
-        logger.info("Creating connection")
+        logger.info("Creating connection for ${createConnection.profile.id}")
 
         val ref = context.spawn(
             PlayConnection.actor(server, createConnection.handler),
@@ -208,12 +228,27 @@ private class DedicatedServerNetworkActor(
 
         connections[createConnection.profile.id] = ref
         createConnection.replyTo.tell(true)
+        context.self.tell(Network.UpdateMotd { it.addPlayer(createConnection.profile) })
 
         return Behaviors.same()
     }
 
     private fun handleDisconnected(disconnected: Network.Disconnected): Behavior<Network> {
+        logger.info("Removing connection for ${disconnected.user.id}")
         connections.remove(disconnected.user.id)
+        context.self.tell(Network.UpdateMotd { it.removePlayer(disconnected.user) })
+        return Behaviors.same()
+    }
+
+    private fun handleUpdateMotd(updateMotd: Network.UpdateMotd): Behavior<Network> {
+        updateMotd.mutation(this.motd)
+        this.updateMotdCache()
+
+        return Behaviors.same()
+    }
+
+    private fun handleQueryMotd(queryMotd: Network.QueryMotd): Behavior<Network> {
+        queryMotd.replyTo.tell(motdCache)
         return Behaviors.same()
     }
 }

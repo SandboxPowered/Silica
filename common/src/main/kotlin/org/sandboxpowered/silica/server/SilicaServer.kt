@@ -17,12 +17,6 @@ import java.security.NoSuchAlgorithmException
 import java.util.*
 
 abstract class SilicaServer {
-    companion object {
-        val gson = GsonBuilder()
-            .registerTypeAdapter(MOTDDeserializer())
-            .registerTypeAdapter(MOTDSerializer())
-            .create()
-    }
 
     var keyPair: KeyPair? = null
     val verificationArray = ByteArray(4)
@@ -34,14 +28,6 @@ abstract class SilicaServer {
     abstract val registryProtocolMapper: VanillaProtocolMapping
     abstract val world: ActorRef<SilicaWorld.Command>
     abstract val network: ActorRef<Network>
-    val motd = MOTD(Version("Sandbox Silica", -1), Players(0, 0, ArrayList()), Component.empty(), "")
-
-    var motdCache: String = gson.toJson(motd)
-        private set
-
-    fun updateMOTDCache() {
-        motdCache = gson.toJson(motd)
-    }
 
     abstract fun shutdown()
 

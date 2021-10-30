@@ -51,11 +51,15 @@ class MOTDSerializer : JsonSerializer<MOTD> {
             this["max"] = src.players.max
             this["online"] = src.players.online
             this["sample"] = JsonArray().apply {
-                src.players.sample.forEach {
+                src.players.sample.asSequence().take(20).forEach {
                     this += JsonObject().apply {
                         this["name"] = it.name
                         this["id"] = it.id.toString()
                     }
+                }
+                if (src.players.sample.size > 20) this += JsonObject().apply {
+                    this["name"] = "..."
+                    this["id"] = "..."
                 }
             }
         }

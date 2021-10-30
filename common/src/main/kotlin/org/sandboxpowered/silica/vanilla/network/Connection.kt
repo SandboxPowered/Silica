@@ -4,6 +4,7 @@ import akka.actor.typed.ActorRef
 import akka.actor.typed.Scheduler
 import akka.actor.typed.javadsl.AskPattern
 import com.mojang.authlib.GameProfile
+import org.sandboxpowered.silica.server.Network
 import org.sandboxpowered.silica.server.Network.CreateConnection
 import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.vanilla.network.login.clientbound.S2CLoginSuccess
@@ -14,14 +15,12 @@ import javax.crypto.SecretKey
 
 class Connection(
     private val server: SilicaServer,
-    private val network: ActorRef<in CreateConnection>,
+    private val network: ActorRef<in Network>,
     private val scheduler: Scheduler
 ) {
     var ping = 0
     lateinit var profile: GameProfile
         private set
-    val motd: String
-        get() = server.motdCache
     private var secretKey: SecretKey? = null
     lateinit var packetHandler: PacketHandler
     fun handleEncryptionResponse(encryptionResponse: C2SEncryptionResponse) {
@@ -41,22 +40,31 @@ class Connection(
         //        packetHandler.sendPacket(new EncryptionRequest("", server.getKeyPair().getPublic().getEncoded(), server.getVerificationArray()));
         packetHandler.sendPacket(S2CLoginSuccess(profile.id, username))
         packetHandler.setProtocol(Protocol.PLAY)
-        server.motd.addPlayer(profile)
-        server.updateMOTDCache()
         println("Sending")
         AskPattern.ask(
             network,
-            { ref: ActorRef<Any?>? -> CreateConnection(profile, packetHandler, ref!!) },
+            { ref: ActorRef<in Boolean> -> CreateConnection(profile, packetHandler, ref) },
             Duration.ofSeconds(3),
             scheduler
-        ).whenComplete { reply: Any?, failure: Throwable? ->
-            if (failure != null) println("Couldn't create connection : ${failure.message}") else if (reply is Boolean) {
-                println("Created connection: $reply")
-            }
+        ).whenComplete { reply: Boolean?, failure: Throwable? ->
+            if (failure != null) println("Couldn't create connection : ${failure.message}")
+            else if (reply != null) println("Created connection: $reply")
         }
     }
 
     fun calculatePing(id: Long) {
         ping = (System.currentTimeMillis() - id).toInt()
+    }
+
+    fun getMotd(andRun: (String) -> Unit) {
+        AskPattern.ask(
+            network,
+            { ref: ActorRef<in String> -> Network.QueryMotd(ref) },
+            Duration.ofSeconds(3),
+            scheduler
+        ).whenComplete { reply: String?, failure: Throwable? ->
+            if (failure != null) println("Couldn't get MOTD : ${failure.message}")
+            else if (reply != null) andRun(reply)
+        }
     }
 }
