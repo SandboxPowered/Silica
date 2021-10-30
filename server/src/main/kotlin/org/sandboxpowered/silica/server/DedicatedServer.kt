@@ -14,7 +14,7 @@ import org.sandboxpowered.silica.resources.ZIPResourceLoader
 import org.sandboxpowered.silica.util.Side
 import org.sandboxpowered.silica.util.Util
 import org.sandboxpowered.silica.util.Util.MINECRAFT_VERSION
-import org.sandboxpowered.silica.util.Util.getLogger
+import org.sandboxpowered.silica.util.getLogger
 import org.sandboxpowered.silica.util.extensions.join
 import org.sandboxpowered.silica.util.extensions.messageAdapter
 import org.sandboxpowered.silica.util.extensions.onMessage
@@ -30,7 +30,7 @@ import java.time.Duration
 import kotlin.system.exitProcess
 
 class DedicatedServer(args: Args) : SilicaServer() {
-    private var logger = getLogger<DedicatedServer>()
+    private var logger = getLogger()
     override val stateRemapper = StateMappingManager()
     override val registryProtocolMapper = VanillaProtocolMapping()
     private val acceptVanillaConnections: Boolean
@@ -93,7 +93,7 @@ class DedicatedServer(args: Args) : SilicaServer() {
     private class DedicatedServerGuardian private constructor(
         val server: SilicaServer, // don't like this
         context: ActorContext<Command>,
-        val timerScheduler: TimerScheduler<Command>,
+        timerScheduler: TimerScheduler<Command>,
         worldInit: (ActorRef<SilicaWorld.Command>) -> Unit,
         networkInit: (ActorRef<Network>) -> Unit
     ) : AbstractBehavior<Command>(context) {
@@ -109,7 +109,7 @@ class DedicatedServer(args: Args) : SilicaServer() {
             }
         }
 
-        private val logger = getLogger<DedicatedServerGuardian>()
+        private val logger = getLogger()
         private var skippedTicks = 0
         private var lastTickTime: Long = -1
         private val world: ActorRef<in SilicaWorld.Command> =

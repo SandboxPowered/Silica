@@ -8,9 +8,9 @@ import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import org.sandboxpowered.silica.server.SilicaServer
-import org.sandboxpowered.silica.util.Util
 import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.util.extensions.onSignal
+import org.sandboxpowered.silica.util.getLogger
 
 /**
  * The Reaper is an Actor that is in charge of collecting dead souls.
@@ -19,7 +19,7 @@ import org.sandboxpowered.silica.util.extensions.onSignal
  * Never fear the reaper.
  */
 class Reaper(val server: SilicaServer, context: ActorContext<Command>) : AbstractBehavior<Reaper.Command>(context) {
-    private val logger = Util.getLogger<Reaper>()
+    private val logger = getLogger()
     override fun createReceive(): Receive<Command> = newReceiveBuilder()
         .onSignal(this::terminated)
         .onMessage(this::onMessage)

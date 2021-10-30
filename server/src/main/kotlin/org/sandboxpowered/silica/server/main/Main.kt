@@ -6,11 +6,11 @@ import org.apache.logging.log4j.LogManager
 import org.sandboxpowered.silica.server.DedicatedServer
 import org.sandboxpowered.silica.server.DedicatedServerProperties.Companion.fromFile
 import org.sandboxpowered.silica.server.ServerEula
-import org.sandboxpowered.silica.util.Util.getLogger
+import org.sandboxpowered.silica.util.getLogger
 import java.nio.file.Paths
 
 object Main {
-    private val logger = getLogger<Main>()
+    private val logger = getLogger()
 
     @JvmStatic
     fun main(args: Array<String>) {

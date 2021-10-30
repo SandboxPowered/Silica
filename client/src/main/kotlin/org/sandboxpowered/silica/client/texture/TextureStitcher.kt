@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.client.texture
 
-import org.sandboxpowered.silica.util.Util.getLogger
 import org.sandboxpowered.silica.util.extensions.toPowerOfTwo
+import org.sandboxpowered.silica.util.getLogger
 import kotlin.math.max
 
 
@@ -11,7 +11,7 @@ class TextureStitcher(private val maxWidth: Int, private val maxHeight: Int, pri
             .comparingInt<TextureAtlas.SpriteReference> { it.height }
             .thenComparingInt { it.width }
             .thenComparing(TextureAtlas.SpriteReference::id)
-        val logger = getLogger<TextureStitcher>()
+        val logger = getLogger()
     }
 
     private val dataSet: MutableSet<TextureAtlas.SpriteReference> = HashSet(256)

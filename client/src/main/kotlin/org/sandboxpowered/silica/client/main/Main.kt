@@ -4,11 +4,11 @@ import joptsimple.OptionParser
 import joptsimple.OptionSpec
 import org.sandboxpowered.silica.client.SilicaClient
 import org.sandboxpowered.silica.client.SilicaClient.Args
-import org.sandboxpowered.silica.util.Util.getLogger
+import org.sandboxpowered.silica.util.getLogger
 import org.sandboxpowered.silica.util.extensions.ofType
 
 object Main {
-    private val logger = getLogger<Main>()
+    private val logger = getLogger()
 
     @JvmStatic
     fun main(args: Array<String>) {

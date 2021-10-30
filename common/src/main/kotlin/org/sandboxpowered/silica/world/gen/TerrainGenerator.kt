@@ -35,7 +35,7 @@ private class TerrainGeneratorActor(private val filler: ChunkFiller, context: Ac
         val time = measureTimeMillis {
             filler.fill(x, y, z, chunk)
         }
-        context.log.info("Generated $x, $y, $z in $time millis")
+        context.log.debug("Generated $x, $y, $z in $time millis")
         replyTo.tell(generate)
 
         return Behaviors.same()

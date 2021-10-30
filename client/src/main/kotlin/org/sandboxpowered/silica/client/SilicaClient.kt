@@ -18,10 +18,10 @@ import org.sandboxpowered.silica.util.FileFilters
 import org.sandboxpowered.silica.util.Side
 import org.sandboxpowered.silica.util.Util
 import org.sandboxpowered.silica.util.Util.MINECRAFT_VERSION
-import org.sandboxpowered.silica.util.Util.getLogger
 import org.sandboxpowered.silica.util.extensions.join
 import org.sandboxpowered.silica.util.extensions.listFiles
 import org.sandboxpowered.silica.util.extensions.notExists
+import org.sandboxpowered.silica.util.getLogger
 import org.sandboxpowered.silica.world.SilicaWorld
 import org.sandboxpowered.silica.world.util.iterateCube
 import java.io.File
@@ -30,7 +30,7 @@ import java.util.*
 
 class SilicaClient(private val args: Args) : Runnable {
     val version: Version = Version.forIntegers(0, 1, 0)
-    private val logger = getLogger<SilicaClient>()
+    private val logger = getLogger()
     lateinit var window: Window
     lateinit var keyboard: Keyboard
     lateinit var assetManager: ResourceManager

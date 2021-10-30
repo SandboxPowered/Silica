@@ -14,6 +14,7 @@ import org.sandboxpowered.silica.util.Util
 import org.sandboxpowered.silica.util.extensions.messageAdapter
 import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.util.extensions.onSignal
+import org.sandboxpowered.silica.util.getLogger
 import org.sandboxpowered.silica.world.SilicaWorld
 import java.time.Duration
 
@@ -36,7 +37,7 @@ class SilicaClientGuardian private constructor(
         }
     }
 
-    private val logger = Util.getLogger<SilicaClientGuardian>()
+    private val logger = getLogger()
     private var skippedTicks = 0
     private var lastTickTime: Long = -1
     private val server: IntegratedServer = IntegratedServer()

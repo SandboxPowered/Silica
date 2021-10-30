@@ -7,7 +7,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.Object2IntMap
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
-import org.sandboxpowered.silica.util.Util.getLogger
+import org.sandboxpowered.silica.util.getLogger
 import org.sandboxpowered.silica.vanilla.network.handshake.clientbound.C2SPingRequest
 import org.sandboxpowered.silica.vanilla.network.handshake.clientbound.C2SStatusRequest
 import org.sandboxpowered.silica.vanilla.network.handshake.serverbound.S2CPongResponse
@@ -102,7 +102,7 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
     }
 
     companion object {
-        val logger = getLogger<Protocol>()
+        val logger = getLogger()
 
         @JvmField
         val PROTOCOL_ATTRIBUTE_KEY: AttributeKey<Protocol> = AttributeKey.valueOf("protocol")

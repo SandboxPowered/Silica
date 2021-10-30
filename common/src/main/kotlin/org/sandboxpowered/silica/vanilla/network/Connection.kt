@@ -7,6 +7,7 @@ import com.mojang.authlib.GameProfile
 import org.sandboxpowered.silica.server.Network
 import org.sandboxpowered.silica.server.Network.CreateConnection
 import org.sandboxpowered.silica.server.SilicaServer
+import org.sandboxpowered.silica.util.getLogger
 import org.sandboxpowered.silica.vanilla.network.login.clientbound.S2CLoginSuccess
 import org.sandboxpowered.silica.vanilla.network.login.serverbound.C2SEncryptionResponse
 import java.time.Duration
@@ -23,6 +24,9 @@ class Connection(
         private set
     private var secretKey: SecretKey? = null
     lateinit var packetHandler: PacketHandler
+
+    private val logger = getLogger()
+
     fun handleEncryptionResponse(encryptionResponse: C2SEncryptionResponse) {
         val privateKey = server.keyPair!!.private
         try {
@@ -47,8 +51,8 @@ class Connection(
             Duration.ofSeconds(3),
             scheduler
         ).whenComplete { reply: Boolean?, failure: Throwable? ->
-            if (failure != null) println("Couldn't create connection : ${failure.message}")
-            else if (reply != null) println("Created connection: $reply")
+            if (failure != null) logger.debug("Couldn't create connection : ${failure.message}")
+            else if (reply != null) logger.debug("Created connection: $reply")
         }
     }
 
@@ -62,9 +66,8 @@ class Connection(
             { ref: ActorRef<in String> -> Network.QueryMotd(ref) },
             Duration.ofSeconds(3),
             scheduler
-        ).whenComplete { reply: String?, failure: Throwable? ->
-            if (failure != null) println("Couldn't get MOTD : ${failure.message}")
-            else if (reply != null) andRun(reply)
+        ).thenAccept(andRun).handle { _, e ->
+            logger.warn("Couldn't get MOTD", e)
         }
     }
 }

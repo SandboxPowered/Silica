@@ -8,7 +8,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 import org.sandboxpowered.silica.registry.SilicaRegistries
-import org.sandboxpowered.silica.util.Util.getLogger
+import org.sandboxpowered.silica.util.getLogger
 import org.sandboxpowered.silica.util.extensions.fromJson
 import org.sandboxpowered.silica.util.extensions.getNullable
 import org.sandboxpowered.silica.util.extensions.getResourceAsString
@@ -21,7 +21,7 @@ class StateMappingManager {
     private val stateMap = Object2IntOpenHashMap<BlockState>()
     private val idMap = Int2ObjectOpenHashMap<BlockState>()
 
-    private val logger = getLogger<StateMappingManager>()
+    private val logger = getLogger()
 
     fun load(): Map<ErrorType, Set<String>> {
         val errorMap = Object2ObjectOpenHashMap<ErrorType, ObjectOpenHashSet<String>>()

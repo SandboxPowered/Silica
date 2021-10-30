@@ -13,13 +13,14 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 
+@Suppress("unused") // used as receiver to not specify generic arg explicitly
+inline fun <reified T> T.getLogger(): Logger = LogManager.getLogger(T::class.java)
+
 object Util {
 
     const val MINECRAFT_VERSION = "1.17.1"
 
     private const val LAUNCHMETA_JSON = "https://launchermeta.mojang.com/mc/game/version_manifest.json"
-
-    inline fun <reified T> getLogger(): Logger = LogManager.getLogger(T::class.java)
 
     private val ktorClient = HttpClient {
         install(JsonFeature) {
