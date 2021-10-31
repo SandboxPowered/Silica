@@ -7,8 +7,8 @@ import com.artemis.systems.IteratingSystem
 import org.sandboxpowered.silica.ecs.component.PositionComponent
 import org.sandboxpowered.silica.ecs.component.RotationComponent
 import org.sandboxpowered.silica.ecs.component.VanillaPlayerInput
-import org.sandboxpowered.silica.server.Network
 import org.sandboxpowered.silica.server.SilicaServer
+import org.sandboxpowered.silica.server.VanillaNetwork
 import org.sandboxpowered.silica.util.extensions.component1
 import org.sandboxpowered.silica.util.extensions.component2
 import org.sandboxpowered.silica.util.extensions.component3
@@ -72,8 +72,8 @@ class VanillaInputSystem(val server: SilicaServer) : IteratingSystem() {
         }
 
         if (packet != null) {
-            server.network.tell(
-                Network.SendToAllExcept(
+            server.vanillaNetwork.tell(
+                VanillaNetwork.SendToAllExcept(
                     input.gameProfile.id,
                     packet
                 )

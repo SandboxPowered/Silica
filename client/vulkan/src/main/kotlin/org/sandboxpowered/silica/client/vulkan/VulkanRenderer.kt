@@ -23,6 +23,8 @@ import org.lwjgl.vulkan.VK10.*
 import org.sandboxpowered.silica.client.Renderer
 import org.sandboxpowered.silica.client.RenderingFactory
 import org.sandboxpowered.silica.client.SilicaClient
+import org.sandboxpowered.silica.client.texture.TextureAtlas
+import org.sandboxpowered.silica.client.texture.TextureStitcher
 import org.sandboxpowered.silica.client.util.ints
 import org.sandboxpowered.silica.client.util.stackPush
 import org.sandboxpowered.silica.client.vulkan.SPIRVUtil.Companion.compileShaderFile
@@ -1357,6 +1359,13 @@ class VulkanRenderer(private val silica: SilicaClient) : Renderer {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API)
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE)
     }
+
+    override fun createTextureStitcher(): TextureStitcher {
+        TODO("Not yet implemented")
+    }
+
+    override val textureAtlas: TextureAtlas
+        get() = TODO("Not yet implemented")
 
     class VulkanRenderingFactory : RenderingFactory {
         override val priority: Int = 600

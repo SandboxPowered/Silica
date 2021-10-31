@@ -1,13 +1,10 @@
 package org.sandboxpowered.silica.server
 
 import akka.actor.typed.ActorRef
-import com.google.gson.GsonBuilder
-import net.kyori.adventure.text.Component
 import org.sandboxpowered.silica.command.Commands
 import org.sandboxpowered.silica.resources.ClasspathResourceLoader
 import org.sandboxpowered.silica.resources.ResourceManager
 import org.sandboxpowered.silica.resources.ResourceType
-import org.sandboxpowered.silica.util.extensions.registerTypeAdapter
 import org.sandboxpowered.silica.vanilla.StateMappingManager
 import org.sandboxpowered.silica.vanilla.VanillaProtocolMapping
 import org.sandboxpowered.silica.world.SilicaWorld
@@ -27,7 +24,7 @@ abstract class SilicaServer {
     abstract val stateRemapper: StateMappingManager
     abstract val registryProtocolMapper: VanillaProtocolMapping
     abstract val world: ActorRef<SilicaWorld.Command>
-    abstract val network: ActorRef<Network>
+    abstract val vanillaNetwork: ActorRef<VanillaNetwork>
 
     abstract fun shutdown()
 

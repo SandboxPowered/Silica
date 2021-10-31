@@ -38,3 +38,9 @@ interface WithScheduler {
         messageFactory: (actorRef: ActorRef<U>) -> T
     ): CompletionStage<U> = AskPattern.ask(this, messageFactory, timeout, scheduler)
 }
+
+interface WithContext : WithScheduler {
+    fun getContext(): ActorContext<*>
+
+    override val scheduler: Scheduler get() = getContext().system.scheduler()
+}

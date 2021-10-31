@@ -1,5 +1,6 @@
 package org.sandboxpowered.silica.vanilla.network
 
+import akka.actor.typed.ActorRef
 import akka.actor.typed.Behavior
 import akka.actor.typed.javadsl.AbstractBehavior
 import akka.actor.typed.javadsl.ActorContext
@@ -12,22 +13,24 @@ import org.sandboxpowered.silica.ecs.system.SilicaPlayerManager
 import org.sandboxpowered.silica.nbt.NBTCompound
 import org.sandboxpowered.silica.nbt.nbt
 import org.sandboxpowered.silica.nbt.setTag
-import org.sandboxpowered.silica.server.Network
 import org.sandboxpowered.silica.server.SilicaServer
+import org.sandboxpowered.silica.server.VanillaNetwork
 import org.sandboxpowered.silica.util.Identifier
-import org.sandboxpowered.silica.util.extensions.getSystem
-import org.sandboxpowered.silica.util.extensions.onMessage
+import org.sandboxpowered.silica.util.extensions.*
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.*
+import org.sandboxpowered.silica.vanilla.network.play.clientbound.world.VanillaChunkSection
+import org.sandboxpowered.silica.world.ChunkSectionPos
 import org.sandboxpowered.silica.world.SilicaWorld
 import org.sandboxpowered.silica.world.VanillaWorldAdapter
-import org.sandboxpowered.silica.world.util.BlocTree
 import java.time.Duration
-import kotlin.system.measureTimeMillis
 
 sealed class PlayConnection {
     class ReceivePacket(val packet: PacketPlay) : PlayConnection()
     class SendPacket(val packet: PacketPlay) : PlayConnection()
-    class ReceiveWorld(val blocks: BlocTree, val vanillaWorldAdapter: VanillaWorldAdapter) : PlayConnection()
+    object ReceiveWorld : PlayConnection()
+    class ReceiveChunkSections(val x: Int, val z: Int, val chunkSections: Array<out VanillaChunkSection>) :
+        PlayConnection()
+
     class ReceivePlayer(
         val gameProfiles: Array<GameProfile>,
         val input: VanillaPlayerInput,
@@ -41,8 +44,12 @@ sealed class PlayConnection {
     object Login : PlayConnection()
 
     companion object {
-        fun actor(server: SilicaServer, packetHandler: PacketHandler): Behavior<PlayConnection> = Behaviors.setup {
-            PlayConnectionActor(server, packetHandler, it)
+        fun actor(
+            server: SilicaServer,
+            packetHandler: PacketHandler,
+            vanillaWorldAdapter: ActorRef<in VanillaWorldAdapter>
+        ): Behavior<PlayConnection> = Behaviors.setup {
+            PlayConnectionActor(server, packetHandler, vanillaWorldAdapter, it)
         }
     }
 }
@@ -50,8 +57,9 @@ sealed class PlayConnection {
 private class PlayConnectionActor(
     private val server: SilicaServer,
     private val packetHandler: PacketHandler,
+    private val vanillaWorldAdapter: ActorRef<in VanillaWorldAdapter>,
     context: ActorContext<PlayConnection>
-) : AbstractBehavior<PlayConnection>(context) {
+) : AbstractBehavior<PlayConnection>(context), WithContext {
 
     override fun createReceive(): Receive<PlayConnection> = newReceiveBuilder()
         .onMessage(this::handleLoginStart)
@@ -59,11 +67,10 @@ private class PlayConnectionActor(
         .onMessage(this::handleReceive)
         .onMessage(this::handleReceivePlayer)
         .onMessage(this::handleFailedToCreatePlayer)
+        .onMessage(this::handleReceiveChunkSection)
         .onMessage(this::handleReceiveWorld)
         .onMessage(this::handleDisconnected)
         .build()
-
-    private val logger = context.log
 
     // TODO: apply at the right time + unsafe to keep a ref to a component
     private lateinit var playerInput: VanillaPlayerInput
@@ -175,22 +182,22 @@ private class PlayConnectionActor(
         }
         packetHandler.sendPacket(
             S2CJoinGame(
-                0,
-                false,
-                1,
-                -1,
-                1,
-                arrayOf(overworld),
-                codec,
-                overworldType,
-                overworld,
-                0,
-                20,
-                4,
-                false,
-                true,
-                false,
-                true
+                playerId = 0,
+                hardcore = false,
+                gamemode = 1,
+                previousGamemode = -1,
+                worldCount = 1,
+                worldNames = arrayOf(overworld),
+                dimCodec = codec,
+                dim = overworldType,
+                world = overworld,
+                seed = 0,
+                maxPlayers = 20,
+                viewDistance = 4,
+                reducedDebug = false,
+                respawnScreen = true,
+                debug = false,
+                flat = true
             )
         )
         packetHandler.sendPacket(S2CHeldItemChange(playerInventoryComponent.inventory.selectedSlot.toByte()))
@@ -217,15 +224,15 @@ private class PlayConnectionActor(
             gamemodes[index] = 1
             pings[index] = 1
         }
-        server.network.tell(
-            Network.SendToAll(
+        server.vanillaNetwork.tell(
+            VanillaNetwork.SendToAll(
                 S2CPlayerInfo.addPlayer(
                     receive.gameProfiles, gamemodes, pings
                 )
             )
         )
-        server.network.tell(
-            Network.SendToAllExcept(
+        server.vanillaNetwork.tell(
+            VanillaNetwork.SendToAllExcept(
                 receive.input.gameProfile.id,
                 S2CSpawnPlayer(
                     receive.input.playerId,
@@ -242,8 +249,8 @@ private class PlayConnectionActor(
             system.onlinePlayers.forEach { t ->
                 if (t != playerInput.gameProfile.id) {
                     val input = system.getVanillaInput(system.getPlayerId(t))
-                    server.network.tell(
-                        Network.SendToAllExcept(
+                    server.vanillaNetwork.tell(
+                        VanillaNetwork.SendToAllExcept(
                             input.gameProfile.id,
                             S2CSpawnPlayer(
                                 input.playerId,
@@ -260,18 +267,25 @@ private class PlayConnectionActor(
         })
         packetHandler.sendPacket(S2CUpdateChunkPosition(0, 0))
 
-        server.world.tell(
-            SilicaWorld.Command.Ask(
-                { PlayConnection.ReceiveWorld((it as SilicaWorld).getTerrain(), it.vanillaWorldAdapter) },
-                context.self
-            )
-        )
+        for (x in -4..4) {
+            for (z in -4..4) {
+                context.spawnAnonymous(
+                    Accumulator.actor(16, vanillaWorldAdapter) { idx, ref: ActorRef<in VanillaChunkSection> ->
+                        VanillaWorldAdapter.GetChunkSection(ChunkSectionPos(x, idx, z), ref)
+                    }
+                ).ask { actorRef: ActorRef<in Array<out VanillaChunkSection>> -> Accumulator.Start(actorRef) }
+                    .thenAccept { context.self.tell(PlayConnection.ReceiveChunkSections(x, z, it)) }
+                    .onException { context.log.warn("Couldn't receive chunk sections", it) }
+            }
+        }
+
+        context.self.tell(PlayConnection.ReceiveWorld)
 
         return Behaviors.same()
     }
 
     private fun handleDisconnected(disconnected: PlayConnection.Disconnected): Behavior<PlayConnection> {
-        server.network.tell(Network.Disconnected(disconnected.profile))
+        server.vanillaNetwork.tell(VanillaNetwork.Disconnected(disconnected.profile))
         server.world.tell(SilicaWorld.Command.DelayedCommand.PerformSilica {
             it.artemisWorld.getSystem<SilicaPlayerManager>().disconnect(disconnected.profile)
         })
@@ -280,21 +294,19 @@ private class PlayConnectionActor(
 
     private fun handleFailedToCreatePlayer(failure: PlayConnection.FailedPlayerCreation): Behavior<PlayConnection> {
         // TODO: disconnect
-        logger.error("Could not create player: ${failure.reason}")
+        context.log.error("Could not create player: ${failure.reason}")
+        return Behaviors.stopped()
+    }
+
+    private fun handleReceiveChunkSection(sections: PlayConnection.ReceiveChunkSections): Behavior<PlayConnection> {
+        context.log.info("Sending sections at ${sections.x}, ${sections.z}")
+        packetHandler.sendPacket(S2CChunkData(sections.x, sections.z, sections.chunkSections))
+        packetHandler.sendPacket(S2CUpdateLight(sections.x, sections.z, true))
         return Behaviors.same()
     }
 
-    private fun handleReceiveWorld(world: PlayConnection.ReceiveWorld): Behavior<PlayConnection> {
-        logger.info("Sending world")
-        for (x in -4..4) {
-            for (z in -4..4) {
-                val time = measureTimeMillis {
-                    packetHandler.sendPacket(S2CChunkData(x, z, world.blocks, world.vanillaWorldAdapter))
-                }
-//                logger.debug("Took {}ms to create Chunk Data for {} {}", time, x, z)
-                packetHandler.sendPacket(S2CUpdateLight(x, z, true))
-            }
-        }
+    private fun handleReceiveWorld(message: PlayConnection.ReceiveWorld): Behavior<PlayConnection> {
+        context.log.info("Sending world")
         packetHandler.sendPacket(S2CWorldBorder())
         packetHandler.sendPacket(
             S2CInitWindowItems(

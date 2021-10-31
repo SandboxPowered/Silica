@@ -9,34 +9,31 @@ import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.world.VanillaChunkSection
 import org.sandboxpowered.silica.vanilla.network.util.BitPackedLongArray
-import org.sandboxpowered.silica.world.ChunkSectionPos
-import org.sandboxpowered.silica.world.VanillaWorldAdapter
-import org.sandboxpowered.silica.world.util.BlocTree
 import java.util.*
 
-class S2CChunkData() : PacketPlay {
-    private val sections = arrayOfNulls<VanillaChunkSection>(16)
-    private var cX = 0
-    private var cZ = 0
+class S2CChunkData(
+    private val cX: Int,
+    private val cZ: Int,
+    private val sections: Array<out VanillaChunkSection>
+) : PacketPlay {
     private var bitMask: LongArray = longArrayOf()
     private var buffer: ByteArray = byteArrayOf()
     private var biomes: IntArray = intArrayOf()
 
-    constructor(cX: Int, cZ: Int, world: BlocTree, adapter: VanillaWorldAdapter) : this() {
-        this.cX = cX
-        this.cZ = cZ
+    constructor(buf: PacketByteBuf) : this(
+        buf.readInt(), buf.readInt(), TODO("Not implemented")
+    )
+
+    init {
         biomes = IntArray(1024)
-        for (i in 0..15) {
-            sections[i] = adapter.getVanillaChunkSection(ChunkSectionPos(cX, i, cZ))
-        }
         buffer = ByteArray(calculateSize(cX, cZ))
-        bitMask = extractData(PacketByteBuf(writeBuffer), cX, cZ, world).toLongArray()
+        bitMask = extractData(PacketByteBuf(writeBuffer), cX, cZ).toLongArray()
     }
 
-    private fun extractData(packetByteBuf: PacketByteBuf, cX: Int, cZ: Int, blocTree: BlocTree): BitSet {
+    private fun extractData(packetByteBuf: PacketByteBuf, cX: Int, cZ: Int): BitSet {
         val mask = BitSet()
         for (i in 0..15) {
-            sections[i]!!.write(packetByteBuf)
+            sections[i].write(packetByteBuf)
             mask.set(i) // TODO: only write non-empty
         }
         return mask

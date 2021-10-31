@@ -3,9 +3,9 @@ package org.sandboxpowered.silica.vanilla.network
 import akka.actor.typed.ActorRef
 import akka.actor.typed.Scheduler
 import com.mojang.authlib.GameProfile
-import org.sandboxpowered.silica.server.Network
-import org.sandboxpowered.silica.server.Network.CreateConnection
 import org.sandboxpowered.silica.server.SilicaServer
+import org.sandboxpowered.silica.server.VanillaNetwork
+import org.sandboxpowered.silica.server.VanillaNetwork.CreateConnection
 import org.sandboxpowered.silica.util.extensions.WithScheduler
 import org.sandboxpowered.silica.util.extensions.onException
 import org.sandboxpowered.silica.util.getLogger
@@ -16,7 +16,7 @@ import javax.crypto.SecretKey
 
 class Connection(
     private val server: SilicaServer,
-    private val network: ActorRef<in Network>,
+    private val vanillaNetwork: ActorRef<in VanillaNetwork>,
     override val scheduler: Scheduler
 ) : WithScheduler {
     var ping = 0
@@ -45,7 +45,7 @@ class Connection(
         packetHandler.sendPacket(S2CLoginSuccess(profile.id, username))
         packetHandler.setProtocol(Protocol.PLAY)
 
-        network.ask { ref: ActorRef<in Boolean> -> CreateConnection(profile, packetHandler, ref) }
+        vanillaNetwork.ask { ref: ActorRef<in Boolean> -> CreateConnection(profile, packetHandler, ref) }
             .thenAccept { logger.debug("Created connection: $it") }
             .onException { logger.warn("Couldn't create connection", it) }
     }
@@ -55,7 +55,7 @@ class Connection(
     }
 
     fun getMotd(andRun: (String) -> Unit) =
-        network.ask { ref: ActorRef<in String> -> Network.QueryMotd(ref) }
+        vanillaNetwork.ask { ref: ActorRef<in String> -> VanillaNetwork.QueryMotd(ref) }
             .thenAccept(andRun)
             .onException { logger.warn("Couldn't get MOTD", it) }
 }

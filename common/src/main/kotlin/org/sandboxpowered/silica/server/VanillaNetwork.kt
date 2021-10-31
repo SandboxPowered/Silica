@@ -29,44 +29,49 @@ import org.sandboxpowered.silica.util.math.Position
 import org.sandboxpowered.silica.vanilla.network.*
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CKeepAliveClient
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CPlayerInfo
+import org.sandboxpowered.silica.world.VanillaWorldAdapter
 import java.util.*
 
-sealed class Network {
-    class Tick(val delta: Float, val replyTo: ActorRef<Tock>) : Network() {
-        class Tock(val done: ActorRef<Network>)
+sealed class VanillaNetwork {
+    class Tick(val delta: Float, val replyTo: ActorRef<Tock>) : VanillaNetwork() {
+        class Tock(val done: ActorRef<VanillaNetwork>)
     }
 
-    class Start(val replyTo: ActorRef<in Boolean>) : Network()
-    class Disconnected(val user: GameProfile) : Network()
+    class Start(val replyTo: ActorRef<in Boolean>) : VanillaNetwork()
+    class Disconnected(val user: GameProfile) : VanillaNetwork()
     class CreateConnection(
         val profile: GameProfile,
         val handler: PacketHandler,
         val replyTo: ActorRef<in Boolean>
-    ) : Network()
+    ) : VanillaNetwork()
 
-    class SendTo(val target: UUID, val packet: PacketPlay) : Network()
-    class SendToAll(val packet: PacketPlay) : Network()
-    class SendToAllExcept(val except: UUID, val packet: PacketPlay) : Network()
-    class SendToNearby(val position: Position, val distance: Int, val packet: PacketPlay) : Network()
-    class SendToWatching(val position: Position, val packet: PacketPlay) : Network()
+    class SendTo(val target: UUID, val packet: PacketPlay) : VanillaNetwork()
+    class SendToAll(val packet: PacketPlay) : VanillaNetwork()
+    class SendToAllExcept(val except: UUID, val packet: PacketPlay) : VanillaNetwork()
+    class SendToNearby(val position: Position, val distance: Int, val packet: PacketPlay) : VanillaNetwork()
+    class SendToWatching(val position: Position, val packet: PacketPlay) : VanillaNetwork()
 
-    class UpdateMotd(val mutation: (MOTD) -> Unit): Network()
-    class QueryMotd(val replyTo: ActorRef<in String>): Network()
+    class UpdateMotd(val mutation: (MOTD) -> Unit) : VanillaNetwork()
+    class QueryMotd(val replyTo: ActorRef<in String>) : VanillaNetwork()
 
     companion object {
-        fun actor(server: SilicaServer): Behavior<Network> = Behaviors.setup {
-            DedicatedServerNetworkActor(server, it)
+        fun actor(server: SilicaServer): Behavior<VanillaNetwork> = Behaviors.setup {
+            VanillaNetworkActor(server, it)
         }
     }
 }
 
 // TODO: clean shutdown
-private class DedicatedServerNetworkActor(
+private class VanillaNetworkActor(
     private val server: SilicaServer, // TODO: remove this one when I can
-    context: ActorContext<Network>
-) : AbstractBehavior<Network>(context) {
-    private val logger = context.log
+    context: ActorContext<VanillaNetwork>
+) : AbstractBehavior<VanillaNetwork>(context) {
     private val connections: Object2ObjectMap<UUID, ActorRef<PlayConnection>> = Object2ObjectOpenHashMap()
+
+    private val vanillaWorld = context.spawn(
+        VanillaWorldAdapter.actor(server.world, server.stateRemapper),
+        "vanilla-world-adapter"
+    )
 
     private val gson = GsonBuilder()
         .registerTypeAdapter(MOTDDeserializer())
@@ -80,7 +85,7 @@ private class DedicatedServerNetworkActor(
         motdCache = gson.toJson(motd)
     }
 
-    override fun createReceive(): Receive<Network> = newReceiveBuilder()
+    override fun createReceive(): Receive<VanillaNetwork> = newReceiveBuilder()
         .onMessage(this::handleTick)
         .onMessage(this::handleStart)
         .onMessage(this::handleCreateConnection)
@@ -96,14 +101,11 @@ private class DedicatedServerNetworkActor(
 
     private var ticks: Int = 0
 
-    private fun handleTick(tick: Network.Tick): Behavior<Network> {
+    private fun handleTick(tick: VanillaNetwork.Tick): Behavior<VanillaNetwork> {
         var latencyPacket: S2CPlayerInfo? = null
         if (ticks % 20 == 0) {
             val uuids = connections.keys.toTypedArray()
-            val pings = IntArray(uuids.size)
-            uuids.forEachIndexed { index, uuid ->
-                pings[index] = 1
-            }
+            val pings = IntArray(uuids.size) { 1 }
             latencyPacket = S2CPlayerInfo.updateLatency(
                 uuids,
                 pings
@@ -111,24 +113,22 @@ private class DedicatedServerNetworkActor(
         }
         connections.values.forEach {
             it.tell(PlayConnection.SendPacket(S2CKeepAliveClient(System.currentTimeMillis())))
-            if (ticks % 20 == 0) {
-                it.tell(PlayConnection.SendPacket(latencyPacket!!))
-            }
+            if (latencyPacket != null) it.tell(PlayConnection.SendPacket(latencyPacket))
         }
 
         ticks++
 
-        tick.replyTo.tell(Network.Tick.Tock(context.self))
+        tick.replyTo.tell(VanillaNetwork.Tick.Tock(context.self))
         return Behaviors.same()
     }
 
-    private fun handleSendTo(send: Network.SendTo): Behavior<Network> {
+    private fun handleSendTo(send: VanillaNetwork.SendTo): Behavior<VanillaNetwork> {
         connections[send.target]?.tell(PlayConnection.SendPacket(send.packet))
 
         return Behaviors.same()
     }
 
-    private fun handleSendToAll(send: Network.SendToAll): Behavior<Network> {
+    private fun handleSendToAll(send: VanillaNetwork.SendToAll): Behavior<VanillaNetwork> {
         connections.values.forEach {
             it.tell(PlayConnection.SendPacket(send.packet))
         }
@@ -136,7 +136,7 @@ private class DedicatedServerNetworkActor(
         return Behaviors.same()
     }
 
-    private fun handleSendToAllExcept(send: Network.SendToAllExcept): Behavior<Network> {
+    private fun handleSendToAllExcept(send: VanillaNetwork.SendToAllExcept): Behavior<VanillaNetwork> {
         connections.forEach { (k, v) ->
             if (k != send.except)
                 v.tell(PlayConnection.SendPacket(send.packet))
@@ -145,7 +145,7 @@ private class DedicatedServerNetworkActor(
         return Behaviors.same()
     }
 
-    private fun handleSendToNearby(send: Network.SendToNearby): Behavior<Network> {
+    private fun handleSendToNearby(send: VanillaNetwork.SendToNearby): Behavior<VanillaNetwork> {
         //TODO only send to connections within distance.
         connections.values.forEach {
             it.tell(PlayConnection.SendPacket(send.packet))
@@ -154,7 +154,7 @@ private class DedicatedServerNetworkActor(
         return Behaviors.same()
     }
 
-    private fun handleSendToWatching(send: Network.SendToWatching): Behavior<Network> {
+    private fun handleSendToWatching(send: VanillaNetwork.SendToWatching): Behavior<VanillaNetwork> {
         //TODO only send to connections with a registered interest in the position.
         connections.values.forEach {
             it.tell(PlayConnection.SendPacket(send.packet))
@@ -163,16 +163,16 @@ private class DedicatedServerNetworkActor(
         return Behaviors.same()
     }
 
-    private fun handleStart(start: Network.Start): Behavior<Network> {
-        val properties = server.properties!!
+    private fun handleStart(start: VanillaNetwork.Start): Behavior<VanillaNetwork> {
+        val properties = server.properties
         val group: EventLoopGroup
         val kclass: Class<out ServerChannel>
         if (Epoll.isAvailable()) {
-            logger.info("using epoll socket channel")
+            context.log.info("using epoll socket channel")
             kclass = EpollServerSocketChannel::class.java
             group = EpollEventLoopGroup()
         } else {
-            logger.info("using nio socket channel")
+            context.log.info("using nio socket channel")
             kclass = NioServerSocketChannel::class.java
             group = NioEventLoopGroup()
         }
@@ -203,8 +203,8 @@ private class DedicatedServerNetworkActor(
                 if (it.isDone) {
                     when {
                         it.isSuccess -> start.replyTo.tell(true)
-                        it.isCancelled -> logger.info("cancelled")
-                        else -> logger.error("Error", it.cause())
+                        it.isCancelled -> context.log.info("cancelled")
+                        else -> context.log.error("Error", it.cause())
                     }
                 }
             }
@@ -216,38 +216,39 @@ private class DedicatedServerNetworkActor(
         return Behaviors.same()
     }
 
-    private fun handleCreateConnection(createConnection: Network.CreateConnection): Behavior<Network> {
+    private fun handleCreateConnection(createConnection: VanillaNetwork.CreateConnection): Behavior<VanillaNetwork> {
         // TODO: store ref & dispose of the actor
-        logger.info("Creating connection for ${createConnection.profile.id}")
+        context.log.info("Creating connection for ${createConnection.profile.id}")
 
         val ref = context.spawn(
-            PlayConnection.actor(server, createConnection.handler),
+            PlayConnection.actor(server, createConnection.handler, this.vanillaWorld),
             "connection-${createConnection.profile.id}"
         )
         ref.tell(PlayConnection.Login)
 
         connections[createConnection.profile.id] = ref
         createConnection.replyTo.tell(true)
-        context.self.tell(Network.UpdateMotd { it.addPlayer(createConnection.profile) })
+        context.self.tell(VanillaNetwork.UpdateMotd { it.addPlayer(createConnection.profile) })
 
         return Behaviors.same()
     }
 
-    private fun handleDisconnected(disconnected: Network.Disconnected): Behavior<Network> {
-        logger.info("Removing connection for ${disconnected.user.id}")
+    private fun handleDisconnected(disconnected: VanillaNetwork.Disconnected): Behavior<VanillaNetwork> {
+        context.log.info("Removing connection for ${disconnected.user.id}")
         connections.remove(disconnected.user.id)
-        context.self.tell(Network.UpdateMotd { it.removePlayer(disconnected.user) })
+        context.self.tell(VanillaNetwork.UpdateMotd { it.removePlayer(disconnected.user) })
+        context.self.tell(VanillaNetwork.SendToAll(S2CPlayerInfo.removePlayer(arrayOf(disconnected.user.id))))
         return Behaviors.same()
     }
 
-    private fun handleUpdateMotd(updateMotd: Network.UpdateMotd): Behavior<Network> {
+    private fun handleUpdateMotd(updateMotd: VanillaNetwork.UpdateMotd): Behavior<VanillaNetwork> {
         updateMotd.mutation(this.motd)
         this.updateMotdCache()
 
         return Behaviors.same()
     }
 
-    private fun handleQueryMotd(queryMotd: Network.QueryMotd): Behavior<Network> {
+    private fun handleQueryMotd(queryMotd: VanillaNetwork.QueryMotd): Behavior<VanillaNetwork> {
         queryMotd.replyTo.tell(motdCache)
         return Behaviors.same()
     }

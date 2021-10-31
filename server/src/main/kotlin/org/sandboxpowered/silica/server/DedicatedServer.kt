@@ -14,11 +14,8 @@ import org.sandboxpowered.silica.resources.ZIPResourceLoader
 import org.sandboxpowered.silica.util.Side
 import org.sandboxpowered.silica.util.Util
 import org.sandboxpowered.silica.util.Util.MINECRAFT_VERSION
+import org.sandboxpowered.silica.util.extensions.*
 import org.sandboxpowered.silica.util.getLogger
-import org.sandboxpowered.silica.util.extensions.join
-import org.sandboxpowered.silica.util.extensions.messageAdapter
-import org.sandboxpowered.silica.util.extensions.onMessage
-import org.sandboxpowered.silica.util.extensions.onSignal
 import org.sandboxpowered.silica.vanilla.StateMappingManager
 import org.sandboxpowered.silica.vanilla.StateMappingManager.ErrorType.UNKNOWN
 import org.sandboxpowered.silica.vanilla.VanillaProtocolMapping
@@ -35,7 +32,7 @@ class DedicatedServer(args: Args) : SilicaServer() {
     override val registryProtocolMapper = VanillaProtocolMapping()
     private val acceptVanillaConnections: Boolean
     override lateinit var world: ActorRef<SilicaWorld.Command>
-    override lateinit var network: ActorRef<Network>
+    override lateinit var vanillaNetwork: ActorRef<VanillaNetwork>
     private val stateRemappingErrors: Map<StateMappingManager.ErrorType, Set<String>>
     override val properties = DedicatedServerProperties.fromFile(Paths.get("server.properties"))
     private lateinit var system: ActorSystem<Command>
@@ -80,7 +77,7 @@ class DedicatedServer(args: Args) : SilicaServer() {
         }
         logger.info("Loaded namespaces: [${dataManager.getNamespaces().join(",")}]")
         system = ActorSystem.create(
-            DedicatedServerGuardian.create(this, this::world::set, this::network::set),
+            DedicatedServerGuardian.create(this, this::world::set, this::vanillaNetwork::set),
             "dedicatedServerGuardian"
         )
     }
@@ -95,13 +92,13 @@ class DedicatedServer(args: Args) : SilicaServer() {
         context: ActorContext<Command>,
         timerScheduler: TimerScheduler<Command>,
         worldInit: (ActorRef<SilicaWorld.Command>) -> Unit,
-        networkInit: (ActorRef<Network>) -> Unit
-    ) : AbstractBehavior<Command>(context) {
+        networkInit: (ActorRef<VanillaNetwork>) -> Unit
+    ) : AbstractBehavior<Command>(context), WithContext {
         companion object {
             fun create(
                 server: SilicaServer,
                 worldInit: (ActorRef<SilicaWorld.Command>) -> Unit,
-                networkInit: (ActorRef<Network>) -> Unit
+                networkInit: (ActorRef<VanillaNetwork>) -> Unit
             ): Behavior<Command> = Behaviors.withTimers { timerScheduler ->
                 Behaviors.setup {
                     DedicatedServerGuardian(server, it, timerScheduler, worldInit, networkInit)
@@ -114,20 +111,21 @@ class DedicatedServer(args: Args) : SilicaServer() {
         private var lastTickTime: Long = -1
         private val world: ActorRef<in SilicaWorld.Command> =
             context.spawn(SilicaWorld.actor(Side.SERVER, server), "world").apply(worldInit)
-        private val network: ActorRef<in Network> = context.spawn(Network.actor(server), "network").apply(networkInit)
+        private val vanillaNetwork: ActorRef<in VanillaNetwork> =
+            context.spawn(VanillaNetwork.actor(server), "network").apply(networkInit)
         private val reaper: ActorRef<in Reaper.Command> = context.spawn(Reaper.actor(server), "reaper")
         private val currentlyTicking: Object2LongMap<ActorRef<*>> = Object2LongOpenHashMap(3)
 
         init {
             context.watch(world)
-            context.watch(network)
+            context.watch(vanillaNetwork)
             // TODO: compare to startTimerAtFixedRate
             timerScheduler.startTimerAtFixedRate("serverTick", Command.Tick(50f), Duration.ofMillis(50))
 
             reaper.tell(Reaper.Command.MarkForReaping(world))
-            reaper.tell(Reaper.Command.MarkForReaping(network))
+            reaper.tell(Reaper.Command.MarkForReaping(vanillaNetwork))
 
-            network.tell(Network.UpdateMotd {
+            vanillaNetwork.tell(VanillaNetwork.UpdateMotd {
                 it.version.name = "1.17.1 - Vanilla"
                 it.version.protocol = 756
 
@@ -138,7 +136,7 @@ class DedicatedServer(args: Args) : SilicaServer() {
             })
 
             // TODO: wait for everything to be ready
-            network.tell(Network.Start(context.system.ignoreRef()))
+            vanillaNetwork.tell(VanillaNetwork.Start(context.system.ignoreRef()))
         }
 
         override fun createReceive(): Receive<Command> = newReceiveBuilder()
@@ -153,7 +151,7 @@ class DedicatedServer(args: Args) : SilicaServer() {
                 if (server.properties.maxTickTime != -1 && lastTickOffset >= server.properties.maxTickTime) {
                     logger.error("Single tick took >=${server.properties.maxTickTime}ms! took ${lastTickOffset}ms")
                     context.stop(world)
-                    context.stop(network)
+                    context.stop(vanillaNetwork)
                     server.shutdown()
                     return Behaviors.stopped()
                 }
@@ -168,10 +166,10 @@ class DedicatedServer(args: Args) : SilicaServer() {
                 @Suppress("ReplacePutWithAssignment") // boxing
                 currentlyTicking.put(world, System.nanoTime())
                 @Suppress("ReplacePutWithAssignment") // boxing
-                currentlyTicking.put(network, System.nanoTime())
+                currentlyTicking.put(vanillaNetwork, System.nanoTime())
                 lastTickTime = System.currentTimeMillis()
                 world.tell(SilicaWorld.Command.Tick(tick.delta, context.messageAdapter { Command.Tock(it.done) }))
-                network.tell(Network.Tick(tick.delta, context.messageAdapter { Command.Tock(it.done) }))
+                vanillaNetwork.tell(VanillaNetwork.Tick(tick.delta, context.messageAdapter { Command.Tock(it.done) }))
             }
 
             return Behaviors.same()

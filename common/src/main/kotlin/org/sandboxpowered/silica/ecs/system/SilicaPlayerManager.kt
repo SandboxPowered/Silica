@@ -6,7 +6,6 @@ import com.artemis.BaseEntitySystem
 import com.artemis.ComponentMapper
 import com.artemis.annotations.All
 import com.artemis.annotations.Wire
-import com.artemis.utils.IntBag
 import com.mojang.authlib.GameProfile
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
@@ -23,7 +22,6 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
     private val entityToUuid: Int2ObjectFunction<UUID> = Int2ObjectOpenHashMap()
     val onlinePlayers: ObjectSet<UUID> = ObjectOpenHashSet()
     val onlinePlayerProfiles: Object2ObjectMap<UUID, GameProfile> = Object2ObjectOpenHashMap()
-    private val entitiesToDelete = IntBag()
 
     @Wire
     private lateinit var playerMapper: ComponentMapper<PlayerComponent>
@@ -39,6 +37,9 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
 
     @Wire
     private lateinit var inventoryMapper: ComponentMapper<PlayerInventoryComponent>
+
+    @Wire
+    private lateinit var removalMapper: ComponentMapper<MarkForRemovalComponent>
 
     override fun processSystem() {
 
@@ -73,7 +74,9 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
         onlinePlayers.remove(profile.id)
         onlinePlayerProfiles.remove(profile.id)
 
-        entityToUuid.remove(uuidToEntityId.removeInt(profile.id))
+        val entityId = uuidToEntityId.removeInt(profile.id)
+        entityToUuid.remove(entityId)
+        removalMapper.create(entityId)
     }
 
     fun create(profile: GameProfile): VanillaPlayerInput {

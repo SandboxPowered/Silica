@@ -1,9 +1,9 @@
 package org.sandboxpowered.silica.client.server
 
 import akka.actor.typed.ActorRef
-import org.sandboxpowered.silica.server.Network
 import org.sandboxpowered.silica.server.ServerProperties
 import org.sandboxpowered.silica.server.SilicaServer
+import org.sandboxpowered.silica.server.VanillaNetwork
 import org.sandboxpowered.silica.vanilla.StateMappingManager
 import org.sandboxpowered.silica.vanilla.VanillaProtocolMapping
 import org.sandboxpowered.silica.world.SilicaWorld
@@ -14,7 +14,7 @@ class IntegratedServer() : SilicaServer() {
     override val properties = IntegratedServerProperties()
 
     override lateinit var world: ActorRef<SilicaWorld.Command>
-    override lateinit var network: ActorRef<Network>
+    override lateinit var vanillaNetwork: ActorRef<VanillaNetwork>
 
     class IntegratedServerProperties : ServerProperties {
         override val onlineMode = true

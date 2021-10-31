@@ -8,19 +8,18 @@ import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import com.artemis.WorldConfigurationBuilder
 import com.mojang.authlib.GameProfile
+import net.mostlyoriginal.api.event.common.EventSystem
 import org.joml.Vector2i
 import org.joml.Vector2ic
 import org.sandboxpowered.silica.content.block.BlockEntityProvider
 import org.sandboxpowered.silica.ecs.component.BlockPositionComponent
 import org.sandboxpowered.silica.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.ecs.component.VanillaPlayerInput
-import org.sandboxpowered.silica.ecs.system.Entity3dMap
-import org.sandboxpowered.silica.ecs.system.Entity3dMapSystem
-import org.sandboxpowered.silica.ecs.system.SilicaPlayerManager
-import org.sandboxpowered.silica.ecs.system.VanillaInputSystem
+import org.sandboxpowered.silica.ecs.events.ReplaceBlockEvent
+import org.sandboxpowered.silica.ecs.system.*
 import org.sandboxpowered.silica.registry.SilicaRegistries
-import org.sandboxpowered.silica.server.Network
 import org.sandboxpowered.silica.server.SilicaServer
+import org.sandboxpowered.silica.server.VanillaNetwork
 import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.Side
 import org.sandboxpowered.silica.util.content.Direction
@@ -51,20 +50,16 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
     )
     val artemisWorld: ArtemisWorld
     private var worldTicks = 0L
-    val listeners: MutableList<(Position, BlockState, BlockState) -> Unit> = ArrayList()
-    val vanillaWorldAdapter = VanillaWorldAdapter(this).apply {
-        addListener(this::propagateUpdate)
-    }
+
+    private val eventSystem = EventSystem()
+
     override val worldHeight: Vector2ic = Vector2i(0, 255)
     override val isClient: Boolean = side == Side.CLIENT
     override val isServer: Boolean = side == Side.SERVER
 
-    fun addListener(listener: (Position, BlockState, BlockState) -> Unit) {
-        listeners.add(listener)
-    }
-
     init {
         val config = WorldConfigurationBuilder()
+        config.with(eventSystem)
         config.with(VanillaInputSystem(server))
         config.with(SilicaPlayerManager(10))
         val entityMap = Entity3dMapSystem(
@@ -81,9 +76,12 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
             it.createProcessingSystem().let { system -> config.with(system) }
         }
         config.with(entityMap)
+        config.with(Int.MIN_VALUE /* last */, EntityRemovalSystem())
         artemisWorld = ArtemisWorld(config.build().registerAs<Entity3dMap>(entityMap))
         artemisWorld.create()
     }
+
+    override fun registerEventSubscriber(sub: Any) = eventSystem.registerEvents(sub)
 
     override fun getBlockState(pos: Position): BlockState {
         return blocks[pos.x, pos.y, pos.z]
@@ -111,8 +109,8 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
             Direction.ALL.forEach { updateNeighbor(pos, state, it.opposite, pos.shift(it)) }
         }
 
-        listeners.forEach { it(pos, oldState, state) }
-        server.network.tell(Network.SendToWatching(pos, S2CBlockChange(pos, server.stateRemapper[state])))
+        eventSystem.dispatch(ReplaceBlockEvent(pos, oldState, state))
+        server.vanillaNetwork.tell(VanillaNetwork.SendToWatching(pos, S2CBlockChange(pos, server.stateRemapper[state])))
         return true
     }
 
@@ -148,6 +146,8 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
          */
         class Ask<T>(val body: (WorldReader) -> T, val replyTo: ActorRef<T>) : Command()
 
+        class RegisterEventSubscriber(val sub: Any) : Command()
+
         /**
          * Will be processed during next tick
          */
@@ -162,7 +162,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
             /**
              * To be avoided when possible
              */
-            class AskSilica<T : Any>(body: (SilicaWorld) -> T, val replyTo: ActorRef<T>) :
+            class AskSilica<T : Any>(val replyTo: ActorRef<T>, body: (SilicaWorld) -> T) :
                 DelayedCommand<SilicaWorld, T>(body)
 
             companion object {
@@ -171,16 +171,15 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
                     replyTo: ActorRef<T>,
                     crossinline transform: (VanillaPlayerInput, PlayerInventoryComponent, Array<GameProfile>) -> T
                 ) = AskSilica(
-                    {
-                        val playerManager = it.artemisWorld.getSystem<SilicaPlayerManager>()
-                        transform(
-                            playerManager.create(gameProfile),
-                            playerManager.createInventory(gameProfile),
-                            playerManager.getOnlinePlayerProfiles()
-                        )
-                    },
                     replyTo
-                )
+                ) {
+                    val playerManager = it.artemisWorld.getSystem<SilicaPlayerManager>()
+                    transform(
+                        playerManager.create(gameProfile),
+                        playerManager.createInventory(gameProfile),
+                        playerManager.getOnlinePlayerProfiles()
+                    )
+                }
             }
         }
     }
@@ -197,6 +196,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
             .onMessage(this::handleTick)
             .onMessage(this::handleAsk)
             .onMessage(this::handleDelayedCommand)
+            .onMessage(this::handleSubscribe)
             .build()
 
         private fun handleTick(tick: Command.Tick): Behavior<Command> {
@@ -239,6 +239,11 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
 
         private fun handleAsk(ask: Command.Ask<Any>): Behavior<Command> {
             ask.replyTo.tell(ask.body(world))
+            return Behaviors.same()
+        }
+
+        private fun handleSubscribe(message: Command.RegisterEventSubscriber): Behavior<Command> {
+            world.registerEventSubscriber(message.sub)
             return Behaviors.same()
         }
 
