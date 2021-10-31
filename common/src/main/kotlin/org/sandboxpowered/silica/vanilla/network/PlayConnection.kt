@@ -299,14 +299,12 @@ private class PlayConnectionActor(
     }
 
     private fun handleReceiveChunkSection(sections: PlayConnection.ReceiveChunkSections): Behavior<PlayConnection> {
-        context.log.info("Sending sections at ${sections.x}, ${sections.z}")
         packetHandler.sendPacket(S2CChunkData(sections.x, sections.z, sections.chunkSections))
         packetHandler.sendPacket(S2CUpdateLight(sections.x, sections.z, true))
         return Behaviors.same()
     }
 
     private fun handleReceiveWorld(message: PlayConnection.ReceiveWorld): Behavior<PlayConnection> {
-        context.log.info("Sending world")
         packetHandler.sendPacket(S2CWorldBorder())
         packetHandler.sendPacket(
             S2CInitWindowItems(

@@ -63,7 +63,6 @@ sealed class Accumulator<out T : Any> {
         }
 
         private fun handleReceiveValue(message: ReceiveValue<T>): Behavior<Accumulator<T>> {
-            context.log.info("Receiving index ${message.index}")
             data[message.index] = message.value
             return checkDone()
         }
@@ -71,10 +70,8 @@ sealed class Accumulator<out T : Any> {
         private fun checkDone(): Behavior<Accumulator<T>> =
             if (data.none { it == null }) {
                 replyTo!!.tell(data.requireNoNulls())
-                context.log.info("Done :)")
                 Behaviors.stopped()
             } else {
-                context.log.info("Received ${data.count { it != null }}/${data.size}")
                 Behaviors.same()
             }
     }
