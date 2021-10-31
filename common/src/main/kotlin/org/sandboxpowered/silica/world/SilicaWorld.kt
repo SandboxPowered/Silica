@@ -111,7 +111,9 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
             Direction.ALL.forEach { updateNeighbor(pos, state, it.opposite, pos.shift(it)) }
         }
 
-        eventSystem.dispatch(ReplaceBlockEvent(pos, oldState, state))
+        if (WorldWriter.Flag.NOTIFY_LISTENERS in flags) {
+            eventSystem.dispatch(ReplaceBlockEvent(pos, oldState, state))
+        }
         return true
     }
 
