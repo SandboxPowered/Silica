@@ -42,34 +42,36 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             0x13 packet ::C2SPlayerRotation
             0x14 packet ::C2SPlayerMovement
             0x1A packet ::C2SPlayerDigging
-            0x2C packet ::C2SHandSwingAnimation
+            0x17 packet ::C2SPickItem
             0x1B packet ::C2SEntityAction
             0x2E packet ::C2SPlayerBlockPlacement
             0x25 packet ::C2SHeldItemChange
-            0x17 packet ::C2SPickItem
+            0x28 packet ::C2SCreativeInventoryAction
+            0x2C packet ::C2SHandSwingAnimation
         }
         client {
-            0x26 packet ::S2CJoinGame
-            0x48 packet ::S2CHeldItemChange
-            0x65 packetDeprecated ::S2CDeclareRecipes
-            0X66 packetDeprecated ::S2CDeclareTags
-            0x1B packetDeprecated ::S2CEntityStatus
-            0x12 packetDeprecated ::S2CDeclareCommands
-            0x38 packet ::S2CSetPlayerPositionAndLook
-            0x39 packetDeprecated ::S2CUnlockRecipes
-            0x36 packetDeprecated ::S2CPlayerInfo
-            0x49 packetDeprecated ::S2CUpdateChunkPosition
-            0x22 packetDeprecated ::S2CChunkData
-            0x25 packetDeprecated ::S2CUpdateLight
-            0x20 packetDeprecated ::S2CWorldBorder
-            0x21 packet ::S2CKeepAliveClient
+            0x04 packetDeprecated ::S2CSpawnPlayer
             0x08 packet ::S2CAcknowledgePlayerDigging
             0x0C packet ::S2CBlockChange
-            0x04 packetDeprecated ::S2CSpawnPlayer
+            0x12 packetDeprecated ::S2CDeclareCommands
+            0x14 packet ::S2CInitWindowItems
+            0x1B packetDeprecated ::S2CEntityStatus
+            0x20 packetDeprecated ::S2CWorldBorder
+            0x21 packet ::S2CKeepAliveClient
+            0x22 packet ::S2CChunkData
+            0x25 packetDeprecated ::S2CUpdateLight
+            0x26 packet ::S2CJoinGame
             0x29 packetDeprecated ::S2CUpdateEntityPosition
             0x2A packetDeprecated ::S2CUpdateEntityPositionRotation
             0x2B packetDeprecated ::S2CUpdateEntityRotation
-            0x14 packet ::S2CInitWindowItems
+            0x36 packetDeprecated ::S2CPlayerInfo
+            0x38 packet ::S2CSetPlayerPositionAndLook
+            0x39 packetDeprecated ::S2CUnlockRecipes
+            0x3A packet ::S2CDestroyEntities
+            0x48 packet ::S2CHeldItemChange
+            0x49 packetDeprecated ::S2CUpdateChunkPosition
+            0x65 packetDeprecated ::S2CDeclareRecipes
+            0x66 packetDeprecated ::S2CDeclareTags
         }
     }),
     STATUS(1, {
