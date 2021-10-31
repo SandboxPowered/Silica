@@ -485,10 +485,23 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         return this
     }
 
+    // hard to "guess" max size with var ints
+    fun readVarIntArray(maxSize: Int = -1): IntArray {
+        val length = readVarInt()
+        if (maxSize in 1 until length) throw DecoderException("IntArray with size $length is bigger than allowed $maxSize")
+        return IntArray(length) { readVarInt() }
+    }
+
     fun writeVarIntArray(array: IntArray): ByteBuf {
         writeVarInt(array.size)
         array.forEach(this::writeVarInt)
         return this
+    }
+
+    fun readLongArray(maxSize: Int = -1): LongArray {
+        val length = readVarInt()
+        if (maxSize in 1 until length) throw DecoderException("LongArray with size $length is bigger than allowed $maxSize")
+        return LongArray(length) { readLong() }
     }
 
     fun writeLongArray(array: LongArray): ByteBuf {

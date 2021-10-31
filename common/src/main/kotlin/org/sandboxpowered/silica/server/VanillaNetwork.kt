@@ -23,12 +23,16 @@ import io.netty.handler.timeout.ReadTimeoutHandler
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import net.kyori.adventure.text.Component
+import net.mostlyoriginal.api.event.common.Subscribe
+import org.sandboxpowered.silica.ecs.events.RemoveEntitiesEvent
 import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.util.extensions.registerTypeAdapter
 import org.sandboxpowered.silica.util.math.Position
 import org.sandboxpowered.silica.vanilla.network.*
+import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CDestroyEntities
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CKeepAliveClient
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CPlayerInfo
+import org.sandboxpowered.silica.world.SilicaWorld
 import org.sandboxpowered.silica.world.VanillaWorldAdapter
 import java.util.*
 
@@ -83,6 +87,10 @@ private class VanillaNetworkActor(
 
     private fun updateMotdCache() {
         motdCache = gson.toJson(motd)
+    }
+
+    init {
+        server.world.tell(SilicaWorld.Command.RegisterEventSubscriber(this))
     }
 
     override fun createReceive(): Receive<VanillaNetwork> = newReceiveBuilder()
@@ -251,5 +259,10 @@ private class VanillaNetworkActor(
     private fun handleQueryMotd(queryMotd: VanillaNetwork.QueryMotd): Behavior<VanillaNetwork> {
         queryMotd.replyTo.tell(motdCache)
         return Behaviors.same()
+    }
+
+    @Subscribe
+    fun removeEntities(event: RemoveEntitiesEvent) {
+        context.self.tell(VanillaNetwork.SendToAll(S2CDestroyEntities(event.entityIds)))
     }
 }
