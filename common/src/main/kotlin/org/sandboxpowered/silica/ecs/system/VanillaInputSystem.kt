@@ -4,6 +4,9 @@ import com.artemis.ComponentMapper
 import com.artemis.annotations.All
 import com.artemis.annotations.Wire
 import com.artemis.systems.IteratingSystem
+import org.joml.Vector3d
+import org.sandboxpowered.silica.content.block.Blocks
+import org.sandboxpowered.silica.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.ecs.component.PositionComponent
 import org.sandboxpowered.silica.ecs.component.RotationComponent
 import org.sandboxpowered.silica.ecs.component.VanillaPlayerInput
@@ -12,10 +15,12 @@ import org.sandboxpowered.silica.server.VanillaNetwork
 import org.sandboxpowered.silica.util.extensions.component1
 import org.sandboxpowered.silica.util.extensions.component2
 import org.sandboxpowered.silica.util.extensions.component3
+import org.sandboxpowered.silica.util.math.Position
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityPosition
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityPositionRotation
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityRotation
+import org.sandboxpowered.silica.world.World
 
 @All(VanillaPlayerInput::class, PositionComponent::class, RotationComponent::class)
 class VanillaInputSystem(val server: SilicaServer) : IteratingSystem() {
@@ -28,6 +33,12 @@ class VanillaInputSystem(val server: SilicaServer) : IteratingSystem() {
 
     @Wire
     private lateinit var rotationMapper: ComponentMapper<RotationComponent>
+
+    @Wire
+    private lateinit var inventoryMapper: ComponentMapper<PlayerInventoryComponent>
+
+    @Wire
+    private lateinit var terrain: World
 
     override fun process(entityId: Int) {
         // TODO: check if in range
@@ -80,5 +91,29 @@ class VanillaInputSystem(val server: SilicaServer) : IteratingSystem() {
             )
         }
         previousLocation.set(location)
+
+        this.handleTerrainInteraction(entityId, input, previousLocation)
+    }
+
+    private fun handleTerrainInteraction(entityId: Int, input: VanillaPlayerInput, position: Vector3d) {
+        input.breaking = performWithRangedCheck(input.breaking, position) {
+            terrain.setBlockState(it, Blocks.AIR.defaultState)
+        }
+
+        input.placing = performWithRangedCheck(input.placing, position) {
+            //val heldItem = inventoryMapper[entityId]?.inventory?.mainHandStack?.takeUnless(ItemStack::isEmpty)
+            terrain.setBlockState(it, Blocks.STONE.defaultState)
+        }
+    }
+
+    private inline fun performWithRangedCheck(
+        target: Position?,
+        position: Vector3d,
+        perform: (Position) -> Unit
+    ): Position? {
+        if (target != null && position.distanceSquared(target.x + .5, target.y + .5, target.z + .5) < 20) {
+            perform(target)
+        }
+        return null
     }
 }

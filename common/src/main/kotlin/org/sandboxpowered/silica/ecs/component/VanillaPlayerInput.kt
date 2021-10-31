@@ -3,6 +3,7 @@ package org.sandboxpowered.silica.ecs.component
 import com.artemis.PooledComponent
 import com.mojang.authlib.GameProfile
 import org.joml.Vector3d
+import org.sandboxpowered.silica.util.math.Position
 
 class VanillaPlayerInput : PooledComponent() {
     private var initialized = false
@@ -19,6 +20,11 @@ class VanillaPlayerInput : PooledComponent() {
 
     var sneaking = false
     var jumping = false
+
+    var breaking: Position? = null
+    var placing: Position? = null
+
+    var creative = true
 
     override fun reset() {
         initialized = false

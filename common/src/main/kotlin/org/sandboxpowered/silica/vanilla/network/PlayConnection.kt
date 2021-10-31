@@ -78,10 +78,9 @@ private class PlayConnectionActor(
 
     private val playContext by lazy {
         PlayContext(
-            server,
             { server.world.tell(SilicaWorld.Command.DelayedCommand.PerformSilica { _ -> it(playerInventoryComponent.inventory) }) },
-            { server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { _ -> it(playerInput) }) },
-            { server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { world -> it(world) }) })
+            { server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { _ -> it(playerInput) }) }
+        )
     }
 
     init {
@@ -306,12 +305,13 @@ private class PlayConnectionActor(
 
     private fun handleReceiveWorld(message: PlayConnection.ReceiveWorld): Behavior<PlayConnection> {
         packetHandler.sendPacket(S2CWorldBorder())
+        val itemMapper = server.registryProtocolMapper["minecraft:item"]
         packetHandler.sendPacket(
             S2CInitWindowItems(
                 0u,
                 1 and 32767,
                 playerInventoryComponent.inventory
-            ) { server.registryProtocolMapper["minecraft:item"][it.identifier] }
+            ) { itemMapper[it.identifier] }
         )
 
         return Behaviors.same()

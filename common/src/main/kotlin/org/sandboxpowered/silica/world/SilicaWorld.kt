@@ -19,7 +19,6 @@ import org.sandboxpowered.silica.ecs.events.ReplaceBlockEvent
 import org.sandboxpowered.silica.ecs.system.*
 import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.server.SilicaServer
-import org.sandboxpowered.silica.server.VanillaNetwork
 import org.sandboxpowered.silica.util.Identifier
 import org.sandboxpowered.silica.util.Side
 import org.sandboxpowered.silica.util.content.Direction
@@ -28,7 +27,6 @@ import org.sandboxpowered.silica.util.extensions.getSystem
 import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.util.extensions.registerAs
 import org.sandboxpowered.silica.util.math.Position
-import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CBlockChange
 import org.sandboxpowered.silica.world.gen.TerrainGenerator
 import org.sandboxpowered.silica.world.state.block.BlockState
 import org.sandboxpowered.silica.world.state.fluid.FluidState
@@ -77,7 +75,11 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         }
         config.with(entityMap)
         config.with(Int.MIN_VALUE /* last */, EntityRemovalSystem())
-        artemisWorld = ArtemisWorld(config.build().registerAs<Entity3dMap>(entityMap))
+        artemisWorld = ArtemisWorld(
+            config.build()
+                .registerAs<Entity3dMap>(entityMap)
+                .registerAs<World>(this)
+        )
         artemisWorld.create()
     }
 
@@ -110,7 +112,6 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         }
 
         eventSystem.dispatch(ReplaceBlockEvent(pos, oldState, state))
-        server.vanillaNetwork.tell(VanillaNetwork.SendToWatching(pos, S2CBlockChange(pos, server.stateRemapper[state])))
         return true
     }
 

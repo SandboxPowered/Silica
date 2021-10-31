@@ -1,5 +1,6 @@
 package org.sandboxpowered.silica.vanilla.network.play.serverbound
 
+import org.sandboxpowered.silica.util.getLogger
 import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
@@ -18,7 +19,11 @@ class C2SCreativeInventoryAction(
         clickedSlot.write(buf)
     }
 
-    override fun handle(packetHandler: PacketHandler, context: PlayContext) = Unit
+    private val logger = getLogger()
+
+    override fun handle(packetHandler: PacketHandler, context: PlayContext) {
+        logger.info("slot $slot with data $clickedSlot")
+    }
 }
 /*
 From the wiki :
