@@ -5,7 +5,7 @@ import org.sandboxpowered.silica.content.item.Items.AIR
 import org.sandboxpowered.silica.registry.RegistryObject
 import kotlin.math.min
 
-class ItemStack private constructor(private val _item: Item, private var _count: Int) {
+class ItemStack private constructor(private var _item: Item, private var _count: Int) {
     companion object {
         val EMPTY by lazy { ItemStack(AIR, 0) }
 
@@ -49,9 +49,9 @@ class ItemStack private constructor(private val _item: Item, private var _count:
     fun isItemEqual(obj: RegistryObject<Item>): Boolean =
         if (obj.isEmpty) false else item == obj.get()
 
-    fun isItemEqual(item: Item): Boolean = if (this.isEmpty) item == AIR else item == this.item
+    fun isItemEqual(item: Item): Boolean = item == this.item
 
-    fun canMerge(stack: ItemStack): Boolean = isItemEqual(stack.item) // TODO: match NBT when we have it
+    fun canMerge(stack: ItemStack): Boolean = this.isEmpty || isItemEqual(stack.item) // TODO: match NBT when we have it
 
     /**
      * Merge this with given [stack] and return the remainder
@@ -62,6 +62,7 @@ class ItemStack private constructor(private val _item: Item, private var _count:
         val max = this.item.properties.maxStackSize
         val toAdd = min(max - count, stack.count)
         this += toAdd
+        this._item = stack.item
         return stack.duplicate().apply {
             this -= toAdd
         }
