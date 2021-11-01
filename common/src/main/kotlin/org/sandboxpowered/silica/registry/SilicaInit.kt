@@ -123,8 +123,8 @@ object SilicaInit {
 
     private fun register(block: Block) {
         SilicaRegistries.BLOCK_REGISTRY.register(block)
-        if (!block.isAir) {
-            SilicaRegistries.ITEM_REGISTRY.register(BlockItem(block.identifier, block, Item.Properties.create {
+        if (block.hasItem) {
+            SilicaRegistries.ITEM_REGISTRY.register(BlockItem(block, Item.Properties.create {
 
             }))
         }

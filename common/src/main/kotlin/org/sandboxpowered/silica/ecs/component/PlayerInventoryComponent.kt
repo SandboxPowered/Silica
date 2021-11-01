@@ -6,6 +6,6 @@ import org.sandboxpowered.silica.content.inventory.PlayerInventory
 class PlayerInventoryComponent : PooledComponent() {
     val inventory = PlayerInventory()
     override fun reset() {
-        inventory.reset()
+        inventory.clear()
     }
 }

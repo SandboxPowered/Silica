@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.vanilla.network.play.serverbound
 
-import org.sandboxpowered.silica.util.getLogger
+import org.sandboxpowered.silica.content.item.ItemStack
 import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
@@ -8,21 +8,24 @@ import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.play.SlotData
 
 class C2SCreativeInventoryAction(
-    private val slot: Short,
-    private val clickedSlot: SlotData
+    private val slotId: Short,
+    private val stack: SlotData
 ) : PacketPlay {
 
     constructor(buf: PacketByteBuf) : this(buf.readShort(), SlotData(buf))
 
     override fun write(buf: PacketByteBuf) {
-        buf.writeShort(slot)
-        clickedSlot.write(buf)
+        buf.writeShort(slotId)
+        stack.write(buf)
     }
 
-    private val logger = getLogger()
-
     override fun handle(packetHandler: PacketHandler, context: PlayContext) {
-        logger.info("slot $slot with data $clickedSlot")
+        // TODO: this should go through PlayerInput and check for creative
+        context.mutatePlayerInventory {
+            it[slotId.toInt()] =
+                if (stack.present) ItemStack(context.idToItem(stack.itemId), stack.itemCount.toInt())
+                else ItemStack.EMPTY
+        }
     }
 }
 /*

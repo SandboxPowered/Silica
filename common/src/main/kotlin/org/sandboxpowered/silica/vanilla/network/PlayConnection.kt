@@ -13,6 +13,7 @@ import org.sandboxpowered.silica.ecs.system.SilicaPlayerManager
 import org.sandboxpowered.silica.nbt.NBTCompound
 import org.sandboxpowered.silica.nbt.nbt
 import org.sandboxpowered.silica.nbt.setTag
+import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.server.VanillaNetwork
 import org.sandboxpowered.silica.util.Identifier
@@ -77,7 +78,9 @@ private class PlayConnectionActor(
     private lateinit var playerInventoryComponent: PlayerInventoryComponent
 
     private val playContext by lazy {
+        val itemMapper = server.registryProtocolMapper["minecraft:item"]
         PlayContext(
+            { SilicaRegistries.ITEM_REGISTRY[itemMapper[it]].get() },
             { server.world.tell(SilicaWorld.Command.DelayedCommand.PerformSilica { _ -> it(playerInventoryComponent.inventory) }) },
             { server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { _ -> it(playerInput) }) }
         )

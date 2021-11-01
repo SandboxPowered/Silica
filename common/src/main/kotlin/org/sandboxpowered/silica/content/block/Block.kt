@@ -14,6 +14,8 @@ sealed interface Block : RegistryEntry<Block>, Translatable {
     val item: Item?
     val isAir: Boolean
 
+    val hasItem: Boolean get() = !isAir
+
     override fun translationKey(): String = "block.${identifier.namespace}.${identifier.path}"
 
     /**

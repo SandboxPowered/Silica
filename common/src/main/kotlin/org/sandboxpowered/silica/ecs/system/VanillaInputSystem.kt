@@ -6,6 +6,8 @@ import com.artemis.annotations.Wire
 import com.artemis.systems.IteratingSystem
 import org.joml.Vector3d
 import org.sandboxpowered.silica.content.block.Blocks
+import org.sandboxpowered.silica.content.item.BlockItem
+import org.sandboxpowered.silica.content.item.ItemStack
 import org.sandboxpowered.silica.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.ecs.component.PositionComponent
 import org.sandboxpowered.silica.ecs.component.RotationComponent
@@ -101,8 +103,13 @@ class VanillaInputSystem(val server: SilicaServer) : IteratingSystem() {
         }
 
         input.placing = performWithRangedCheck(input.placing, position) {
-            //val heldItem = inventoryMapper[entityId]?.inventory?.mainHandStack?.takeUnless(ItemStack::isEmpty)
-            terrain.setBlockState(it, Blocks.STONE.defaultState)
+            val heldItem = inventoryMapper[entityId]?.inventory?.mainHandStack?.takeUnless(ItemStack::isEmpty)
+            if (heldItem != null) {
+                val item = heldItem.item
+                if (item is BlockItem) {
+                    terrain.setBlockState(it, item.block.defaultState)
+                }
+            }
         }
     }
 

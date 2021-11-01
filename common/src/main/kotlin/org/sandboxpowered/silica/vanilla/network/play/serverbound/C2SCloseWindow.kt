@@ -5,16 +5,14 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 
-class C2SHeldItemChange(private val slot: Int) : PacketPlay {
-    constructor(buf: PacketByteBuf) : this(buf.readShort().toInt())
+class C2SCloseWindow(private val windowId: UByte) : PacketPlay {
+    constructor(buf: PacketByteBuf) : this(buf.readUByte())
 
     override fun write(buf: PacketByteBuf) {
-        buf.writeShort(slot)
+        buf.writeByte(windowId.toByte())
     }
 
     override fun handle(packetHandler: PacketHandler, context: PlayContext) {
-        context.mutatePlayerInventory {
-            it.selectedSlot = slot
-        }
+
     }
 }

@@ -35,6 +35,7 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
         server {
             0x00 packet ::C2STeleportConfirmation
             0x05 packet ::C2SClientSettings
+            0x09 packet ::C2SCloseWindow
             0x0A packet ::C2SClientPluginChannel
             0x0F packet ::C2SKeepAliveServer
             0x11 packet ::C2SPlayerPosition

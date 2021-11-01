@@ -584,16 +584,17 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         }
     }
 
-    fun writeNBT(tag: NBTCompound?) {
+    fun writeNBT(tag: NBTCompound?): PacketByteBuf {
         if (tag == null)
             writeByte(0)
         else {
             val out = ByteBufOutputStream(this)
             out.write(tag)
         }
+        return this
     }
 
-    fun writeVarLong(i: Long): ByteBuf {
+    fun writeVarLong(i: Long): PacketByteBuf {
         var l = i
         while (l and -128L != 0L) {
             writeByte((l and 127L).toInt() or 128)
@@ -606,14 +607,34 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
 
     fun readPosition(): Position = Position.unpack(readLong())
 
-    fun writePosition(pos: Position): ByteBuf = writeLong(pos.packed)
+    fun writePosition(pos: Position): PacketByteBuf {
+        writeLong(pos.packed)
+        return this
+    }
 
-    fun writeText(reason: Component) {
+    fun writeText(reason: Component): PacketByteBuf {
         writeString(GsonComponentSerializer.gson().serialize(reason))
+        return this
     }
 
     fun readText(): Component {
         return GsonComponentSerializer.gson().deserialize(readString())
+    }
+
+    fun <T> readCollection(transform: (PacketByteBuf) -> T): Collection<T> {
+        val size = readVarInt()
+        return List(size) { transform(this) }
+    }
+
+    fun <T> writeCollection(collection: Collection<T>, transform: PacketByteBuf.(T) -> PacketByteBuf): PacketByteBuf {
+        writeVarInt(collection.size)
+        return collection.fold(this, transform)
+    }
+
+    @JvmName("writeCollectionFunky")
+    fun <T> writeCollection(collection: Collection<T>, transform: T.(PacketByteBuf) -> PacketByteBuf): PacketByteBuf {
+        writeVarInt(collection.size)
+        return collection.fold(this) { acc, it -> it.transform(acc) }
     }
 
     companion object {

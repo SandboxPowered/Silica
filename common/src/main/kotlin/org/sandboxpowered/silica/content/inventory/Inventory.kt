@@ -2,24 +2,73 @@ package org.sandboxpowered.silica.content.inventory
 
 import org.sandboxpowered.silica.content.item.Item
 import org.sandboxpowered.silica.content.item.ItemStack
+import kotlin.math.min
 
-interface Inventory {
+interface Inventory : Iterable<ItemStack> {
+    /**
+     * The amount of slots in this inventory
+     */
     val size: Int
-    val isEmpty: Boolean
 
+    /**
+     * Whether this inventory is empty
+     */
+    val isEmpty: Boolean get() = all(ItemStack::isEmpty)
+
+    /**
+     * Get stack in [slot]
+     */
     operator fun get(slot: Int): ItemStack
-    operator fun set(slot: Int, stack: ItemStack)
 
-    fun add(i: Int, stack: ItemStack)
+    /**
+     * Set [stack] in [slot]
+     */
+    operator fun set(slot: Int, stack: ItemStack): ItemStack
 
-    fun removeStack(slot: Int): ItemStack
-    fun removeStack(slot: Int, amount: Int): ItemStack
+    /**
+     * Clear this inventory
+     */
+    fun clear() = repeat(size) { set(it, ItemStack.EMPTY) }
 
-    fun isValidItem(slot: Int, item: ItemStack): Boolean
+    /**
+     * Add the [stack] to given [slot] and return the remainder
+     * In case the items do not match, the full [stack] will be returned
+     */
+    fun add(slot: Int, stack: ItemStack): ItemStack = get(slot).merge(stack)
 
-    fun count(item: Item): Int
+    /**
+     * Remove the stack in [slot] and return it
+     */
+    fun removeStack(slot: Int): ItemStack = set(slot, ItemStack.EMPTY)
 
-    operator fun contains(item: Item): Boolean
+    /**
+     * Remove at least [amount] items from the stack in [slot] and return the removed stack
+     */
+    fun removeStack(slot: Int, amount: Int): ItemStack {
+        val stack = get(slot)
+        val toRemove = min(amount, stack.count)
+        set(slot, stack.duplicate().apply { this -= toRemove })
+        stack.count = toRemove
+        return stack
+    }
 
-    fun containsAny(vararg items: Item): Boolean
+    /**
+     * Whether the stack in [slot] can merge with [stack]
+     */
+    fun isValidItem(slot: Int, stack: ItemStack): Boolean = get(slot).canMerge(stack)
+
+    /**
+     * Count the amount of [item] in this inventory
+     */
+    fun count(item: Item): Int = asSequence().filter { it.isItemEqual(item) }.sumOf { it.count }
+
+    /**
+     * Whether this inventory contains any [item]
+     */
+    operator fun contains(item: Item): Boolean = any { it.isItemEqual(item) }
+
+    /**
+     * Whether this inventory contains any of the [items]
+     */
+    fun containsAny(items: Set<Item>): Boolean = any { !it.isEmpty && it.item in items }
 }

@@ -26,8 +26,7 @@ class FurnaceProcessingSystem : DelayedIteratingSystem() {
     private lateinit var inventoryMapper: ComponentMapper<ResizableInventoryComponent>
 
     fun resetIfApplicable(inventory: ResizableInventory) {
-        if (inventory.size != 3)
-            inventory.reset(3)
+        if (inventory.size != 3) inventory.clear()
     }
 
     val fuelTime = 1600 // TODO replace with getting fuel per item

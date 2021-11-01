@@ -1,9 +1,8 @@
 package org.sandboxpowered.silica.content.item
 
 import org.sandboxpowered.silica.content.block.Block
-import org.sandboxpowered.silica.util.Identifier
 
-class BlockItem(identifier: Identifier, val block: Block, properties: Item.Properties) :
-    BaseItem(identifier, properties) {
+class BlockItem(val block: Block, properties: Item.Properties) :
+    BaseItem(block.identifier, properties) {
     override fun translationKey(): String = block.translationKey()
 }
