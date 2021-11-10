@@ -44,7 +44,12 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             0x08 packet ::C2SClickWindow
             0x09 packet ::C2SCloseWindow
             0x0A packet ::C2SPluginChannel
+            0x0B packet ::C2SEditBook
+            0x0C packet ::C2SQueryEntity
+            0x0D packet C2SInteractEntity::readFrom
+            0x0E packet ::C2SGenerateStructure
             0x0F packet ::C2SKeepAliveServer
+            0x10 packet ::C2SLockDifficulty
             0x11 packet ::C2SPlayerPosition
             0x12 packet ::C2SPlayerPositionAndRotation
             0x13 packet ::C2SPlayerRotation

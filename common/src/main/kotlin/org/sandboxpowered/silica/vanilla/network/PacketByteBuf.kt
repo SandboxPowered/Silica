@@ -9,11 +9,12 @@ import io.netty.handler.codec.EncoderException
 import io.netty.util.ByteProcessor
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
+import org.joml.Vector3f
+import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.nbt.NBTCompound
 import org.sandboxpowered.silica.nbt.readNbt
 import org.sandboxpowered.silica.nbt.write
-import org.sandboxpowered.silica.api.util.Identifier
-import org.sandboxpowered.silica.api.util.math.Position
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -778,6 +779,15 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
             this.readBytes(bs)
             bs
         }
+    }
+
+    fun readVec3f(): Vector3f = Vector3f(readFloat(), readFloat(), readFloat())
+
+    fun writeVec3f(vec: Vector3f): PacketByteBuf {
+        writeFloat(vec.x)
+        writeFloat(vec.y)
+        writeFloat(vec.z)
+        return this
     }
 
     fun writeByteArray(array: ByteArray): PacketByteBuf {
