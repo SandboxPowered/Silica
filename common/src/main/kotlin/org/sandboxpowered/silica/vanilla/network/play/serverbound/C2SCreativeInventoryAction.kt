@@ -1,6 +1,7 @@
 package org.sandboxpowered.silica.vanilla.network.play.serverbound
 
 import org.sandboxpowered.silica.content.item.ItemStack
+import org.sandboxpowered.silica.util.getLogger
 import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
@@ -19,9 +20,12 @@ class C2SCreativeInventoryAction(
         stack.write(buf)
     }
 
+    private val logger = getLogger()
+
     override fun handle(packetHandler: PacketHandler, context: PlayContext) {
         // TODO: this should go through PlayerInput and check for creative
-        context.mutatePlayerInventory {
+        if (slotId.toInt() == -1) logger.info("Throwing $stack")
+        else context.mutatePlayerInventory {
             it[slotId.toInt()] =
                 if (stack.present) ItemStack(context.idToItem(stack.itemId), stack.itemCount.toInt())
                 else ItemStack.EMPTY
