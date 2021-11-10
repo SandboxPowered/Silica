@@ -74,9 +74,9 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
             )
         )
         SilicaRegistries.BLOCKS_WITH_ENTITY.forEach {
-            it.createProcessingSystem()?.let { system -> config.with(system) }
+            it.createProcessingSystem()?.let { system -> config.with(it.processingSystemPriority, system) }
         }
-        config.with(entityMap)
+        config.with(Int.MAX_VALUE /* first */, entityMap)
         config.with(Int.MIN_VALUE /* last */, EntityRemovalSystem())
         artemisWorld = ArtemisWorld(
             config.build()
@@ -98,9 +98,9 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         if (isOutOfHeightLimit(pos)) return false
         //TODO see if theres generally any better way of doing this.
         val system = artemisWorld.getSystem<Entity3dMapSystem>()
-        val ents = system.getBlockEntities(pos)
-        if (!ents.isEmpty) {
-            ents.forEach {
+        val existingBEs = system.getBlockEntities(pos)
+        if (!existingBEs.isEmpty) {
+            existingBEs.forEach {
                 artemisWorld.delete(it)
             }
         }
