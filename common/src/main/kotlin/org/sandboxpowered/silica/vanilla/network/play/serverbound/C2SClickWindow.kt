@@ -8,6 +8,7 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.play.SlotData
+import org.sandboxpowered.silica.vanilla.network.play.readSlot
 
 /**
  * See documentation at https://wiki.vg/Protocol#Click_Window
@@ -29,7 +30,7 @@ data class C2SClickWindow(
         buf.readByte(),
         buf.readVarInt(),
         buf.readCollection {
-            it.readShort() to SlotData(it)
+            it.readShort() to it.readSlot()
         }.let {
             Int2ObjectOpenHashMap<SlotData>(it.size).apply {
                 it.forEach { (key, value) ->
@@ -37,7 +38,7 @@ data class C2SClickWindow(
                 }
             }
         },
-        SlotData(buf)
+        buf.readSlot()
     )
 
     override fun write(buf: PacketByteBuf) {

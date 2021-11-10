@@ -7,17 +7,19 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.play.SlotData
+import org.sandboxpowered.silica.vanilla.network.play.readSlot
+import org.sandboxpowered.silica.vanilla.network.play.writeSlot
 
 class C2SCreativeInventoryAction(
     private val slotId: Short,
     private val stack: SlotData
 ) : PacketPlay {
 
-    constructor(buf: PacketByteBuf) : this(buf.readShort(), SlotData(buf))
+    constructor(buf: PacketByteBuf) : this(buf.readShort(), buf.readSlot())
 
     override fun write(buf: PacketByteBuf) {
         buf.writeShort(slotId)
-        stack.write(buf)
+        buf.writeSlot(stack)
     }
 
     private val logger = getLogger()

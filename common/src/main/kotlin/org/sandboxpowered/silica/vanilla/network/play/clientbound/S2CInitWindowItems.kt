@@ -7,6 +7,8 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.play.SlotData
+import org.sandboxpowered.silica.vanilla.network.play.readSlot
+import org.sandboxpowered.silica.vanilla.network.play.writeSlot
 
 class S2CInitWindowItems(
     private val window: UByte,
@@ -24,15 +26,15 @@ class S2CInitWindowItems(
     constructor(buf: PacketByteBuf) : this(
         buf.readUByte(),
         buf.readVarInt(),
-        buf.readCollection(SlotData::invoke),
-        SlotData(buf)
+        buf.readCollection(PacketByteBuf::readSlot),
+        buf.readSlot()
     )
 
     override fun write(buf: PacketByteBuf) {
         buf.writeUByte(window)
         buf.writeVarInt(state)
-        buf.writeCollection(slots, SlotData::write)
-        cursorStack.write(buf)
+        buf.writeCollection(slots, PacketByteBuf::writeSlot)
+        buf.writeSlot(cursorStack)
     }
 
     override fun handle(packetHandler: PacketHandler, context: PlayContext) {

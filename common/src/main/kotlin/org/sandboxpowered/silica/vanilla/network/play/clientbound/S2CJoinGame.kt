@@ -13,7 +13,7 @@ class S2CJoinGame(
     private val gamemode: Byte,
     private val previousGamemode: Byte,
     private val worldCount: Int,
-    private val worldNames: Array<Identifier> = emptyArray(),
+    private val worldNames: Collection<Identifier>,
     private val dimCodec: NBTCompound?,
     private val dim: NBTCompound?,
     private val world: Identifier,
@@ -31,7 +31,7 @@ class S2CJoinGame(
         buf.readByte(),
         buf.readByte(),
         buf.readVarInt(),
-        buf.readIdentityArray(),
+        buf.readCollection(PacketByteBuf::readIdentity),
         buf.readNBT(),
         buf.readNBT(),
         buf.readIdentity(),
@@ -50,7 +50,7 @@ class S2CJoinGame(
         buf.writeByte(gamemode.toInt())
         buf.writeByte(previousGamemode.toInt())
         buf.writeVarInt(worldCount)
-        buf.writeIdentityArray(worldNames)
+        buf.writeCollection(worldNames, PacketByteBuf::writeIdentity)
         buf.writeNBT(dimCodec)
         buf.writeNBT(dim)
         buf.writeIdentity(world)

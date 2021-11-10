@@ -189,7 +189,7 @@ private class PlayConnectionActor(
                 gamemode = 1,
                 previousGamemode = -1,
                 worldCount = 1,
-                worldNames = arrayOf(overworld),
+                worldNames = listOf(overworld),
                 dimCodec = codec,
                 dim = overworldType,
                 world = overworld,
