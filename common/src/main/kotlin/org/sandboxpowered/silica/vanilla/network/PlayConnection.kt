@@ -80,7 +80,7 @@ private class PlayConnectionActor(
     private val playContext by lazy {
         val itemMapper = server.registryProtocolMapper["minecraft:item"]
         PlayContext(
-            { SilicaRegistries.ITEM_REGISTRY[itemMapper[it]].get() },
+            { SilicaRegistries.ITEM_REGISTRY[itemMapper[it]] },
             { server.world.tell(SilicaWorld.Command.DelayedCommand.PerformSilica { _ -> it(playerInventoryComponent.inventory) }) },
             { server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { _ -> it(playerInput) }) }
         )
