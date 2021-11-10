@@ -69,4 +69,14 @@ open class BaseState<B : RegistryEntry<B>, S : PropertyContainer<S>>(
         } while (iterator.next() != value)
         return if (iterator.hasNext()) iterator.next() else collection.iterator().next()
     }
+
+    fun modify(block: StateModifier<S>.() -> Unit): S {
+        return StateModifier(this).apply(block).state as S
+    }
+}
+
+class StateModifier<V : PropertyContainer<V>>(var state: PropertyContainer<V>) {
+    infix fun <T : Comparable<T>> Property<T>.set(value: T) {
+        state = state.set(this, value)
+    }
 }

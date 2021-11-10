@@ -6,11 +6,14 @@ import akka.actor.typed.javadsl.AbstractBehavior
 import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
+import com.artemis.Archetype
 import com.artemis.WorldConfigurationBuilder
+import com.artemis.utils.ImmutableIntBag
 import com.mojang.authlib.GameProfile
 import net.mostlyoriginal.api.event.common.EventSystem
 import org.joml.Vector2i
 import org.joml.Vector2ic
+import org.sandboxpowered.silica.content.block.Block
 import org.sandboxpowered.silica.content.block.BlockEntityProvider
 import org.sandboxpowered.silica.ecs.component.BlockPositionComponent
 import org.sandboxpowered.silica.ecs.component.PlayerInventoryComponent
@@ -71,7 +74,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
             )
         )
         SilicaRegistries.BLOCKS_WITH_ENTITY.forEach {
-            it.createProcessingSystem().let { system -> config.with(system) }
+            it.createProcessingSystem()?.let { system -> config.with(system) }
         }
         config.with(entityMap)
         config.with(Int.MIN_VALUE /* last */, EntityRemovalSystem())
@@ -89,20 +92,25 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         return blocks[pos.x, pos.y, pos.z]
     }
 
+    private val cache = mutableMapOf<Block, Archetype>()
+
     override fun setBlockState(pos: Position, state: BlockState, vararg flags: WorldWriter.Flag): Boolean {
         if (isOutOfHeightLimit(pos)) return false
         //TODO see if theres generally any better way of doing this.
         val system = artemisWorld.getSystem<Entity3dMapSystem>()
         val ents = system.getBlockEntities(pos)
         if (!ents.isEmpty) {
-            artemisWorld.delete(ents[0])
+            ents.forEach {
+                artemisWorld.delete(it)
+            }
         }
         val block = state.block
         if (block is BlockEntityProvider) {
-            val builder = block.createArchetype()
-            builder.add<BlockPositionComponent>()
-            val archetype = builder.build(artemisWorld) // TODO cache these per world
-            artemisWorld.create(archetype)
+            artemisWorld.create(cache.computeIfAbsent(block) {
+                val builder = block.createArchetype()
+                builder.add<BlockPositionComponent>()
+                builder.build(artemisWorld, block.identifier.toString())
+            })
         }
         val oldState = blocks[pos.x, pos.y, pos.z]
         blocks[pos.x, pos.y, pos.z] = state
@@ -265,4 +273,10 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
     }
 
 
+}
+
+private fun ImmutableIntBag<Any>.forEach(block: (Int) -> Unit) {
+    for (i in 0 until this.size()) {
+        block(this.get(i))
+    }
 }

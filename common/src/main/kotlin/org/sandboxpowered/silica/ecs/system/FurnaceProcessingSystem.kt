@@ -3,18 +3,17 @@ package org.sandboxpowered.silica.ecs.system
 import com.artemis.ComponentMapper
 import com.artemis.annotations.All
 import com.artemis.annotations.Wire
-import com.artemis.systems.DelayedIteratingSystem
-import org.sandboxpowered.silica.content.inventory.ResizableInventory
+import com.artemis.systems.IteratingSystem
+import org.sandboxpowered.silica.content.inventory.BaseInventory
 import org.sandboxpowered.silica.content.item.ItemStack
 import org.sandboxpowered.silica.ecs.component.BlockPositionComponent
 import org.sandboxpowered.silica.ecs.component.FurnaceLogicComponent
 import org.sandboxpowered.silica.ecs.component.ResizableInventoryComponent
 import org.sandboxpowered.silica.registry.SilicaRegistries.items
-import kotlin.math.min
 
 
 @All(BlockPositionComponent::class, FurnaceLogicComponent::class, ResizableInventoryComponent::class)
-class FurnaceProcessingSystem : DelayedIteratingSystem() {
+class FurnaceProcessingSystem : IteratingSystem() {
 
     @Wire
     private lateinit var positionMapper: ComponentMapper<BlockPositionComponent>
@@ -25,54 +24,47 @@ class FurnaceProcessingSystem : DelayedIteratingSystem() {
     @Wire
     private lateinit var inventoryMapper: ComponentMapper<ResizableInventoryComponent>
 
-    fun resetIfApplicable(inventory: ResizableInventory) {
+    fun resetIfApplicable(inventory: BaseInventory) {
         if (inventory.size != 3) inventory.clear()
     }
 
-    val fuelTime = 1600 // TODO replace with getting fuel per item
-    val smeltTime = 200 // TODO replace with getting fuel per recipe
-
-    override fun getRemainingDelay(entityId: Int): Float {
-        val logic = logicMapper[entityId]
-        return min(logic.fuelTime, logic.smeltingTime)
-    }
-
-    override fun processDelta(entityId: Int, accumulatedDelta: Float) {
-        val logic = logicMapper[entityId]
-        logic.fuelTime -= accumulatedDelta
-        logic.smeltingTime -= accumulatedDelta
-    }
-
-
     // TODO replace with actual recipes
-
+    val smeltTime = 200
     private val iron_ore by items().guaranteed
     private val iron_ingot by items().guaranteed
     private val outputStack: ItemStack by lazy {
-        ItemStack(iron_ingot, 2)
+        ItemStack(iron_ingot, 1)
     }
 
-    override fun processExpired(entityId: Int) {
+    override fun process(entityId: Int) {
         val inventory = inventoryMapper[entityId].inventory.apply(this::resetIfApplicable)
         val logic = logicMapper[entityId]
 
         var isBurning = logic.fuelTime > 0
+
+        if (isBurning) {
+            logic.fuelTime -= 1
+        }
+
         val (inputItem, fuelItem, outputItem) = inventory
-        if ((isBurning || !fuelItem.isEmpty) && !inputItem.isEmpty) {
+        if ((isBurning || fuelItem.isNotEmpty) && !inputItem.isEmpty) {
             val isValidItemForRecipe = inputItem.isItemEqual(iron_ore)
-            if (!isValidItemForRecipe) {
+            if (isValidItemForRecipe) {
                 val canAcceptRecipeOutput =
                     outputItem.isEmpty || (outputItem.isItemEqual(iron_ingot) && outputItem.count + outputStack.count <= 64)
                 if (!isBurning && canAcceptRecipeOutput) {
-                    logic.fuelTime = fuelTime / 20f
+                    logic.fuelTime = fuelItem.item.properties.fuelTime
+                    logic.fuelTimeTotal = logic.fuelTime
                     fuelItem -= 1
                     isBurning = true
                     //TODO support recipe remainders (lava bucket -> empty bucket)
                 }
 
                 if (isBurning && canAcceptRecipeOutput) {
-                    if (logic.smeltingTime <= 0) {
-                        logic.smeltingTime = 0f
+                    logic.smeltingTime++
+                    if (logic.smeltingTime >= smeltTime.toFloat()) {
+                        logic.smeltingTimeTotal = getTotalSmeltTime(logic, inventory)
+                        logic.smeltingTime = 0
                         if (outputItem.isEmpty) {
                             inventory[2] = outputStack.duplicate()
                         } else {
@@ -80,15 +72,20 @@ class FurnaceProcessingSystem : DelayedIteratingSystem() {
                         }
                     }
                 } else {
-                    logic.smeltingTime = 0f
+                    logic.smeltingTime = 0
+                    logic.smeltingTimeTotal = getTotalSmeltTime(logic, inventory)
                 }
             }
         }
+    }
 
-        // TODO update blockstate in world
+    fun getTotalSmeltTime(logic: FurnaceLogicComponent, inventory: BaseInventory): Int {
+        val input = inventory[0]
+        if (input.isEmpty) return 0
+        return smeltTime
     }
 }
 
-private operator fun ResizableInventory.component1(): ItemStack = get(0)
-private operator fun ResizableInventory.component2(): ItemStack = get(1)
-private operator fun ResizableInventory.component3(): ItemStack = get(2)
+private operator fun BaseInventory.component1(): ItemStack = get(0)
+private operator fun BaseInventory.component2(): ItemStack = get(1)
+private operator fun BaseInventory.component3(): ItemStack = get(2)

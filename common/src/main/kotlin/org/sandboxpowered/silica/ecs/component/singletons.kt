@@ -7,3 +7,5 @@ abstract class SingletonComponent : PooledComponent() {
 }
 
 class MarkForRemovalComponent : SingletonComponent()
+
+class MarkForItemInteractionComponent : SingletonComponent()

@@ -24,9 +24,9 @@ class ItemStack private constructor(private var _item: Item, private var _count:
         get() = if (isEmpty) AIR else _item
 
     val isEmpty: Boolean
-        get() {
-            return _count <= 0 || _item.identifier.path == "air"
-        }
+        get() = _count <= 0 || _item.identifier.path == "air"
+    val isNotEmpty: Boolean
+        get() = !isEmpty
 
     var count: Int
         get() = _count
@@ -52,6 +52,8 @@ class ItemStack private constructor(private var _item: Item, private var _count:
     fun isItemEqual(item: Item): Boolean = item == this.item
 
     fun canMerge(stack: ItemStack): Boolean = this.isEmpty || isItemEqual(stack.item) // TODO: match NBT when we have it
+
+    override fun toString(): String = "ItemStack(item=\"${item.identifier}\", count=$count)"
 
     /**
      * Merge this with given [stack] and return the remainder

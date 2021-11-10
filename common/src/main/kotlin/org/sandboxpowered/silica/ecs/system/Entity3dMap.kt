@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.ecs.system
 
 import com.artemis.ComponentMapper
-import com.artemis.annotations.All
+import com.artemis.annotations.One
 import com.artemis.annotations.Wire
 import com.artemis.systems.IteratingSystem
 import com.artemis.utils.IntBag
@@ -38,7 +38,7 @@ interface Entity3dMap {
     fun getBlockEntities(pos: Position): IntBag
 }
 
-@All(PositionComponent::class, HitboxComponent::class)
+@One(BlockPositionComponent::class, PositionComponent::class)
 class Entity3dMapSystem(
     private val tree: OcTree,
     private val blockEntityTree: IntTree
@@ -80,6 +80,7 @@ class Entity3dMapSystem(
 
     override fun removed(entityId: Int) {
         tree.remove(entityId)
+        blockEntityTree.remove(entityId)
     }
 
     override fun process(entityId: Int) {
