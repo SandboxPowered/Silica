@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.client.mesh
 
-import org.sandboxpowered.silica.util.math.Position
+import org.sandboxpowered.silica.api.util.math.Position
 
 data class RenderChunk(val pos: ChunkPos, val vertexData: FloatArray) {
     override fun equals(other: Any?): Boolean {

@@ -12,8 +12,8 @@ import org.sandboxpowered.silica.util.getLogger
 import org.sandboxpowered.silica.util.extensions.fromJson
 import org.sandboxpowered.silica.util.extensions.getNullable
 import org.sandboxpowered.silica.util.extensions.getResourceAsString
-import org.sandboxpowered.silica.world.state.block.BlockState
-import org.sandboxpowered.silica.world.state.property.Property
+import org.sandboxpowered.silica.api.world.state.block.BlockState
+import org.sandboxpowered.silica.api.world.state.property.Property
 import kotlin.system.measureTimeMillis
 
 class StateMappingManager {

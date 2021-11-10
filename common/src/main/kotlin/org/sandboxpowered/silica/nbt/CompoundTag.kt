@@ -10,8 +10,8 @@ import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.long
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.longArray
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.string
 import org.sandboxpowered.silica.nbt.CompoundTag.Entry.Companion.tag
-import org.sandboxpowered.silica.util.Identifier
-import org.sandboxpowered.silica.util.math.Position
+import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.silica.api.util.math.Position
 import java.util.*
 
 class CompoundTag : NBTCompound {

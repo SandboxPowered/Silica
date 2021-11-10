@@ -14,7 +14,7 @@ import org.sandboxpowered.silica.ecs.component.PositionComponent
 import org.sandboxpowered.silica.util.extensions.component1
 import org.sandboxpowered.silica.util.extensions.component2
 import org.sandboxpowered.silica.util.extensions.component3
-import org.sandboxpowered.silica.util.math.Position
+import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.world.util.IntTree
 import org.sandboxpowered.silica.world.util.OcTree
 

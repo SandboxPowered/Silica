@@ -15,7 +15,7 @@ import org.sandboxpowered.silica.resources.ResourceManager
 import org.sandboxpowered.silica.resources.ResourceType
 import org.sandboxpowered.silica.resources.ZIPResourceLoader
 import org.sandboxpowered.silica.util.FileFilters
-import org.sandboxpowered.silica.util.Side
+import org.sandboxpowered.silica.api.util.Side
 import org.sandboxpowered.silica.util.Util
 import org.sandboxpowered.silica.util.Util.MINECRAFT_VERSION
 import org.sandboxpowered.silica.util.extensions.join

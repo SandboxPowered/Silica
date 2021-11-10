@@ -1,9 +1,9 @@
 package org.sandboxpowered.silica.vanilla.network
 
 import org.sandboxpowered.silica.content.inventory.PlayerInventory
-import org.sandboxpowered.silica.content.item.Item
+import org.sandboxpowered.silica.api.item.Item
 import org.sandboxpowered.silica.ecs.component.VanillaPlayerInput
-import org.sandboxpowered.silica.registry.RegistryObject
+import org.sandboxpowered.silica.api.registry.RegistryObject
 
 typealias PlayerInventoryMutation = (PlayerInventory) -> Unit
 typealias PlayerMutation = (VanillaPlayerInput) -> Unit

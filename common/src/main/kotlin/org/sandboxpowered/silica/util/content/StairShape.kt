@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.util.content
 
-import org.sandboxpowered.silica.world.state.property.StringSerializable
+import org.sandboxpowered.silica.api.util.StringSerializable
 
 enum class StairShape(override val asString: String) : StringSerializable {
     OUTER_LEFT("outer_left"),

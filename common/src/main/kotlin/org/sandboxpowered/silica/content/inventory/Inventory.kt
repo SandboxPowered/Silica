@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.content.inventory
 
-import org.sandboxpowered.silica.content.item.Item
-import org.sandboxpowered.silica.content.item.ItemStack
+import org.sandboxpowered.silica.api.item.Item
+import org.sandboxpowered.silica.api.item.ItemStack
 import kotlin.math.min
 
 interface Inventory : Iterable<ItemStack> {

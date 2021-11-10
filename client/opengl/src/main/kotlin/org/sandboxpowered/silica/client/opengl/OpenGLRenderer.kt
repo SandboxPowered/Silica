@@ -13,7 +13,7 @@ import org.sandboxpowered.silica.client.opengl.texture.OpenGLTextureAtlas
 import org.sandboxpowered.silica.client.texture.TextureAtlas
 import org.sandboxpowered.silica.client.texture.TextureStitcher
 import org.sandboxpowered.silica.client.util.stackPush
-import org.sandboxpowered.silica.util.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 
 class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
 

@@ -6,7 +6,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.Object2IntMap
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
-import org.sandboxpowered.silica.util.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.util.extensions.fromJson
 import org.sandboxpowered.silica.util.extensions.getResourceAsString
 import org.sandboxpowered.silica.util.extensions.set

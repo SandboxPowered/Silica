@@ -16,7 +16,7 @@ import org.sandboxpowered.silica.nbt.setTag
 import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.server.VanillaNetwork
-import org.sandboxpowered.silica.util.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.util.extensions.*
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.*
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.world.VanillaChunkSection

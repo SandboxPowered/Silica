@@ -11,3 +11,8 @@ include 'client:opengl'
 include 'client:vulkan'
 include 'common'
 include 'server'
+
+include 'api'
+
+include 'vanilla:common'
+include 'vanilla:1-17-1'

@@ -1,13 +1,14 @@
 package org.sandboxpowered.silica.content.block
 
-import org.sandboxpowered.silica.content.item.Item
-import org.sandboxpowered.silica.registry.Registry
+import org.sandboxpowered.silica.api.block.Block
+import org.sandboxpowered.silica.api.item.Item
+import org.sandboxpowered.silica.api.registry.Registry
 import org.sandboxpowered.silica.registry.SilicaRegistries
-import org.sandboxpowered.silica.util.Identifier
-import org.sandboxpowered.silica.world.state.SilicaStateBuilder
-import org.sandboxpowered.silica.world.state.SilicaStateFactory
-import org.sandboxpowered.silica.world.state.StateProvider
-import org.sandboxpowered.silica.world.state.block.BlockState
+import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.silica.api.world.state.SilicaStateBuilder
+import org.sandboxpowered.silica.api.world.state.SilicaStateFactory
+import org.sandboxpowered.silica.api.world.state.StateProvider
+import org.sandboxpowered.silica.api.world.state.block.BlockState
 
 open class BaseBlock(final override val identifier: Identifier) : Block {
     override val isAir: Boolean

@@ -1,0 +1,8 @@
+subprojects {
+    dependencies {
+        api project(':api')
+        if (project.name != "common") {
+            api project(":vanilla:common")
+        }
+    }
+}

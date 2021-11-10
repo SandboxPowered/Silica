@@ -1,6 +1,9 @@
 package org.sandboxpowered.silica.registry
 
-import org.sandboxpowered.silica.util.Identifier
+import org.sandboxpowered.silica.api.registry.Registry
+import org.sandboxpowered.silica.api.registry.RegistryEntry
+import org.sandboxpowered.silica.api.registry.RegistryObject
+import org.sandboxpowered.silica.api.util.Identifier
 import java.util.*
 import java.util.function.Supplier
 

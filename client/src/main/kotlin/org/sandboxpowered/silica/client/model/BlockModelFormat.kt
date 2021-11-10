@@ -6,8 +6,8 @@ import org.joml.Vector3f
 import org.sandboxpowered.silica.client.texture.TextureAtlas
 import org.sandboxpowered.silica.resources.ResourceManager
 import org.sandboxpowered.silica.resources.ResourceType
-import org.sandboxpowered.silica.util.Identifier
-import org.sandboxpowered.silica.util.content.Direction
+import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.silica.api.util.Direction
 import org.sandboxpowered.silica.util.extensions.*
 import java.io.InputStreamReader
 import java.lang.reflect.Type

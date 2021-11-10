@@ -6,7 +6,7 @@ import akka.actor.typed.SupervisorStrategy
 import akka.actor.typed.javadsl.*
 import org.sandboxpowered.silica.client.SilicaClient
 import org.sandboxpowered.silica.util.extensions.onMessage
-import org.sandboxpowered.silica.world.WorldReader
+import org.sandboxpowered.silica.api.world.WorldReader
 
 /**
  * The MeshRouter is an Actor that is in charge of generating chunk meshes.

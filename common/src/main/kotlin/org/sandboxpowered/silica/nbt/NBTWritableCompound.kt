@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.nbt
 
-import org.sandboxpowered.silica.util.Identifier
-import org.sandboxpowered.silica.util.math.Position
+import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.silica.api.util.math.Position
 import java.util.*
 
 interface NBTWritableCompound : NBT {

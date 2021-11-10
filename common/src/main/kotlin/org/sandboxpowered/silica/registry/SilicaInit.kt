@@ -1,10 +1,11 @@
 package org.sandboxpowered.silica.registry
 
+import org.sandboxpowered.silica.api.block.Block
 import org.sandboxpowered.silica.content.block.*
 import org.sandboxpowered.silica.content.item.BaseItem
 import org.sandboxpowered.silica.content.item.BlockItem
-import org.sandboxpowered.silica.content.item.Item
-import org.sandboxpowered.silica.util.Identifier
+import org.sandboxpowered.silica.api.item.Item
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.util.content.Colour
 
 object SilicaInit {

@@ -6,7 +6,7 @@ import org.sandboxpowered.silica.client.util.stackPush
 import org.sandboxpowered.silica.client.util.streamToBuffer
 import org.sandboxpowered.silica.resources.ResourceManager
 import org.sandboxpowered.silica.resources.ResourceType
-import org.sandboxpowered.silica.util.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 import java.io.InputStream
 import java.nio.ByteBuffer
 

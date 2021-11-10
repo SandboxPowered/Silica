@@ -9,9 +9,9 @@ import akka.actor.typed.javadsl.Receive
 import it.unimi.dsi.fastutil.floats.FloatList
 import org.sandboxpowered.silica.client.model.ModelLoader
 import org.sandboxpowered.silica.client.util.ChunkUtils
-import org.sandboxpowered.silica.util.content.Direction
+import org.sandboxpowered.silica.api.util.Direction
 import org.sandboxpowered.silica.util.extensions.onMessage
-import org.sandboxpowered.silica.world.WorldReader
+import org.sandboxpowered.silica.api.world.WorldReader
 import org.sandboxpowered.silica.world.util.iterateCube
 import kotlin.random.Random
 

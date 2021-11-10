@@ -7,7 +7,7 @@ import org.lwjgl.opengl.GL30
 import org.sandboxpowered.silica.client.texture.TextureAtlas
 import org.sandboxpowered.silica.client.texture.TextureAtlas.Sprite
 import org.sandboxpowered.silica.client.texture.TextureStitcher
-import org.sandboxpowered.silica.util.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 
 
 class OpenGLTextureAtlas(private val stitcher: TextureStitcher) : TextureAtlas {

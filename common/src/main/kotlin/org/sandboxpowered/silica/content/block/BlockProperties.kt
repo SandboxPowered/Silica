@@ -2,12 +2,13 @@
 
 package org.sandboxpowered.silica.content.block
 
+import org.sandboxpowered.silica.api.util.Direction
 import org.sandboxpowered.silica.util.content.*
-import org.sandboxpowered.silica.util.content.Direction.Axis
-import org.sandboxpowered.silica.world.state.property.BooleanProperty.Companion.of
-import org.sandboxpowered.silica.world.state.property.EnumProperty.Companion.of
-import org.sandboxpowered.silica.world.state.property.IntProperty.Companion.of
-import org.sandboxpowered.silica.world.state.property.Property
+import org.sandboxpowered.silica.api.util.Direction.Axis
+import org.sandboxpowered.silica.api.world.state.property.BooleanProperty.Companion.of
+import org.sandboxpowered.silica.api.world.state.property.EnumProperty.Companion.of
+import org.sandboxpowered.silica.api.world.state.property.IntProperty.Companion.of
+import org.sandboxpowered.silica.api.world.state.property.Property
 
 object BlockProperties {
     val ATTACHED: Property<Boolean> = of("attached")

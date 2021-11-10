@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.vanilla.network.play.clientbound
 
 import io.netty.buffer.Unpooled
-import org.sandboxpowered.silica.util.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay

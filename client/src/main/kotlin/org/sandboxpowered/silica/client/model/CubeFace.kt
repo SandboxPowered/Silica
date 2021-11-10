@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.client.model
 
-import org.sandboxpowered.silica.util.content.Direction
+import org.sandboxpowered.silica.api.util.Direction
 
 enum class CubeFace(vararg corners: Corner) {
     DOWN(

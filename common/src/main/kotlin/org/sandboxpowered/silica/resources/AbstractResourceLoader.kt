@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.resources
 
 import org.sandboxpowered.silica.resources.ResourceLoader.Companion.getPath
-import org.sandboxpowered.silica.util.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 import java.io.InputStream
 
 abstract class AbstractResourceLoader : ResourceLoader {

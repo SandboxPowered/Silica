@@ -5,9 +5,9 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import org.sandboxpowered.silica.util.math.Position.PositionRange
+import org.sandboxpowered.silica.api.util.math.Position.PositionRange
 import java.util.stream.Stream
-import org.sandboxpowered.silica.util.math.Position as Pos
+import org.sandboxpowered.silica.api.util.math.Position as Pos
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PositionTest {

@@ -6,7 +6,7 @@ import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30
 import org.sandboxpowered.silica.client.opengl.shader.OpenGLShader
 import org.sandboxpowered.silica.resources.ResourceManager
-import org.sandboxpowered.silica.util.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 
 class RenderingFormat(identity: Identifier, vararg attributes: Attribute) {
     private val identity: Identifier

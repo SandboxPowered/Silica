@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.util.extensions
 
-import org.sandboxpowered.silica.util.Identifier
-import org.sandboxpowered.silica.util.math.Position
+import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.silica.api.util.math.Position
 
 operator fun Position.component1(): Int = x
 operator fun Position.component2(): Int = y

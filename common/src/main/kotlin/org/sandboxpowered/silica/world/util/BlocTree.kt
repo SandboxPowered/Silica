@@ -4,7 +4,7 @@ import net.mostlyoriginal.api.utils.pooling.ObjectPool
 import net.mostlyoriginal.api.utils.pooling.Poolable
 import org.sandboxpowered.silica.util.extensions.getPool
 import org.sandboxpowered.silica.util.extensions.pow
-import org.sandboxpowered.silica.world.state.block.BlockState
+import org.sandboxpowered.silica.api.world.state.block.BlockState
 
 /**
  * Octree for optimized queries in 3d space, but for BlockStates

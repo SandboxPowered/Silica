@@ -11,7 +11,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import org.apache.commons.io.FileUtils
 import org.sandboxpowered.silica.akka.Reaper
 import org.sandboxpowered.silica.resources.ZIPResourceLoader
-import org.sandboxpowered.silica.util.Side
+import org.sandboxpowered.silica.api.util.Side
 import org.sandboxpowered.silica.util.Util
 import org.sandboxpowered.silica.util.Util.MINECRAFT_VERSION
 import org.sandboxpowered.silica.util.extensions.*

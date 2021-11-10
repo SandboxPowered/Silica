@@ -1,10 +1,11 @@
 package org.sandboxpowered.silica.registry
 
-import org.sandboxpowered.silica.content.block.Block
-import org.sandboxpowered.silica.content.block.BlockEntityProvider
-import org.sandboxpowered.silica.content.fluid.Fluid
-import org.sandboxpowered.silica.content.item.Item
-import org.sandboxpowered.silica.util.Identifier
+import org.sandboxpowered.silica.api.block.Block
+import org.sandboxpowered.silica.api.block.BlockEntityProvider
+import org.sandboxpowered.silica.api.fluid.Fluid
+import org.sandboxpowered.silica.api.item.Item
+import org.sandboxpowered.silica.api.registry.RegistryDelegate
+import org.sandboxpowered.silica.api.util.Identifier
 
 object SilicaRegistries {
     val BLOCK_REGISTRY = SilicaRegistry(Identifier("minecraft", "block"), Block::class.java).apply {

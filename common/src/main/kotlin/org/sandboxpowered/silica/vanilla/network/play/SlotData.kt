@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.vanilla.network.play
 
-import org.sandboxpowered.silica.content.item.Item
-import org.sandboxpowered.silica.content.item.ItemStack
+import org.sandboxpowered.silica.api.item.Item
+import org.sandboxpowered.silica.api.item.ItemStack
 import org.sandboxpowered.silica.nbt.NBTCompound
 import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
 

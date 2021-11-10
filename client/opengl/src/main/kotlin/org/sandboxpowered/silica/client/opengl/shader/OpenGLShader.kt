@@ -8,7 +8,7 @@ import org.sandboxpowered.silica.client.shader.Shader
 import org.sandboxpowered.silica.client.util.stackPush
 import org.sandboxpowered.silica.resources.ResourceManager
 import org.sandboxpowered.silica.resources.ResourceType.ASSETS
-import org.sandboxpowered.silica.util.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader

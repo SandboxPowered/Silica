@@ -1,5 +1,7 @@
 package org.sandboxpowered.silica.util
 
+import org.sandboxpowered.silica.api.util.Identifier
+
 object Hardcoding {
     val BLOCK_TAGS = arrayOf(
         Identifier("minecraft", "banners"),

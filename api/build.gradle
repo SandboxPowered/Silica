@@ -1,0 +1,24 @@
+dependencies {
+    api("com.github.zafarkhaja:java-semver:0.9.0")
+
+    api("org.jetbrains:annotations:20.1.0")
+
+    api("commons-io:commons-io:2.8.0")
+    api("org.apache.commons:commons-lang3:3.11")
+    api("com.google.code.gson:gson:2.8.6")
+    api("com.google.inject:guice:5.0.0-BETA-1")
+
+    api("com.mojang:brigadier:1.0.17")
+
+    api("net.onedaybeard.artemis:artemis-odb:2.3.0")
+
+    api("com.electronwill.night-config:core:3.6.3")
+    api("com.electronwill.night-config:json:3.6.3")
+    api("com.electronwill.night-config:toml:3.6.3")
+
+    api("org.joml:joml:1.9.25")
+    api("org.apache.logging.log4j:log4j-api:2.14.0")
+
+    api("net.kyori:adventure-api:4.9.2")
+    api("net.kyori:adventure-nbt:4.9.2")
+}

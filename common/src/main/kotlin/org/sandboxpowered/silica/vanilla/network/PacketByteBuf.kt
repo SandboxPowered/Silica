@@ -12,8 +12,8 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import org.sandboxpowered.silica.nbt.NBTCompound
 import org.sandboxpowered.silica.nbt.readNbt
 import org.sandboxpowered.silica.nbt.write
-import org.sandboxpowered.silica.util.Identifier
-import org.sandboxpowered.silica.util.math.Position
+import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.silica.api.util.math.Position
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream

@@ -4,8 +4,8 @@ import com.artemis.ComponentMapper
 import com.artemis.annotations.All
 import com.artemis.annotations.Wire
 import com.artemis.systems.IteratingSystem
+import org.sandboxpowered.silica.api.item.ItemStack
 import org.sandboxpowered.silica.content.inventory.BaseInventory
-import org.sandboxpowered.silica.content.item.ItemStack
 import org.sandboxpowered.silica.ecs.component.BlockPositionComponent
 import org.sandboxpowered.silica.ecs.component.FurnaceLogicComponent
 import org.sandboxpowered.silica.ecs.component.ResizableInventoryComponent

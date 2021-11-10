@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.client.opengl
 
 import org.sandboxpowered.silica.client.opengl.RenderingFormat.Attribute
-import org.sandboxpowered.silica.util.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 
 object RenderingFormats {
     val POSITION_TEXTURE = RenderingFormat(

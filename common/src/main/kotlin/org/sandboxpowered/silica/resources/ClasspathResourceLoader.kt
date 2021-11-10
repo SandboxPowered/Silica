@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.resources
 
 import org.sandboxpowered.silica.resources.ResourceLoader.Companion.isValidPath
-import org.sandboxpowered.silica.util.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.InputStream

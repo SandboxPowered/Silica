@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.content.inventory
 
-import org.sandboxpowered.silica.content.item.ItemStack
+import org.sandboxpowered.silica.api.item.ItemStack
 
 class ResizableInventory : Inventory {
     override fun iterator(): Iterator<ItemStack> {

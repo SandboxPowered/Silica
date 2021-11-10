@@ -1,8 +1,9 @@
 package org.sandboxpowered.silica.content.item
 
-import org.sandboxpowered.silica.registry.Registry
+import org.sandboxpowered.silica.api.item.Item
+import org.sandboxpowered.silica.api.registry.Registry
 import org.sandboxpowered.silica.registry.SilicaRegistries
-import org.sandboxpowered.silica.util.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 
 open class BaseItem(
     override val identifier: Identifier,
