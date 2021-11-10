@@ -57,8 +57,7 @@ class PacketHandler(val connection: Connection) : SimpleChannelInboundHandler<Pa
         if (channel.isOpen) {
             if (msg is PacketPlay) {
                 if (waiting.size > 0) {
-                    var read: PacketPlay?
-                    while (waiting.poll().also { read = it } != null) playConnection!!.tell(ReceivePacket(read!!))
+                    waiting.forEach { playConnection!!.tell(ReceivePacket(it)) }
                 }
                 playConnection!!.tell(ReceivePacket(msg))
             } else (msg as Packet).handle(this, connection)

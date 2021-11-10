@@ -34,14 +34,22 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
     PLAY(0, {
         server {
             0x00 packet ::C2STeleportConfirmation
+            0x01 packet ::C2SQueryBlock
+            0x02 packet ::C2SSetDifficulty
+            0x03 packet ::C2SChatMessage
+            0x04 packet ::C2SClientStatus
             0x05 packet ::C2SClientSettings
+            0x06 packet ::C2STabComplete
+            0x07 packet ::C2SClickWindowButton
+            0x08 packet ::C2SClickWindow
             0x09 packet ::C2SCloseWindow
-            0x0A packet ::C2SClientPluginChannel
+            0x0A packet ::C2SPluginChannel
             0x0F packet ::C2SKeepAliveServer
             0x11 packet ::C2SPlayerPosition
             0x12 packet ::C2SPlayerPositionAndRotation
             0x13 packet ::C2SPlayerRotation
             0x14 packet ::C2SPlayerMovement
+            0x19 packet ::C2SPlayerAbilities
             0x1A packet ::C2SPlayerDigging
             0x17 packet ::C2SPickItem
             0x1B packet ::C2SEntityAction
@@ -49,6 +57,7 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             0x25 packet ::C2SHeldItemChange
             0x28 packet ::C2SCreativeInventoryAction
             0x2C packet ::C2SHandSwingAnimation
+            0x2F packet ::C2SUseItem
         }
         client {
             0x04 packetDeprecated ::S2CSpawnPlayer
@@ -56,6 +65,7 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             0x0C packet ::S2CBlockChange
             0x12 packetDeprecated ::S2CDeclareCommands
             0x14 packet ::S2CInitWindowItems
+            0x18 packet ::S2CPluginChannel
             0x1B packetDeprecated ::S2CEntityStatus
             0x20 packetDeprecated ::S2CWorldBorder
             0x21 packet ::S2CKeepAliveClient

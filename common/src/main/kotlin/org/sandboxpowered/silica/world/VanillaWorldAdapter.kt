@@ -16,6 +16,7 @@ import org.sandboxpowered.silica.vanilla.StateMappingManager
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.world.VanillaChunkSection
 import org.sandboxpowered.silica.world.state.block.BlockState
 import org.sandboxpowered.silica.world.util.BlocTree
+import kotlin.math.floor
 
 sealed class VanillaWorldAdapter {
     class GetChunkSection(
@@ -99,5 +100,5 @@ data class ChunkSectionPos(val x: Int, val y: Int, val z: Int)
 
 private val Position.toChunkSection: ChunkSectionPos
     get() {
-        return ChunkSectionPos((x / 16f).toInt(), (y / 16f).toInt(), (z / 16f).toInt())
+        return ChunkSectionPos(floor(x / 16f).toInt(), floor(y / 16f).toInt(), floor(z / 16f).toInt())
     }

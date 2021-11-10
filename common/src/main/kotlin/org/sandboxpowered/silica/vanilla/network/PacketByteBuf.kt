@@ -17,6 +17,7 @@ import org.sandboxpowered.silica.util.math.Position
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.lang.Integer.min
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.channels.FileChannel
@@ -261,7 +262,7 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
 
     override fun readDouble(): Double = source.readDouble()
 
-    override fun readBytes(i: Int): ByteBuf = source.readBytes(i)
+    override fun readBytes(i: Int): PacketByteBuf = PacketByteBuf(source.readBytes(min(readableBytes(), i)))
 
     override fun readSlice(i: Int): ByteBuf = source.readSlice(i)
 
@@ -621,18 +622,27 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         return GsonComponentSerializer.gson().deserialize(readString())
     }
 
-    fun <T> readCollection(transform: (PacketByteBuf) -> T): Collection<T> {
+    inline fun <T> readCollection(maxSize: Int, transform: (PacketByteBuf) -> T): Collection<T> {
         val size = readVarInt()
+        require(maxSize == -1 || size <= maxSize) { "Read collection size was $size, expected max $maxSize" }
         return List(size) { transform(this) }
     }
 
-    fun <T> writeCollection(collection: Collection<T>, transform: PacketByteBuf.(T) -> PacketByteBuf): PacketByteBuf {
+    inline fun <T> readCollection(transform: (PacketByteBuf) -> T): Collection<T> = readCollection(-1, transform)
+
+    inline fun <T> writeCollection(
+        collection: Collection<T>,
+        transform: PacketByteBuf.(T) -> PacketByteBuf
+    ): PacketByteBuf {
         writeVarInt(collection.size)
         return collection.fold(this, transform)
     }
 
     @JvmName("writeCollectionFunky")
-    fun <T> writeCollection(collection: Collection<T>, transform: T.(PacketByteBuf) -> PacketByteBuf): PacketByteBuf {
+    inline fun <T> writeCollection(
+        collection: Collection<T>,
+        transform: T.(PacketByteBuf) -> PacketByteBuf
+    ): PacketByteBuf {
         writeVarInt(collection.size)
         return collection.fold(this) { acc, it -> it.transform(acc) }
     }

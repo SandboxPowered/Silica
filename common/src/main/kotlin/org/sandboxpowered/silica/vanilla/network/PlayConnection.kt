@@ -202,6 +202,9 @@ private class PlayConnectionActor(
                 flat = true
             )
         )
+        packetHandler.sendPacket(S2CPluginChannel(Identifier("minecraft", "brand")) {
+            it.writeString("silica")
+        })
         packetHandler.sendPacket(S2CHeldItemChange(playerInventoryComponent.inventory.selectedSlot.toByte()))
         packetHandler.sendPacket(S2CDeclareRecipes())
         packetHandler.sendPacket(S2CDeclareTags())

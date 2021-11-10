@@ -24,7 +24,7 @@ class VanillaPlayerInput : PooledComponent() {
     var breaking: Position? = null
     var placing: Position? = null
 
-    var creative = true
+    var flying = false
 
     override fun reset() {
         initialized = false
@@ -33,6 +33,11 @@ class VanillaPlayerInput : PooledComponent() {
         wantedPitch = 0f
         sneaking = false
         jumping = false
+
+        breaking = null
+        placing = null
+
+        flying = false
     }
 
     internal fun initialize(playerId: Int, gameProfile: GameProfile) {
