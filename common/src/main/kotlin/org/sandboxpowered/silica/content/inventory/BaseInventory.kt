@@ -2,11 +2,11 @@ package org.sandboxpowered.silica.content.inventory
 
 import org.sandboxpowered.silica.content.item.ItemStack
 
-abstract class BaseInventory : Inventory {
+open class BaseInventory : Inventory {
 
     private val slots = mutableListOf<ItemStack>()
 
-    protected fun section(size: Int, init: (Int) -> ItemStack = { ItemStack.EMPTY }): Inventory {
+    fun section(size: Int, init: (Int) -> ItemStack = { ItemStack.EMPTY }): Inventory {
         val currentSize = slots.size
         slots.addAll(Array(size, init))
         return Section(currentSize, size, slots)
