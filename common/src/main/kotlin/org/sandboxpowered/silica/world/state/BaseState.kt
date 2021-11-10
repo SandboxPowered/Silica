@@ -24,6 +24,7 @@ open class BaseState<B : RegistryEntry<B>, S : PropertyContainer<S>>(
     override fun <T : Comparable<T>> set(property: Property<T>, value: T): S {
         val currentValue = properties[property]
         require(currentValue != null) { "Cannot set property $property as it does not exist in $base" }
+        if (currentValue == value) return this as S
         val state = getState(property, value)
         return state ?: error("Cannot set property $property to $value on $base, it is not an allowed value")
     }
@@ -41,7 +42,7 @@ open class BaseState<B : RegistryEntry<B>, S : PropertyContainer<S>>(
             val comparableIterator = property.values.iterator()
             while (comparableIterator.hasNext()) {
                 val comparable = comparableIterator.next()
-                if (comparable !== value) {
+                if (comparable != value) {
                     map[createPropertiesCollectionWith(property, comparable)]?.let {
                         table[property, comparable] = it
                     }
