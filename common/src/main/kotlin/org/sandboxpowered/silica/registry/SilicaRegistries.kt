@@ -22,7 +22,7 @@ object SilicaRegistries {
     val FLUID_REGISTRY = SilicaRegistry(Identifier("minecraft", "fluid"), Fluid::class.java)
 
     init {
-        SilicaInit.init()
+//        SilicaInit.init() TODO: Remove this
     }
 
     private val blockDelegates = HashMap<String, RegistryDelegate<Block>>()

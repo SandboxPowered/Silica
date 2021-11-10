@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.vanilla.network.play.clientbound
 
-import org.sandboxpowered.silica.content.inventory.PlayerInventory
+import org.sandboxpowered.silica.api.item.inventory.PlayerInventory
 import org.sandboxpowered.silica.api.item.Item
 import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
 import org.sandboxpowered.silica.vanilla.network.PacketHandler

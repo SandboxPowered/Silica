@@ -6,6 +6,7 @@ import akka.actor.typed.javadsl.AbstractBehavior
 import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
+import org.sandboxpowered.silica.api.util.extensions.onException
 
 sealed class Accumulator<out T : Any> {
     class Start<T : Any>(val replyTo: ActorRef<in Array<out T>>) : Accumulator<T>()

@@ -3,10 +3,10 @@ package org.sandboxpowered.silica.client.model
 import org.joml.*
 import org.sandboxpowered.silica.client.texture.TextureAtlas
 import org.sandboxpowered.silica.api.util.Direction
-import org.sandboxpowered.silica.util.extensions.getQuaternionAngle
-import org.sandboxpowered.silica.util.extensions.minus
-import org.sandboxpowered.silica.util.extensions.mulComponents
-import org.sandboxpowered.silica.util.extensions.read
+import org.sandboxpowered.silica.api.util.extensions.getQuaternionAngle
+import org.sandboxpowered.silica.api.util.extensions.minus
+import org.sandboxpowered.silica.api.util.extensions.mulComponents
+import org.sandboxpowered.silica.api.util.extensions.read
 import kotlin.math.abs
 import kotlin.math.cos
 

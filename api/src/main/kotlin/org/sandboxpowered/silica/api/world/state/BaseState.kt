@@ -4,8 +4,8 @@ import com.google.common.collect.ArrayTable
 import com.google.common.collect.HashBasedTable
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.Table
-import org.sandboxpowered.silica.registry.RegistryEntry
-import org.sandboxpowered.silica.util.extensions.set
+import org.sandboxpowered.silica.api.registry.RegistryEntry
+import org.sandboxpowered.silica.api.util.extensions.set
 import org.sandboxpowered.silica.api.world.state.property.Property
 
 open class BaseState<B : RegistryEntry<B>, S : PropertyContainer<S>>(

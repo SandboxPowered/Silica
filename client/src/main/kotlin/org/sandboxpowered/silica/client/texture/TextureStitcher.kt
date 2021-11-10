@@ -1,9 +1,8 @@
 package org.sandboxpowered.silica.client.texture
 
-import org.sandboxpowered.silica.util.extensions.toPowerOfTwo
+import org.sandboxpowered.silica.api.util.extensions.toPowerOfTwo
 import org.sandboxpowered.silica.util.getLogger
 import kotlin.math.max
-
 
 class TextureStitcher(private val maxWidth: Int, private val maxHeight: Int, private val onlySquare: Boolean) {
     companion object {

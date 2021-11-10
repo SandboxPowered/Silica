@@ -4,8 +4,8 @@ import com.google.gson.*
 import com.mojang.authlib.GameProfile
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
-import org.sandboxpowered.silica.util.extensions.plusAssign
-import org.sandboxpowered.silica.util.extensions.set
+import org.sandboxpowered.silica.api.util.extensions.set
+import org.sandboxpowered.silica.api.util.extensions.plusAssign
 import java.lang.reflect.Type
 
 data class MOTD(

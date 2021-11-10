@@ -3,12 +3,12 @@ package org.sandboxpowered.silica.client.model
 import com.google.common.collect.Lists
 import com.google.gson.*
 import org.joml.Vector3f
+import org.sandboxpowered.silica.api.util.Direction
+import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.silica.api.util.extensions.*
 import org.sandboxpowered.silica.client.texture.TextureAtlas
 import org.sandboxpowered.silica.resources.ResourceManager
 import org.sandboxpowered.silica.resources.ResourceType
-import org.sandboxpowered.silica.api.util.Identifier
-import org.sandboxpowered.silica.api.util.Direction
-import org.sandboxpowered.silica.util.extensions.*
 import java.io.InputStreamReader
 import java.lang.reflect.Type
 import java.util.*

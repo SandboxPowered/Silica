@@ -4,7 +4,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.translation.Translatable
 import org.sandboxpowered.silica.api.registry.RegistryEntry
 
-sealed interface Item : RegistryEntry<Item>, Translatable {
+interface Item : RegistryEntry<Item>, Translatable {
     val properties: Properties
 
     override fun translationKey(): String = "item.${identifier.namespace}.${identifier.path}"

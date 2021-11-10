@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.api.world.state
 
-import org.sandboxpowered.silica.registry.RegistryEntry
+import org.sandboxpowered.silica.api.registry.RegistryEntry
 import org.sandboxpowered.silica.api.world.state.property.Property
 
 interface StateProvider<T : RegistryEntry<T>, S : PropertyContainer<S>> {

@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.api.world.state
 
 import com.google.common.collect.Maps
-import org.sandboxpowered.silica.registry.RegistryEntry
+import org.sandboxpowered.silica.api.registry.RegistryEntry
 import org.sandboxpowered.silica.api.world.state.property.Property
 
 class SilicaStateBuilder<B : RegistryEntry<B>, S : PropertyContainer<S>>(private val base: B) :

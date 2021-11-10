@@ -7,7 +7,7 @@ import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.server.VanillaNetwork
 import org.sandboxpowered.silica.server.VanillaNetwork.CreateConnection
 import org.sandboxpowered.silica.util.extensions.WithScheduler
-import org.sandboxpowered.silica.util.extensions.onException
+import org.sandboxpowered.silica.api.util.extensions.onException
 import org.sandboxpowered.silica.util.getLogger
 import org.sandboxpowered.silica.vanilla.network.login.clientbound.S2CLoginSuccess
 import org.sandboxpowered.silica.vanilla.network.login.serverbound.C2SEncryptionResponse

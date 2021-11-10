@@ -9,9 +9,9 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.util.getLogger
-import org.sandboxpowered.silica.util.extensions.fromJson
-import org.sandboxpowered.silica.util.extensions.getNullable
-import org.sandboxpowered.silica.util.extensions.getResourceAsString
+import org.sandboxpowered.silica.api.util.extensions.fromJson
+import org.sandboxpowered.silica.api.util.extensions.getNullable
+import org.sandboxpowered.silica.api.util.extensions.getResourceAsString
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 import org.sandboxpowered.silica.api.world.state.property.Property
 import kotlin.system.measureTimeMillis

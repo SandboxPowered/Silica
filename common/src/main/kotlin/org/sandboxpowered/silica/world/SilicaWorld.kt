@@ -15,7 +15,7 @@ import org.joml.Vector2i
 import org.joml.Vector2ic
 import org.sandboxpowered.silica.api.block.Block
 import org.sandboxpowered.silica.api.block.BlockEntityProvider
-import org.sandboxpowered.silica.ecs.component.BlockPositionComponent
+import org.sandboxpowered.silica.api.ecs.BlockPositionComponent
 import org.sandboxpowered.silica.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.ecs.component.VanillaPlayerInput
 import org.sandboxpowered.silica.ecs.events.ReplaceBlockEvent
@@ -28,10 +28,10 @@ import org.sandboxpowered.silica.api.world.World
 import org.sandboxpowered.silica.api.world.WorldReader
 import org.sandboxpowered.silica.api.world.WorldWriter
 import org.sandboxpowered.silica.api.util.Direction
-import org.sandboxpowered.silica.util.extensions.add
-import org.sandboxpowered.silica.util.extensions.getSystem
+import org.sandboxpowered.silica.api.util.extensions.add
+import org.sandboxpowered.silica.api.util.extensions.getSystem
 import org.sandboxpowered.silica.util.extensions.onMessage
-import org.sandboxpowered.silica.util.extensions.registerAs
+import org.sandboxpowered.silica.api.util.extensions.registerAs
 import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.world.gen.TerrainGenerator
 import org.sandboxpowered.silica.api.world.state.block.BlockState

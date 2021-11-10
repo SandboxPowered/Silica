@@ -5,9 +5,9 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.ParameterizedTest.*
 import org.junit.jupiter.params.provider.MethodSource
-import org.sandboxpowered.silica.util.extensions.component1
-import org.sandboxpowered.silica.util.extensions.component2
-import org.sandboxpowered.silica.util.extensions.component3
+import org.sandboxpowered.silica.api.util.extensions.component1
+import org.sandboxpowered.silica.api.util.extensions.component2
+import org.sandboxpowered.silica.api.util.extensions.component3
 import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 import java.util.stream.Stream

@@ -1,6 +1,5 @@
 package org.sandboxpowered.silica.vanilla.network.play.serverbound
 
-import org.sandboxpowered.silica.content.inventory.PlayerInventory
 import org.sandboxpowered.silica.api.item.ItemStack
 import org.sandboxpowered.silica.content.item.Items
 import org.sandboxpowered.silica.vanilla.network.PacketByteBuf

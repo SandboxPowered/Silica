@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.client.util
 
 import org.lwjgl.system.MemoryStack
-import org.sandboxpowered.silica.util.extensions.set
+import org.sandboxpowered.silica.api.util.extensions.set
 import java.nio.IntBuffer
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind

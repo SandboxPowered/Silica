@@ -18,9 +18,9 @@ import org.sandboxpowered.silica.util.FileFilters
 import org.sandboxpowered.silica.api.util.Side
 import org.sandboxpowered.silica.util.Util
 import org.sandboxpowered.silica.util.Util.MINECRAFT_VERSION
-import org.sandboxpowered.silica.util.extensions.join
-import org.sandboxpowered.silica.util.extensions.listFiles
-import org.sandboxpowered.silica.util.extensions.notExists
+import org.sandboxpowered.silica.api.util.extensions.join
+import org.sandboxpowered.silica.api.util.extensions.listFiles
+import org.sandboxpowered.silica.api.util.extensions.notExists
 import org.sandboxpowered.silica.util.getLogger
 import org.sandboxpowered.silica.world.SilicaWorld
 import org.sandboxpowered.silica.world.util.iterateCube

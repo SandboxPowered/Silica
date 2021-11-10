@@ -3,7 +3,7 @@ package org.sandboxpowered.silica.api.world.state
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSortedMap
-import org.sandboxpowered.silica.registry.RegistryEntry
+import org.sandboxpowered.silica.api.registry.RegistryEntry
 import org.sandboxpowered.silica.api.world.state.property.Property
 
 class SilicaStateFactory<B : RegistryEntry<B>, S : PropertyContainer<S>>(

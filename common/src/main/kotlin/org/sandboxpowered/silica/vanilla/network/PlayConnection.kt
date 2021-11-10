@@ -7,6 +7,9 @@ import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import com.mojang.authlib.GameProfile
+import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.silica.api.util.extensions.getSystem
+import org.sandboxpowered.silica.api.util.extensions.onException
 import org.sandboxpowered.silica.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.ecs.component.VanillaPlayerInput
 import org.sandboxpowered.silica.ecs.system.SilicaPlayerManager
@@ -16,8 +19,9 @@ import org.sandboxpowered.silica.nbt.setTag
 import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.server.VanillaNetwork
-import org.sandboxpowered.silica.api.util.Identifier
-import org.sandboxpowered.silica.util.extensions.*
+import org.sandboxpowered.silica.util.extensions.Accumulator
+import org.sandboxpowered.silica.util.extensions.WithContext
+import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.*
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.world.VanillaChunkSection
 import org.sandboxpowered.silica.world.ChunkSectionPos

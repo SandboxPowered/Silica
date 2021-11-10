@@ -2,8 +2,8 @@ package org.sandboxpowered.silica.world.util
 
 import net.mostlyoriginal.api.utils.pooling.ObjectPool
 import net.mostlyoriginal.api.utils.pooling.Poolable
-import org.sandboxpowered.silica.util.extensions.getPool
-import org.sandboxpowered.silica.util.extensions.pow
+import org.sandboxpowered.silica.api.util.extensions.getPool
+import org.sandboxpowered.silica.api.util.extensions.pow
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 
 /**
@@ -302,8 +302,8 @@ class BlocTree private constructor(
 
         fun contains(x: Int, y: Int, z: Int): Boolean =
             this.x <= x && this.x + this.size > x
-                && this.y <= y && this.y + this.size > y
-                && this.z <= z && this.z + this.size > z
+                    && this.y <= y && this.y + this.size > y
+                    && this.z <= z && this.z + this.size > z
 
         override fun toString() = "Bounds(x=$x, y=$y, z=$z, size=$size)"
     }
