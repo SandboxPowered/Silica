@@ -221,15 +221,19 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         private fun processCommandQueue() {
             var next = commandQueue.pollFirst()
             while (next != null) {
-                when (next) {
-                    is Command.DelayedCommand.Perform -> next.body(world)
-                    is Command.DelayedCommand.PerformSilica -> next.body(world)
-                    is Command.DelayedCommand.AskSilica<*> -> {
-                        @Suppress("UNCHECKED_CAST")
-                        val replyTo = next.replyTo as ActorRef<Any>
-                        replyTo.tell(next.body(world))
+                try {
+                    when (next) {
+                        is Command.DelayedCommand.Perform -> next.body(world)
+                        is Command.DelayedCommand.PerformSilica -> next.body(world)
+                        is Command.DelayedCommand.AskSilica<*> -> {
+                            @Suppress("UNCHECKED_CAST")
+                            val replyTo = next.replyTo as ActorRef<Any>
+                            replyTo.tell(next.body(world))
+                        }
+                        else -> error("Unhandled command in queue : $next")
                     }
-                    else -> error("Unhandled command in queue : $next")
+                } catch (e: Throwable) {
+                    context.log.error("Couldn't process command ${next.javaClass.simpleName}", e)
                 }
                 next = commandQueue.pollFirst()
             }
