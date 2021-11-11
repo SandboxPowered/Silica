@@ -3,6 +3,7 @@ import org.gradle.internal.os.OperatingSystem
 plugins {
     id 'application'
     id 'java'
+    id 'idea
     id 'org.jetbrains.kotlin.jvm' version '1.5.30'
 }
 
@@ -13,6 +14,12 @@ allprojects {
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         maven { url 'https://jitpack.io' }
         maven { url 'https://libraries.minecraft.net/' }
+    }
+}
+
+idea {
+    module {
+        excludeDirs.add(file("run"))
     }
 }
 
