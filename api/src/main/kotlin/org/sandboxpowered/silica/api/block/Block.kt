@@ -2,6 +2,8 @@ package org.sandboxpowered.silica.api.block
 
 import net.kyori.adventure.translation.Translatable
 import org.sandboxpowered.silica.api.item.Item
+import org.sandboxpowered.silica.api.registry.Registries
+import org.sandboxpowered.silica.api.registry.Registry
 import org.sandboxpowered.silica.api.registry.RegistryEntry
 import org.sandboxpowered.silica.api.util.Direction
 import org.sandboxpowered.silica.api.util.math.Position
@@ -32,4 +34,6 @@ sealed interface Block : RegistryEntry<Block>, Translatable {
 
     val defaultState: BlockState
     val stateProvider: StateProvider<Block, BlockState>
+
+    override val registry: Registry<Block> get() = Registries.BLOCKS
 }
