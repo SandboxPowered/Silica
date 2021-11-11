@@ -16,3 +16,5 @@ fun getInstance(): InternalAPI {
 interface InternalAPI {
     fun <T : RegistryEntry<T>> getRegistry(kclass: KClass<T>): Registry<T>
 }
+
+inline fun <reified T : RegistryEntry<T>> InternalAPI.getRegistry(): Registry<T> = getRegistry(T::class)

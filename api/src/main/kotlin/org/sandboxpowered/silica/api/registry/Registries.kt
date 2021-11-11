@@ -2,11 +2,12 @@ package org.sandboxpowered.silica.api.registry
 
 import org.sandboxpowered.silica.api.block.Block
 import org.sandboxpowered.silica.api.internal.SilicaAPI
+import org.sandboxpowered.silica.api.internal.getRegistry
 import org.sandboxpowered.silica.api.item.Item
 
 object Registries {
-    val BLOCKS = SilicaAPI.getRegistry(Block::class)
-    val ITEMS = SilicaAPI.getRegistry(Item::class)
+    val BLOCKS: Registry<Block> = SilicaAPI.getRegistry()
+    val ITEMS: Registry<Item> = SilicaAPI.getRegistry()
 
     private val blockDelegates = HashMap<String, RegistryDelegate<Block>>()
     private val itemDelegates = HashMap<String, RegistryDelegate<Item>>()

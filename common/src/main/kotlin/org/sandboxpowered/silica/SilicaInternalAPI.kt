@@ -9,11 +9,10 @@ import org.sandboxpowered.silica.registry.SilicaRegistries
 import kotlin.reflect.KClass
 
 class SilicaInternalAPI : InternalAPI {
-    override fun <T : RegistryEntry<T>> getRegistry(kclass: KClass<T>): Registry<T> {
-        if (kclass == Block::class)
-            return SilicaRegistries.BLOCK_REGISTRY as Registry<T>
-        if (kclass == Item::class)
-            return SilicaRegistries.ITEM_REGISTRY as Registry<T>
-        error("Unknown registry type $kclass")
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : RegistryEntry<T>> getRegistry(kclass: KClass<T>) = when (kclass) {
+        Block::class -> SilicaRegistries.BLOCK_REGISTRY as Registry<T>
+        Item::class -> SilicaRegistries.ITEM_REGISTRY as Registry<T>
+        else -> error("Unknown registry type $kclass")
     }
 }
