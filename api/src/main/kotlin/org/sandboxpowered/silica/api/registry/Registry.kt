@@ -20,15 +20,13 @@ interface Registry<T : RegistryEntry<T>> : Iterable<T> {
 }
 
 class RegistryDelegate<T : RegistryEntry<T>>(private val registry: Registry<T>, private val domain: String) {
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): T? {
-        return registry[Identifier(domain, property.name.lowercase())].orNull()
-    }
+    operator fun getValue(thisRef: Any?, property: KProperty<*>): T =
+        registry[Identifier(domain, property.name.lowercase())].get()
 
-    val guaranteed = NonNullRegistryDelegate(registry, domain)
+    val optional = NullableRegistryDelegate(registry, domain)
 
-    class NonNullRegistryDelegate<T : RegistryEntry<T>>(private val registry: Registry<T>, private val domain: String) {
-        operator fun getValue(thisRef: Any?, property: KProperty<*>): T {
-            return registry[Identifier(domain, property.name.lowercase())].get()
-        }
+    class NullableRegistryDelegate<T : RegistryEntry<T>>(private val registry: Registry<T>, private val domain: String) {
+        operator fun getValue(thisRef: Any?, property: KProperty<*>): T? =
+            registry[Identifier(domain, property.name.lowercase())].orNull()
     }
 }

@@ -15,12 +15,12 @@ object Registries {
     fun blocks(domain: String = "minecraft"): RegistryDelegate<Block> =
         blockDelegates.computeIfAbsent(domain) { RegistryDelegate(BLOCKS, it) }
 
-    fun blocks(domain: String = "minecraft", required: Boolean): RegistryDelegate.NonNullRegistryDelegate<Block> =
-        blockDelegates.computeIfAbsent(domain) { RegistryDelegate(BLOCKS, it) }.guaranteed
+    fun blocks(domain: String = "minecraft", optional: Boolean): RegistryDelegate.NullableRegistryDelegate<Block> =
+        blockDelegates.computeIfAbsent(domain) { RegistryDelegate(BLOCKS, it) }.optional
 
     fun items(domain: String = "minecraft"): RegistryDelegate<Item> =
         itemDelegates.computeIfAbsent(domain) { RegistryDelegate(ITEMS, it) }
 
-    fun items(domain: String = "minecraft", required: Boolean): RegistryDelegate.NonNullRegistryDelegate<Item> =
-        itemDelegates.computeIfAbsent(domain) { RegistryDelegate(ITEMS, it) }.guaranteed
+    fun items(domain: String = "minecraft", optional: Boolean): RegistryDelegate.NullableRegistryDelegate<Item> =
+        itemDelegates.computeIfAbsent(domain) { RegistryDelegate(ITEMS, it) }.optional
 }
