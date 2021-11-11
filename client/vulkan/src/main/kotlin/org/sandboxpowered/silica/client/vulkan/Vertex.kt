@@ -15,7 +15,7 @@ class Vertex(val pos: Vector2fc, val color: Vector3fc) {
         private const val colorOffset = 2 * Float.SIZE_BYTES
 
         fun getBindingDescription(stack: MemoryStack): VkVertexInputBindingDescription.Buffer {
-            val binding = VkVertexInputBindingDescription.callocStack(1, stack)
+            val binding = VkVertexInputBindingDescription.calloc(1, stack)
             binding.binding(0)
             binding.stride(sizeOf)
             binding.inputRate(VK_VERTEX_INPUT_RATE_VERTEX)
@@ -23,7 +23,7 @@ class Vertex(val pos: Vector2fc, val color: Vector3fc) {
         }
 
         fun getAttributeDescriptions(stack: MemoryStack): VkVertexInputAttributeDescription.Buffer {
-            val attributeDescription = VkVertexInputAttributeDescription.callocStack(2, stack)
+            val attributeDescription = VkVertexInputAttributeDescription.calloc(2, stack)
 
             attributeDescription.apply(0) {
                 it.binding(0)
