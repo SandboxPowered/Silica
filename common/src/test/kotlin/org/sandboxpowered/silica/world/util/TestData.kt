@@ -8,9 +8,9 @@ import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 
 object TestData {
-    fun block(name: String, isAir: Boolean = false): Block = mockk(name, relaxed = true) {
+    fun block(name: String, air: Boolean = false): Block = mockk(name, relaxed = true) {
         every { identifier } returns Identifier(name)
-        every { isAir } returns isAir
+        every { isAir } returns air
     }
 
     fun state(blockName: String, isAir: Boolean = false) = BlockState(block(blockName, isAir), ImmutableMap.of())
