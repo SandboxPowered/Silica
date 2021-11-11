@@ -100,8 +100,8 @@ private class PlayConnectionActor(
         return Behaviors.same()
     }
 
-    private fun handleSend(receive: PlayConnection.SendPacket): Behavior<PlayConnection> {
-        packetHandler.sendPacket(receive.packet)
+    private fun handleSend(send: PlayConnection.SendPacket): Behavior<PlayConnection> {
+        packetHandler.sendPacket(send.packet)
 
         return Behaviors.same()
     }

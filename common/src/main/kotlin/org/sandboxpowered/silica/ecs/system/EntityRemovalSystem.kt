@@ -14,8 +14,11 @@ class EntityRemovalSystem : BaseEntitySystem() {
     private lateinit var eventSystem: EventSystem
 
     override fun processSystem() {
-        val ids = entityIds.data.copyOfRange(0, entityIds.size())
-        ids.forEach(world::delete)
-        eventSystem.dispatch(RemoveEntitiesEvent(ids))
+        if (entityIds.size() > 0) {
+            val ids = entityIds.data.copyOfRange(0, entityIds.size())
+
+            ids.forEach(world::delete)
+            eventSystem.dispatch(RemoveEntitiesEvent(ids))
+        }
     }
 }
