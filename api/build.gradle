@@ -31,6 +31,8 @@ dependencies {
 
     api("net.kyori:adventure-api:4.9.2")
     api("net.kyori:adventure-nbt:4.9.2")
+
+    api("org.jetbrains.kotlin:kotlin-reflect")
 }
 
 static String artemisContrib(String module) {
