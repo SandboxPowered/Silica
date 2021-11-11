@@ -6,10 +6,10 @@ import org.sandboxpowered.silica.api.plugin.Plugin
 @Plugin(id = "minecraft-network", version = "1.17.1", requirements = ["minecraft:1.17.1"])
 class VanillaNetworkPlugin : BasePlugin {
     override fun onEnable() {
-        println("VanillaNetworkPlugin enabled")
+        println("Minecraft network adapter v1.17.1 enabled!")
     }
 
     override fun onDisable() {
-        println("VanillaNetworkPlugin disabled")
+        println("Minecraft network adapter v1.17.1 disabled!")
     }
 }

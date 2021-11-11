@@ -6,11 +6,11 @@ import org.sandboxpowered.silica.api.plugin.Plugin
 @Plugin("minecraft", "1.17.1")
 class VanillaPlugin : BasePlugin {
     override fun onEnable() {
-        println("VanillaPlugin enabled!")
+        println("Minecraft content adapter v1.17.1 enabled!")
         SilicaInit.init()
     }
 
     override fun onDisable() {
-        println("VanillaPlugin disabled!")
+        println("Minecraft content adapter v1.17.1 disabled!")
     }
 }
