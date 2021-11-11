@@ -4,7 +4,7 @@ import org.sandboxpowered.silica.api.plugin.BasePlugin
 import org.sandboxpowered.silica.api.plugin.Plugin
 import org.sandboxpowered.silica.api.util.getLogger
 
-@Plugin("minecraft", "1.17.1")
+@Plugin("minecraft:content", "1.17.1")
 class VanillaPlugin : BasePlugin {
     private val logger = getLogger()
 

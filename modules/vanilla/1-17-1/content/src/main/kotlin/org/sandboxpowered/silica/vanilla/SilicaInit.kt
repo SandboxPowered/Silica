@@ -38,11 +38,6 @@ object SilicaInit {
             fuelTime = 1600
         }))
 
-        register(BaseBlock(Identifier("air")), false)
-        register(BaseBlock(Identifier("bedrock")))
-        register(BaseBlock(Identifier("dirt")))
-
-        register(BaseBlock(Identifier("glowstone")))
         register(GlowLichenBlock(Identifier("glow_lichen")))
 
         register(BaseBlock(Identifier("sand")))
@@ -151,9 +146,7 @@ object SilicaInit {
     private fun register(block: Block, registerItemBlock: Boolean = true) {
         Registries.BLOCKS.register(block)
         if (block.hasItem && registerItemBlock) {
-            Registries.ITEMS.register(BlockItem(block, Item.Properties.create {
-
-            }))
+            Registries.ITEMS.register(BlockItem(block))
         }
     }
 

@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.api.registry
 
+import org.sandboxpowered.silica.api.SilicaAPI
 import org.sandboxpowered.silica.api.block.Block
-import org.sandboxpowered.silica.api.internal.SilicaAPI
 import org.sandboxpowered.silica.api.internal.getRegistry
 import org.sandboxpowered.silica.api.item.Item
 
