@@ -15,4 +15,7 @@ include 'server'
 include 'api'
 
 include 'vanilla:common'
-include 'vanilla:1-17-1'
+include 'vanilla:1-17-1:content'
+include 'vanilla:1-17-1:network'
+include 'vanilla:1-19:content'
+include 'vanilla:1-19:network'
