@@ -16,26 +16,27 @@ import org.joml.Vector2ic
 import org.sandboxpowered.silica.api.block.Block
 import org.sandboxpowered.silica.api.block.BlockEntityProvider
 import org.sandboxpowered.silica.api.ecs.BlockPositionComponent
+import org.sandboxpowered.silica.api.registry.Registries
+import org.sandboxpowered.silica.api.util.Direction
+import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.silica.api.util.Side
+import org.sandboxpowered.silica.api.util.extensions.add
+import org.sandboxpowered.silica.api.util.extensions.getSystem
+import org.sandboxpowered.silica.api.util.extensions.registerAs
+import org.sandboxpowered.silica.api.util.math.Position
+import org.sandboxpowered.silica.api.world.World
+import org.sandboxpowered.silica.api.world.WorldReader
+import org.sandboxpowered.silica.api.world.WorldWriter
+import org.sandboxpowered.silica.api.world.state.block.BlockState
+import org.sandboxpowered.silica.api.world.state.fluid.FluidState
 import org.sandboxpowered.silica.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.ecs.component.VanillaPlayerInput
 import org.sandboxpowered.silica.ecs.events.ReplaceBlockEvent
 import org.sandboxpowered.silica.ecs.system.*
 import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.server.SilicaServer
-import org.sandboxpowered.silica.api.util.Identifier
-import org.sandboxpowered.silica.api.util.Side
-import org.sandboxpowered.silica.api.world.World
-import org.sandboxpowered.silica.api.world.WorldReader
-import org.sandboxpowered.silica.api.world.WorldWriter
-import org.sandboxpowered.silica.api.util.Direction
-import org.sandboxpowered.silica.api.util.extensions.add
-import org.sandboxpowered.silica.api.util.extensions.getSystem
 import org.sandboxpowered.silica.util.extensions.onMessage
-import org.sandboxpowered.silica.api.util.extensions.registerAs
-import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.world.gen.TerrainGenerator
-import org.sandboxpowered.silica.api.world.state.block.BlockState
-import org.sandboxpowered.silica.api.world.state.fluid.FluidState
 import org.sandboxpowered.silica.world.util.BlocTree
 import org.sandboxpowered.silica.world.util.IntTree
 import org.sandboxpowered.silica.world.util.OcTree
@@ -50,7 +51,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         WORLD_MIN,
         WORLD_MIN,
         WORLD_SIZE,
-        SilicaRegistries.BLOCK_REGISTRY[Identifier("air")].get().defaultState
+        Registries.BLOCKS[Identifier("air")].get().defaultState
     )
     val artemisWorld: ArtemisWorld
     private var worldTicks = 0L
