@@ -3,7 +3,7 @@ import org.gradle.internal.os.OperatingSystem
 plugins {
     id 'application'
     id 'java'
-    id 'idea
+    id 'idea'
     id 'org.jetbrains.kotlin.jvm' version '1.5.30'
 }
 
