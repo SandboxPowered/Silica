@@ -3,6 +3,8 @@ apply plugin: 'org.jetbrains.kotlin.jvm'
 dependencies {
     implementation project(":common")
 
+    implementation project(":vanilla:1-17-1")
+
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.4")
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     api 'com.google.code.gson:gson:2.8.6'

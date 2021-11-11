@@ -18,10 +18,10 @@ class SilicaRegistry<T : RegistryEntry<T>>(private val id: Identifier, override 
         listeners.add(listener)
     }
 
-    fun register(t: T): T {
-        internalMap[t.identifier] = t
-        listeners.forEach { it(t) }
-        return t
+    override fun register(value: T): T {
+        internalMap[value.identifier] = value
+        listeners.forEach { it(value) }
+        return value
     }
 
     override fun iterator() = internalMap.values.iterator()

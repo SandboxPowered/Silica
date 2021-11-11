@@ -14,6 +14,8 @@ interface Registry<T : RegistryEntry<T>> : Iterable<T> {
     @ApiStatus.Experimental
     fun getUnsafe(id: Identifier): T?
 
+    fun register(value: T): T
+
     val type: Class<T>
 }
 

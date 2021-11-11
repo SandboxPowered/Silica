@@ -6,7 +6,7 @@ import com.artemis.annotations.Wire
 import com.artemis.systems.IteratingSystem
 import org.joml.Vector3d
 import org.sandboxpowered.silica.content.block.Blocks
-import org.sandboxpowered.silica.content.item.BlockItem
+import org.sandboxpowered.silica.api.item.BlockItem
 import org.sandboxpowered.silica.api.item.ItemStack
 import org.sandboxpowered.silica.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.api.ecs.PositionComponent

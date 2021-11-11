@@ -4,8 +4,10 @@ import org.sandboxpowered.silica.api.block.Block
 import org.sandboxpowered.silica.api.block.BlockEntityProvider
 import org.sandboxpowered.silica.api.fluid.Fluid
 import org.sandboxpowered.silica.api.item.Item
+import org.sandboxpowered.silica.api.plugin.BasePlugin
 import org.sandboxpowered.silica.api.registry.RegistryDelegate
 import org.sandboxpowered.silica.api.util.Identifier
+import java.util.*
 
 object SilicaRegistries {
     val BLOCK_REGISTRY = SilicaRegistry(Identifier("minecraft", "block"), Block::class.java).apply {
@@ -22,7 +24,9 @@ object SilicaRegistries {
     val FLUID_REGISTRY = SilicaRegistry(Identifier("minecraft", "fluid"), Fluid::class.java)
 
     init {
-//        SilicaInit.init() TODO: Remove this
+        ServiceLoader.load(BasePlugin::class.java).forEach {
+            it.onEnable()
+        }
     }
 
     private val blockDelegates = HashMap<String, RegistryDelegate<Block>>()
