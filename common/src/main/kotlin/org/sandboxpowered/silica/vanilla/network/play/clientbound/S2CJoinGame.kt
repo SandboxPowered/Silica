@@ -12,7 +12,6 @@ class S2CJoinGame(
     private val hardcore: Boolean,
     private val gamemode: Byte,
     private val previousGamemode: Byte,
-    private val worldCount: Int,
     private val worldNames: Collection<Identifier>,
     private val dimCodec: NBTCompound?,
     private val dim: NBTCompound?,
@@ -30,7 +29,6 @@ class S2CJoinGame(
         buf.readBoolean(),
         buf.readByte(),
         buf.readByte(),
-        buf.readVarInt(),
         buf.readCollection(PacketByteBuf::readIdentity),
         buf.readNBT(),
         buf.readNBT(),
@@ -49,7 +47,6 @@ class S2CJoinGame(
         buf.writeBoolean(hardcore)
         buf.writeByte(gamemode.toInt())
         buf.writeByte(previousGamemode.toInt())
-        buf.writeVarInt(worldCount)
         buf.writeCollection(worldNames, PacketByteBuf::writeIdentity)
         buf.writeNBT(dimCodec)
         buf.writeNBT(dim)
