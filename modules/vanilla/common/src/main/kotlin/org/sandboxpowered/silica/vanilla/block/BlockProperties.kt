@@ -71,6 +71,7 @@ object BlockProperties {
     val STAGE: Property<Int> = of("stage", 0, 1)
     val DISTANCE_0_7: Property<Int> = of("distance", 0, 7)
     val ROTATION: Property<Int> = of("rotation", 0, 15)
+    val CANDLES: Property<Int> = of("candles", 1, 4)
     val FACING: Property<Direction> = of<Direction>("facing")
     val HORIZONTAL_FACING: Property<Direction> = of("facing", Direction.Type.HORIZONTAL)
     val HOPPER_FACING: Property<Direction> = of("facing") { it != Direction.UP }
@@ -83,6 +84,11 @@ object BlockProperties {
     val WALL_SHAPE_EAST: Property<WallShape> = of<WallShape>("east")
     val WALL_SHAPE_SOUTH: Property<WallShape> = of<WallShape>("south")
     val WALL_SHAPE_WEST: Property<WallShape> = of<WallShape>("west")
+
+    val REDSTONE_SIDE_NORTH: Property<RedstoneSideState> = of<RedstoneSideState>("north")
+    val REDSTONE_SIDE_EAST: Property<RedstoneSideState> = of<RedstoneSideState>("east")
+    val REDSTONE_SIDE_WEST: Property<RedstoneSideState> = of<RedstoneSideState>("west")
+    val REDSTONE_SIDE_SOUTH: Property<RedstoneSideState> = of<RedstoneSideState>("south")
 
     val INSTRUMENT: Property<Instrument> = of<Instrument>("instrument")
     val BED_PART: Property<BedPart> = of<BedPart>("part")

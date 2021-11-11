@@ -12,6 +12,7 @@ import org.apache.commons.io.FileUtils
 import org.sandboxpowered.silica.akka.Reaper
 import org.sandboxpowered.silica.api.util.Side
 import org.sandboxpowered.silica.api.util.extensions.join
+import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.resources.ZIPResourceLoader
 import org.sandboxpowered.silica.util.Util
 import org.sandboxpowered.silica.util.Util.MINECRAFT_VERSION
@@ -19,7 +20,6 @@ import org.sandboxpowered.silica.util.extensions.WithContext
 import org.sandboxpowered.silica.util.extensions.messageAdapter
 import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.util.extensions.onSignal
-import org.sandboxpowered.silica.util.getLogger
 import org.sandboxpowered.silica.vanilla.StateMappingManager
 import org.sandboxpowered.silica.vanilla.StateMappingManager.ErrorType.UNKNOWN
 import org.sandboxpowered.silica.vanilla.VanillaProtocolMapping

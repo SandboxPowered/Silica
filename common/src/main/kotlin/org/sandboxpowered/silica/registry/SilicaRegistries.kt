@@ -9,9 +9,9 @@ import org.sandboxpowered.silica.api.plugin.BasePlugin
 import org.sandboxpowered.silica.api.plugin.Plugin
 import org.sandboxpowered.silica.api.registry.RegistryDelegate
 import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.util.extensions.getAnnotation
 import org.sandboxpowered.silica.util.extensions.getTypesAnnotatedWith
-import org.sandboxpowered.silica.util.getLogger
 
 object SilicaRegistries {
     val BLOCK_REGISTRY = SilicaRegistry(Identifier("minecraft", "block"), Block::class.java).apply {

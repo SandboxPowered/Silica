@@ -16,11 +16,16 @@ object SilicaInit {
     private val STAIRS = EMPTY suffix "_stairs" block ::StairBlock
     private val SLAB = EMPTY suffix "_slab" block ::SlabBlock
     private val WALL = EMPTY suffix "_wall" block ::WallBlock
+    private val FENCE = EMPTY suffix "_fence" block ::FenceBlock
+    private val FENCE_GATE = EMPTY suffix "_fence_gate" block ::FenceGateBlock
     private val DOOR = EMPTY suffix "_door" block ::DoorBlock
     private val TRAPDOOR = EMPTY suffix "_trapdoor" block ::TrapdoorBlock
     private val BUTTON = EMPTY suffix "_button" block ::ButtonBlock
     private val LEAVES = EMPTY suffix "_leaves" block ::LeavesBlock
     private val GRASS = EMPTY block ::GrassBlock
+
+    private val SIGN = EMPTY suffix "_sign" block ::SignBlock
+    private val WALL_SIGN = EMPTY suffix "_wall_sign" block ::WallSignBlock
 
     private val BLOCK_S = BLOCK suffix "s"
     private val BLOCK_ORE = BLOCK suffix "_ore"
@@ -37,16 +42,27 @@ object SilicaInit {
         register(BaseBlock(Identifier("bedrock")))
         register(BaseBlock(Identifier("dirt")))
 
+        register(BaseBlock(Identifier("glowstone")))
+        register(GlowLichenBlock(Identifier("glow_lichen")))
+
         register(BaseBlock(Identifier("sand")))
         register(BaseBlock(Identifier("gravel")))
 
         register(BaseBlock(Identifier("glass")))
 
         register(NoteBlock(Identifier("note_block")))
+
+        register(TripwireBlock(Identifier("tripwire")))
+        register(TripwireHookBlock(Identifier("tripwire_hook")))
+
         register(FireBlock(Identifier("fire")))
         register(GlassPaneBlock(Identifier("glass_pane")))
 
         register(FurnaceBlock(Identifier("furnace")))
+        register(RedstoneWireBlock(Identifier("redstone_wire")))
+
+        register(BeehiveBlock(Identifier("beehive")))
+        register(BeehiveBlock(Identifier("bee_nest")))
 
         blocks {
             Colour.NAME_ARRAY defines {
@@ -55,6 +71,8 @@ object SilicaInit {
                 archetypes(BLOCK suffix "_stained_glass")
                 archetypes(EMPTY suffix "_stained_glass_pane" block ::GlassPaneBlock)
                 archetypes(EMPTY suffix "_bed" block ::BedBlock)
+                archetypes(EMPTY suffix "_banner" block ::BannerBlock)
+                archetypes(EMPTY suffix "_candle" block ::CandleBlock)
             }
             arrayOf("grass_block", "mycelium", "podzol") defines {
                 archetypes(GRASS)
@@ -67,6 +85,10 @@ object SilicaInit {
                     DOOR,
                     TRAPDOOR,
                     BUTTON,
+                    FENCE,
+                    FENCE_GATE,
+                    SIGN,
+                    WALL_SIGN,
                     LEAVES not "warped" not "crimson"
                 )
             }
@@ -76,7 +98,7 @@ object SilicaInit {
             "iron" defines { archetypes(DOOR, TRAPDOOR) }
             "stone" defines { archetypes(BUTTON) }
             arrayOf("iron", "coal", "gold", "diamond", "emerald", "lapis") defines {
-                archetypes(BLOCK_ORE, BLOCK_DEEPSLATE_ORE)
+                archetypes(BLOCK_ORE, BLOCK_DEEPSLATE_ORE, BLOCK suffix "_block")
             }
             arrayOf("cobblestone", "diorite", "granite", "andesite") defines {
                 archetypes(BLOCK, WALL, STAIRS, SLAB)
@@ -114,6 +136,7 @@ object SilicaInit {
             "red_sandstone" defines { archetypes(BLOCK, WALL, STAIRS, SLAB) }
             "end_stone_brick" defines { archetypes(BLOCK_S, WALL, STAIRS, SLAB) }
             "polished_blackstone_brick" defines { archetypes(BLOCK_S, WALL, STAIRS, SLAB) }
+            "polished_blackstone" defines { archetypes(BLOCK, WALL, STAIRS, SLAB, BUTTON) }
             "blackstone" defines { archetypes(BLOCK, WALL, STAIRS, SLAB) }
             "mossy_cobblestone" defines { archetypes(BLOCK, WALL, STAIRS, SLAB) }
             "deepslate_brick" defines { archetypes(BLOCK_S, WALL, STAIRS, SLAB) }

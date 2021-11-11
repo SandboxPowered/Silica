@@ -24,11 +24,11 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import net.kyori.adventure.text.Component
 import net.mostlyoriginal.api.event.common.Subscribe
+import org.sandboxpowered.silica.api.util.extensions.registerTypeAdapter
+import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.ecs.events.RemoveEntitiesEvent
 import org.sandboxpowered.silica.ecs.events.ReplaceBlockEvent
 import org.sandboxpowered.silica.util.extensions.onMessage
-import org.sandboxpowered.silica.api.util.extensions.registerTypeAdapter
-import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.vanilla.network.*
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CBlockChange
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CDestroyEntities

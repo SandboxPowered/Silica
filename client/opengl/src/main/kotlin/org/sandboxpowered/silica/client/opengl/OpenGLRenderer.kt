@@ -4,6 +4,7 @@ import com.github.zafarkhaja.semver.Version
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL30.*
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.client.Renderer
 import org.sandboxpowered.silica.client.RenderingFactory
 import org.sandboxpowered.silica.client.SilicaClient
@@ -13,7 +14,6 @@ import org.sandboxpowered.silica.client.opengl.texture.OpenGLTextureAtlas
 import org.sandboxpowered.silica.client.texture.TextureAtlas
 import org.sandboxpowered.silica.client.texture.TextureStitcher
 import org.sandboxpowered.silica.client.util.stackPush
-import org.sandboxpowered.silica.api.util.Identifier
 
 class OpenGLRenderer(private val silica: SilicaClient) : Renderer {
 

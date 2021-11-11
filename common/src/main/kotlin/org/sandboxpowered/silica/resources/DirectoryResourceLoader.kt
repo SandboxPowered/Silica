@@ -2,8 +2,8 @@ package org.sandboxpowered.silica.resources
 
 import com.google.common.collect.Sets
 import org.apache.commons.io.filefilter.DirectoryFileFilter
-import org.sandboxpowered.silica.resources.ResourceLoader.Companion.isValidPath
 import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.silica.resources.ResourceLoader.Companion.isValidPath
 import java.io.File
 import java.io.FileFilter
 import java.io.FileInputStream

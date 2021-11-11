@@ -20,6 +20,7 @@ import org.lwjgl.vulkan.EXTDebugUtils.*
 import org.lwjgl.vulkan.KHRSurface.*
 import org.lwjgl.vulkan.KHRSwapchain.*
 import org.lwjgl.vulkan.VK10.*
+import org.sandboxpowered.silica.api.util.extensions.set
 import org.sandboxpowered.silica.client.Renderer
 import org.sandboxpowered.silica.client.RenderingFactory
 import org.sandboxpowered.silica.client.SilicaClient
@@ -32,7 +33,6 @@ import org.sandboxpowered.silica.client.vulkan.SPIRVUtil.ShaderKind.FRAGMENT_SHA
 import org.sandboxpowered.silica.client.vulkan.SPIRVUtil.ShaderKind.VERTEX_SHADER
 import org.sandboxpowered.silica.client.vulkan.VkError.Companion.checkError
 import org.sandboxpowered.silica.client.vulkan.VkError.Companion.checkErrorRun
-import org.sandboxpowered.silica.api.util.extensions.set
 import java.io.PrintStream
 import java.nio.ByteBuffer
 import java.nio.IntBuffer

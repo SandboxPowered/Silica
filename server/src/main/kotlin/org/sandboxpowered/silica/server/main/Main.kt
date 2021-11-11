@@ -3,10 +3,10 @@ package org.sandboxpowered.silica.server.main
 import joptsimple.OptionParser
 import joptsimple.OptionSpec
 import org.apache.logging.log4j.LogManager
+import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.server.DedicatedServer
 import org.sandboxpowered.silica.server.DedicatedServerProperties.Companion.fromFile
 import org.sandboxpowered.silica.server.ServerEula
-import org.sandboxpowered.silica.util.getLogger
 import java.nio.file.Paths
 
 object Main {

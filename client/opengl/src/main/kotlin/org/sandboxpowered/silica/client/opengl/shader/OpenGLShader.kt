@@ -4,11 +4,11 @@ import org.joml.Matrix4fc
 import org.joml.Vector2fc
 import org.joml.Vector3fc
 import org.lwjgl.opengl.GL20.*
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.client.shader.Shader
 import org.sandboxpowered.silica.client.util.stackPush
 import org.sandboxpowered.silica.resources.ResourceManager
 import org.sandboxpowered.silica.resources.ResourceType.ASSETS
-import org.sandboxpowered.silica.api.util.Identifier
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader

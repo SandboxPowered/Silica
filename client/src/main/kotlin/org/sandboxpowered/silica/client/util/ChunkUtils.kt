@@ -87,18 +87,18 @@ class ChunkUtils {
         private fun onChunkRemoved(chunk: RenderChunk): Int {
             val d = distToChunk(chunk.cx, chunk.cy, chunk.cz)
             return (onChunkRemoved(chunk.cx - 1, chunk.cy, chunk.cz, d)
-                + onChunkRemoved(chunk.cx + 1, chunk.cy, chunk.cz, d)
-                + onChunkRemoved(chunk.cx, chunk.cy, chunk.cz - 1, d)
-                + onChunkRemoved(chunk.cx, chunk.cy, chunk.cz + 1, d)
-                + onChunkRemoved(chunk.cx, chunk.cy - 1, chunk.cz, d)
-                + onChunkRemoved(chunk.cx, chunk.cy + 1, chunk.cz, d))
+                    + onChunkRemoved(chunk.cx + 1, chunk.cy, chunk.cz, d)
+                    + onChunkRemoved(chunk.cx, chunk.cy, chunk.cz - 1, d)
+                    + onChunkRemoved(chunk.cx, chunk.cy, chunk.cz + 1, d)
+                    + onChunkRemoved(chunk.cx, chunk.cy - 1, chunk.cz, d)
+                    + onChunkRemoved(chunk.cx, chunk.cy + 1, chunk.cz, d))
         }
 
         private fun culledXY(minX: Float, minY: Float, minZ: Float, maxX: Float, maxY: Float, maxZ: Float): Boolean {
             return nxX * (if (nxX < 0) minX else maxX) + nxY * (if (nxY < 0) minY else maxY) + nxZ * (if (nxZ < 0) minZ else maxZ) < -nxW
-                || pxX * (if (pxX < 0) minX else maxX) + pxY * (if (pxY < 0) minY else maxY) + pxZ * (if (pxZ < 0) minZ else maxZ) < -pxW
-                || nyX * (if (nyX < 0) minX else maxX) + nyY * (if (nyY < 0) minY else maxY) + nyZ * (if (nyZ < 0) minZ else maxZ) < -nyW
-                || pyX * (if (pyX < 0) minX else maxX) + pyY * (if (pyY < 0) minY else maxY) + pyZ * (if (pyZ < 0) minZ else maxZ) < -pyW
+                    || pxX * (if (pxX < 0) minX else maxX) + pxY * (if (pxY < 0) minY else maxY) + pxZ * (if (pxZ < 0) minZ else maxZ) < -pxW
+                    || nyX * (if (nyX < 0) minX else maxX) + nyY * (if (nyY < 0) minY else maxY) + nyZ * (if (nyZ < 0) minZ else maxZ) < -nyW
+                    || pyX * (if (pyX < 0) minX else maxX) + pyY * (if (pyY < 0) minY else maxY) + pyZ * (if (pyZ < 0) minZ else maxZ) < -pyW
         }
 
         private fun chunkNotInFrustum(chunk: RenderChunk): Boolean {

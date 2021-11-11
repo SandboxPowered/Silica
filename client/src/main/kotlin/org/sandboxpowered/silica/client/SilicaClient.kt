@@ -6,6 +6,11 @@ import com.github.zafarkhaja.semver.Version
 import com.google.common.base.Joiner
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.system.Configuration
+import org.sandboxpowered.silica.api.util.Side
+import org.sandboxpowered.silica.api.util.extensions.join
+import org.sandboxpowered.silica.api.util.extensions.listFiles
+import org.sandboxpowered.silica.api.util.extensions.notExists
+import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.client.input.Keyboard
 import org.sandboxpowered.silica.client.mesh.ChunkPos
 import org.sandboxpowered.silica.client.mesh.MeshRouter
@@ -15,13 +20,8 @@ import org.sandboxpowered.silica.resources.ResourceManager
 import org.sandboxpowered.silica.resources.ResourceType
 import org.sandboxpowered.silica.resources.ZIPResourceLoader
 import org.sandboxpowered.silica.util.FileFilters
-import org.sandboxpowered.silica.api.util.Side
 import org.sandboxpowered.silica.util.Util
 import org.sandboxpowered.silica.util.Util.MINECRAFT_VERSION
-import org.sandboxpowered.silica.api.util.extensions.join
-import org.sandboxpowered.silica.api.util.extensions.listFiles
-import org.sandboxpowered.silica.api.util.extensions.notExists
-import org.sandboxpowered.silica.util.getLogger
 import org.sandboxpowered.silica.world.SilicaWorld
 import org.sandboxpowered.silica.world.util.iterateCube
 import java.io.File

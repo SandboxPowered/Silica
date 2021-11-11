@@ -6,14 +6,14 @@ import akka.actor.typed.Terminated
 import akka.actor.typed.javadsl.*
 import it.unimi.dsi.fastutil.objects.Object2LongMap
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap
+import org.sandboxpowered.silica.api.util.Side
+import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.client.SilicaClient.Command
 import org.sandboxpowered.silica.client.mesh.MeshRouter
 import org.sandboxpowered.silica.client.server.IntegratedServer
-import org.sandboxpowered.silica.api.util.Side
 import org.sandboxpowered.silica.util.extensions.messageAdapter
 import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.util.extensions.onSignal
-import org.sandboxpowered.silica.util.getLogger
 import org.sandboxpowered.silica.world.SilicaWorld
 import java.time.Duration
 

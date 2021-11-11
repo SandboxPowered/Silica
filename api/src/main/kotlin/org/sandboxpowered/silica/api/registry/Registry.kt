@@ -25,7 +25,10 @@ class RegistryDelegate<T : RegistryEntry<T>>(private val registry: Registry<T>, 
 
     val optional = NullableRegistryDelegate(registry, domain)
 
-    class NullableRegistryDelegate<T : RegistryEntry<T>>(private val registry: Registry<T>, private val domain: String) {
+    class NullableRegistryDelegate<T : RegistryEntry<T>>(
+        private val registry: Registry<T>,
+        private val domain: String
+    ) {
         operator fun getValue(thisRef: Any?, property: KProperty<*>): T? =
             registry[Identifier(domain, property.name.lowercase())].orNull()
     }

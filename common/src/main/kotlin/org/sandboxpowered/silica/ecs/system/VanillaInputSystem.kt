@@ -5,24 +5,24 @@ import com.artemis.annotations.All
 import com.artemis.annotations.Wire
 import com.artemis.systems.IteratingSystem
 import org.joml.Vector3d
-import org.sandboxpowered.silica.content.block.Blocks
+import org.sandboxpowered.silica.api.ecs.PositionComponent
 import org.sandboxpowered.silica.api.item.BlockItem
 import org.sandboxpowered.silica.api.item.ItemStack
-import org.sandboxpowered.silica.ecs.component.PlayerInventoryComponent
-import org.sandboxpowered.silica.api.ecs.PositionComponent
 import org.sandboxpowered.silica.api.util.extensions.component1
 import org.sandboxpowered.silica.api.util.extensions.component2
 import org.sandboxpowered.silica.api.util.extensions.component3
+import org.sandboxpowered.silica.api.util.math.Position
+import org.sandboxpowered.silica.api.world.World
+import org.sandboxpowered.silica.content.block.Blocks
+import org.sandboxpowered.silica.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.ecs.component.RotationComponent
 import org.sandboxpowered.silica.ecs.component.VanillaPlayerInput
 import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.server.VanillaNetwork
-import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityPosition
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityPositionRotation
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityRotation
-import org.sandboxpowered.silica.api.world.World
 
 @All(VanillaPlayerInput::class, PositionComponent::class, RotationComponent::class)
 class VanillaInputSystem(val server: SilicaServer) : IteratingSystem() {

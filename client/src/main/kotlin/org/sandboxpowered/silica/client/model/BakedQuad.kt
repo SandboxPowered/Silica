@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.client.model
 
-import org.sandboxpowered.silica.client.texture.TextureAtlas
 import org.sandboxpowered.silica.api.util.Direction
+import org.sandboxpowered.silica.client.texture.TextureAtlas
 
 data class BakedQuad(
     val vertexData: FloatArray,

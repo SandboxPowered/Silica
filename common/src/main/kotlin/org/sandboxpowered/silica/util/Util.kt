@@ -6,16 +6,11 @@ import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.SystemUtils
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 import org.sandboxpowered.silica.api.util.Side
 import org.sandboxpowered.silica.util.extensions.downloadFile
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
-
-@Suppress("unused") // used as receiver to not specify generic arg explicitly
-inline fun <reified T> T.getLogger(): Logger = LogManager.getLogger(T::class.java)
 
 object Util {
 

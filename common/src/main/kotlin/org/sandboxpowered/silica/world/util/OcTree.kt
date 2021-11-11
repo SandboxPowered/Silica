@@ -522,15 +522,15 @@ class OcTree @JvmOverloads constructor(
 
         fun contains(x: Float, y: Float, z: Float): Boolean =
             this.x <= x && this.x + this.width >= x
-                && this.y <= y && this.y + this.height >= y
-                && this.z <= z && this.z + this.depth >= z
+                    && this.y <= y && this.y + this.height >= y
+                    && this.z <= z && this.z + this.depth >= z
 
         fun overlaps(
             x: Float, y: Float, z: Float,
             width: Float, height: Float, depth: Float
         ): Boolean = this.x < x + width && this.x + this.width >= x
-            && this.y < y + height && this.y + this.height >= y
-            && this.z < z + depth && this.z + this.depth >= z
+                && this.y < y + height && this.y + this.height >= y
+                && this.z < z + depth && this.z + this.depth >= z
 
         fun contains(
             ox: Float, oy: Float, oz: Float,
@@ -541,8 +541,8 @@ class OcTree @JvmOverloads constructor(
             val zMax = oz + oDepth
 
             return ox > x && ox < x + width && xMax > x && xMax < x + width
-                && oy > y && oy < y + height && yMax > y && yMax < y + height
-                && oz > z && oz < z + depth && zMax > z && yMax < z + depth
+                    && oy > y && oy < y + height && yMax > y && yMax < y + height
+                    && oz > z && oz < z + depth && zMax > z && yMax < z + depth
         }
 
         operator fun contains(c: Container): Boolean = contains(c.x, c.y, c.z, c.width, c.height, c.depth)

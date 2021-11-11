@@ -2,11 +2,11 @@ package org.sandboxpowered.silica.client.texture
 
 import org.joml.Vector2fc
 import org.lwjgl.stb.STBImage.*
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.client.util.stackPush
 import org.sandboxpowered.silica.client.util.streamToBuffer
 import org.sandboxpowered.silica.resources.ResourceManager
 import org.sandboxpowered.silica.resources.ResourceType
-import org.sandboxpowered.silica.api.util.Identifier
 import java.io.InputStream
 import java.nio.ByteBuffer
 

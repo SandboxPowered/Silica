@@ -2,9 +2,9 @@ package org.sandboxpowered.silica.client.main
 
 import joptsimple.OptionParser
 import joptsimple.OptionSpec
+import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.client.SilicaClient
 import org.sandboxpowered.silica.client.SilicaClient.Args
-import org.sandboxpowered.silica.util.getLogger
 import org.sandboxpowered.silica.util.extensions.ofType
 
 object Main {
