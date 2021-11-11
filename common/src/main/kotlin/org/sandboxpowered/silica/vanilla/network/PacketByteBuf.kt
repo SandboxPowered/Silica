@@ -753,7 +753,7 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
     fun writeString(string: String, maxLength: Int = 32767): PacketByteBuf {
         val bs = string.toByteArray(StandardCharsets.UTF_8)
         return if (bs.size > maxLength) {
-            throw EncoderException("String too big (was " + bs.size + " bytes encoded, max " + maxLength + ")")
+            throw EncoderException("String too big (was ${bs.size} bytes encoded, max $maxLength)")
         } else {
             writeVarInt(bs.size)
             this.writeBytes(bs)

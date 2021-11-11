@@ -15,14 +15,12 @@ class S2CPluginChannel(private var channel: Identifier, private var data: Packet
         buf.writeBytes(if (data.readableBytes() > MAX_SIZE) data.readSlice(MAX_SIZE) else data)
     }
 
-    override fun handle(packetHandler: PacketHandler, context: PlayContext) {}
+    override fun handle(packetHandler: PacketHandler, context: PlayContext) = Unit
 
     companion object {
         private const val MAX_SIZE = 1048576
 
-        inline operator fun invoke(channel: Identifier, data: (PacketByteBuf) -> Unit) = S2CPluginChannel(
-            channel,
-            PacketByteBuf(Unpooled.buffer()).apply(data)
-        )
+        inline operator fun invoke(channel: Identifier, data: (PacketByteBuf) -> Unit) =
+            S2CPluginChannel(channel, PacketByteBuf(Unpooled.buffer()).apply(data))
     }
 }

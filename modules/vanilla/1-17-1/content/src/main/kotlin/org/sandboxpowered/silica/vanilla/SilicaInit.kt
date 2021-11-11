@@ -38,6 +38,11 @@ object SilicaInit {
             fuelTime = 1600
         }))
 
+        register(BaseBlock(Identifier("air")), false)
+        register(BaseBlock(Identifier("bedrock")))
+        register(BaseBlock(Identifier("dirt")))
+
+        register(BaseBlock(Identifier("glowstone")))
         register(GlowLichenBlock(Identifier("glow_lichen")))
 
         register(BaseBlock(Identifier("sand")))

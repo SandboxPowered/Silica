@@ -1,6 +1,7 @@
 package org.sandboxpowered.silica.api.internal
 
 import org.sandboxpowered.silica.api.network.NetworkAdapter
+import org.sandboxpowered.silica.api.plugin.PluginManager
 import org.sandboxpowered.silica.api.registry.Registry
 import org.sandboxpowered.silica.api.registry.RegistryEntry
 import org.sandboxpowered.silica.api.world.generation.WorldGenerator
@@ -14,6 +15,7 @@ fun getInstance(): InternalAPI {
 }
 
 interface InternalAPI {
+    val pluginManager: PluginManager
     fun <T : RegistryEntry<T>> getRegistry(kclass: KClass<T>): Registry<T>
     fun registerNetworkAdapter(adapter: NetworkAdapter)
     fun registerWorldGenerator(generator: WorldGenerator)
