@@ -18,7 +18,7 @@ open class BaseState<B : RegistryEntry<B>, S : PropertyContainer<S>>(
     override fun <T : Comparable<T>> get(property: Property<T>): T {
         val value = properties[property]
         require(value != null) { "Cannot get property $property as it does not exist in $base" }
-        return property.valueType.cast(value)
+        return value as T
     }
 
     override fun <T : Comparable<T>> set(property: Property<T>, value: T): S {
