@@ -1,5 +1,6 @@
 package org.sandboxpowered.silica.vanilla.network.play.clientbound.world
 
+import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
@@ -46,11 +47,9 @@ class VanillaChunkSection(
         else if (!oldState.isAir && newState.isAir) ++nonAir
     }
 
-    val serializedSize: Int get() = 3 + PacketByteBuf.getVarIntSize(bitPacked.data.size) + bitPacked.data.size * 8
+    val serializedSize: Int get() = 3 + PacketBuffer.getVarIntSize(bitPacked.data.size) + bitPacked.data.size * 8
 
-    private fun index(x: Int, y: Int, z: Int): Int {
-        return y shl 8 or (z shl 4) or x
-    }
+    private fun index(x: Int, y: Int, z: Int): Int = y shl 8 or (z shl 4) or x
 
     private companion object {
         const val BITS = 15

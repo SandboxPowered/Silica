@@ -2,8 +2,9 @@ package org.sandboxpowered.silica.vanilla.network.play.serverbound
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
+import org.sandboxpowered.silica.api.network.PacketBuffer
+import org.sandboxpowered.silica.api.network.readCollection
 import org.sandboxpowered.silica.api.util.getLogger
-import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
@@ -23,15 +24,13 @@ data class C2SClickWindow(
     private val clickedItem: SlotData
 ) : PacketPlay {
 
-    constructor(buf: PacketByteBuf) : this(
+    constructor(buf: PacketBuffer) : this(
         buf.readByte(),
         buf.readVarInt(),
         buf.readShort(),
         buf.readByte(),
         buf.readVarInt(),
-        buf.readCollection {
-            it.readShort() to it.readSlot()
-        }.let {
+        buf.readCollection { it.readShort() to it.readSlot() }.let {
             Int2ObjectOpenHashMap<SlotData>(it.size).apply {
                 it.forEach { (key, value) ->
                     put(key.toInt(), value)
@@ -41,7 +40,7 @@ data class C2SClickWindow(
         buf.readSlot()
     )
 
-    override fun write(buf: PacketByteBuf) {
+    override fun write(buf: PacketBuffer) {
         buf.writeByte(window)
         buf.writeByte(button)
     }

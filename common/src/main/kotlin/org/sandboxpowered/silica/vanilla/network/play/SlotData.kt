@@ -2,8 +2,8 @@ package org.sandboxpowered.silica.vanilla.network.play
 
 import org.sandboxpowered.silica.api.item.Item
 import org.sandboxpowered.silica.api.item.ItemStack
-import org.sandboxpowered.silica.nbt.NBTCompound
-import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
+import org.sandboxpowered.silica.api.nbt.NBTCompound
+import org.sandboxpowered.silica.api.network.PacketBuffer
 
 data class SlotData(
     val present: Boolean,
@@ -20,7 +20,7 @@ data class SlotData(
     }
 }
 
-fun PacketByteBuf.writeSlot(slot: SlotData): PacketByteBuf {
+fun PacketBuffer.writeSlot(slot: SlotData): PacketBuffer {
     if (slot.present) {
         writeBoolean(true)
         writeVarInt(slot.itemId)
@@ -30,7 +30,7 @@ fun PacketByteBuf.writeSlot(slot: SlotData): PacketByteBuf {
     return this
 }
 
-fun PacketByteBuf.readSlot(): SlotData =
+fun PacketBuffer.readSlot(): SlotData =
     if (readBoolean()) {
         val itemId = readVarInt()
         val itemCount = readByte()

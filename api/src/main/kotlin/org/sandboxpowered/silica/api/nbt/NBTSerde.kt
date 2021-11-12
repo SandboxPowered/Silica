@@ -1,6 +1,6 @@
-package org.sandboxpowered.silica.nbt
+package org.sandboxpowered.silica.api.nbt
 
-import org.sandboxpowered.silica.nbt.CompoundTag.Entry
+import org.sandboxpowered.silica.api.nbt.CompoundTag.Entry
 import java.io.DataInput
 import java.io.DataOutput
 import java.io.IOException
@@ -73,13 +73,13 @@ private enum class NbtType(
         var type = readByte().toInt()
         while (type != 0) {
             val k = readUTF()
-            val v = Companion.read(type, this)
+            val v = read(type, this)
             compound.tags[k] = v
             type = readByte().toInt()
         }
         compound
     }, {
-        it as org.sandboxpowered.silica.nbt.CompoundTag
+        it as CompoundTag
         for ((k, v) in it.tags) write(k, v, this)
         writeByte(0)
     }),

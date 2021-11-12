@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.vanilla.network.play.serverbound
 
-import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
+import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
@@ -14,7 +14,7 @@ class C2SClientSettings(
     private val hand: Int,
     private val textFiltering: Boolean,
 ) : PacketPlay {
-    constructor(buf: PacketByteBuf) : this(
+    constructor(buf: PacketBuffer) : this(
         buf.readString(16),
         buf.readByte(),
         buf.readVarInt(),
@@ -24,6 +24,6 @@ class C2SClientSettings(
         buf.readBoolean()
     )
 
-    override fun write(buf: PacketByteBuf) {}
+    override fun write(buf: PacketBuffer) {}
     override fun handle(packetHandler: PacketHandler, context: PlayContext) {}
 }

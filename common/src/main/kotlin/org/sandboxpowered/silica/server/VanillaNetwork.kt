@@ -297,6 +297,11 @@ private class VanillaNetworkActor(
 
     @Subscribe
     fun changeBlock(event: ReplaceBlockEvent) {
-        context.self.tell(VanillaNetwork.SendToWatching(event.pos, S2CBlockChange(event.pos, server.stateRemapper[event.newState])))
+        context.self.tell(
+            VanillaNetwork.SendToWatching(
+                event.pos,
+                S2CBlockChange(event.pos, server.stateRemapper[event.newState])
+            )
+        )
     }
 }

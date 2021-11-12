@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.nbt
+package org.sandboxpowered.silica.api.nbt
 
 import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.math.Position

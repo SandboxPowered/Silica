@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.vanilla.network.play.clientbound
 
-import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
+import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
@@ -10,7 +10,7 @@ class S2CSetPlayerPositionAndLook(
     private val yaw: Float, private val pitch: Float, private val flags: Byte,
     private val id: Int,
 ) : PacketPlay {
-    constructor(buf: PacketByteBuf) : this(
+    constructor(buf: PacketBuffer) : this(
         buf.readDouble(),
         buf.readDouble(),
         buf.readDouble(),
@@ -20,13 +20,13 @@ class S2CSetPlayerPositionAndLook(
         buf.readVarInt()
     )
 
-    override fun write(buf: PacketByteBuf) {
+    override fun write(buf: PacketBuffer) {
         buf.writeDouble(x)
         buf.writeDouble(y)
         buf.writeDouble(z)
         buf.writeFloat(yaw)
         buf.writeFloat(pitch)
-        buf.writeByte(flags.toInt())
+        buf.writeByte(flags)
         buf.writeVarInt(id)
         buf.writeBoolean(false) // dismount vehicle
     }

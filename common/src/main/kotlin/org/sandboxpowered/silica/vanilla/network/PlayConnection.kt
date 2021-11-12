@@ -8,14 +8,14 @@ import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import com.mojang.authlib.GameProfile
 import org.sandboxpowered.silica.api.ecs.component.PlayerInventoryComponent
+import org.sandboxpowered.silica.api.nbt.NBTCompound
+import org.sandboxpowered.silica.api.nbt.nbt
+import org.sandboxpowered.silica.api.nbt.setTag
 import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.extensions.getSystem
 import org.sandboxpowered.silica.api.util.extensions.onException
 import org.sandboxpowered.silica.ecs.component.VanillaPlayerInput
 import org.sandboxpowered.silica.ecs.system.SilicaPlayerManager
-import org.sandboxpowered.silica.nbt.NBTCompound
-import org.sandboxpowered.silica.nbt.nbt
-import org.sandboxpowered.silica.nbt.setTag
 import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.server.VanillaNetwork

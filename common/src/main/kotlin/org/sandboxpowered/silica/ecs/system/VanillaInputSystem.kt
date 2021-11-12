@@ -76,12 +76,21 @@ class VanillaInputSystem(val server: SilicaServer) : IteratingSystem() {
 
         if (hasRotated) {
             packet = if (hasMoved && !teleport) {
-                S2CUpdateEntityPositionRotation(entityId, dx.toInt(), dy.toInt(), dz.toInt(), yaw, pitch, false)
+                S2CUpdateEntityPositionRotation(
+                    entityId,
+                    dx.toInt().toShort(), dy.toInt().toShort(), dz.toInt().toShort(), yaw, pitch, false
+                )
             } else {
                 S2CUpdateEntityRotation(entityId, yaw, pitch, false)
             }
         } else if (hasMoved) {
-            packet = S2CUpdateEntityPosition(entityId, dx.toInt(), dy.toInt(), dz.toInt(), false)
+            packet = S2CUpdateEntityPosition(
+                entityId,
+                dx.toInt().toShort(),
+                dy.toInt().toShort(),
+                dz.toInt().toShort(),
+                false
+            )
         }
 
         if (packet != null) {

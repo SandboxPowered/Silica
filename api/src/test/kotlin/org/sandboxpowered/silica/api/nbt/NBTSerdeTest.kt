@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.nbt
+package org.sandboxpowered.silica.api.nbt
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.TestInstance

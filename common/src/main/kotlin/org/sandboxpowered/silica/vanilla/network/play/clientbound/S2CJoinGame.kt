@@ -1,8 +1,10 @@
 package org.sandboxpowered.silica.vanilla.network.play.clientbound
 
+import org.sandboxpowered.silica.api.nbt.NBTCompound
+import org.sandboxpowered.silica.api.network.PacketBuffer
+import org.sandboxpowered.silica.api.network.readCollection
+import org.sandboxpowered.silica.api.network.writeCollection
 import org.sandboxpowered.silica.api.util.Identifier
-import org.sandboxpowered.silica.nbt.NBTCompound
-import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
@@ -24,15 +26,15 @@ class S2CJoinGame(
     private val debug: Boolean,
     private val flat: Boolean,
 ) : PacketPlay {
-    constructor(buf: PacketByteBuf) : this(
+    constructor(buf: PacketBuffer) : this(
         buf.readInt(),
         buf.readBoolean(),
         buf.readByte(),
         buf.readByte(),
-        buf.readCollection(PacketByteBuf::readIdentity),
+        buf.readCollection(PacketBuffer::readIdentifier),
         buf.readNBT(),
         buf.readNBT(),
-        buf.readIdentity(),
+        buf.readIdentifier(),
         buf.readLong(),
         buf.readVarInt(),
         buf.readVarInt(),
@@ -42,15 +44,15 @@ class S2CJoinGame(
         buf.readBoolean()
     )
 
-    override fun write(buf: PacketByteBuf) {
+    override fun write(buf: PacketBuffer) {
         buf.writeInt(playerId)
         buf.writeBoolean(hardcore)
-        buf.writeByte(gamemode.toInt())
-        buf.writeByte(previousGamemode.toInt())
-        buf.writeCollection(worldNames, PacketByteBuf::writeIdentity)
+        buf.writeByte(gamemode)
+        buf.writeByte(previousGamemode)
+        buf.writeCollection(worldNames, PacketBuffer::writeIdentifier)
         buf.writeNBT(dimCodec)
         buf.writeNBT(dim)
-        buf.writeIdentity(world)
+        buf.writeIdentifier(world)
         buf.writeLong(seed)
         buf.writeVarInt(maxPlayers)
         buf.writeVarInt(viewDistance)

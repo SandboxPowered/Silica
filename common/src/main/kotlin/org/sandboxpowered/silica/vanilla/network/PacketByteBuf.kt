@@ -10,11 +10,12 @@ import io.netty.util.ByteProcessor
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import org.joml.Vector3f
+import org.sandboxpowered.silica.api.nbt.NBTCompound
+import org.sandboxpowered.silica.api.nbt.readNbt
+import org.sandboxpowered.silica.api.nbt.write
+import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.math.Position
-import org.sandboxpowered.silica.nbt.NBTCompound
-import org.sandboxpowered.silica.nbt.readNbt
-import org.sandboxpowered.silica.nbt.write
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -29,7 +30,10 @@ import java.nio.charset.StandardCharsets
 import java.util.*
 import kotlin.experimental.and
 
-class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
+class PacketByteBuf(private val source: ByteBuf) : ByteBuf(), PacketBuffer {
+    override val readableBytes: Int
+        get() = readableBytes()
+
     override fun capacity(): Int = source.capacity()
 
     override fun capacity(i: Int): PacketByteBuf {
@@ -345,31 +349,31 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
 
     override fun readUnsignedShort(): Int = source.readUnsignedShort()
 
-    fun readUByte(): UByte = readUnsignedByte().toUByte()
+    override fun readUByte(): UByte = readUnsignedByte().toUByte()
 
-    fun writeUByte(b: UByte): PacketByteBuf {
-        writeByte(b.toInt())
+    override fun writeUByte(value: UByte): PacketByteBuf {
+        writeByte(value.toInt())
         return this
     }
 
-    fun readUShort(): UShort = readUnsignedShort().toUShort()
+    override fun readUShort(): UShort = readUnsignedShort().toUShort()
 
-    fun writeUShort(s: UShort): PacketByteBuf {
-        writeShort(s.toInt())
+    override fun writeUShort(value: UShort): PacketByteBuf {
+        writeShort(value.toInt())
         return this
     }
 
-    fun readUInt(): UInt = readVarInt().toUInt()
+    override fun readUInt(): UInt = readVarInt().toUInt()
 
-    fun writeUInt(i: UInt): PacketByteBuf {
-        writeVarInt(i.toInt())
+    override fun writeUInt(value: UInt): PacketByteBuf {
+        writeVarInt(value.toInt())
         return this
     }
 
-    fun readULong(): ULong = readVarLong().toULong()
+    override fun readULong(): ULong = readVarLong().toULong()
 
-    fun writeULong(l: ULong): PacketByteBuf {
-        writeVarLong(l.toLong())
+    override fun writeULong(value: ULong): PacketByteBuf {
+        writeVarLong(value.toLong())
         return this
     }
 
@@ -457,8 +461,8 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         return this
     }
 
-    override fun writeBoolean(bl: Boolean): PacketByteBuf {
-        source.writeBoolean(bl)
+    override fun writeBoolean(value: Boolean): PacketByteBuf {
+        source.writeBoolean(value)
         return this
     }
 
@@ -467,8 +471,8 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         return this
     }
 
-    fun writeByte(b: Byte): PacketByteBuf {
-        source.writeByte(b.toInt())
+    override fun writeByte(value: Byte): PacketByteBuf {
+        source.writeByte(value.toInt())
         return this
     }
 
@@ -477,8 +481,8 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         return this
     }
 
-    fun writeShort(s: Short): PacketByteBuf {
-        source.writeShort(s.toInt())
+    override fun writeShort(value: Short): PacketByteBuf {
+        source.writeShort(value.toInt())
         return this
     }
 
@@ -497,8 +501,8 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         return this
     }
 
-    override fun writeInt(i: Int): PacketByteBuf {
-        source.writeInt(i)
+    override fun writeInt(value: Int): PacketByteBuf {
+        source.writeInt(value)
         return this
     }
 
@@ -507,8 +511,8 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         return this
     }
 
-    override fun writeLong(l: Long): PacketByteBuf {
-        source.writeLong(l)
+    override fun writeLong(value: Long): PacketByteBuf {
+        source.writeLong(value)
         return this
     }
 
@@ -522,13 +526,13 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         return this
     }
 
-    override fun writeFloat(f: Float): PacketByteBuf {
-        source.writeFloat(f)
+    override fun writeFloat(value: Float): PacketByteBuf {
+        source.writeFloat(value)
         return this
     }
 
-    override fun writeDouble(d: Double): PacketByteBuf {
-        source.writeDouble(d)
+    override fun writeDouble(value: Double): PacketByteBuf {
+        source.writeDouble(value)
         return this
     }
 
@@ -547,8 +551,13 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         return this
     }
 
-    override fun writeBytes(bs: ByteArray): PacketByteBuf {
-        source.writeBytes(bs)
+    override fun writeBytes(value: PacketBuffer): PacketBuffer {
+        writeBytes(value as ByteBuf)
+        return this
+    }
+
+    override fun writeBytes(value: ByteArray): PacketByteBuf {
+        source.writeBytes(value)
         return this
     }
 
@@ -664,7 +673,7 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
 
     override fun release(i: Int): Boolean = source.release(i)
 
-    fun readVarInt(): Int {
+    override fun readVarInt(): Int {
         var i = 0
         var j = 0
 
@@ -680,7 +689,7 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         return i
     }
 
-    fun readVarLong(): Long {
+    override fun readVarLong(): Long {
         var l = 0L
         var i = 0
         var b: Int
@@ -694,8 +703,7 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         return l
     }
 
-    @JvmOverloads
-    fun readString(maxSize: Int = 32767): String {
+    override fun readString(maxSize: Int): String {
         val j = readVarInt()
         return if (j > maxSize * 4) {
             throw DecoderException("The received encoded string buffer length is longer than maximum allowed (" + j + " > " + maxSize * 4 + ")")
@@ -712,10 +720,10 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         }
     }
 
-    fun readOptionalString(maxSize: Int): String? = if (readBoolean()) readString(maxSize) else null
+    override fun readOptionalString(maxSize: Int): String? = if (readBoolean()) readString(maxSize) else null
 
-    fun writeVarInt(i: Int): PacketByteBuf {
-        var ii = i
+    override fun writeVarInt(value: Int): PacketByteBuf {
+        var ii = value
         while (ii and -128 != 0) {
             writeByte(ii and 127 or 128)
             ii = ii ushr 7
@@ -725,33 +733,32 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
     }
 
     // hard to "guess" max size with var ints
-    fun readVarIntArray(maxSize: Int = -1): IntArray {
+    override fun readVarIntArray(maxSize: Int): IntArray {
         val length = readVarInt()
         if (maxSize in 1 until length) throw DecoderException("IntArray with size $length is bigger than allowed $maxSize")
         return IntArray(length) { readVarInt() }
     }
 
-    fun writeVarIntArray(array: IntArray): PacketByteBuf {
-        writeVarInt(array.size)
-        array.forEach(this::writeVarInt)
+    override fun writeVarIntArray(value: IntArray): PacketByteBuf {
+        writeVarInt(value.size)
+        value.forEach(this::writeVarInt)
         return this
     }
 
-    fun readLongArray(maxSize: Int = -1): LongArray {
+    override fun readLongArray(maxSize: Int): LongArray {
         val length = readVarInt()
         if (maxSize in 1 until length) throw DecoderException("LongArray with size $length is bigger than allowed $maxSize")
         return LongArray(length) { readLong() }
     }
 
-    fun writeLongArray(array: LongArray): PacketByteBuf {
-        writeVarInt(array.size)
-        array.forEach(this::writeLong)
+    override fun writeLongArray(value: LongArray): PacketByteBuf {
+        writeVarInt(value.size)
+        value.forEach(this::writeLong)
         return this
     }
 
-    @JvmOverloads
-    fun writeString(string: String, maxLength: Int = 32767): PacketByteBuf {
-        val bs = string.toByteArray(StandardCharsets.UTF_8)
+    override fun writeString(value: String, maxLength: Int): PacketByteBuf {
+        val bs = value.toByteArray(StandardCharsets.UTF_8)
         return if (bs.size > maxLength) {
             throw EncoderException("String too big (was ${bs.size} bytes encoded, max $maxLength)")
         } else {
@@ -761,16 +768,13 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         }
     }
 
-    @JvmOverloads
-    @JvmName("writeOptionalString")
-    fun writeString(string: String?, maxLength: Int = 32767): PacketByteBuf {
-        writeBoolean(string !== null)
-        string?.let { this.writeString(it, maxLength) }
+    override fun writeOptionalString(value: String?, maxLength: Int): PacketByteBuf {
+        writeBoolean(value !== null)
+        value?.let { this.writeString(it, maxLength) }
         return this
     }
 
-    @JvmOverloads
-    fun readByteArray(maxSize: Int = readableBytes()): ByteArray {
+    override fun readByteArray(maxSize: Int): ByteArray {
         val length = readVarInt()
         return if (length > maxSize) {
             throw DecoderException("ByteArray with size $length is bigger than allowed $maxSize")
@@ -781,37 +785,37 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         }
     }
 
-    fun readVec3f(): Vector3f = Vector3f(readFloat(), readFloat(), readFloat())
+    override fun readVector3f(): Vector3f = Vector3f(readFloat(), readFloat(), readFloat())
 
-    fun writeVec3f(vec: Vector3f): PacketByteBuf {
-        writeFloat(vec.x)
-        writeFloat(vec.y)
-        writeFloat(vec.z)
+    override fun writeVector3f(value: Vector3f): PacketByteBuf {
+        writeFloat(value.x)
+        writeFloat(value.y)
+        writeFloat(value.z)
         return this
     }
 
-    fun writeByteArray(array: ByteArray): PacketByteBuf {
-        writeVarInt(array.size)
-        this.writeBytes(array)
+    override fun writeByteArray(value: ByteArray): PacketByteBuf {
+        writeVarInt(value.size)
+        this.writeBytes(value)
         return this
     }
 
-    fun readUUID(): UUID = UUID(readLong(), readLong())
+    override fun readUUID(): UUID = UUID(readLong(), readLong())
 
-    fun writeUUID(uuid: UUID): PacketByteBuf {
-        writeLong(uuid.mostSignificantBits)
-        writeLong(uuid.leastSignificantBits)
+    override fun writeUUID(value: UUID): PacketByteBuf {
+        writeLong(value.mostSignificantBits)
+        writeLong(value.leastSignificantBits)
         return this
     }
 
-    fun readIdentity(): Identifier = Identifier(readString())
+    override fun readIdentifier(): Identifier = Identifier(readString())
 
-    fun writeIdentity(identity: Identifier): PacketByteBuf {
-        writeString(identity.toString())
+    override fun writeIdentifier(value: Identifier): PacketByteBuf {
+        writeString(value.toString())
         return this
     }
 
-    fun readNBT(): NBTCompound? {
+    override fun readNBT(): NBTCompound? {
         val i = readerIndex()
         val b = readByte()
         return if (b.toInt() == 0) {
@@ -823,18 +827,18 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         }
     }
 
-    fun writeNBT(tag: NBTCompound?): PacketByteBuf {
-        if (tag == null)
+    override fun writeNBT(value: NBTCompound?): PacketByteBuf {
+        if (value == null)
             writeByte(0)
         else {
             val out = ByteBufOutputStream(this)
-            out.write(tag)
+            out.write(value)
         }
         return this
     }
 
-    fun writeVarLong(i: Long): PacketByteBuf {
-        var l = i
+    override fun writeVarLong(value: Long): PacketByteBuf {
+        var l = value
         while (l and -128L != 0L) {
             writeByte((l and 127L).toInt() or 128)
             l = l ushr 7
@@ -844,62 +848,17 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf() {
         return this
     }
 
-    fun readPosition(): Position = Position.unpack(readLong())
+    override fun readPosition(): Position = Position.unpack(readLong())
 
-    fun writePosition(pos: Position): PacketByteBuf {
-        writeLong(pos.packed)
+    override fun writePosition(value: Position): PacketByteBuf {
+        writeLong(value.packed)
         return this
     }
 
-    fun writeText(reason: Component): PacketByteBuf {
-        writeString(GsonComponentSerializer.gson().serialize(reason))
+    override fun writeText(value: Component): PacketByteBuf {
+        writeString(GsonComponentSerializer.gson().serialize(value))
         return this
     }
 
-    fun readText(): Component {
-        return GsonComponentSerializer.gson().deserialize(readString())
-    }
-
-    inline fun <T> readCollection(maxSize: Int, transform: (PacketByteBuf) -> T): Collection<T> {
-        val size = readVarInt()
-        require(maxSize == -1 || size <= maxSize) { "Read collection size was $size, expected max $maxSize" }
-        return List(size) { transform(this) }
-    }
-
-    inline fun <T> readCollection(transform: (PacketByteBuf) -> T): Collection<T> = readCollection(-1, transform)
-
-    inline fun <T> writeCollection(
-        collection: Collection<T>,
-        transform: PacketByteBuf.(T) -> PacketByteBuf
-    ): PacketByteBuf {
-        writeVarInt(collection.size)
-        return collection.fold(this, transform)
-    }
-
-    companion object {
-        @JvmStatic
-        fun getVarIntSize(i: Int): Int {
-            for (j in 1..4) {
-                if (i and -1 shl j * 7 == 0) {
-                    return j
-                }
-            }
-            return 5
-        }
-
-        @JvmStatic
-        inline fun readVarInt(next: () -> Byte): Int {
-            var i = 0
-            var j = 0
-            var b: Int
-            do {
-                b = next().toInt()
-                i = i or ((b and 127) shl j++ * 7)
-                if (j > 5) {
-                    throw RuntimeException("VarInt too big")
-                }
-            } while ((b and 128) == 128)
-            return i
-        }
-    }
+    override fun readText(): Component = GsonComponentSerializer.gson().deserialize(readString())
 }

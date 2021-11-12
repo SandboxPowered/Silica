@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.vanilla.network.play.serverbound
 
-import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
+import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
@@ -13,7 +13,7 @@ class C2SPlayerPositionAndRotation(
     private val pitch: Float,
     private val onGround: Boolean,
 ) : PacketPlay {
-    constructor(buf: PacketByteBuf) : this(
+    constructor(buf: PacketBuffer) : this(
         buf.readDouble(),
         buf.readDouble(),
         buf.readDouble(),
@@ -22,7 +22,7 @@ class C2SPlayerPositionAndRotation(
         buf.readBoolean()
     )
 
-    override fun write(buf: PacketByteBuf) {
+    override fun write(buf: PacketBuffer) {
         buf.writeDouble(x)
         buf.writeDouble(y)
         buf.writeDouble(z)

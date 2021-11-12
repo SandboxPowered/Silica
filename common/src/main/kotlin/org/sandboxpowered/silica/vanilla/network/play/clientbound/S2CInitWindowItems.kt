@@ -2,7 +2,9 @@ package org.sandboxpowered.silica.vanilla.network.play.clientbound
 
 import org.sandboxpowered.silica.api.item.Item
 import org.sandboxpowered.silica.api.item.inventory.PlayerInventory
-import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
+import org.sandboxpowered.silica.api.network.PacketBuffer
+import org.sandboxpowered.silica.api.network.readCollection
+import org.sandboxpowered.silica.api.network.writeCollection
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
@@ -23,17 +25,17 @@ class S2CInitWindowItems(
         protocolMapping: (Item) -> Int
     ) : this(window, state, inventory.map { SlotData.from(it, protocolMapping) }, SlotData.EMPTY)
 
-    constructor(buf: PacketByteBuf) : this(
+    constructor(buf: PacketBuffer) : this(
         buf.readUByte(),
         buf.readVarInt(),
-        buf.readCollection(PacketByteBuf::readSlot),
+        buf.readCollection(PacketBuffer::readSlot),
         buf.readSlot()
     )
 
-    override fun write(buf: PacketByteBuf) {
+    override fun write(buf: PacketBuffer) {
         buf.writeUByte(window)
         buf.writeVarInt(state)
-        buf.writeCollection(slots, PacketByteBuf::writeSlot)
+        buf.writeCollection(slots, PacketBuffer::writeSlot)
         buf.writeSlot(cursorStack)
     }
 

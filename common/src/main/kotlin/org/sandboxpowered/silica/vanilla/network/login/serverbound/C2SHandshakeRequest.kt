@@ -1,8 +1,8 @@
 package org.sandboxpowered.silica.vanilla.network.login.serverbound
 
+import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.vanilla.network.Connection
 import org.sandboxpowered.silica.vanilla.network.Packet
-import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.Protocol.Companion.getProtocolFromId
 
@@ -12,9 +12,9 @@ class C2SHandshakeRequest(
     private val port: UShort,
     private val intention: Int,
 ) : Packet {
-    constructor(buf: PacketByteBuf) : this(buf.readVarInt(), buf.readString(255), buf.readUShort(), buf.readVarInt())
+    constructor(buf: PacketBuffer) : this(buf.readVarInt(), buf.readString(255), buf.readUShort(), buf.readVarInt())
 
-    override fun write(buf: PacketByteBuf) {
+    override fun write(buf: PacketBuffer) {
         buf.writeVarInt(protocolVersion)
         buf.writeString(hostName)
         buf.writeUShort(port)

@@ -3,7 +3,7 @@ package org.sandboxpowered.silica.vanilla.network.play.clientbound
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import com.mojang.authlib.properties.PropertyMap
-import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
+import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
@@ -17,11 +17,11 @@ class S2CPlayerInfo(
     private var gamemodes: IntArray = intArrayOf(),// Action 0,1
     private var pings: IntArray = intArrayOf(),// Action 0,2
 ) : PacketPlay {
-    override fun read(buf: PacketByteBuf) {
+    override fun read(buf: PacketBuffer) {
         action = buf.readVarInt()
     }
 
-    override fun write(buf: PacketByteBuf) {
+    override fun write(buf: PacketBuffer) {
         buf.writeVarInt(action)
         buf.writeVarInt(uuids.size)
         for (i in uuids.indices) {

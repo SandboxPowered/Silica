@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.nbt
+package org.sandboxpowered.silica.api.nbt
 
 import org.jetbrains.annotations.Contract
 import kotlin.contracts.ExperimentalContracts

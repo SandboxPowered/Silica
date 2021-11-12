@@ -1,6 +1,10 @@
 package org.sandboxpowered.silica.vanilla.network.login.serverbound
 
-import org.sandboxpowered.silica.vanilla.network.*
+import org.sandboxpowered.silica.api.network.PacketBuffer
+import org.sandboxpowered.silica.vanilla.network.Connection
+import org.sandboxpowered.silica.vanilla.network.EncryptionException
+import org.sandboxpowered.silica.vanilla.network.Packet
+import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import java.security.Key
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
@@ -8,9 +12,9 @@ import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 class C2SEncryptionResponse(private val sharedSecret: ByteArray, private val verifyToken: ByteArray) : Packet {
-    constructor(buf: PacketByteBuf) : this(buf.readByteArray(), buf.readByteArray())
+    constructor(buf: PacketBuffer) : this(buf.readByteArray(), buf.readByteArray())
 
-    override fun write(buf: PacketByteBuf) {
+    override fun write(buf: PacketBuffer) {
         buf.writeByteArray(sharedSecret)
         buf.writeByteArray(verifyToken)
     }

@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.Object2IntMap
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
+import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.vanilla.network.handshake.clientbound.C2SPingRequest
 import org.sandboxpowered.silica.vanilla.network.handshake.clientbound.C2SStatusRequest
@@ -157,7 +158,7 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
     class Builder {
         class FlowBuilder(val flow: NetworkFlow) {
             val classToId: Object2IntMap<Class<out PacketBase>> = Object2IntOpenHashMap()
-            val idToConstructor: Int2ObjectMap<Function<PacketByteBuf, out PacketBase>> = Int2ObjectOpenHashMap()
+            val idToConstructor: Int2ObjectMap<Function<PacketBuffer, out PacketBase>> = Int2ObjectOpenHashMap()
 
             init {
                 classToId.defaultReturnValue(-1)
@@ -168,10 +169,10 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             val allPackets: Iterable<Class<out PacketBase>>
                 get() = Iterables.unmodifiableIterable(classToId.keys)
 
-            fun createPacket(packetId: Int, buf: PacketByteBuf): PacketBase? =
+            fun createPacket(packetId: Int, buf: PacketBuffer): PacketBase? =
                 if (!idToConstructor.containsKey(packetId)) null else idToConstructor[packetId].apply(buf)
 
-            @Deprecated("use PacketByteBuf constructor instead")
+            @Deprecated("use PacketBuffer constructor instead")
             inline infix fun <reified P : PacketBase> Int.packetDeprecated(packetSupplier: Supplier<P>) {
                 packet { buf ->
                     val packet = packetSupplier.get()
@@ -180,7 +181,7 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
                 }
             }
 
-            inline infix fun <reified P : PacketBase> Int.packet(packetSupplier: Function<PacketByteBuf, P>) {
+            inline infix fun <reified P : PacketBase> Int.packet(packetSupplier: Function<PacketBuffer, P>) {
                 val id = classToId.put(P::class.java, this)
                 require(id == -1) { "Packet ${P::class.java} is already registered to ID $id" }
                 idToConstructor[this] = packetSupplier

@@ -2,7 +2,8 @@ package org.sandboxpowered.silica.vanilla.network.play.clientbound
 
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
-import org.sandboxpowered.silica.nbt.CompoundTag
+import org.sandboxpowered.silica.api.nbt.CompoundTag
+import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
@@ -20,7 +21,7 @@ class S2CChunkData(
     private var buffer: ByteArray = byteArrayOf()
     private var biomes: IntArray = intArrayOf()
 
-    constructor(buf: PacketByteBuf) : this(
+    constructor(buf: PacketBuffer) : this(
         buf.readInt(), buf.readInt(), TODO("Not implemented")
     )
 
@@ -56,8 +57,8 @@ class S2CChunkData(
         return r
     }
 
-    override fun read(buf: PacketByteBuf) {}
-    override fun write(buf: PacketByteBuf) {
+    override fun read(buf: PacketBuffer) {}
+    override fun write(buf: PacketBuffer) {
         buf.writeInt(cX)
         buf.writeInt(cZ)
         buf.writeLongArray(bitMask)

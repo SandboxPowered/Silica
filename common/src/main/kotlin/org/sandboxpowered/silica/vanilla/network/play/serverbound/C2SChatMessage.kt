@@ -1,11 +1,11 @@
 package org.sandboxpowered.silica.vanilla.network.play.serverbound
 
 import org.sandboxpowered.silica.api.ecs.component.PositionComponent
+import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.extensions.create
 import org.sandboxpowered.silica.api.util.getLogger
-import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
@@ -13,9 +13,9 @@ import org.sandboxpowered.silica.world.SilicaWorld.Command.DelayedCommand.Compan
 
 data class C2SChatMessage(private val message: String) : PacketPlay {
 
-    constructor(buf: PacketByteBuf) : this(buf.readString(MAX_SIZE))
+    constructor(buf: PacketBuffer) : this(buf.readString(MAX_SIZE))
 
-    override fun write(buf: PacketByteBuf) {
+    override fun write(buf: PacketBuffer) {
         buf.writeString(message.take(MAX_SIZE))
     }
 

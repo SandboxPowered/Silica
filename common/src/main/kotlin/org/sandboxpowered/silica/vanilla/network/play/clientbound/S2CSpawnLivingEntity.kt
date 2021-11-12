@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.vanilla.network.play.clientbound
 
-import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
+import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
@@ -20,7 +20,7 @@ class S2CSpawnLivingEntity(
     private val velocityY: Short,
     private val velocityZ: Short
 ) : PacketPlay {
-    constructor(buf: PacketByteBuf) : this(
+    constructor(buf: PacketBuffer) : this(
         buf.readVarInt(),
         buf.readUUID(),
         buf.readVarInt(),
@@ -35,7 +35,7 @@ class S2CSpawnLivingEntity(
         buf.readShort()
     )
 
-    override fun write(buf: PacketByteBuf) {
+    override fun write(buf: PacketBuffer) {
         buf.writeVarInt(entityId)
         buf.writeUUID(uuid)
         buf.writeVarInt(type)

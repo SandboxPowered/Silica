@@ -1,8 +1,8 @@
 package org.sandboxpowered.silica.vanilla.network.play.serverbound
 
+import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.api.util.Direction
 import org.sandboxpowered.silica.api.util.math.Position
-import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
@@ -16,7 +16,7 @@ class C2SPlayerBlockPlacement(
     val cursorZ: Float,
     val insideBlock: Boolean,
 ) : PacketPlay {
-    constructor(buf: PacketByteBuf) : this(
+    constructor(buf: PacketBuffer) : this(
         buf.readVarInt(),
         buf.readPosition(),
         buf.readVarInt(),
@@ -26,7 +26,7 @@ class C2SPlayerBlockPlacement(
         buf.readBoolean()
     )
 
-    override fun write(buf: PacketByteBuf) {
+    override fun write(buf: PacketBuffer) {
         TODO("Not yet implemented")
     }
 
