@@ -22,6 +22,7 @@ import org.sandboxpowered.silica.api.block.BlockEntityProvider
 import org.sandboxpowered.silica.api.ecs.component.BlockPositionComponent
 import org.sandboxpowered.silica.api.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.api.entity.EntityDefinition
+import org.sandboxpowered.silica.api.entity.EntityEvents
 import org.sandboxpowered.silica.api.internal.InternalAPI
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.util.Direction
@@ -146,6 +147,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
     private fun spawnEntity(entityDefinition: EntityDefinition, initialize: (EntityEdit) -> Unit) {
         val id = artemisWorld.create(entitiesArchetypesCache.computeIfAbsent(entityDefinition) {
             val archetype = it.createArchetype()
+            EntityEvents.INITIALIZE_ARCHETYPE_EVENT.invoker?.invoke(it, archetype)
             eventSystem.dispatch(InitializeArchetypeEvent(it, archetype))
             archetype.add<EntityIdentity>()
                 .build(artemisWorld, "entity:${entityDefinition.identifier}")
