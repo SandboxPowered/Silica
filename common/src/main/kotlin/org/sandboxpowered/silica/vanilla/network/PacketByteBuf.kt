@@ -794,6 +794,13 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf(), PacketBuffer {
         return this
     }
 
+    override fun writeVector3f(x: Float, y: Float, z: Float): PacketBuffer {
+        writeFloat(x)
+        writeFloat(y)
+        writeFloat(z)
+        return this
+    }
+
     override fun writeByteArray(value: ByteArray): PacketByteBuf {
         writeVarInt(value.size)
         this.writeBytes(value)

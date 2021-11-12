@@ -12,6 +12,7 @@ class DedicatedServerProperties(private val properties: Properties) : ServerProp
     override val serverIp = get("server-ip", "")
     override val maxTickTime = get("max-tick-time", 60000)
     override val maxPlayers = get("max-players", 20)
+    override val supportChatFormatting: Boolean = get("support-chat-formatting", true)
 
     private fun getRawString(string: String): String? = properties[string] as String?
 

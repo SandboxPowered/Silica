@@ -7,4 +7,5 @@ interface ServerProperties {
     val serverIp: String
     val maxTickTime: Int
     val maxPlayers: Int
+    val supportChatFormatting: Boolean
 }

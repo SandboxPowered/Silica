@@ -7,7 +7,7 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 
-class C2SPlayerBlockPlacement(
+data class C2SPlayerBlockInteract(
     val hand: Int,
     val location: Position,
     val face: Int,
@@ -27,7 +27,11 @@ class C2SPlayerBlockPlacement(
     )
 
     override fun write(buf: PacketBuffer) {
-        TODO("Not yet implemented")
+        buf.writeVarInt(hand)
+        buf.writePosition(location)
+        buf.writeVarInt(face)
+        buf.writeVector3f(cursorX, cursorY, cursorZ)
+        buf.writeBoolean(insideBlock)
     }
 
     override fun handle(packetHandler: PacketHandler, context: PlayContext) {

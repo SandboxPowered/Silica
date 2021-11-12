@@ -5,6 +5,8 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.Behavior
 import akka.actor.typed.Terminated
 import akka.actor.typed.javadsl.*
+import com.mojang.authlib.minecraft.MinecraftSessionService
+import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService
 import it.unimi.dsi.fastutil.objects.Object2LongMap
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap
 import net.kyori.adventure.text.minimessage.MiniMessage
@@ -25,6 +27,7 @@ import org.sandboxpowered.silica.vanilla.StateMappingManager.ErrorType.UNKNOWN
 import org.sandboxpowered.silica.vanilla.VanillaProtocolMapping
 import org.sandboxpowered.silica.world.SilicaWorld
 import java.io.File
+import java.net.Proxy
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.time.Duration

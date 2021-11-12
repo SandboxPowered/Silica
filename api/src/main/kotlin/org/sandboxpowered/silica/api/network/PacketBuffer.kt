@@ -89,6 +89,7 @@ interface PacketBuffer {
 
     //region Write JOML
     fun writeVector3f(value: Vector3f): PacketBuffer
+    fun writeVector3f(x: Float, y: Float, z: Float): PacketBuffer
     //endregion
 
     //region Write Arrays

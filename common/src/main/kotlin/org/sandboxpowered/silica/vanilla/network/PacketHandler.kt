@@ -7,14 +7,24 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import org.sandboxpowered.silica.vanilla.network.PlayConnection.ReceivePacket
 import org.sandboxpowered.silica.vanilla.network.Protocol.Companion.getProtocolForPacket
+import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.util.*
+import javax.crypto.Cipher
 
 class PacketHandler(val connection: Connection) : SimpleChannelInboundHandler<PacketBase>() {
     private val waiting: Queue<PacketPlay> = LinkedList()
     private var playConnection: ActorRef<PlayConnection>? = null
     private lateinit var channel: Channel
-    private lateinit var address: SocketAddress
+    private lateinit var remoteAddress: SocketAddress
+    val address: InetAddress?
+        get() {
+            val remote = remoteAddress
+            if (remote is InetSocketAddress)
+                return remote.address
+            return null
+        }
 
     fun setPlayConnection(playConnection: ActorRef<PlayConnection>?) {
         this.playConnection = playConnection
@@ -28,7 +38,7 @@ class PacketHandler(val connection: Connection) : SimpleChannelInboundHandler<Pa
     override fun channelActive(ctx: ChannelHandlerContext) {
         super.channelActive(ctx)
         channel = ctx.channel()
-        address = channel.remoteAddress()
+        remoteAddress = channel.remoteAddress()
         setProtocol(Protocol.HANDSHAKE)
     }
 
@@ -80,6 +90,15 @@ class PacketHandler(val connection: Connection) : SimpleChannelInboundHandler<Pa
         if (wantedProtocol !== currentProtocol) setProtocol(wantedProtocol)
         val channelFuture = channel.writeAndFlush(packet)
         channelFuture.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
+    }
+
+    var encrypted: Boolean = false
+        private set
+
+    fun setEncryptionKey(cipher: Cipher, cipher2: Cipher) {
+        encrypted = true
+        channel.pipeline().addBefore("splitter", "decrypt", PacketDecrypter(cipher))
+        channel.pipeline().addBefore("prepender", "encrypt", PacketEncrypter(cipher2))
     }
 
     init {

@@ -59,7 +59,7 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             0x1A packet ::C2SPlayerDigging
             0x17 packet ::C2SPickItem
             0x1B packet ::C2SEntityAction
-            0x2E packet ::C2SPlayerBlockPlacement
+            0x2E packet ::C2SPlayerBlockInteract
             0x25 packet ::C2SHeldItemChange
             0x28 packet ::C2SCreativeInventoryAction
             0x2C packet ::C2SHandSwingAnimation
@@ -90,6 +90,7 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             0x49 packetDeprecated ::S2CUpdateChunkPosition
             0x65 packetDeprecated ::S2CDeclareRecipes
             0x66 packetDeprecated ::S2CDeclareTags
+            0x0F packet ::S2CChatMessage
         }
     }),
     STATUS(1, {

@@ -5,7 +5,7 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 
-class C2SPlayerPositionAndRotation(
+data class C2SPlayerPositionAndRotation(
     private val x: Double,
     private val y: Double,
     private val z: Double,

@@ -7,11 +7,11 @@ class SimpleEvent<T>(private val type: Class<T>, private val invokerFactory: (Li
     override val invoker: T?
         get() = if (handlers.isNotEmpty()) _invoker ?: recreateInvoker() else null
 
+    private val handlers: MutableList<T> = ArrayList()
+
     init {
         recreateInvoker()
     }
-
-    private var handlers: List<T> = mutableListOf()
 
     fun recreateInvoker(): T {
         _invoker = invokerFactory(handlers)
@@ -20,7 +20,7 @@ class SimpleEvent<T>(private val type: Class<T>, private val invokerFactory: (Li
 
     override fun subscribe(listener: T) {
         synchronized(this) {
-            handlers = handlers + listener
+            handlers += listener
             recreateInvoker()
         }
     }

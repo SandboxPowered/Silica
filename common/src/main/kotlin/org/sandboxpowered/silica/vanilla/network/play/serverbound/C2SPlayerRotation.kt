@@ -5,7 +5,7 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 
-class C2SPlayerRotation(
+data class C2SPlayerRotation(
     private val yaw: Float,
     private val pitch: Float,
     private val onGround: Boolean,

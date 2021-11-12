@@ -88,7 +88,9 @@ private class PlayConnectionActor(
             { itemMapper[it.identifier] },
             { server.world.tell(SilicaWorld.Command.DelayedCommand.PerformSilica { _ -> it(playerInventoryComponent.inventory) }) },
             { server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { _ -> it(playerInput) }) },
-            server.world
+            server.world,
+            server.vanillaNetwork,
+            server.properties
         )
     }
 
