@@ -12,6 +12,7 @@ typealias PlayerMutation = (VanillaPlayerInput) -> Unit
 
 class PlayContext(
     val idToItem: (Int) -> RegistryObject<Item>,
+    val itemToId: (Item) -> Int,
     val mutatePlayerInventory: (PlayerInventoryMutation) -> Unit,
     val mutatePlayer: (PlayerMutation) -> Unit,
     val world: ActorRef<SilicaWorld.Command>
