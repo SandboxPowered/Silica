@@ -12,6 +12,7 @@ import org.sandboxpowered.silica.api.item.BlockItem
 import org.sandboxpowered.silica.api.item.Item
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.silica.api.util.extensions.add
 import org.sandboxpowered.silica.vanilla.block.*
 import org.sandboxpowered.silica.vanilla.ecs.component.EntityTestComponent
 import org.sandboxpowered.silica.vanilla.ecs.system.EntityTestSystem
@@ -158,22 +159,16 @@ object SilicaInit {
             "cobbled_deepslate" defines { archetypes(BLOCK, WALL, STAIRS, SLAB) }
         }
 
-        register(
-            BaseEntityDefinition(
-                Identifier("zombie"),
-                PositionComponent::class.java,
-                EntityTestComponent::class.java,
-                HitboxComponent::class.java
-            )
-        )
-        register(
-            BaseEntityDefinition(
-                Identifier("creeper"),
-                PositionComponent::class.java,
-                EntityTestComponent::class.java,
-                HitboxComponent::class.java
-            )
-        )
+        register(BaseEntityDefinition(Identifier("zombie")) {
+            add<PositionComponent>()
+            add<EntityTestComponent>()
+            add<HitboxComponent>()
+        })
+        register(BaseEntityDefinition(Identifier("creeper")) {
+            add<PositionComponent>()
+            add<EntityTestComponent>()
+            add<HitboxComponent>()
+        })
         SilicaAPI.registerSystem(EntityTestSystem())
     }
 
