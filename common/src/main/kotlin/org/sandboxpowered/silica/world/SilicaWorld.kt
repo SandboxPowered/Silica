@@ -114,7 +114,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
     private val blockArchetypesCache: Object2ObjectMap<Block, Archetype> = Object2ObjectOpenHashMap()
     private val entitiesArchetypesCache: Object2ObjectMap<EntityDefinition, Archetype> = Object2ObjectOpenHashMap()
 
-    override fun setBlockState(pos: Position, state: BlockState, vararg flags: WorldWriter.Flag): Boolean {
+    override fun setBlockState(pos: Position, state: BlockState, flag: WorldWriter.Flag): Boolean {
         if (isOutOfHeightLimit(pos)) return false
         //TODO see if theres generally any better way of doing this.
         val system = artemisWorld.getSystem<Entity3dMapSystem>()
@@ -135,11 +135,11 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         val oldState = blocks[pos.x, pos.y, pos.z]
         blocks[pos.x, pos.y, pos.z] = state
 
-        if (WorldWriter.Flag.NOTIFY_NEIGHBORS in flags) {
+        if (WorldWriter.Flag.NOTIFY_NEIGHBORS in flag) {
             Direction.ALL.forEach { updateNeighbor(pos, state, it.opposite, pos.shift(it)) }
         }
 
-        if (WorldWriter.Flag.NOTIFY_LISTENERS in flags) {
+        if (WorldWriter.Flag.NOTIFY_LISTENERS in flag) {
             eventSystem.dispatch(ReplaceBlockEvent(pos, oldState, state))
         }
         return true

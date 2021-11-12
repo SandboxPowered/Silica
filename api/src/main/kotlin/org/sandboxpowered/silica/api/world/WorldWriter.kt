@@ -60,5 +60,6 @@ interface WorldWriter {
 
         private infix fun or(value: Flag): Flag = Flag(this.flag or value.flag)
         private infix fun not(value: Flag): Flag = Flag(this.flag and value.flag.inv())
+        operator fun contains(value: Flag): Boolean = flag and value.flag == value.flag
     }
 }

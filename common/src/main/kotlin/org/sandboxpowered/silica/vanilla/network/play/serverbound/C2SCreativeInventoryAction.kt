@@ -7,7 +7,6 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.play.SlotData
-import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CInitWindowItems
 import org.sandboxpowered.silica.vanilla.network.play.readSlot
 import org.sandboxpowered.silica.vanilla.network.play.writeSlot
 
@@ -29,14 +28,10 @@ class C2SCreativeInventoryAction(
         // TODO: this should go through PlayerInput and check for creative
         if (slotId.toInt() == -1) logger.info("Throwing $stack")
         else context.mutatePlayerInventory {
-            it[slotId.toInt()] = if (stack.present) ItemStack(context.idToItem(stack.itemId), stack.itemCount.toInt()) else ItemStack.EMPTY
-            packetHandler.sendPacket(
-                S2CInitWindowItems(
-                    0u,
-                    1 and 32767,
-                    it
-                ) { item -> context.itemToId(item) }
-            )
+            it[slotId.toInt()] = if (stack.present) ItemStack(
+                context.idToItem(stack.itemId),
+                stack.itemCount.toInt()
+            ) else ItemStack.EMPTY
         }
     }
 }
