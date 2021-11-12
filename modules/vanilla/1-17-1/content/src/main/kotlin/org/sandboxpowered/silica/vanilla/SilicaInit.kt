@@ -71,6 +71,10 @@ object SilicaInit {
         register(BeehiveBlock(Identifier("beehive")))
         register(BeehiveBlock(Identifier("bee_nest")))
 
+        register(BaseBlock(Identifier("coal_block")), properties = {
+            fuelTime = 14400
+        })
+
         blocks {
             Colour.NAME_ARRAY defines {
                 archetypes(BLOCK suffix "_wool")
@@ -105,7 +109,7 @@ object SilicaInit {
             "iron" defines { archetypes(DOOR, TRAPDOOR) }
             "stone" defines { archetypes(BUTTON) }
             arrayOf("iron", "coal", "gold", "diamond", "emerald", "lapis") defines {
-                archetypes(BLOCK_ORE, BLOCK_DEEPSLATE_ORE, BLOCK suffix "_block")
+                archetypes(BLOCK_ORE, BLOCK_DEEPSLATE_ORE, BLOCK suffix "_block" not "coal")
             }
             arrayOf("cobblestone", "diorite", "granite", "andesite") defines {
                 archetypes(BLOCK, WALL, STAIRS, SLAB)
@@ -173,10 +177,16 @@ object SilicaInit {
         SilicaAPI.registerSystem(EntityTestSystem())
     }
 
-    private fun register(block: Block, registerItemBlock: Boolean = true) {
+    private fun register(
+        block: Block,
+        registerItemBlock: Boolean = true,
+        properties: Item.Properties.Builder.() -> Unit = {}
+    ) {
         Registries.BLOCKS.register(block)
         if (block.hasItem && registerItemBlock) {
-            Registries.ITEMS.register(BlockItem(block))
+            Registries.ITEMS.register(BlockItem(block, Item.Properties.create {
+                properties(this)
+            }))
         }
     }
 
