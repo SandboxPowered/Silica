@@ -44,7 +44,16 @@ class FenceGateBlock(identifier: Identifier) : BaseBlock(identifier) {
     ): ActionResult {
         if (ctx.sneaking) return ActionResult.PASS
 
-        world.setBlockState(pos, state.cycle(OPEN))
+        if (state[OPEN]) {
+            world.setBlockState(pos, state.set(OPEN, false))
+        } else {
+            val facing = ctx.horizontalFacing
+            var newState = state
+            if (state[HORIZONTAL_FACING] == facing.opposite) {
+                newState = newState.set(HORIZONTAL_FACING, facing)
+            }
+            world.setBlockState(pos, newState.set(OPEN, true))
+        }
         return ActionResult.SUCCESS
     }
 
