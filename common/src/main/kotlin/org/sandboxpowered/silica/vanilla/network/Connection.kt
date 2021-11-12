@@ -12,6 +12,7 @@ import org.sandboxpowered.silica.vanilla.network.login.clientbound.S2CEncryption
 import org.sandboxpowered.silica.vanilla.network.login.clientbound.S2CLoginSuccess
 import org.sandboxpowered.silica.vanilla.network.login.serverbound.C2SEncryptionResponse
 import java.math.BigInteger
+import java.nio.charset.StandardCharsets.UTF_8
 import java.security.MessageDigest
 import java.security.PublicKey
 import java.util.*
@@ -56,7 +57,9 @@ class Connection(
 
         val string = BigInteger(digestData("", server.keyPair.public, secretKey!!)).toString(16)
 
-        profile = server.sessionService.hasJoinedServer(profile, string, packetHandler.address)
+        profile = if (server.properties.onlineMode)
+            server.sessionService.hasJoinedServer(profile, string, packetHandler.address)
+        else GameProfile(UUID.nameUUIDFromBytes("OfflinePlayer:$string".toByteArray(UTF_8)), profile.name)
 
         packetHandler.sendPacket(S2CLoginSuccess(profile.id, profile.name))
         packetHandler.setProtocol(Protocol.PLAY)

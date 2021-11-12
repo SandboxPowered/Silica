@@ -6,7 +6,7 @@ import java.nio.file.Path
 import java.util.*
 
 class DedicatedServerProperties(private val properties: Properties) : ServerProperties {
-    override val onlineMode = get("online-mode", true)
+    override val onlineMode = get("online-mode", true) // TODO: Only allow this in dev envs
     override val motd = get("motd", "<grey>A <red>**Sandbox Silica</red> Server</grey>")
     override val serverPort = get("server-port", 25565)
     override val serverIp = get("server-ip", "")
