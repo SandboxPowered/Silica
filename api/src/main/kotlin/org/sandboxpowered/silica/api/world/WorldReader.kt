@@ -15,7 +15,7 @@ interface WorldReader {
 
     fun getHeight(): Int = worldHeight.y() - worldHeight.x()
 
-    fun isWithinHeightLimit(pos: Position): Boolean = isOutOfHeightLimit(pos.y)
+    fun isWithinHeightLimit(pos: Position): Boolean = isWithinHeightLimit(pos.y)
     fun isWithinHeightLimit(height: Int): Boolean = height in worldHeight.x()..worldHeight.y()
 
     fun isOutOfHeightLimit(pos: Position): Boolean = isOutOfHeightLimit(pos.y)

@@ -36,6 +36,7 @@ import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.api.world.World
 import org.sandboxpowered.silica.api.world.WorldReader
 import org.sandboxpowered.silica.api.world.WorldWriter
+import org.sandboxpowered.silica.api.world.generation.WorldGenerator
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 import org.sandboxpowered.silica.api.world.state.fluid.FluidState
 import org.sandboxpowered.silica.ecs.component.EntityIdentity
@@ -69,7 +70,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
 
     private val eventSystem = EventSystem()
 
-    override val worldHeight: Vector2ic = Vector2i(0, 255)
+    override val worldHeight: Vector2ic = Vector2i(worldGenerator.minWorldHeight, worldGenerator.maxWorldHeight)
     override val isClient: Boolean = side == Side.CLIENT
     override val isServer: Boolean = side == Side.SERVER
 
@@ -175,9 +176,13 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
     fun getTerrain(): BlocTree = this.blocks
 
     companion object {
-        private const val WORLD_MIN = -1 shl 25 // -2^25
-        private const val WORLD_MAX = (1 shl 25) - 1 // (2^25)-1
-        private const val WORLD_SIZE = -WORLD_MIN + WORLD_MAX + 1 // 2^26
+        lateinit var worldGenerator: WorldGenerator
+        private val WORLD_MIN
+            get() = worldGenerator.minWorldWidth
+        private val WORLD_MAX
+            get() = worldGenerator.maxWorldWidth
+        private val WORLD_SIZE
+            get() = -WORLD_MIN + WORLD_MAX + 1
 
         fun actor(side: Side, server: SilicaServer): Behavior<Command> = Behaviors.setup {
             Actor(SilicaWorld(side, server), it)

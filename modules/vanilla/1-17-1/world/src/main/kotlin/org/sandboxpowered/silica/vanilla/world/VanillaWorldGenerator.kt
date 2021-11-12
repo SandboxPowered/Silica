@@ -5,7 +5,8 @@ import org.sandboxpowered.silica.api.world.generation.WorldGenerator
 
 object VanillaWorldGenerator : WorldGenerator {
     override val id: Identifier = Identifier("minecraft", "vanilla")
-
+    override val minWorldWidth: Int = -1 shl 25
+    override val maxWorldWidth: Int = (1 shl 25) - 1
     override val minWorldHeight: Int = 0
     override val maxWorldHeight: Int = 255
 }

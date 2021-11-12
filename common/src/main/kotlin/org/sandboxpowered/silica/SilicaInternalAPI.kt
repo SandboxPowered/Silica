@@ -12,6 +12,7 @@ import org.sandboxpowered.silica.api.registry.Registry
 import org.sandboxpowered.silica.api.registry.RegistryEntry
 import org.sandboxpowered.silica.api.world.generation.WorldGenerator
 import org.sandboxpowered.silica.registry.SilicaRegistries
+import org.sandboxpowered.silica.world.SilicaWorld
 import kotlin.reflect.KClass
 
 class SilicaInternalAPI : InternalAPI {
@@ -27,6 +28,7 @@ class SilicaInternalAPI : InternalAPI {
 
     override fun registerWorldGenerator(generator: WorldGenerator) {
         log.info("Registered world generator ${generator.id}")
+        SilicaWorld.worldGenerator = generator
         // TODO("Not yet implemented")
     }
 

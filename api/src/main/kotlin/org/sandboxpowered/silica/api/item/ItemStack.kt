@@ -1,12 +1,14 @@
 package org.sandboxpowered.silica.api.item
 
 import org.sandboxpowered.silica.api.block.Block
+import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.registry.RegistryObject
 import kotlin.math.min
 
 class ItemStack private constructor(private var _item: Item, private var _count: Int) {
     companion object {
-        val EMPTY by lazy { ItemStack(Items.AIR, 0) }
+        private val AIR by Registries.items()
+        val EMPTY by lazy { ItemStack(AIR, 0) }
 
         operator fun invoke(block: Block): ItemStack = invoke(block.item, 1)
 
@@ -16,11 +18,11 @@ class ItemStack private constructor(private var _item: Item, private var _count:
 
         operator fun invoke(item: Item?): ItemStack = invoke(item, 1)
 
-        operator fun invoke(item: Item?, count: Int): ItemStack = ItemStack(item ?: Items.AIR, count)
+        operator fun invoke(item: Item?, count: Int): ItemStack = ItemStack(item ?: AIR, count)
     }
 
     val item: Item
-        get() = if (isEmpty) Items.AIR else _item
+        get() = if (isEmpty) AIR else _item
 
     val isEmpty: Boolean
         get() = _count <= 0 || _item.identifier.path == "air"
