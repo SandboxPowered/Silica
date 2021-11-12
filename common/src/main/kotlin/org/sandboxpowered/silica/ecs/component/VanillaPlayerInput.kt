@@ -3,8 +3,8 @@ package org.sandboxpowered.silica.ecs.component
 import com.artemis.PooledComponent
 import com.mojang.authlib.GameProfile
 import org.joml.Vector3d
+import org.sandboxpowered.silica.api.entity.InteractionContext
 import org.sandboxpowered.silica.api.util.math.Position
-import org.sandboxpowered.silica.vanilla.network.play.serverbound.InteractionContext
 
 class VanillaPlayerInput : PooledComponent() {
     private var initialized = false

@@ -8,6 +8,7 @@ import org.joml.Vector3d
 import org.sandboxpowered.silica.api.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.api.ecs.component.PositionComponent
 import org.sandboxpowered.silica.api.ecs.component.RotationComponent
+import org.sandboxpowered.silica.api.entity.InteractionContext
 import org.sandboxpowered.silica.api.item.BlockItem
 import org.sandboxpowered.silica.api.item.ItemStack
 import org.sandboxpowered.silica.api.util.ActionResult
@@ -25,7 +26,6 @@ import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityPosition
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityPositionRotation
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityRotation
-import org.sandboxpowered.silica.vanilla.network.play.serverbound.InteractionContext
 
 @All(VanillaPlayerInput::class, PositionComponent::class, RotationComponent::class)
 class VanillaInputSystem(val server: SilicaServer) : IteratingSystem() {
@@ -128,7 +128,10 @@ class VanillaInputSystem(val server: SilicaServer) : IteratingSystem() {
                 if (heldItem.isNotEmpty) {
                     val item = heldItem.item
                     if (item is BlockItem) {
-                        terrain.setBlockState(newLoc, item.block.getStateForPlacement(terrain, newLoc, ctx))
+                        terrain.setBlockState(
+                            newLoc,
+                            item.block.getStateForPlacement(terrain, newLoc, it, ctx)
+                        )
                     }
                 }
             }

@@ -4,6 +4,7 @@ import org.joml.Vector3f
 import org.sandboxpowered.silica.api.block.BaseBlock
 import org.sandboxpowered.silica.api.block.Block
 import org.sandboxpowered.silica.api.entity.EntityContext
+import org.sandboxpowered.silica.api.entity.InteractionContext
 import org.sandboxpowered.silica.api.util.ActionResult
 import org.sandboxpowered.silica.api.util.Direction
 import org.sandboxpowered.silica.api.util.Hand
@@ -57,6 +58,9 @@ class FenceGateBlock(identifier: Identifier) : BaseBlock(identifier) {
         return ActionResult.SUCCESS
     }
 
-    override fun getStateForPlacement(world: WorldReader, pos: Position, ctx: EntityContext): BlockState =
+    override fun getStateForPlacement(
+        world: WorldReader, pos: Position,
+        interaction: InteractionContext, ctx: EntityContext
+    ): BlockState =
         defaultState.set(HORIZONTAL_FACING, ctx.horizontalFacing)
 }

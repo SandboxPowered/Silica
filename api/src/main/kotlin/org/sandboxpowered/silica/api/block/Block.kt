@@ -3,6 +3,7 @@ package org.sandboxpowered.silica.api.block
 import net.kyori.adventure.translation.Translatable
 import org.joml.Vector3f
 import org.sandboxpowered.silica.api.entity.EntityContext
+import org.sandboxpowered.silica.api.entity.InteractionContext
 import org.sandboxpowered.silica.api.item.Item
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.registry.Registry
@@ -47,7 +48,12 @@ sealed interface Block : RegistryEntry<Block>, Translatable {
         ctx: EntityContext
     ): ActionResult = ActionResult.PASS
 
-    fun getStateForPlacement(world: WorldReader, pos: Position, ctx: EntityContext): BlockState = defaultState
+    fun getStateForPlacement(
+        world: WorldReader,
+        pos: Position,
+        interaction: InteractionContext,
+        ctx: EntityContext
+    ): BlockState = defaultState
 
     val defaultState: BlockState
     val stateProvider: StateProvider<Block, BlockState>
