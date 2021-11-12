@@ -10,7 +10,7 @@ interface WorldWriter {
     fun setBlockState(pos: Position, state: BlockState, flag: Flag): Boolean
 
     @JvmInline
-    value class Flag(val flag: Int) {
+    value class Flag private constructor(val flag: Int) {
         companion object {
             /**
              * Sends a neighbor update event to surrounding blocks.
