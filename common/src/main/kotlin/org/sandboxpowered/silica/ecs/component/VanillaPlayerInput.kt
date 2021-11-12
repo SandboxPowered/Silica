@@ -4,6 +4,7 @@ import com.artemis.PooledComponent
 import com.mojang.authlib.GameProfile
 import org.joml.Vector3d
 import org.sandboxpowered.silica.api.util.math.Position
+import org.sandboxpowered.silica.vanilla.network.play.serverbound.InteractionContext
 
 class VanillaPlayerInput : PooledComponent() {
     private var initialized = false
@@ -22,7 +23,7 @@ class VanillaPlayerInput : PooledComponent() {
     var jumping = false
 
     var breaking: Position? = null
-    var placing: Position? = null
+    var interacting: InteractionContext? = null
 
     var flying = false
 
@@ -35,7 +36,7 @@ class VanillaPlayerInput : PooledComponent() {
         jumping = false
 
         breaking = null
-        placing = null
+        interacting = null
 
         flying = false
     }

@@ -10,12 +10,14 @@ import org.sandboxpowered.silica.api.ecs.component.PositionComponent
 import org.sandboxpowered.silica.api.ecs.component.RotationComponent
 import org.sandboxpowered.silica.api.item.BlockItem
 import org.sandboxpowered.silica.api.item.ItemStack
+import org.sandboxpowered.silica.api.util.ActionResult
 import org.sandboxpowered.silica.api.util.extensions.component1
 import org.sandboxpowered.silica.api.util.extensions.component2
 import org.sandboxpowered.silica.api.util.extensions.component3
 import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.api.world.World
 import org.sandboxpowered.silica.content.block.Blocks
+import org.sandboxpowered.silica.ecs.SilicaEntityContext
 import org.sandboxpowered.silica.ecs.component.VanillaPlayerInput
 import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.server.VanillaNetwork
@@ -23,6 +25,7 @@ import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityPosition
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityPositionRotation
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityRotation
+import org.sandboxpowered.silica.vanilla.network.play.serverbound.InteractionContext
 
 @All(VanillaPlayerInput::class, PositionComponent::class, RotationComponent::class)
 class VanillaInputSystem(val server: SilicaServer) : IteratingSystem() {
@@ -83,6 +86,8 @@ class VanillaInputSystem(val server: SilicaServer) : IteratingSystem() {
             } else {
                 S2CUpdateEntityRotation(entityId, yaw, pitch, false)
             }
+            rot.yaw = yaw % 360.0f
+            rot.pitch = pitch
         } else if (hasMoved) {
             packet = S2CUpdateEntityPosition(
                 entityId,
@@ -103,22 +108,34 @@ class VanillaInputSystem(val server: SilicaServer) : IteratingSystem() {
         }
         previousLocation.set(location)
 
-        this.handleTerrainInteraction(entityId, input, previousLocation)
+        this.handleTerrainInteraction(entityId, input, previousLocation, rot)
     }
 
-    private fun handleTerrainInteraction(entityId: Int, input: VanillaPlayerInput, position: Vector3d) {
-        input.breaking = performWithRangedCheck(input.breaking, position) {
-            terrain.setBlockState(it, Blocks.AIR.defaultState)
-        }
-
-        input.placing = performWithRangedCheck(input.placing, position) {
-            val heldItem = inventoryMapper[entityId]?.inventory?.mainHandStack?.takeUnless(ItemStack::isEmpty)
-            if (heldItem != null) {
-                val item = heldItem.item
-                if (item is BlockItem) {
-                    terrain.setBlockState(it, item.block.defaultState)
+    private fun handleTerrainInteraction(
+        entityId: Int,
+        input: VanillaPlayerInput,
+        position: Vector3d,
+        rot: RotationComponent
+    ) {
+        input.interacting = performWithRangedCheck(input.interacting, position) {
+            val ctx = SilicaEntityContext(input, position, rot)
+            val heldItem = inventoryMapper[entityId]?.inventory?.mainHandStack ?: ItemStack.EMPTY
+            val state = terrain.getBlockState(it.location)
+            val block = state.block
+            val result = block.onUse(terrain, it.location, state, it.hand, it.face, it.cursor, ctx)
+            if (result == ActionResult.PASS) {
+                val newLoc = it.location.shift(it.face)
+                if (heldItem.isNotEmpty) {
+                    val item = heldItem.item
+                    if (item is BlockItem) {
+                        terrain.setBlockState(newLoc, item.block.getStateForPlacement(terrain, newLoc, ctx))
+                    }
                 }
             }
+        }
+
+        input.breaking = performWithRangedCheck(input.breaking, position) {
+            terrain.setBlockState(it, Blocks.AIR.defaultState)
         }
     }
 
@@ -128,6 +145,22 @@ class VanillaInputSystem(val server: SilicaServer) : IteratingSystem() {
         perform: (Position) -> Unit
     ): Position? {
         if (target != null && position.distanceSquared(target.x + .5, target.y + .5, target.z + .5) < 20) {
+            perform(target)
+        }
+        return null
+    }
+
+    private inline fun performWithRangedCheck(
+        target: InteractionContext?,
+        position: Vector3d,
+        perform: (InteractionContext) -> Unit
+    ): InteractionContext? {
+        if (target != null && position.distanceSquared(
+                target.location.x + .5,
+                target.location.y + .5,
+                target.location.z + .5
+            ) < 20
+        ) {
             perform(target)
         }
         return null

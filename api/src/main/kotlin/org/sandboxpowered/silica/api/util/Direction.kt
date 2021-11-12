@@ -6,10 +6,11 @@ import org.joml.Vector3i
 import org.joml.Vector3ic
 import java.util.function.Predicate
 import kotlin.math.abs
+import kotlin.math.floor
 
 enum class Direction(
     val id: Int,
-    val invertedId: Int,
+    private val inverse: Int,
     val horizontalId: Int,
     override val asString: String,
     val axisDirection: AxisDirection,
@@ -23,7 +24,7 @@ enum class Direction(
     WEST(4, 5, 1, "west", AxisDirection.NEGATIVE, Axis.X, Vector3i(-1, 0, 0)),
     EAST(5, 4, 3, "east", AxisDirection.POSITIVE, Axis.X, Vector3i(1, 0, 0));
 
-    val opposite: Direction by lazy { byId(invertedId) }
+    val opposite: Direction by lazy { byId(inverse) }
     val offsetX: Int = this.offset.x()
     val offsetY: Int = this.offset.y()
     val offsetZ: Int = this.offset.z()
@@ -44,11 +45,17 @@ enum class Direction(
         }
 
         fun byHorizontalId(idx: @Range(from = 0, to = 3) Int): Direction {
-            require(idx in 0..5) { "Horizontal Direction id can only be within 0-3 got $idx" }
-            return HORIZONTAL[abs(idx % 3)]
+            require(idx in 0..3) { "Horizontal Direction id can only be within 0-3 got $idx" }
+            return HORIZONTAL[idx]
         }
 
         fun byName(name: String): Direction? = NAME_MAP[name.lowercase()]
+        fun fromYRotation(yaw: Float): Direction {
+            println("${floor(yaw / 90.0 +0.5)} | ${floor(yaw / 90.0+0.5).toInt() and 3}")
+            val out = byHorizontalId(floor(yaw / 90.0+0.5).toInt() and 3)
+            println("Got $yaw out $out")
+            return out
+        }
     }
 
 
