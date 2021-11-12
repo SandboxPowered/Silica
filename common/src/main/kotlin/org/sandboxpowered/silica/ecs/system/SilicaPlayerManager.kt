@@ -10,10 +10,11 @@ import com.mojang.authlib.GameProfile
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.*
-import org.sandboxpowered.silica.api.ecs.PositionComponent
+import org.sandboxpowered.silica.api.ecs.component.*
 import org.sandboxpowered.silica.api.util.extensions.add
 import org.sandboxpowered.silica.api.util.extensions.set
-import org.sandboxpowered.silica.ecs.component.*
+import org.sandboxpowered.silica.ecs.component.PlayerComponent
+import org.sandboxpowered.silica.ecs.component.VanillaPlayerInput
 import java.util.*
 
 @All(PlayerComponent::class, PositionComponent::class)

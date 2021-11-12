@@ -21,12 +21,13 @@ operator fun IntBag.plusAssign(e: Int) = this.add(e)
 inline fun <reified T> WorldConfiguration.registerAs(it: T): WorldConfiguration =
     this.register(T::class.qualifiedName, it)
 
-inline fun <reified T : Component> ArchetypeBuilder.add() {
-    add(T::class.java)
-}
+inline fun <reified T : Component> ArchetypeBuilder.add(): ArchetypeBuilder = add(T::class.java)
 
-inline fun <reified T : Component> ArchetypeBuilder.remove() {
-    remove(T::class.java)
-}
+inline fun <reified T : Component> ArchetypeBuilder.remove(): ArchetypeBuilder = remove(T::class.java)
+
+inline fun <reified T : Component> EntityEdit.create(): T = create(T::class.java)
+inline fun <reified T : Component> EntityEdit.remove(): EntityEdit = remove(T::class.java)
+
+inline fun <reified T : Component> Entity.getComponent(): T? = getComponent(T::class.java)
 
 inline fun <reified T : BaseSystem> World.getSystem(): T = getSystem(T::class.java)

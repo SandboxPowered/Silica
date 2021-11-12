@@ -6,7 +6,7 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 
-class C2SHandSwingAnimation(val hand: Int) : PacketPlay {
+data class C2SHandSwingAnimation(val hand: Int) : PacketPlay {
     constructor(buf: PacketByteBuf) : this(buf.readVarInt())
 
     override fun write(buf: PacketByteBuf) {

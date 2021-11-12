@@ -1,8 +1,10 @@
 package org.sandboxpowered.silica.registry
 
+import com.artemis.BaseEntitySystem
 import org.reflections.Reflections
 import org.sandboxpowered.silica.api.block.Block
 import org.sandboxpowered.silica.api.block.BlockEntityProvider
+import org.sandboxpowered.silica.api.entity.EntityDefinition
 import org.sandboxpowered.silica.api.fluid.Fluid
 import org.sandboxpowered.silica.api.item.Item
 import org.sandboxpowered.silica.api.plugin.BasePlugin
@@ -25,7 +27,12 @@ object SilicaRegistries {
 
     val ITEM_REGISTRY = SilicaRegistry(Identifier("minecraft", "item"), Item::class.java)
 
+    val ENTITY_DEFINITION_REGISTRY =
+        SilicaRegistry(Identifier("minecraft", "entity_type"), EntityDefinition::class.java)
+
     val FLUID_REGISTRY = SilicaRegistry(Identifier("minecraft", "fluid"), Fluid::class.java)
+
+    val SYSTEM_REGISTRY = mutableSetOf<BaseEntitySystem>() // TODO : make an actual registry for this ?
 
     init {
         //TODO: make this use an plugin classloader rather than package search

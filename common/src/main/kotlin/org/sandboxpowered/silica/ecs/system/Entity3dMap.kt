@@ -5,15 +5,16 @@ import com.artemis.annotations.One
 import com.artemis.annotations.Wire
 import com.artemis.systems.IteratingSystem
 import com.artemis.utils.IntBag
+import org.joml.Vector3f
 import org.joml.Vector3fc
 import org.joml.Vector3ic
-import org.sandboxpowered.silica.api.ecs.BlockPositionComponent
-import org.sandboxpowered.silica.api.ecs.PositionComponent
+import org.sandboxpowered.silica.api.ecs.component.BlockPositionComponent
+import org.sandboxpowered.silica.api.ecs.component.HitboxComponent
+import org.sandboxpowered.silica.api.ecs.component.PositionComponent
 import org.sandboxpowered.silica.api.util.extensions.component1
 import org.sandboxpowered.silica.api.util.extensions.component2
 import org.sandboxpowered.silica.api.util.extensions.component3
 import org.sandboxpowered.silica.api.util.math.Position
-import org.sandboxpowered.silica.ecs.component.HitboxComponent
 import org.sandboxpowered.silica.ecs.component.PlayerComponent
 import org.sandboxpowered.silica.world.util.IntTree
 import org.sandboxpowered.silica.world.util.OcTree
@@ -64,7 +65,7 @@ class Entity3dMapSystem(
         if (!isBE) {
             val isPlayer = playerMapper.has(entityId)
             val (x, y, z) = positionMapper[entityId].pos
-            val (w, h, d) = hitboxMapper[entityId].hitbox
+            val (w, h, d) = hitboxMapper[entityId]?.hitbox ?: Vector3f(0f)
 
             tree.insert(
                 entityId, if (isPlayer) playerFlag else livingFlag /*TODO: improve this shit*/,

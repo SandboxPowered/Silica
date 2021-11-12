@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.ecs.component
+package org.sandboxpowered.silica.api.ecs.component
 
 import com.artemis.PooledComponent
 

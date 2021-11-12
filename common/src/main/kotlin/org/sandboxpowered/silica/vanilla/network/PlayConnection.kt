@@ -7,10 +7,10 @@ import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import com.mojang.authlib.GameProfile
+import org.sandboxpowered.silica.api.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.extensions.getSystem
 import org.sandboxpowered.silica.api.util.extensions.onException
-import org.sandboxpowered.silica.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.ecs.component.VanillaPlayerInput
 import org.sandboxpowered.silica.ecs.system.SilicaPlayerManager
 import org.sandboxpowered.silica.nbt.NBTCompound
@@ -86,7 +86,8 @@ private class PlayConnectionActor(
         PlayContext(
             { SilicaRegistries.ITEM_REGISTRY[itemMapper[it]] },
             { server.world.tell(SilicaWorld.Command.DelayedCommand.PerformSilica { _ -> it(playerInventoryComponent.inventory) }) },
-            { server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { _ -> it(playerInput) }) }
+            { server.world.tell(SilicaWorld.Command.DelayedCommand.Perform { _ -> it(playerInput) }) },
+            server.world
         )
     }
 
@@ -211,7 +212,7 @@ private class PlayConnectionActor(
         packetHandler.sendPacket(S2CHeldItemChange(playerInventoryComponent.inventory.selectedSlot.toByte()))
         packetHandler.sendPacket(S2CDeclareRecipes())
         packetHandler.sendPacket(S2CDeclareTags())
-        packetHandler.sendPacket(S2CEntityStatus())
+        packetHandler.sendPacket(S2CEntityStatus(0, 24))
         packetHandler.sendPacket(S2CDeclareCommands())
         packetHandler.sendPacket(S2CUnlockRecipes())
         val currentPos = receive.input.wantedPosition

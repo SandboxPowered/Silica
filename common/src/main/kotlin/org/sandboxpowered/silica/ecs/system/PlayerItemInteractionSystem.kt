@@ -4,9 +4,9 @@ import com.artemis.ComponentMapper
 import com.artemis.annotations.All
 import com.artemis.annotations.Wire
 import com.artemis.systems.IteratingSystem
-import org.sandboxpowered.silica.ecs.component.MarkForItemInteractionComponent
+import org.sandboxpowered.silica.api.ecs.component.MarkForItemInteractionComponent
+import org.sandboxpowered.silica.api.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.ecs.component.PlayerComponent
-import org.sandboxpowered.silica.ecs.component.PlayerInventoryComponent
 
 @All(PlayerComponent::class, PlayerInventoryComponent::class, MarkForItemInteractionComponent::class)
 class PlayerItemInteractionSystem : IteratingSystem() {

@@ -65,13 +65,14 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             0x2F packet ::C2SUseItem
         }
         client {
-            0x04 packetDeprecated ::S2CSpawnPlayer
+            0x02 packet ::S2CSpawnLivingEntity
+            0x04 packet ::S2CSpawnPlayer
             0x08 packet ::S2CAcknowledgePlayerDigging
             0x0C packet ::S2CBlockChange
             0x12 packetDeprecated ::S2CDeclareCommands
             0x14 packet ::S2CInitWindowItems
             0x18 packet ::S2CPluginChannel
-            0x1B packetDeprecated ::S2CEntityStatus
+            0x1B packet ::S2CEntityStatus
             0x20 packetDeprecated ::S2CWorldBorder
             0x21 packet ::S2CKeepAliveClient
             0x22 packet ::S2CChunkData

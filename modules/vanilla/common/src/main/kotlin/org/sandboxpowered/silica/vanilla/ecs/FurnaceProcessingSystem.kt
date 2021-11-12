@@ -4,7 +4,7 @@ import com.artemis.ComponentMapper
 import com.artemis.annotations.All
 import com.artemis.annotations.Wire
 import com.artemis.systems.IteratingSystem
-import org.sandboxpowered.silica.api.ecs.BlockPositionComponent
+import org.sandboxpowered.silica.api.ecs.component.BlockPositionComponent
 import org.sandboxpowered.silica.api.item.ItemStack
 import org.sandboxpowered.silica.api.item.inventory.BaseInventory
 import org.sandboxpowered.silica.api.registry.Registries.items

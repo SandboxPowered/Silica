@@ -4,7 +4,7 @@ import com.artemis.BaseEntitySystem
 import com.artemis.annotations.All
 import com.artemis.annotations.Wire
 import net.mostlyoriginal.api.event.common.EventSystem
-import org.sandboxpowered.silica.ecs.component.MarkForRemovalComponent
+import org.sandboxpowered.silica.api.ecs.component.MarkForRemovalComponent
 import org.sandboxpowered.silica.ecs.events.RemoveEntitiesEvent
 
 @All(MarkForRemovalComponent::class)

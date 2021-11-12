@@ -12,6 +12,7 @@ class SilicaRegistry<T : RegistryEntry<T>>(private val id: Identifier, override 
     var registryEntries: MutableMap<Identifier, SilicaRegistryEntry<T>> = HashMap()
     var listeners: MutableList<(T) -> Unit> = ArrayList()
 
+    @Suppress("UNCHECKED_CAST")
     fun <X : RegistryEntry<X>> cast(): Registry<X> = this as Registry<X>
 
     fun addListener(listener: (T) -> Unit) {

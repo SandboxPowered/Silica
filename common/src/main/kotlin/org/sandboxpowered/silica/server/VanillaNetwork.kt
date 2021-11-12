@@ -24,19 +24,21 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import net.kyori.adventure.text.Component
 import net.mostlyoriginal.api.event.common.Subscribe
-import org.sandboxpowered.silica.api.util.extensions.registerTypeAdapter
+import org.sandboxpowered.silica.api.ecs.component.PositionComponent
+import org.sandboxpowered.silica.api.ecs.component.RotationComponent
+import org.sandboxpowered.silica.api.util.extensions.*
 import org.sandboxpowered.silica.api.util.math.Position
+import org.sandboxpowered.silica.ecs.component.EntityIdentity
 import org.sandboxpowered.silica.ecs.events.RemoveEntitiesEvent
 import org.sandboxpowered.silica.ecs.events.ReplaceBlockEvent
+import org.sandboxpowered.silica.ecs.events.SpawnEntityEvent
 import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.vanilla.network.*
-import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CBlockChange
-import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CDestroyEntities
-import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CKeepAliveClient
-import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CPlayerInfo
+import org.sandboxpowered.silica.vanilla.network.play.clientbound.*
 import org.sandboxpowered.silica.world.SilicaWorld
 import org.sandboxpowered.silica.world.VanillaWorldAdapter
 import java.util.*
+import kotlin.math.floor
 
 sealed class VanillaNetwork {
     class Tick(val delta: Float, val replyTo: ActorRef<Tock>) : VanillaNetwork() {
@@ -261,6 +263,31 @@ private class VanillaNetworkActor(
     private fun handleQueryMotd(queryMotd: VanillaNetwork.QueryMotd): Behavior<VanillaNetwork> {
         queryMotd.replyTo.tell(motdCache)
         return Behaviors.same()
+    }
+
+    private val entityRegistry = server.registryProtocolMapper["minecraft:entity_type"]
+    private val noRotation = RotationComponent().apply {
+        yaw = 0f
+        pitch = 0f
+    }
+
+    private fun angleToBytes(angle: Float) = floor(angle * 256f / 360f).toInt().toByte()
+
+    @Subscribe
+    fun spawnEntity(event: SpawnEntityEvent) {
+        val e = event.entity
+        val (x, y, z) = e.getComponent<PositionComponent>()?.pos ?: return
+        val identity = e.getComponent<EntityIdentity>() ?: return
+        val rot = e.getComponent() ?: noRotation
+        val type = entityRegistry[identity.entityDefinition!!.identifier]
+
+        context.self.tell(
+            VanillaNetwork.SendToAll(
+                S2CSpawnLivingEntity(
+                    e.id, identity.uuid!!, type, x, y, z, angleToBytes(rot.yaw), angleToBytes(rot.pitch), 0, 0, 0, 0
+                )
+            )
+        )
     }
 
     @Subscribe

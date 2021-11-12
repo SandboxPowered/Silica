@@ -7,20 +7,28 @@ import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import com.artemis.Archetype
+import com.artemis.EntityEdit
 import com.artemis.WorldConfigurationBuilder
 import com.artemis.utils.ImmutableIntBag
 import com.mojang.authlib.GameProfile
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import net.mostlyoriginal.api.event.common.EventSystem
 import org.joml.Vector2i
 import org.joml.Vector2ic
+import org.sandboxpowered.silica.SilicaInternalAPI
 import org.sandboxpowered.silica.api.block.Block
 import org.sandboxpowered.silica.api.block.BlockEntityProvider
-import org.sandboxpowered.silica.api.ecs.BlockPositionComponent
+import org.sandboxpowered.silica.api.ecs.component.BlockPositionComponent
+import org.sandboxpowered.silica.api.ecs.component.PlayerInventoryComponent
+import org.sandboxpowered.silica.api.entity.EntityDefinition
+import org.sandboxpowered.silica.api.internal.InternalAPI
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.util.Direction
 import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.Side
 import org.sandboxpowered.silica.api.util.extensions.add
+import org.sandboxpowered.silica.api.util.extensions.create
 import org.sandboxpowered.silica.api.util.extensions.getSystem
 import org.sandboxpowered.silica.api.util.extensions.registerAs
 import org.sandboxpowered.silica.api.util.math.Position
@@ -29,9 +37,11 @@ import org.sandboxpowered.silica.api.world.WorldReader
 import org.sandboxpowered.silica.api.world.WorldWriter
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 import org.sandboxpowered.silica.api.world.state.fluid.FluidState
-import org.sandboxpowered.silica.ecs.component.PlayerInventoryComponent
+import org.sandboxpowered.silica.ecs.component.EntityIdentity
 import org.sandboxpowered.silica.ecs.component.VanillaPlayerInput
+import org.sandboxpowered.silica.ecs.events.InitializeArchetypeEvent
 import org.sandboxpowered.silica.ecs.events.ReplaceBlockEvent
+import org.sandboxpowered.silica.ecs.events.SpawnEntityEvent
 import org.sandboxpowered.silica.ecs.system.*
 import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.server.SilicaServer
@@ -80,6 +90,9 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         SilicaRegistries.BLOCKS_WITH_ENTITY.forEach {
             it.createProcessingSystem()?.let { system -> config.with(it.processingSystemPriority, system) }
         }
+        SilicaRegistries.SYSTEM_REGISTRY.forEach {
+            config.with(0 /* TODO: insert actual prio */, it)
+        }
         config.with(Int.MAX_VALUE /* first */, entityMap)
         config.with(Int.MIN_VALUE /* last */, EntityRemovalSystem())
         artemisWorld = ArtemisWorld(
@@ -96,7 +109,8 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         return blocks[pos.x, pos.y, pos.z]
     }
 
-    private val cache = mutableMapOf<Block, Archetype>()
+    private val blockArchetypesCache: Object2ObjectMap<Block, Archetype> = Object2ObjectOpenHashMap()
+    private val entitiesArchetypesCache: Object2ObjectMap<EntityDefinition, Archetype> = Object2ObjectOpenHashMap()
 
     override fun setBlockState(pos: Position, state: BlockState, vararg flags: WorldWriter.Flag): Boolean {
         if (isOutOfHeightLimit(pos)) return false
@@ -110,10 +124,10 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         }
         val block = state.block
         if (block is BlockEntityProvider) {
-            artemisWorld.create(cache.computeIfAbsent(block) {
+            artemisWorld.create(blockArchetypesCache.computeIfAbsent(block) {
                 val builder = block.createArchetype()
                 builder.add<BlockPositionComponent>()
-                builder.build(artemisWorld, block.identifier.toString())
+                builder.build(artemisWorld, "block:${block.identifier}")
             })
         }
         val oldState = blocks[pos.x, pos.y, pos.z]
@@ -127,6 +141,23 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
             eventSystem.dispatch(ReplaceBlockEvent(pos, oldState, state))
         }
         return true
+    }
+
+    private fun spawnEntity(entityDefinition: EntityDefinition, initialize: (EntityEdit) -> Unit) {
+        val id = artemisWorld.create(entitiesArchetypesCache.computeIfAbsent(entityDefinition) {
+            val archetype = it.createArchetype()
+            eventSystem.dispatch(InitializeArchetypeEvent(it, archetype))
+            archetype.add<EntityIdentity>()
+                .build(artemisWorld, "entity:${entityDefinition.identifier}")
+        })
+
+        artemisWorld.edit(id).also {
+            val identity = it.create<EntityIdentity>()
+            identity.uuid = UUID.randomUUID()
+            identity.entityDefinition = entityDefinition
+            initialize(it)
+            eventSystem.dispatch(SpawnEntityEvent(it.entity))
+        }
     }
 
     private fun updateNeighbor(pos: Position, state: BlockState, opposite: Direction, neighbor: Position) {
@@ -172,7 +203,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
             /**
              * To be avoided when possible
              */
-            class PerformSilica(body: (SilicaWorld) -> Unit) : DelayedCommand<SilicaWorld, Unit>(body)
+            open class PerformSilica(body: (SilicaWorld) -> Unit) : DelayedCommand<SilicaWorld, Unit>(body)
 
             /**
              * To be avoided when possible
@@ -195,6 +226,12 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
                         playerManager.getOnlinePlayerProfiles()
                     )
                 }
+
+                fun spawnEntity(
+                    entityDefinition: EntityDefinition, initialize: (EntityEdit) -> Unit = { }
+                ) = PerformSilica {
+                    it.spawnEntity(entityDefinition, initialize)
+                }
             }
         }
     }
@@ -206,6 +243,12 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         private val generator: ActorRef<TerrainGenerator> =
             context.spawn(TerrainGenerator.actor(), "terrain_generator")
         private var generated = false
+
+        init {
+            (InternalAPI.instance as SilicaInternalAPI).registerListenerDelegate = {
+                context.self.tell(Command.RegisterEventSubscriber(it))
+            }
+        }
 
         override fun createReceive(): Receive<Command> = newReceiveBuilder()
             .onMessage(this::handleTick)

@@ -1,13 +1,20 @@
 package org.sandboxpowered.silica.vanilla
 
+import org.sandboxpowered.silica.api.SilicaAPI
 import org.sandboxpowered.silica.api.block.BaseBlock
 import org.sandboxpowered.silica.api.block.Block
+import org.sandboxpowered.silica.api.ecs.component.HitboxComponent
+import org.sandboxpowered.silica.api.ecs.component.PositionComponent
+import org.sandboxpowered.silica.api.entity.BaseEntityDefinition
+import org.sandboxpowered.silica.api.entity.EntityDefinition
 import org.sandboxpowered.silica.api.item.BaseItem
 import org.sandboxpowered.silica.api.item.BlockItem
 import org.sandboxpowered.silica.api.item.Item
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.vanilla.block.*
+import org.sandboxpowered.silica.vanilla.ecs.component.EntityTestComponent
+import org.sandboxpowered.silica.vanilla.ecs.system.EntityTestSystem
 import org.sandboxpowered.silica.vanilla.util.Colour
 
 object SilicaInit {
@@ -146,6 +153,24 @@ object SilicaInit {
             "sandstone" defines { archetypes(BLOCK, WALL, STAIRS, SLAB) }
             "cobbled_deepslate" defines { archetypes(BLOCK, WALL, STAIRS, SLAB) }
         }
+
+        register(
+            BaseEntityDefinition(
+                Identifier("zombie"),
+                PositionComponent::class.java,
+                EntityTestComponent::class.java,
+                HitboxComponent::class.java
+            )
+        )
+        register(
+            BaseEntityDefinition(
+                Identifier("creeper"),
+                PositionComponent::class.java,
+                EntityTestComponent::class.java,
+                HitboxComponent::class.java
+            )
+        )
+        SilicaAPI.registerSystem(EntityTestSystem())
     }
 
     private fun register(block: Block, registerItemBlock: Boolean = true) {
@@ -157,6 +182,10 @@ object SilicaInit {
 
     private fun register(item: Item) {
         Registries.ITEMS.register(item)
+    }
+
+    private fun register(entityDefinition: EntityDefinition) {
+        Registries.ENTITY_DEFINITIONS.register(entityDefinition)
     }
 
     inline fun blocks(block: Blocks.() -> Unit) {
