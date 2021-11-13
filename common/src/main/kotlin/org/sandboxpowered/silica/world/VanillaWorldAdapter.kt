@@ -7,10 +7,9 @@ import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
-import net.mostlyoriginal.api.event.common.Subscribe
 import org.sandboxpowered.silica.api.util.math.Position
+import org.sandboxpowered.silica.api.world.WorldEvents
 import org.sandboxpowered.silica.api.world.state.block.BlockState
-import org.sandboxpowered.silica.ecs.events.ReplaceBlockEvent
 import org.sandboxpowered.silica.util.extensions.WithContext
 import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.vanilla.StateMappingManager
@@ -29,7 +28,7 @@ sealed class VanillaWorldAdapter {
         val chunk: BlocTree
     ) : VanillaWorldAdapter()
 
-    class Update(val event: ReplaceBlockEvent) : VanillaWorldAdapter()
+    class Update(val pos: Position, val old: BlockState, val new: BlockState) : VanillaWorldAdapter()
 
     companion object {
         fun actor(world: ActorRef<in SilicaWorld.Command>, mapper: StateMappingManager): Behavior<VanillaWorldAdapter> =
@@ -44,7 +43,7 @@ private class VanillaWorldAdapterActor(
 ) : AbstractBehavior<VanillaWorldAdapter>(context), WithContext {
 
     init {
-        world.tell(SilicaWorld.Command.RegisterEventSubscriber(this))
+        WorldEvents.REPLACE_BLOCKS_EVENT.subscribe(this::onUpdate)
     }
 
     override fun createReceive(): Receive<VanillaWorldAdapter> = newReceiveBuilder()
@@ -86,14 +85,14 @@ private class VanillaWorldAdapterActor(
     private fun remapToVanillaProtocol(state: BlockState): Int = mapper[state]
 
     private fun onUpdate(message: VanillaWorldAdapter.Update): Behavior<VanillaWorldAdapter> {
-        val chunkPos = message.event.pos.toChunkSection
-        vanillaChunkSectionMap[chunkPos]?.set(message.event.pos, message.event.oldState, message.event.newState)
+        val chunkPos = message.pos.toChunkSection
+        vanillaChunkSectionMap[chunkPos]?.set(message.pos, message.old, message.new)
 
         return Behaviors.same()
     }
 
-    @Subscribe
-    fun onUpdate(event: ReplaceBlockEvent) = context.self.tell(VanillaWorldAdapter.Update(event))
+    fun onUpdate(pos: Position, old: BlockState, new: BlockState) =
+        context.self.tell(VanillaWorldAdapter.Update(pos, old, new))
 }
 
 data class ChunkSectionPos(val x: Int, val y: Int, val z: Int)

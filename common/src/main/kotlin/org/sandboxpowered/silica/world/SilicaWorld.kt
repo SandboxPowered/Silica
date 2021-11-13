@@ -19,6 +19,7 @@ import org.joml.Vector2ic
 import org.sandboxpowered.silica.SilicaInternalAPI
 import org.sandboxpowered.silica.api.block.Block
 import org.sandboxpowered.silica.api.block.BlockEntityProvider
+import org.sandboxpowered.silica.api.block.BlockEvents
 import org.sandboxpowered.silica.api.ecs.component.BlockPositionComponent
 import org.sandboxpowered.silica.api.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.api.entity.EntityDefinition
@@ -34,6 +35,7 @@ import org.sandboxpowered.silica.api.util.extensions.getSystem
 import org.sandboxpowered.silica.api.util.extensions.registerAs
 import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.api.world.World
+import org.sandboxpowered.silica.api.world.WorldEvents
 import org.sandboxpowered.silica.api.world.WorldReader
 import org.sandboxpowered.silica.api.world.WorldWriter
 import org.sandboxpowered.silica.api.world.generation.WorldGenerator
@@ -129,6 +131,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
             artemisWorld.create(blockArchetypesCache.computeIfAbsent(block) {
                 val builder = block.createArchetype()
                 builder.add<BlockPositionComponent>()
+                BlockEvents.INITIALIZE_ARCHETYPE_EVENT.invoker?.invoke(block, builder)
                 builder.build(artemisWorld, "block:${block.identifier}")
             })
         }
@@ -141,6 +144,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
 
         if (WorldWriter.Flag.NOTIFY_LISTENERS in flag) {
             eventSystem.dispatch(ReplaceBlockEvent(pos, oldState, state))
+            WorldEvents.REPLACE_BLOCKS_EVENT.invoker?.invoke(pos, oldState, state)
         }
         return true
     }
@@ -160,6 +164,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
             identity.entityDefinition = entityDefinition
             initialize(it)
             eventSystem.dispatch(SpawnEntityEvent(it.entity))
+            EntityEvents.SPAWN_ENTITY_EVENT.invoker?.invoke(it.entity)
         }
     }
 
@@ -199,6 +204,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
          */
         class Ask<T>(val body: (WorldReader) -> T, val replyTo: ActorRef<T>) : Command()
 
+        @Deprecated("Use new event system instead")
         class RegisterEventSubscriber(val sub: Any) : Command()
 
         /**

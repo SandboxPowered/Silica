@@ -6,6 +6,7 @@ import akka.actor.typed.javadsl.AbstractBehavior
 import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
+import com.artemis.Entity
 import com.google.gson.GsonBuilder
 import com.mojang.authlib.GameProfile
 import io.netty.bootstrap.ServerBootstrap
@@ -23,19 +24,17 @@ import io.netty.handler.timeout.ReadTimeoutHandler
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import net.kyori.adventure.text.Component
-import net.mostlyoriginal.api.event.common.Subscribe
 import org.sandboxpowered.silica.api.ecs.component.PositionComponent
 import org.sandboxpowered.silica.api.ecs.component.RotationComponent
+import org.sandboxpowered.silica.api.entity.EntityEvents
 import org.sandboxpowered.silica.api.util.extensions.*
 import org.sandboxpowered.silica.api.util.math.Position
+import org.sandboxpowered.silica.api.world.WorldEvents
+import org.sandboxpowered.silica.api.world.state.block.BlockState
 import org.sandboxpowered.silica.ecs.component.EntityIdentity
-import org.sandboxpowered.silica.ecs.events.RemoveEntitiesEvent
-import org.sandboxpowered.silica.ecs.events.ReplaceBlockEvent
-import org.sandboxpowered.silica.ecs.events.SpawnEntityEvent
 import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.vanilla.network.*
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.*
-import org.sandboxpowered.silica.world.SilicaWorld
 import org.sandboxpowered.silica.world.VanillaWorldAdapter
 import java.util.*
 import kotlin.math.floor
@@ -94,7 +93,9 @@ private class VanillaNetworkActor(
     }
 
     init {
-        server.world.tell(SilicaWorld.Command.RegisterEventSubscriber(this))
+        EntityEvents.SPAWN_ENTITY_EVENT.subscribe(this::spawnEntity)
+        EntityEvents.REMOVE_ENTITIES_EVENT.subscribe(this::removeEntities)
+        WorldEvents.REPLACE_BLOCKS_EVENT.subscribe(this::changeBlock)
     }
 
     override fun createReceive(): Receive<VanillaNetwork> = newReceiveBuilder()
@@ -273,9 +274,7 @@ private class VanillaNetworkActor(
 
     private fun angleToBytes(angle: Float) = floor(angle * 256f / 360f).toInt().toByte()
 
-    @Subscribe
-    fun spawnEntity(event: SpawnEntityEvent) {
-        val e = event.entity
+    fun spawnEntity(e: Entity) {
         val (x, y, z) = e.getComponent<PositionComponent>()?.pos ?: return
         val identity = e.getComponent<EntityIdentity>() ?: return
         val rot = e.getComponent() ?: noRotation
@@ -290,18 +289,11 @@ private class VanillaNetworkActor(
         )
     }
 
-    @Subscribe
-    fun removeEntities(event: RemoveEntitiesEvent) {
-        context.self.tell(VanillaNetwork.SendToAll(S2CDestroyEntities(event.entityIds)))
+    fun removeEntities(entities: IntArray) {
+        context.self.tell(VanillaNetwork.SendToAll(S2CDestroyEntities(entities)))
     }
 
-    @Subscribe
-    fun changeBlock(event: ReplaceBlockEvent) {
-        context.self.tell(
-            VanillaNetwork.SendToWatching(
-                event.pos,
-                S2CBlockChange(event.pos, server.stateRemapper[event.newState])
-            )
-        )
+    fun changeBlock(pos: Position, old: BlockState, new: BlockState) {
+        context.self.tell(VanillaNetwork.SendToWatching(pos, S2CBlockChange(pos, server.stateRemapper[new])))
     }
 }
