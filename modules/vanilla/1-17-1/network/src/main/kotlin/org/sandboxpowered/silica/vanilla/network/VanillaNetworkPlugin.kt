@@ -10,9 +10,11 @@ import org.sandboxpowered.silica.api.plugin.Plugin
 import org.sandboxpowered.silica.api.util.extensions.add
 import org.sandboxpowered.silica.api.util.extensions.getComponent
 import org.sandboxpowered.silica.api.util.getLogger
-import org.sandboxpowered.silica.vanilla.network.StateMappingManager.ErrorType
-import org.sandboxpowered.silica.vanilla.network.ecs.VanillaInputSystem
-import org.sandboxpowered.silica.vanilla.network.ecs.VanillaPlayerInput
+import org.sandboxpowered.silica.vanilla.network.util.mapping.BlockStateProtocolMapping.ErrorType
+import org.sandboxpowered.silica.vanilla.network.ecs.system.VanillaInputSystem
+import org.sandboxpowered.silica.vanilla.network.ecs.component.VanillaPlayerInputComponent
+import org.sandboxpowered.silica.vanilla.network.util.mapping.BlockStateProtocolMapping
+import org.sandboxpowered.silica.vanilla.network.util.mapping.VanillaProtocolMapping
 import java.io.File
 import java.nio.charset.StandardCharsets
 
@@ -28,7 +30,7 @@ class VanillaNetworkPlugin : BasePlugin {
     override fun onEnable() {
         logger.info("Minecraft network adapter v1.17.1 enabled!")
 
-        val stateMappingErrors = StateMappingManager.INSTANCE.load()
+        val stateMappingErrors = BlockStateProtocolMapping.INSTANCE.load()
         VanillaProtocolMapping.INSTANCE.load()
         if (stateMappingErrors.isNotEmpty()) {
             val unknown = stateMappingErrors[ErrorType.UNKNOWN]
@@ -56,11 +58,11 @@ class VanillaNetworkPlugin : BasePlugin {
         }
         EntityEvents.INITIALIZE_ARCHETYPE_EVENT.subscribe { ent, edit ->
             if (ent.identifier.path == "player") {
-                edit.add<VanillaPlayerInput>()
+                edit.add<VanillaPlayerInputComponent>()
             }
         }
         EntityEvents.SPAWN_ENTITY_EVENT.subscribe {
-            val component = it.getComponent<VanillaPlayerInput>()
+            val component = it.getComponent<VanillaPlayerInputComponent>()
             if (component != null) {
                 val player = it.getComponent<PlayerComponent>()!!
                 val position = it.getComponent<PositionComponent>()!!

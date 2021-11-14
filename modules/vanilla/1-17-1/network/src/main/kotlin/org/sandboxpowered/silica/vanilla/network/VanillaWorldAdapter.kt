@@ -15,7 +15,8 @@ import org.sandboxpowered.silica.api.world.WorldEvents
 import org.sandboxpowered.silica.api.world.WorldReader
 import org.sandboxpowered.silica.api.world.WorldWriter
 import org.sandboxpowered.silica.api.world.state.block.BlockState
-import org.sandboxpowered.silica.vanilla.network.play.clientbound.world.VanillaChunkSection
+import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.world.VanillaChunkSection
+import org.sandboxpowered.silica.vanilla.network.util.mapping.BlockStateProtocolMapping
 import kotlin.math.floor
 
 sealed class VanillaWorldAdapter {
@@ -30,14 +31,14 @@ sealed class VanillaWorldAdapter {
         VanillaWorldAdapter()
 
     companion object {
-        fun actor(world: ActorRef<in World.Command>, mapper: StateMappingManager): Behavior<VanillaWorldAdapter> =
+        fun actor(world: ActorRef<in World.Command>, mapper: BlockStateProtocolMapping): Behavior<VanillaWorldAdapter> =
             Behaviors.setup { VanillaWorldAdapterActor(world, mapper, it) }
     }
 }
 
 private class VanillaWorldAdapterActor(
     private val world: ActorRef<in World.Command>,
-    private val mapper: StateMappingManager,
+    private val mapper: BlockStateProtocolMapping,
     context: ActorContext<VanillaWorldAdapter>
 ) : AbstractBehavior<VanillaWorldAdapter>(context), WithContext {
 

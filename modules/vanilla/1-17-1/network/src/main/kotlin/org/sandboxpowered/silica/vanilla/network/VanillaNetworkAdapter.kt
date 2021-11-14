@@ -39,9 +39,11 @@ import org.sandboxpowered.silica.vanilla.network.netty.LengthPrepender
 import org.sandboxpowered.silica.vanilla.network.netty.LengthSplitter
 import org.sandboxpowered.silica.vanilla.network.netty.PacketDecoder
 import org.sandboxpowered.silica.vanilla.network.netty.PacketEncoder
-import org.sandboxpowered.silica.vanilla.network.play.clientbound.*
+import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.*
+import org.sandboxpowered.silica.vanilla.network.util.NetworkFlow
+import org.sandboxpowered.silica.vanilla.network.util.mapping.BlockStateProtocolMapping
+import org.sandboxpowered.silica.vanilla.network.util.mapping.VanillaProtocolMapping
 import java.util.*
-import kotlin.math.floor
 
 object VanillaNetworkAdapter : NetworkAdapter {
     override val id: Identifier = Identifier("minecraft", "1.17.1")
@@ -73,7 +75,7 @@ class VanillaNetworkBehavior(
         .build()
 
     private val vanillaWorld = context.spawn(
-        VanillaWorldAdapter.actor(server.world, StateMappingManager.INSTANCE),
+        VanillaWorldAdapter.actor(server.world, BlockStateProtocolMapping.INSTANCE),
         "vanilla-world-adapter"
     )
 
@@ -243,8 +245,6 @@ class VanillaNetworkBehavior(
         pitch = 0f
     }
 
-    private fun angleToBytes(angle: Float) = floor(angle * 256f / 360f).toInt().toByte()
-
     fun spawnEntity(e: Entity) {
         val (x, y, z) = e.getComponent<PositionComponent>()?.pos ?: return
         val identity = e.getComponent<EntityIdentity>() ?: return
@@ -254,7 +254,7 @@ class VanillaNetworkBehavior(
         context.self.tell(
             VanillaCommand.SendToAll(
                 S2CSpawnLivingEntity(
-                    e.id, identity.uuid!!, type, x, y, z, angleToBytes(rot.yaw), angleToBytes(rot.pitch), 0, 0, 0, 0
+                    e.id, identity.uuid!!, type, x, y, z, rot.yaw, rot.pitch, 0, 0, 0, 0
                 )
             )
         )
@@ -265,7 +265,12 @@ class VanillaNetworkBehavior(
     }
 
     fun changeBlock(pos: Position, old: BlockState, new: BlockState, flag: WorldWriter.Flag) {
-        context.self.tell(VanillaCommand.SendToWatching(pos, S2CBlockChange(pos, StateMappingManager.INSTANCE[new])))
+        context.self.tell(
+            VanillaCommand.SendToWatching(
+                pos,
+                S2CBlockChange(pos, BlockStateProtocolMapping.INSTANCE[new])
+            )
+        )
     }
 
     object VanillaCommand {

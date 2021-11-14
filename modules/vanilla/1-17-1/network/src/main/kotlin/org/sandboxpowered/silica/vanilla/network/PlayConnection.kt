@@ -17,9 +17,12 @@ import org.sandboxpowered.silica.api.server.Server
 import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.extensions.*
 import org.sandboxpowered.silica.api.world.World
-import org.sandboxpowered.silica.vanilla.network.ecs.VanillaPlayerInput
-import org.sandboxpowered.silica.vanilla.network.play.clientbound.*
-import org.sandboxpowered.silica.vanilla.network.play.clientbound.world.VanillaChunkSection
+import org.sandboxpowered.silica.vanilla.network.ecs.component.VanillaPlayerInputComponent
+import org.sandboxpowered.silica.vanilla.network.packets.HandledPacket
+import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
+import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.*
+import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.world.VanillaChunkSection
+import org.sandboxpowered.silica.vanilla.network.util.mapping.VanillaProtocolMapping
 import java.time.Duration
 
 sealed class PlayConnection {
@@ -31,7 +34,7 @@ sealed class PlayConnection {
 
     class ReceivePlayer(
         val gameProfiles: Array<GameProfile>,
-        val input: VanillaPlayerInput,
+        val input: VanillaPlayerInputComponent,
         val inventoryComponent: PlayerInventoryComponent
     ) : PlayConnection()
 
@@ -71,7 +74,7 @@ private class PlayConnectionActor(
         .build()
 
     // TODO: apply at the right time + unsafe to keep a ref to a component
-    private lateinit var playerInput: VanillaPlayerInput
+    private lateinit var playerInput: VanillaPlayerInputComponent
     private lateinit var playerInventoryComponent: PlayerInventoryComponent
 
     private val playContext by lazy {
@@ -112,7 +115,7 @@ private class PlayConnectionActor(
                 World.Command.DelayedCommand.Ask(it) { world ->
                     val manager = world.playerManager
                     val player = manager.createPlayer(packetHandler.connection.profile)
-                    val input = player.getComponent<VanillaPlayerInput>() ?: error("Player has no input component")
+                    val input = player.getComponent<VanillaPlayerInputComponent>() ?: error("Player has no input component")
                     val inventory =
                         player.getComponent<PlayerInventoryComponent>() ?: error("Player has no inventory component")
                     val onlinePlayers = manager.onlinePlayerProfiles
@@ -257,7 +260,7 @@ private class PlayConnectionActor(
             val system = it.playerManager
             system.onlinePlayers.forEach { t ->
                 if (t != playerInput.gameProfile.id) {
-                    val input = system.getEntity(system.getPlayerId(t))?.getComponent<VanillaPlayerInput>()
+                    val input = system.getEntity(system.getPlayerId(t))?.getComponent<VanillaPlayerInputComponent>()
                         ?: error("Couldn't get input component for player $t")
                     server.network.tell(
                         VanillaNetworkBehavior.VanillaCommand.SendToAllExcept(

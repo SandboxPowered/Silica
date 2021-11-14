@@ -103,6 +103,18 @@ interface PacketBuffer {
 }
 
 //region Extensions
+@JvmOverloads
+inline fun <reified T : Enum<T>> PacketBuffer.readEnum(transform: PacketBuffer.() -> Int = PacketBuffer::readVarInt): T {
+    return T::class.java.enumConstants[transform(this)]
+}
+
+fun <T : Enum<T>> PacketBuffer.writeEnum(
+    value: T,
+    transform: PacketBuffer.(Int) -> PacketBuffer = PacketBuffer::writeVarInt
+): PacketBuffer {
+    return transform(this, value.ordinal)
+}
+
 inline fun <T> PacketBuffer.readCollection(transform: (PacketBuffer) -> T): Collection<T> =
     readCollection(-1, transform)
 

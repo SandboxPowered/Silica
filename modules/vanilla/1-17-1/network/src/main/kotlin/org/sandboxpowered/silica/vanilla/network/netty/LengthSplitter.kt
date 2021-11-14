@@ -5,7 +5,7 @@ import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.ByteToMessageDecoder
 import io.netty.handler.codec.CorruptedFrameException
-import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
+import org.sandboxpowered.silica.vanilla.network.util.PacketByteBuf
 
 class LengthSplitter : ByteToMessageDecoder() {
 

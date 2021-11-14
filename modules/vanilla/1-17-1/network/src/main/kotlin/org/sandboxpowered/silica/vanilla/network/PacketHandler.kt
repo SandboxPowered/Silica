@@ -10,6 +10,9 @@ import org.sandboxpowered.silica.vanilla.network.PlayConnection.ReceivePacket
 import org.sandboxpowered.silica.vanilla.network.Protocol.Companion.getProtocolForPacket
 import org.sandboxpowered.silica.vanilla.network.netty.PacketDecrypter
 import org.sandboxpowered.silica.vanilla.network.netty.PacketEncrypter
+import org.sandboxpowered.silica.vanilla.network.packets.HandledPacket
+import org.sandboxpowered.silica.vanilla.network.packets.PacketBase
+import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.SocketAddress

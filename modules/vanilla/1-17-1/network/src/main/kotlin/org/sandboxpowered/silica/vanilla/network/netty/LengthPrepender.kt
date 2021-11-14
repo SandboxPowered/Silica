@@ -3,7 +3,7 @@ package org.sandboxpowered.silica.vanilla.network.netty
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.MessageToByteEncoder
-import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
+import org.sandboxpowered.silica.vanilla.network.util.PacketByteBuf
 
 class LengthPrepender : MessageToByteEncoder<ByteBuf>() {
     override fun encode(ctx: ChannelHandlerContext, buf: ByteBuf, out: ByteBuf) {

@@ -8,9 +8,10 @@ import org.sandboxpowered.silica.api.server.Server
 import org.sandboxpowered.silica.api.util.extensions.WithScheduler
 import org.sandboxpowered.silica.api.util.extensions.onException
 import org.sandboxpowered.silica.api.util.getLogger
-import org.sandboxpowered.silica.vanilla.network.login.clientbound.S2CEncryptionRequest
-import org.sandboxpowered.silica.vanilla.network.login.clientbound.S2CLoginSuccess
-import org.sandboxpowered.silica.vanilla.network.login.serverbound.C2SEncryptionResponse
+import org.sandboxpowered.silica.vanilla.network.packets.login.clientbound.S2CEncryptionRequest
+import org.sandboxpowered.silica.vanilla.network.packets.login.clientbound.S2CLoginSuccess
+import org.sandboxpowered.silica.vanilla.network.packets.login.serverbound.C2SEncryptionResponse
+import org.sandboxpowered.silica.vanilla.network.util.Encryption
 import java.math.BigInteger
 import java.nio.charset.StandardCharsets.UTF_8
 import java.security.MessageDigest

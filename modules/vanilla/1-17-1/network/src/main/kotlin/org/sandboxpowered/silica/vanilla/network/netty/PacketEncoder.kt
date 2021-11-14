@@ -3,9 +3,9 @@ package org.sandboxpowered.silica.vanilla.network.netty
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.MessageToByteEncoder
-import org.sandboxpowered.silica.vanilla.network.NetworkFlow
-import org.sandboxpowered.silica.vanilla.network.PacketBase
-import org.sandboxpowered.silica.vanilla.network.PacketByteBuf
+import org.sandboxpowered.silica.vanilla.network.util.NetworkFlow
+import org.sandboxpowered.silica.vanilla.network.packets.PacketBase
+import org.sandboxpowered.silica.vanilla.network.util.PacketByteBuf
 import org.sandboxpowered.silica.vanilla.network.Protocol
 import java.io.IOException
 
