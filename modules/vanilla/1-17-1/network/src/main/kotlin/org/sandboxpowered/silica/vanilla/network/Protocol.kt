@@ -92,6 +92,7 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             0x65 packetDeprecated ::S2CDeclareRecipes
             0x66 packetDeprecated ::S2CDeclareTags
             0x0F packet ::S2CChatMessage
+            0x3E packet ::S2CUpdateEntityHeadRotation
         }
     }),
     STATUS(1, {

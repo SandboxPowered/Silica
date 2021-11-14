@@ -12,5 +12,4 @@ class SmeltingRecipe(
     val input: Ingredient,
     val output: ItemStack,
     val experience: Float
-) : Recipe<BaseInventory> {
-}
+) : Recipe<BaseInventory>

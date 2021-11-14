@@ -22,6 +22,7 @@ import org.sandboxpowered.silica.api.world.World
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.VanillaNetworkBehavior
 import org.sandboxpowered.silica.vanilla.network.ecs.VanillaPlayerInput
+import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityHeadRotation
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityPosition
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityPositionRotation
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityRotation
@@ -49,7 +50,7 @@ class VanillaInputSystem(val server: Server) : IteratingSystem() {
         // TODO: check if in range
         val input = playerInputMapper[entityId]
         val location = input.wantedPosition
-        val yaw = input.wantedYaw
+        val yaw = input.wantedYaw % 360.0f
         val pitch = input.wantedPitch
         val previousLocation = positionMapper[entityId].pos
         val rot = rotationMapper[entityId]
@@ -86,7 +87,7 @@ class VanillaInputSystem(val server: Server) : IteratingSystem() {
             } else {
                 S2CUpdateEntityRotation(entityId, yaw, pitch, false)
             }
-            rot.yaw = yaw % 360.0f
+            rot.yaw = yaw
             rot.pitch = pitch
         } else if (hasMoved) {
             packet = S2CUpdateEntityPosition(
@@ -95,6 +96,15 @@ class VanillaInputSystem(val server: Server) : IteratingSystem() {
                 dy.toInt().toShort(),
                 dz.toInt().toShort(),
                 false
+            )
+        }
+
+        if (yaw != previousYaw) {
+            server.network.tell(
+                VanillaNetworkBehavior.VanillaCommand.SendToAllExcept(
+                    input.gameProfile.id,
+                    S2CUpdateEntityHeadRotation(entityId, yaw)
+                )
             )
         }
 

@@ -67,7 +67,7 @@ object SilicaInit {
         register(GlassPaneBlock(Identifier("glass_pane")))
 
         register(FurnaceBlock(Identifier("furnace")))
-        register(RedstoneWireBlock(Identifier("redstone_wire")))
+        register(RedstoneWireBlock(Identifier("redstone_wire")), registerItemBlock = false)
 
         register(BeehiveBlock(Identifier("beehive")))
         register(BeehiveBlock(Identifier("bee_nest")))

@@ -77,7 +77,7 @@ class FurnaceProcessingSystem : IteratingSystem() {
         }
     }
 
-    fun getTotalSmeltTime(logic: FurnaceLogicComponent, inventory: BaseInventory): Int {
+    private fun getTotalSmeltTime(logic: FurnaceLogicComponent, inventory: BaseInventory): Int {
         val input = inventory[0]
         if (input.isEmpty) return 0
         return smeltTime
