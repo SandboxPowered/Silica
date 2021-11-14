@@ -4,17 +4,20 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.markdown.DiscordFlavor
 import org.sandboxpowered.silica.api.ecs.component.PositionComponent
+import org.sandboxpowered.silica.api.event.EventResult
+import org.sandboxpowered.silica.api.event.TypedEventResult
 import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.api.registry.Registries
+import org.sandboxpowered.silica.api.server.ServerEvents
 import org.sandboxpowered.silica.api.util.EasterEggs
 import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.extensions.create
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.api.world.World
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
-import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.VanillaNetworkBehavior
+import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.S2CChatMessage
 
 data class C2SChatMessage(private val message: String) : PacketPlay {
@@ -49,15 +52,19 @@ data class C2SChatMessage(private val message: String) : PacketPlay {
             else Component.text("<${profile.name}>")
             val text =
                 if (context.properties.supportChatFormatting) formatter.parse(message) else Component.text(message)
-            context.network.tell(
-                VanillaNetworkBehavior.VanillaCommand.SendToAll(
-                    S2CChatMessage(
-                        username.append(" ").append(text),
-                        0,
-                        packetHandler.connection.profile.id
+            val message = username.append(" ").append(text)
+            val result = ServerEvents.CHAT_EVENT.dispatcher?.invoke(profile, Identifier("minecraft", "chat"), message) ?: TypedEventResult(EventResult.DEFAULT, message)
+            if (!result.isCancelled) {
+                context.network.tell(
+                    VanillaNetworkBehavior.VanillaCommand.SendToAll(
+                        S2CChatMessage(
+                            result.value,
+                            0,
+                            packetHandler.connection.profile.id
+                        )
                     )
                 )
-            )
+            }
         }
     }
 
