@@ -191,7 +191,7 @@ private class PlayConnectionActor(
             S2CJoinGame(
                 playerId = 0,
                 hardcore = false,
-                gamemode = 1,
+                gamemode = 0,
                 previousGamemode = -1,
                 worldNames = listOf(overworld),
                 dimCodec = codec,
