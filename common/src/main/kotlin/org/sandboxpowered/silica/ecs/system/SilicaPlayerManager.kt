@@ -104,7 +104,7 @@ class SilicaPlayerManager : BaseEntitySystem(), PlayerManager {
         entityToUuid[entity.id] = profile.id
 
         val playerPosition = positionMapper[entity]
-        playerPosition.pos.set(8.0, 8.0, 8.0)
+        playerPosition.pos.set(8.0, 10.0, 8.0)
 
         hitboxMapper[entity].hitbox.set(0.6, 1.8, 0.6)
 

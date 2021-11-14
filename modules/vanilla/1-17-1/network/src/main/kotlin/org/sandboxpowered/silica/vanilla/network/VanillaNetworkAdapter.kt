@@ -25,12 +25,14 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import org.sandboxpowered.silica.api.ecs.component.EntityIdentity
 import org.sandboxpowered.silica.api.ecs.component.PositionComponent
 import org.sandboxpowered.silica.api.ecs.component.RotationComponent
+import org.sandboxpowered.silica.api.entity.EntityEvents
 import org.sandboxpowered.silica.api.network.NetworkAdapter
 import org.sandboxpowered.silica.api.network.Packet
 import org.sandboxpowered.silica.api.server.Server
 import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.extensions.*
 import org.sandboxpowered.silica.api.util.math.Position
+import org.sandboxpowered.silica.api.world.WorldEvents
 import org.sandboxpowered.silica.api.world.WorldWriter
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 import org.sandboxpowered.silica.vanilla.network.netty.LengthPrepender
@@ -74,6 +76,12 @@ class VanillaNetworkBehavior(
         VanillaWorldAdapter.actor(server.world, StateMappingManager.INSTANCE),
         "vanilla-world-adapter"
     )
+
+    init {
+        EntityEvents.SPAWN_ENTITY_EVENT.subscribe(this::spawnEntity)
+        EntityEvents.REMOVE_ENTITIES_EVENT.subscribe(this::removeEntities)
+        WorldEvents.REPLACE_BLOCKS_EVENT.subscribe(this::changeBlock)
+    }
 
     private var ticks: Int = 0
 
