@@ -4,7 +4,7 @@ import com.artemis.PooledComponent
 import com.mojang.authlib.GameProfile
 import org.joml.Vector3d
 import org.sandboxpowered.silica.api.entity.InteractionContext
-import org.sandboxpowered.silica.api.util.math.Position
+import org.sandboxpowered.silica.vanilla.network.play.serverbound.C2SPlayerDigging
 
 class VanillaPlayerInput : PooledComponent() {
     private var initialized = false
@@ -22,7 +22,7 @@ class VanillaPlayerInput : PooledComponent() {
     var sneaking = false
     var jumping = false
 
-    var breaking: Position? = null
+    var breaking: C2SPlayerDigging.PlayerDigging? = null
     var interacting: InteractionContext? = null
 
     var flying = false

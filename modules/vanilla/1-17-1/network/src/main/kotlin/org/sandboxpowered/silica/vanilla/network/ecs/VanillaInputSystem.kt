@@ -25,6 +25,7 @@ import org.sandboxpowered.silica.vanilla.network.ecs.VanillaPlayerInput
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityPosition
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityPositionRotation
 import org.sandboxpowered.silica.vanilla.network.play.clientbound.S2CUpdateEntityRotation
+import org.sandboxpowered.silica.vanilla.network.play.serverbound.C2SPlayerDigging
 
 @All(VanillaPlayerInput::class, PositionComponent::class, RotationComponent::class)
 class VanillaInputSystem(val server: Server) : IteratingSystem() {
@@ -137,7 +138,9 @@ class VanillaInputSystem(val server: Server) : IteratingSystem() {
         }
 
         input.breaking = performWithRangedCheck(input.breaking, position) {
-            terrain.setBlockState(it, Block.AIR.defaultState)
+            val newState = Block.AIR.defaultState
+            val success = terrain.setBlockState(it.location, newState)
+            it.acknowldge(success, newState)
         }
     }
 
@@ -157,6 +160,22 @@ class VanillaInputSystem(val server: Server) : IteratingSystem() {
         position: Vector3d,
         perform: (InteractionContext) -> Unit
     ): InteractionContext? {
+        if (target != null && position.distanceSquared(
+                target.location.x + .5,
+                target.location.y + .5,
+                target.location.z + .5
+            ) < 20
+        ) {
+            perform(target)
+        }
+        return null
+    }
+
+    private inline fun performWithRangedCheck(
+        target: C2SPlayerDigging.PlayerDigging?,
+        position: Vector3d,
+        perform: (C2SPlayerDigging.PlayerDigging) -> Unit
+    ): C2SPlayerDigging.PlayerDigging? {
         if (target != null && position.distanceSquared(
                 target.location.x + .5,
                 target.location.y + .5,

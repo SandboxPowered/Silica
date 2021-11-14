@@ -4,6 +4,7 @@ import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.api.world.World
+import org.sandboxpowered.silica.api.world.state.block.BlockState
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.PlayContext
@@ -24,12 +25,27 @@ data class C2SPlayerDigging(private val status: Int, private val location: Posit
 
     override fun handle(packetHandler: PacketHandler, context: PlayContext) {
         logger.info(this)
-//        println("Player Digging: $status $location $face")
         when (status) {
-            2 -> context.mutatePlayer { it.breaking = location }
+            2 -> context.mutatePlayer {
+                it.breaking = PlayerDigging(this) { success, newState ->
+                    context.world.tell(World.Command.DelayedCommand.Perform {
+                        packetHandler.sendPacket(
+                            S2CAcknowledgePlayerDigging(
+                                location,
+                                StateMappingManager.INSTANCE[newState],
+                                status,
+                                success
+                            )
+                        )
+                    })
+                }
+            }
         }
-        context.world.tell(World.Command.DelayedCommand.Perform {
-            packetHandler.sendPacket(S2CAcknowledgePlayerDigging(location, StateMappingManager.INSTANCE[it.getBlockState(location)], status, true))
-        })
+    }
+
+    data class PlayerDigging(private val packet: C2SPlayerDigging, val acknowldge: (Boolean, BlockState) -> Unit) {
+        val location = packet.location
+        val status = packet.status
+        val face = packet.face
     }
 }
