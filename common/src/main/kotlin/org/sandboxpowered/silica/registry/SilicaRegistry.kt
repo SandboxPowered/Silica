@@ -1,5 +1,6 @@
 package org.sandboxpowered.silica.registry
 
+import com.google.common.collect.ImmutableMap
 import org.sandboxpowered.silica.api.registry.Registry
 import org.sandboxpowered.silica.api.registry.RegistryEntry
 import org.sandboxpowered.silica.api.registry.RegistryObject
@@ -11,6 +12,8 @@ class SilicaRegistry<T : RegistryEntry<T>>(private val id: Identifier, override 
     var internalMap: MutableMap<Identifier, T> = HashMap()
     var registryEntries: MutableMap<Identifier, SilicaRegistryEntry<T>> = HashMap()
     var listeners: MutableList<(T) -> Unit> = ArrayList()
+    override val values: Map<Identifier, T>
+        get() = ImmutableMap.copyOf(internalMap)
 
     @Suppress("UNCHECKED_CAST")
     fun <X : RegistryEntry<X>> cast(): Registry<X> = this as Registry<X>

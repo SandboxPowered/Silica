@@ -1,5 +1,7 @@
 package org.sandboxpowered.silica.api.world
 
+import com.artemis.EntityEdit
+import org.sandboxpowered.silica.api.entity.EntityDefinition
 import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 
@@ -9,8 +11,10 @@ interface WorldWriter {
 
     fun setBlockState(pos: Position, state: BlockState, flag: Flag): Boolean
 
+    fun spawnEntity(entity: EntityDefinition, editor: (EntityEdit) -> Unit)
+
     @JvmInline
-    value class Flag private constructor(val flag: Int) {
+    value class Flag(val flag: Int) {
         companion object {
             /**
              * Sends a neighbor update event to surrounding blocks.

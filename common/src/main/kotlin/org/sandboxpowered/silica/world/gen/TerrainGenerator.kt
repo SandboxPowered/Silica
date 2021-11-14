@@ -6,8 +6,8 @@ import akka.actor.typed.javadsl.AbstractBehavior
 import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
+import org.sandboxpowered.silica.api.util.extensions.onMessage
 import org.sandboxpowered.silica.content.block.Blocks
-import org.sandboxpowered.silica.util.extensions.onMessage
 import org.sandboxpowered.silica.world.util.BlocTree
 import org.sandboxpowered.silica.world.util.iterateCube
 import kotlin.system.measureTimeMillis

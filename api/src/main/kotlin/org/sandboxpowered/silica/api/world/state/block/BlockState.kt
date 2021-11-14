@@ -16,4 +16,6 @@ class BlockState(base: Block, properties: ImmutableMap<Property<*>, Comparable<*
     companion object {
         val factory = ::BlockState
     }
+
+    override fun toString(): String = "${block.javaClass.simpleName}($properties)"
 }

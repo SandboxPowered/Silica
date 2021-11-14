@@ -1,5 +1,6 @@
 package org.sandboxpowered.silica.server
 
+import org.sandboxpowered.silica.api.server.ServerProperties
 import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path

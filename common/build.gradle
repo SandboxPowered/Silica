@@ -49,8 +49,6 @@ dependencies {
     api "it.unimi.dsi:fastutil:8.4.4"
     api "com.mojang:authlib:2.3.31"
 
-    api "io.netty:netty-all:4.1.56.Final"
-
     api "io.ktor:ktor-client-core:$ktorVersion"
     api "io.ktor:ktor-client-cio:$ktorVersion"
     api "io.ktor:ktor-client-serialization:$ktorVersion"

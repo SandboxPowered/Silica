@@ -20,7 +20,7 @@ class EntityRemovalSystem : BaseEntitySystem() {
 
             ids.forEach(world::delete)
             eventSystem.dispatch(RemoveEntitiesEvent(ids))
-            EntityEvents.REMOVE_ENTITIES_EVENT.invoker?.invoke(ids)
+            EntityEvents.REMOVE_ENTITIES_EVENT.dispatcher?.invoke(ids)
         }
     }
 }

@@ -8,10 +8,10 @@ import org.sandboxpowered.silica.api.world.state.block.BlockState
 
 object WorldEvents {
     val REPLACE_BLOCKS_EVENT: Event<ReplaceBlocksEvent> = EventFactory.createEvent { handlers ->
-        ReplaceBlocksEvent { pos, old, new -> handlers.forEach { it(pos, old, new) } }
+        ReplaceBlocksEvent { pos, old, new, flag -> handlers.forEach { it(pos, old, new, flag) } }
     }
 
     fun interface ReplaceBlocksEvent {
-        operator fun invoke(pos: Position, old: BlockState, new: BlockState)
+        operator fun invoke(pos: Position, old: BlockState, new: BlockState, flag: WorldWriter.Flag)
     }
 }

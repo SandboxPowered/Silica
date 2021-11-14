@@ -16,6 +16,7 @@ interface Registry<T : RegistryEntry<T>> : Iterable<T> {
 
     fun register(value: T): T
 
+    val values: Map<Identifier, T>
     val type: Class<T>
 }
 

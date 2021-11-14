@@ -11,6 +11,7 @@ import org.sandboxpowered.silica.api.util.extensions.join
 import org.sandboxpowered.silica.api.util.extensions.listFiles
 import org.sandboxpowered.silica.api.util.extensions.notExists
 import org.sandboxpowered.silica.api.util.getLogger
+import org.sandboxpowered.silica.api.world.World
 import org.sandboxpowered.silica.client.input.Keyboard
 import org.sandboxpowered.silica.client.mesh.ChunkPos
 import org.sandboxpowered.silica.client.mesh.MeshRouter
@@ -22,7 +23,6 @@ import org.sandboxpowered.silica.resources.ZIPResourceLoader
 import org.sandboxpowered.silica.util.FileFilters
 import org.sandboxpowered.silica.util.Util
 import org.sandboxpowered.silica.util.Util.MINECRAFT_VERSION
-import org.sandboxpowered.silica.world.SilicaWorld
 import org.sandboxpowered.silica.world.util.iterateCube
 import java.io.File
 import java.util.*
@@ -35,7 +35,7 @@ class SilicaClient(private val args: Args) : Runnable {
     lateinit var keyboard: Keyboard
     lateinit var assetManager: ResourceManager
     lateinit var renderer: Renderer
-    lateinit var world: ActorRef<SilicaWorld.Command>
+    lateinit var world: ActorRef<org.sandboxpowered.silica.api.world.World.Command>
     lateinit var meshRouter: ActorRef<MeshRouter.Command>
     lateinit var modelLoader: ModelLoader
 
@@ -138,9 +138,9 @@ class SilicaClient(private val args: Args) : Runnable {
 
     fun guardianStarted() {
         iterateCube(-8, 0, -8, 8, 16, 8) { x, y, z ->
-            world.tell(SilicaWorld.Command.Ask({
+            world.tell(World.Command.Ask(meshRouter) {
                 MeshRouter.Command.RequestConstruction(ChunkPos(x, y, z), it)
-            }, meshRouter))
+            })
         }
     }
 }

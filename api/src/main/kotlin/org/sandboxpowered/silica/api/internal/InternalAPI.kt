@@ -5,6 +5,7 @@ import org.sandboxpowered.silica.api.network.NetworkAdapter
 import org.sandboxpowered.silica.api.plugin.PluginManager
 import org.sandboxpowered.silica.api.registry.Registry
 import org.sandboxpowered.silica.api.registry.RegistryEntry
+import org.sandboxpowered.silica.api.server.Server
 import org.sandboxpowered.silica.api.world.generation.WorldGenerator
 import java.util.*
 import kotlin.reflect.KClass
@@ -15,6 +16,7 @@ interface InternalAPI {
     fun <T : RegistryEntry<T>> getRegistry(kclass: KClass<T>): Registry<T>
     fun registerNetworkAdapter(adapter: NetworkAdapter)
     fun registerWorldGenerator(generator: WorldGenerator)
+    fun registerSystem(system: (Server) -> BaseEntitySystem)
     fun registerSystem(system: BaseEntitySystem)
     fun registerListener(listener: Any)
 

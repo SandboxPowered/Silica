@@ -1,20 +1,16 @@
 package org.sandboxpowered.silica.client.server
 
 import akka.actor.typed.ActorRef
-import org.sandboxpowered.silica.server.ServerProperties
+import org.sandboxpowered.silica.api.network.NetworkAdapter
+import org.sandboxpowered.silica.api.server.ServerProperties
+import org.sandboxpowered.silica.api.world.World
 import org.sandboxpowered.silica.server.SilicaServer
-import org.sandboxpowered.silica.server.VanillaNetwork
-import org.sandboxpowered.silica.vanilla.StateMappingManager
-import org.sandboxpowered.silica.vanilla.VanillaProtocolMapping
-import org.sandboxpowered.silica.world.SilicaWorld
 
 class IntegratedServer() : SilicaServer() {
-    override val stateRemapper = StateMappingManager()
-    override val registryProtocolMapper = VanillaProtocolMapping()
     override val properties = IntegratedServerProperties()
 
-    override lateinit var world: ActorRef<SilicaWorld.Command>
-    override lateinit var vanillaNetwork: ActorRef<VanillaNetwork>
+    override lateinit var world: ActorRef<World.Command>
+    override lateinit var network: ActorRef<NetworkAdapter.Command>
 
     class IntegratedServerProperties : ServerProperties {
         override val onlineMode = true

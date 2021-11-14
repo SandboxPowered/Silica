@@ -10,6 +10,7 @@ interface WorldReader {
     val isServer: Boolean
     val worldHeight: Vector2ic
 
+    fun getBlockState(x: Int, y: Int, z: Int): BlockState
     fun getBlockState(pos: Position): BlockState
     fun getFluidState(pos: Position): FluidState
 
@@ -22,4 +23,6 @@ interface WorldReader {
     fun isOutOfHeightLimit(height: Int): Boolean = !isWithinHeightLimit(height)
 
     fun registerEventSubscriber(sub: Any)
+    fun subsection(x: Int, y: Int, z: Int, w: Int, h: Int, d: Int): WorldReader
+    fun nonAirInChunk(x: Int, y: Int, z: Int): Int
 }

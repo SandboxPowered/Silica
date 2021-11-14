@@ -27,4 +27,5 @@ open class BaseBlock(final override val identifier: Identifier) : Block {
     }
     override val defaultState: BlockState by lazy { createDefaultState(stateProvider.baseState) }
 
+    override fun toString(): String = "${javaClass.simpleName}($identifier)"
 }

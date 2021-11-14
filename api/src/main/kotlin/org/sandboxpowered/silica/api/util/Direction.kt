@@ -5,7 +5,6 @@ import org.jetbrains.annotations.Range
 import org.joml.Vector3i
 import org.joml.Vector3ic
 import java.util.function.Predicate
-import kotlin.math.abs
 import kotlin.math.floor
 
 enum class Direction(
@@ -28,6 +27,26 @@ enum class Direction(
     val offsetX: Int = this.offset.x()
     val offsetY: Int = this.offset.y()
     val offsetZ: Int = this.offset.z()
+    val counterClockWise: Direction
+        get() {
+            return when (this) {
+                NORTH -> WEST
+                SOUTH -> EAST
+                WEST -> SOUTH
+                EAST -> NORTH
+                else -> error("Unable to get counter clockwise direction of $this")
+            }
+        }
+    val clockWise: Direction
+        get() {
+            return when (this) {
+                NORTH -> EAST
+                SOUTH -> WEST
+                WEST -> NORTH
+                EAST -> SOUTH
+                else -> error("Unable to get counter clockwise direction of $this")
+            }
+        }
 
     override fun toString(): String = this.asString
 
@@ -51,8 +70,8 @@ enum class Direction(
 
         fun byName(name: String): Direction? = NAME_MAP[name.lowercase()]
         fun fromYRotation(yaw: Float): Direction {
-            println("${floor(yaw / 90.0 +0.5)} | ${floor(yaw / 90.0+0.5).toInt() and 3}")
-            val out = byHorizontalId(floor(yaw / 90.0+0.5).toInt() and 3)
+            println("${floor(yaw / 90.0 + 0.5)} | ${floor(yaw / 90.0 + 0.5).toInt() and 3}")
+            val out = byHorizontalId(floor(yaw / 90.0 + 0.5).toInt() and 3)
             println("Got $yaw out $out")
             return out
         }

@@ -27,14 +27,12 @@ object Main {
         if (set.has("initSettings")) {
             fromFile(Paths.get("server.properties"))
         } else {
-            if (!eula.agreed) {
+            if (!eula.accepted) {
                 LogManager.getLogger("Minecraft EULA")
                     .error("You need to agree to the EULA in order to run the server. Go to eula.txt for more info.")
                 return
             }
-            DedicatedServer(
-                DedicatedServer.Args()
-            ).run()
+            DedicatedServer(DedicatedServer.Args()).run()
         }
     }
 }

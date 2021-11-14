@@ -10,18 +10,21 @@ import org.sandboxpowered.silica.api.network.NetworkAdapter
 import org.sandboxpowered.silica.api.plugin.PluginManager
 import org.sandboxpowered.silica.api.registry.Registry
 import org.sandboxpowered.silica.api.registry.RegistryEntry
+import org.sandboxpowered.silica.api.server.Server
 import org.sandboxpowered.silica.api.world.generation.WorldGenerator
 import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.world.SilicaWorld
 import kotlin.reflect.KClass
 
 class SilicaInternalAPI : InternalAPI {
+    var networkAdapter: NetworkAdapter? = null
     private val log = LogManager.getLogger("SilicaAPI")
 
     override val pluginManager: PluginManager
         get() = TODO("Not yet implemented")
 
     override fun registerNetworkAdapter(adapter: NetworkAdapter) {
+        this.networkAdapter = adapter
         log.info("Registered network adapter ${adapter.id} for protocol ${adapter.protocol}")
         // TODO("Not yet implemented")
     }
@@ -42,6 +45,10 @@ class SilicaInternalAPI : InternalAPI {
 
     override fun registerSystem(system: BaseEntitySystem) {
         SilicaRegistries.SYSTEM_REGISTRY += system
+    }
+
+    override fun registerSystem(system: (Server) -> BaseEntitySystem) {
+        SilicaRegistries.DYNAMIC_SYSTEM_REGISTRY += system
     }
 
     lateinit var registerListenerDelegate: (Any) -> Unit

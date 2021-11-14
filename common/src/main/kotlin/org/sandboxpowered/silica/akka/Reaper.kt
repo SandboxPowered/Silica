@@ -7,10 +7,10 @@ import akka.actor.typed.javadsl.AbstractBehavior
 import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
+import org.sandboxpowered.silica.api.util.extensions.onMessage
+import org.sandboxpowered.silica.api.util.extensions.onSignal
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.server.SilicaServer
-import org.sandboxpowered.silica.util.extensions.onMessage
-import org.sandboxpowered.silica.util.extensions.onSignal
 
 /**
  * The Reaper is an Actor that is in charge of collecting dead souls.

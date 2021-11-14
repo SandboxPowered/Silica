@@ -1,9 +1,9 @@
 package org.sandboxpowered.silica.ecs.system
 
 import com.artemis.Archetype
-import com.artemis.ArchetypeBuilder
 import com.artemis.BaseEntitySystem
 import com.artemis.ComponentMapper
+import com.artemis.Entity
 import com.artemis.annotations.All
 import com.artemis.annotations.Wire
 import com.mojang.authlib.GameProfile
@@ -11,19 +11,26 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectFunction
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.*
 import org.sandboxpowered.silica.api.ecs.component.*
+import org.sandboxpowered.silica.api.entity.BaseEntityDefinition
+import org.sandboxpowered.silica.api.entity.EntityDefinition
+import org.sandboxpowered.silica.api.entity.EntityEvents
+import org.sandboxpowered.silica.api.server.PlayerManager
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.extensions.add
 import org.sandboxpowered.silica.api.util.extensions.set
-import org.sandboxpowered.silica.ecs.component.PlayerComponent
-import org.sandboxpowered.silica.ecs.component.VanillaPlayerInput
 import java.util.*
 
 @All(PlayerComponent::class, PositionComponent::class)
-class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
+class SilicaPlayerManager : BaseEntitySystem(), PlayerManager {
     private val uuidToEntityId: Object2IntFunction<UUID> = Object2IntOpenHashMap<UUID>()
         .apply { defaultReturnValue(UNKNOWN_ID) }
     private val entityToUuid: Int2ObjectFunction<UUID> = Int2ObjectOpenHashMap()
-    val onlinePlayers: ObjectSet<UUID> = ObjectOpenHashSet()
-    val onlinePlayerProfiles: Object2ObjectMap<UUID, GameProfile> = Object2ObjectOpenHashMap()
+    val _onlinePlayers: ObjectSet<UUID> = ObjectOpenHashSet()
+    val _onlinePlayerProfiles: Object2ObjectMap<UUID, GameProfile> = Object2ObjectOpenHashMap()
+    override val onlinePlayers: Array<UUID>
+        get() = _onlinePlayers.toTypedArray()
+    override val onlinePlayerProfiles: Array<GameProfile>
+        get() = _onlinePlayerProfiles.values.toTypedArray()
 
     @Wire
     private lateinit var playerMapper: ComponentMapper<PlayerComponent>
@@ -35,9 +42,6 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
     private lateinit var hitboxMapper: ComponentMapper<HitboxComponent>
 
     @Wire
-    private lateinit var playerInputMapper: ComponentMapper<VanillaPlayerInput>
-
-    @Wire
     private lateinit var inventoryMapper: ComponentMapper<PlayerInventoryComponent>
 
     @Wire
@@ -47,7 +51,7 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
 
     }
 
-    fun getPlayerId(uuid: UUID): Int {
+    override fun getPlayerId(uuid: UUID): Int {
         return uuidToEntityId.getInt(uuid)
     }
 
@@ -55,73 +59,68 @@ class SilicaPlayerManager(var maxPlayers: Int) : BaseEntitySystem() {
         return getPlayerId(profile.id)
     }
 
+    private lateinit var playerEntDefinition: EntityDefinition
+
     private lateinit var playerArchetype: Archetype
 
     override fun initialize() {
         super.initialize()
 
-        val builder = ArchetypeBuilder()
+        val entityDefinition = BaseEntityDefinition(Identifier("player")) {
+            add<PlayerComponent>()
+            add<PositionComponent>()
+            add<RotationComponent>()
+            add<HitboxComponent>()
+            add<PlayerInventoryComponent>()
+        }
 
-        builder.add<PlayerComponent>()
-        builder.add<PositionComponent>()
-        builder.add<RotationComponent>()
-        builder.add<HitboxComponent>()
-        builder.add<VanillaPlayerInput>()
-        builder.add<PlayerInventoryComponent>()
+        val arch = entityDefinition.createArchetype()
+        EntityEvents.INITIALIZE_ARCHETYPE_EVENT.dispatcher?.invoke(entityDefinition, arch)
 
-        playerArchetype = builder.build(world, "player")
+        playerArchetype = arch.build(world, "entity:${entityDefinition.identifier}")
     }
 
-    fun disconnect(profile: GameProfile) {
-        onlinePlayers.remove(profile.id)
-        onlinePlayerProfiles.remove(profile.id)
+    override fun disconnect(profile: GameProfile) {
+        _onlinePlayers.remove(profile.id)
+        _onlinePlayerProfiles.remove(profile.id)
 
         val entityId = uuidToEntityId.removeInt(profile.id)
         entityToUuid.remove(entityId)
         removalMapper.create(entityId)
     }
 
-    fun create(profile: GameProfile): VanillaPlayerInput {
+    override fun createPlayer(profile: GameProfile): Entity {
         val existing = uuidToEntityId.getInt(profile.id)
-        if (existing != UNKNOWN_ID) return playerInputMapper[existing]
+        if (existing != UNKNOWN_ID) return getEntity(existing)!!
 
-        val id = world.create(playerArchetype)
-        val player = playerMapper.get(id)!!
+        val entity = world.createEntity(playerArchetype)
+        val player = playerMapper.get(entity)!!
         player.profile = profile
 
-        onlinePlayers.add(profile.id)
-        onlinePlayerProfiles[profile.id] = profile
+        _onlinePlayers.add(profile.id)
+        _onlinePlayerProfiles[profile.id] = profile
 
-        uuidToEntityId[profile.id] = id
-        entityToUuid[id] = profile.id
+        uuidToEntityId[profile.id] = entity.id
+        entityToUuid[entity.id] = profile.id
 
-        val playerPosition = positionMapper[id]
+        val playerPosition = positionMapper[entity]
         playerPosition.pos.set(8.0, 8.0, 8.0)
 
-        hitboxMapper[id].hitbox.set(0.6, 1.8, 0.6)
+        hitboxMapper[entity].hitbox.set(0.6, 1.8, 0.6)
 
-        val playerInput = playerInputMapper[id]
-        playerInput.initialize(id, profile)
-        playerInput.wantedPosition.set(playerPosition.pos)
+        EntityEvents.SPAWN_ENTITY_EVENT.dispatcher?.invoke(entity)
 
-        return playerInput
+//        val playerInput = playerInputMapper[id]
+//        playerInput.initialize(id, profile)
+//        playerInput.wantedPosition.set(playerPosition.pos)
+
+        return entity
     }
 
-    fun getVanillaInput(ent: Int): VanillaPlayerInput {
-        return playerInputMapper.get(ent)
-    }
+    override fun getEntity(id: Int): Entity? = world.getEntity(id)
 
-    fun getOnlinePlayers(): Array<UUID> {
-        return onlinePlayers.toTypedArray()
-    }
-
-    fun getOnlinePlayerProfiles(): Array<GameProfile> {
-        return onlinePlayerProfiles.values.toTypedArray()
-    }
-
-    fun createInventory(gameProfile: GameProfile): PlayerInventoryComponent {
-        return inventoryMapper[uuidToEntityId.getInt(gameProfile.id)]
-    }
+    fun createInventory(gameProfile: GameProfile): PlayerInventoryComponent =
+        inventoryMapper[uuidToEntityId.getInt(gameProfile.id)]
 
     private companion object {
         private const val UNKNOWN_ID = -1

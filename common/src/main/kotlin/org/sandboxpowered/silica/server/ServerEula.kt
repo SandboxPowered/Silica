@@ -5,7 +5,7 @@ import java.nio.file.Path
 import java.util.*
 
 class ServerEula(private val path: Path) {
-    val agreed = checkAgreement()
+    val accepted = checkAgreement()
 
     private fun checkAgreement(): Boolean {
         if (Files.notExists(path)) writeDefaultEULA()

@@ -1,19 +1,14 @@
 package org.sandboxpowered.silica.registry
 
 import com.artemis.BaseEntitySystem
-import org.reflections.Reflections
 import org.sandboxpowered.silica.api.block.Block
 import org.sandboxpowered.silica.api.block.BlockEntityProvider
 import org.sandboxpowered.silica.api.entity.EntityDefinition
 import org.sandboxpowered.silica.api.fluid.Fluid
 import org.sandboxpowered.silica.api.item.Item
-import org.sandboxpowered.silica.api.plugin.BasePlugin
-import org.sandboxpowered.silica.api.plugin.Plugin
 import org.sandboxpowered.silica.api.registry.RegistryDelegate
+import org.sandboxpowered.silica.api.server.Server
 import org.sandboxpowered.silica.api.util.Identifier
-import org.sandboxpowered.silica.api.util.getLogger
-import org.sandboxpowered.silica.util.extensions.getAnnotation
-import org.sandboxpowered.silica.util.extensions.getTypesAnnotatedWith
 
 object SilicaRegistries {
     val BLOCK_REGISTRY = SilicaRegistry(Identifier("minecraft", "block"), Block::class.java).apply {
@@ -32,22 +27,9 @@ object SilicaRegistries {
 
     val FLUID_REGISTRY = SilicaRegistry(Identifier("minecraft", "fluid"), Fluid::class.java)
 
-    val SYSTEM_REGISTRY = mutableSetOf<BaseEntitySystem>() // TODO : make an actual registry for this ?
-
-    init {
-        //TODO: make this use an plugin classloader rather than package search
-        val classes = Reflections("org.sandboxpowered").getTypesAnnotatedWith<Plugin>()
-        val log = getLogger()
-        log.info("Loading ${classes.size} plugins")
-        classes.forEach {
-            val plugin = it.getAnnotation<Plugin>()
-            if (BasePlugin::class.java.isAssignableFrom(it)) {
-                val instance = it.getConstructor().newInstance() as BasePlugin
-                log.debug("Loading ${plugin.id}@${plugin.version}")
-                instance.onEnable()
-            }
-        }
-    }
+    val SYSTEM_REGISTRY = mutableSetOf<BaseEntitySystem>() // TODO : make an actual registry for this
+    val DYNAMIC_SYSTEM_REGISTRY =
+        mutableSetOf<(Server) -> BaseEntitySystem>() // TODO : make an actual registry for this
 
     private val blockDelegates = HashMap<String, RegistryDelegate<Block>>()
     private val itemDelegates = HashMap<String, RegistryDelegate<Item>>()

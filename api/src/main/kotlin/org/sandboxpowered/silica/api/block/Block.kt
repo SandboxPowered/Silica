@@ -19,6 +19,10 @@ import org.sandboxpowered.silica.api.world.state.StateProvider
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 
 sealed interface Block : RegistryEntry<Block>, Translatable {
+    companion object {
+        val AIR by Registries.blocks()
+    }
+
     val item: Item?
     val isAir: Boolean
 

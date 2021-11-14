@@ -36,6 +36,11 @@ open class BaseState<B : RegistryEntry<B>, S : PropertyContainer<S>>(
         return set(property, findNextInCollection(property.values, currentValue as T))
     }
 
+    override fun matches(other: S, vararg properties: Property<*>): Boolean = properties.all { matches(other, it) }
+
+    override fun <T : Comparable<T>> matches(other: S, property: Property<T>): Boolean =
+        this[property] == other[property]
+
     fun initTable(map: Map<Map<Property<*>, Comparable<*>>, S>) {
         val table: Table<Property<*>, Comparable<*>, S> = HashBasedTable.create()
         for ((property, value) in properties) {
