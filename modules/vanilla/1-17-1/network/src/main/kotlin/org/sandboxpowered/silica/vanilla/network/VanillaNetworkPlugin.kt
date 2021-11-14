@@ -16,7 +16,13 @@ import org.sandboxpowered.silica.vanilla.network.ecs.VanillaPlayerInput
 import java.io.File
 import java.nio.charset.StandardCharsets
 
-@Plugin(id = "minecraft:network", version = "1.17.1", requirements = ["minecraft:content@1.17.1"])
+@Plugin(
+    id = "minecraft:network",
+    version = "1.17.1",
+    requirements = ["minecraft:content@1.17.1"],
+    after = ["minecraft:content"],
+    native = true
+)
 class VanillaNetworkPlugin : BasePlugin {
     private val logger = getLogger()
     override fun onEnable() {

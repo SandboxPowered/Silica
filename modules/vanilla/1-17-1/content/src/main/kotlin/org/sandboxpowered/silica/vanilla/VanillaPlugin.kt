@@ -5,7 +5,7 @@ import org.sandboxpowered.silica.api.plugin.Plugin
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.api.world.WorldEvents
 
-@Plugin("minecraft:content", "1.17.1")
+@Plugin("minecraft:content", "1.17.1", native = true)
 class VanillaPlugin : BasePlugin {
     private val logger = getLogger()
 

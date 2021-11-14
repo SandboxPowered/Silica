@@ -5,7 +5,14 @@ import org.sandboxpowered.silica.api.plugin.BasePlugin
 import org.sandboxpowered.silica.api.plugin.Plugin
 import org.sandboxpowered.silica.api.util.getLogger
 
-@Plugin(id = "minecraft:world", version = "1.17.1", requirements = ["minecraft:content@1.17.1"])
+@Plugin(
+    id = "minecraft:world",
+    version = "1.17.1",
+    requirements = ["minecraft:content@1.17.1"],
+    after = ["minecraft:content"],
+    before = ["minecraft:network"],
+    native = true
+)
 class VanillaWorldPlugin : BasePlugin {
     private val logger = getLogger()
     override fun onEnable() {

@@ -54,13 +54,22 @@ class DedicatedServer(args: Args) : SilicaServer() {
         val classes = Reflections("org.sandboxpowered").getTypesAnnotatedWith<Plugin>()
         val log = getLogger()
         log.info("Loading ${classes.size} plugins")
+        val map = sortedMapOf<Plugin, BasePlugin>(compareBy<Plugin> { !it.native }.thenComparing { o1, o2 ->
+            if (o1.id in o2.before) 1 else if (o2.id in o1.before) -1 else 0
+        }.thenComparing { o1, o2 ->
+            if (o1.id in o2.after) -1 else if (o2.id in o1.after) 1 else 0
+        })
+        //TODO: Make dependencies load in the correct order
         classes.forEach {
             val plugin = it.getAnnotation<Plugin>()
             if (BasePlugin::class.java.isAssignableFrom(it)) {
                 val instance = it.getConstructor().newInstance() as BasePlugin
-                log.debug("Loading ${plugin.id}@${plugin.version}")
-                instance.onEnable()
+                map[plugin] = instance
             }
+        }
+        map.forEach { (plugin, instance) ->
+            log.debug("Loading ${plugin.id}@${plugin.version}")
+            instance.onEnable()
         }
 
         system = ActorSystem.create(
