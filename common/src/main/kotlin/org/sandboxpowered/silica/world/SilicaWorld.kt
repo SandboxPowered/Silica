@@ -125,7 +125,6 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
 
     override fun setBlockState(pos: Position, state: BlockState, flag: WorldWriter.Flag): Boolean {
         if (isOutOfHeightLimit(pos)) return false
-        //TODO see if theres generally any better way of doing this.
         val system = artemisWorld.getSystem<Entity3dMapSystem>()
         val existingBEs = system.getBlockEntities(pos)
         if (!existingBEs.isEmpty) {

@@ -46,7 +46,6 @@ data class C2SChatMessage(private val message: String) : PacketPlay {
         } else {
             val profile = packetHandler.connection.profile
             val formatter = MiniMessage.withMarkdownFlavor(DiscordFlavor.get())
-            //TODO: Allow plugins to modify chat message layout
             val username = if (profile.id.toString() in EasterEggs.DEV_UUID)
                 formatter.parse("<rainbow><${profile.name}></rainbow>")
             else Component.text("<${profile.name}>")

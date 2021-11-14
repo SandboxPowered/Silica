@@ -36,7 +36,6 @@ data class C2SPlayerBlockInteract(
     }
 
     override fun handle(packetHandler: PacketHandler, context: PlayContext) {
-        // TODO
         context.mutatePlayer {
             it.interacting = InteractionContext(
                 Hand.MAIN_HAND,
