@@ -18,7 +18,7 @@ import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.api.world.World
 
 @Plugin(id = "test", version = "1.0.0", requirements = ["minecraft:content"])
-class TestPlugin : BasePlugin {
+object TestPlugin : BasePlugin {
     private val logger = getLogger()
 
     private val OAK_FENCE_GATE by Registries.blocks()

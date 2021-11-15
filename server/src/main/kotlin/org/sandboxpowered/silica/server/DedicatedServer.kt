@@ -63,7 +63,7 @@ class DedicatedServer(args: Args) : SilicaServer() {
         classes.forEach {
             val plugin = it.getAnnotation<Plugin>()
             if (BasePlugin::class.java.isAssignableFrom(it)) {
-                val instance = it.getConstructor().newInstance() as BasePlugin
+                val instance = (it.kotlin.objectInstance ?: it.getConstructor().newInstance()) as BasePlugin
                 map[plugin] = instance
             }
         }
