@@ -1,6 +1,7 @@
 package org.sandboxpowered.silica.api.util
 
 import com.google.common.base.Objects
+import com.mojang.brigadier.StringReader
 
 class Identifier(val namespace: String, val path: String) : Comparable<Identifier> {
     init {
@@ -41,6 +42,18 @@ class Identifier(val namespace: String, val path: String) : Comparable<Identifie
                 2 -> Identifier(it[0], it[1])
                 else -> error("Couldn't parse $id")
             }
+        }
+
+        fun isAllowed(c: Char): Boolean =
+            c in '0'..'9' || c in 'a'..'z' || c == '_' || c == ':' || c == '/' || c == '.' || c == '-'
+
+        fun read(reader: StringReader): Identifier {
+            val i = reader.cursor
+            while (reader.canRead() && isAllowed(reader.peek())) {
+                reader.skip()
+            }
+            val string = reader.string.substring(i, reader.cursor)
+            return Identifier(string)
         }
     }
 }

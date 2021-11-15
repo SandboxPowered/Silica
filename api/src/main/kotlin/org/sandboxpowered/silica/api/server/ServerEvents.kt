@@ -14,7 +14,6 @@ import org.sandboxpowered.silica.api.world.World
 object ServerEvents {
     // TODO: Completely rewrite this event to be infinitely more flexible.
     val CHAT_EVENT: Event<ChatEvent<Component>> = chatLikeEvent()
-    val CHAT_COMMAND_EVENT: Event<ChatEvent<String>> = chatLikeEvent()
 
     private fun <T : Any> chatLikeEvent(): Event<ChatEvent<T>> = EventFactory.createEvent { handlers ->
         ChatEvent { player, channel, message, world ->

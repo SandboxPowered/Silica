@@ -13,7 +13,7 @@ import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.vanilla.network.ecs.component.VanillaPlayerInputComponent
 import org.sandboxpowered.silica.vanilla.network.ecs.system.VanillaInputSystem
 import org.sandboxpowered.silica.vanilla.network.util.mapping.BlockStateProtocolMapping
-import org.sandboxpowered.silica.vanilla.network.util.mapping.BlockStateProtocolMapping.ErrorType
+import org.sandboxpowered.silica.vanilla.network.util.mapping.MappingErrorType
 import org.sandboxpowered.silica.vanilla.network.util.mapping.VanillaProtocolMapping
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -31,9 +31,9 @@ class VanillaNetworkPlugin : BasePlugin {
         logger.info("Minecraft network adapter v1.17.1 enabled")
 
         val stateMappingErrors = BlockStateProtocolMapping.INSTANCE.load()
-        VanillaProtocolMapping.INSTANCE.load()
+        val protocolErrors = VanillaProtocolMapping.INSTANCE.load()
         if (stateMappingErrors.isNotEmpty()) {
-            val unknown = stateMappingErrors[ErrorType.UNKNOWN]
+            val unknown = stateMappingErrors[MappingErrorType.UNKNOWN]
             if (unknown != null && unknown.isNotEmpty()) {
                 logger.error("Found ${unknown.size} unknown BlockStates. Exported to unknown.txt")
                 val builder = StringBuilder()
@@ -42,7 +42,7 @@ class VanillaNetworkPlugin : BasePlugin {
                 }
                 FileUtils.writeStringToFile(File("unknown.txt"), builder.toString(), StandardCharsets.UTF_8)
             }
-            val missing = stateMappingErrors[ErrorType.MISSING]
+            val missing = stateMappingErrors[MappingErrorType.MISSING]
             if (missing != null && missing.isNotEmpty()) {
                 logger.error("Missing ${missing.size} vanilla BlockStates. Exported to missing.txt")
                 val builder = StringBuilder()

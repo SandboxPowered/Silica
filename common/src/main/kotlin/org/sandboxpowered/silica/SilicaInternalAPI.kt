@@ -1,8 +1,10 @@
 package org.sandboxpowered.silica
 
 import com.artemis.BaseEntitySystem
+import com.mojang.brigadier.CommandDispatcher
 import org.apache.logging.log4j.LogManager
 import org.sandboxpowered.silica.api.block.Block
+import org.sandboxpowered.silica.api.command.CommandSource
 import org.sandboxpowered.silica.api.entity.EntityDefinition
 import org.sandboxpowered.silica.api.internal.InternalAPI
 import org.sandboxpowered.silica.api.item.Item
@@ -19,7 +21,7 @@ import kotlin.reflect.KClass
 class SilicaInternalAPI : InternalAPI {
     var networkAdapter: NetworkAdapter? = null
     private val log = LogManager.getLogger("SilicaAPI")
-
+    override val commandDispatcher: CommandDispatcher<CommandSource> = CommandDispatcher()
     override val pluginManager: PluginManager
         get() = TODO("Not yet implemented")
 
@@ -49,6 +51,10 @@ class SilicaInternalAPI : InternalAPI {
 
     override fun registerSystem(system: (Server) -> BaseEntitySystem) {
         SilicaRegistries.DYNAMIC_SYSTEM_REGISTRY += system
+    }
+
+    override fun registerCommands(builder: CommandDispatcher<CommandSource>.() -> Unit) {
+        builder(commandDispatcher)
     }
 
     lateinit var registerListenerDelegate: (Any) -> Unit

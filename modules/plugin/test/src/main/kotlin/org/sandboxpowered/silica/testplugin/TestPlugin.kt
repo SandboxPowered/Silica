@@ -1,8 +1,12 @@
 package org.sandboxpowered.silica.testplugin
 
 import net.kyori.adventure.text.Component
+import org.sandboxpowered.silica.api.SilicaAPI
+import org.sandboxpowered.silica.api.command.sync.ArgumentTypes
+import org.sandboxpowered.silica.api.command.sync.SingletonArgumentSerializer
 import org.sandboxpowered.silica.api.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.api.ecs.component.PositionComponent
+import org.sandboxpowered.silica.api.entity.EntityDefinition
 import org.sandboxpowered.silica.api.entity.EntityEvents
 import org.sandboxpowered.silica.api.event.EventResult
 import org.sandboxpowered.silica.api.event.TypedEventResult
@@ -11,10 +15,12 @@ import org.sandboxpowered.silica.api.plugin.BasePlugin
 import org.sandboxpowered.silica.api.plugin.Plugin
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.server.ServerEvents
-import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.extensions.create
+import org.sandboxpowered.silica.api.util.extensions.getArgument
 import org.sandboxpowered.silica.api.util.extensions.getComponent
+import org.sandboxpowered.silica.api.util.extensions.literal
 import org.sandboxpowered.silica.api.util.getLogger
+import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.api.world.World
 
 @Plugin(id = "test", version = "1.0.0", requirements = ["minecraft:content"])
@@ -36,19 +42,27 @@ object TestPlugin : BasePlugin {
         ServerEvents.CHAT_EVENT.subscribe { _, channel, message, _ ->
             TypedEventResult(EventResult.ALLOW, Component.text("[$channel] ").append(message))
         }
-        ServerEvents.CHAT_COMMAND_EVENT.subscribe { _, _, message, world ->
-            //TODO: Create a proper command system
-            val parts = message.split(' ')
-            if (parts.size >= 5 && parts[0] == "spawn") {
-                val entity = Registries.ENTITY_DEFINITIONS[Identifier(parts[1])].orNull()
-                if (entity != null) world.tell(World.Command.DelayedCommand.Perform {
-                    it.spawnEntity(entity) { edit ->
-                        val pos = edit.create<PositionComponent>().pos
-                        pos.set(parts[2].toDouble() + .5, parts[3].toDouble(), parts[4].toDouble() + .5)
+        ArgumentTypes.register("block_pos", SingletonArgumentSerializer { PositionArgumentType() })
+        ArgumentTypes.register("entity_summon", SingletonArgumentSerializer { EntityArgumentType() })
+        SilicaAPI.registerCommands {
+            literal("spawn") {
+                argument("entity", EntityArgumentType()) {
+                    argument("pos", PositionArgumentType()) {
+                        executes {
+                            val entity = it.getArgument<EntityDefinition>("entity")
+                            val pos = it.getArgument<Position>("pos")
+                            world.tell(World.Command.DelayedCommand.Perform {
+                                it.spawnEntity(entity) { edit ->
+                                    val epos = edit.create<PositionComponent>().pos
+                                    epos.set(pos.x + .5, pos.y.toDouble(), pos.z + .5)
+                                }
+                            })
+                            sendMessage(Component.text("Spawned ${entity.identifier}"))
+                            1
+                        }
                     }
-                })
+                }
             }
-            TypedEventResult(EventResult.ALLOW, message)
         }
     }
 

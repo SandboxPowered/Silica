@@ -27,8 +27,8 @@ class BlockStateProtocolMapping private constructor() {
 
     private val logger = getLogger()
 
-    fun load(): Map<ErrorType, Set<String>> {
-        val errorMap = Object2ObjectOpenHashMap<ErrorType, ObjectOpenHashSet<String>>()
+    fun load(): Map<MappingErrorType, Set<String>> {
+        val errorMap = Object2ObjectOpenHashMap<MappingErrorType, ObjectOpenHashSet<String>>()
         measureTimeMillis {
             val string = javaClass.getResourceAsString("/data/minecraft/blocks.json")
             val gson = Gson()
@@ -104,8 +104,8 @@ class BlockStateProtocolMapping private constructor() {
                 }
             }
             rawMap.clear()
-            if (unknown.isNotEmpty()) errorMap[ErrorType.UNKNOWN] = unknown
-            if (missing.isNotEmpty()) errorMap[ErrorType.MISSING] = missing
+            if (unknown.isNotEmpty()) errorMap[MappingErrorType.UNKNOWN] = unknown
+            if (missing.isNotEmpty()) errorMap[MappingErrorType.MISSING] = missing
         }.let { logger.debug("Took ${it}ms to collect vanilla state mappings") }
         return errorMap
     }
@@ -113,8 +113,4 @@ class BlockStateProtocolMapping private constructor() {
     operator fun get(state: BlockState): Int = stateMap.getInt(state)
     operator fun get(id: Int): BlockState = idMap.getOrElse(id) { idMap.get(0) }
 
-    enum class ErrorType {
-        MISSING,
-        UNKNOWN
-    }
 }

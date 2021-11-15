@@ -7,6 +7,7 @@ import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import com.mojang.authlib.GameProfile
+import org.sandboxpowered.silica.api.SilicaAPI
 import org.sandboxpowered.silica.api.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.api.nbt.NBTCompound
 import org.sandboxpowered.silica.api.nbt.nbt
@@ -115,7 +116,8 @@ private class PlayConnectionActor(
                 World.Command.DelayedCommand.Ask(it) { world ->
                     val manager = world.playerManager
                     val player = manager.createPlayer(packetHandler.connection.profile)
-                    val input = player.getComponent<VanillaPlayerInputComponent>() ?: error("Player has no input component")
+                    val input =
+                        player.getComponent<VanillaPlayerInputComponent>() ?: error("Player has no input component")
                     val inventory =
                         player.getComponent<PlayerInventoryComponent>() ?: error("Player has no inventory component")
                     val onlinePlayers = manager.onlinePlayerProfiles
@@ -216,7 +218,7 @@ private class PlayConnectionActor(
         packetHandler.sendPacket(S2CDeclareRecipes())
         packetHandler.sendPacket(S2CDeclareTags())
         packetHandler.sendPacket(S2CEntityStatus(0, 24))
-        packetHandler.sendPacket(S2CDeclareCommands())
+        packetHandler.sendPacket(S2CDeclareCommands(SilicaAPI.commandDispatcher.root))
         packetHandler.sendPacket(S2CUnlockRecipes())
         val currentPos = receive.input.wantedPosition
         packetHandler.sendPacket(

@@ -22,7 +22,7 @@ class VanillaProtocolMapping private constructor() {
         return registryMap[string] ?: error("Unable to find $string registry")
     }
 
-    fun load() {
+    fun load(): Map<String, Map<MappingErrorType, Set<String>>> {
         val string = javaClass.getResourceAsString("/data/minecraft/registries.json")
         val json = gson.fromJson<JsonObject>(string)
         json.entrySet().forEach { (registryKey, registryObject) ->
@@ -39,6 +39,9 @@ class VanillaProtocolMapping private constructor() {
                 registryMap[registryKey] = registryReference
             }
         }
+
+        //TODO: Scan and check for missing or unknown entries from the registries
+        return emptyMap()
     }
 
     class RegistryReference(val registryKey: String, val default: String?, val protocol: Int) {
