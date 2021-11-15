@@ -107,7 +107,7 @@ class DedicatedServer(args: Args) : SilicaServer() {
         private var lastTickTime: Long = -1
         private val world: ActorRef<in World.Command> =
             context.spawn(SilicaWorld.actor(Side.SERVER, server), "world").apply(worldInit)
-        private val vanillaNetwork: ActorRef<in NetworkAdapter.Command> = run {
+        private val networkAdapter: ActorRef<in NetworkAdapter.Command> = run {
             val api = InternalAPI.instance as SilicaInternalAPI
             val adapter = api.networkAdapter ?: error("No network adapter found")
             context.spawn(adapter.createBehavior(server), "network").apply(networkInit)
@@ -117,15 +117,15 @@ class DedicatedServer(args: Args) : SilicaServer() {
 
         init {
             context.watch(world)
-            context.watch(vanillaNetwork)
+            context.watch(networkAdapter)
             // TODO: compare to startTimerAtFixedRate
             timerScheduler.startTimerAtFixedRate("serverTick", Command.Tick(50f), Duration.ofMillis(50))
 
             reaper.tell(Reaper.Command.MarkForReaping(world))
-            reaper.tell(Reaper.Command.MarkForReaping(vanillaNetwork))
+            reaper.tell(Reaper.Command.MarkForReaping(networkAdapter))
 
             // TODO: wait for everything to be ready
-            vanillaNetwork.tell(NetworkAdapter.Command.Start(context.system.ignoreRef()))
+            networkAdapter.tell(NetworkAdapter.Command.Start(context.system.ignoreRef()))
         }
 
         override fun createReceive(): Receive<Command> = newReceiveBuilder()
@@ -140,7 +140,7 @@ class DedicatedServer(args: Args) : SilicaServer() {
                 if (server.properties.maxTickTime != -1 && lastTickOffset >= server.properties.maxTickTime) {
                     logger.error("Single tick took >=${server.properties.maxTickTime}ms! took ${lastTickOffset}ms")
                     context.stop(world)
-                    context.stop(vanillaNetwork)
+                    context.stop(networkAdapter)
                     server.shutdown()
                     return Behaviors.stopped()
                 }
@@ -155,10 +155,10 @@ class DedicatedServer(args: Args) : SilicaServer() {
                 @Suppress("ReplacePutWithAssignment") // boxing
                 currentlyTicking.put(world, System.nanoTime())
                 @Suppress("ReplacePutWithAssignment") // boxing
-                currentlyTicking.put(vanillaNetwork, System.nanoTime())
+                currentlyTicking.put(networkAdapter, System.nanoTime())
                 lastTickTime = System.currentTimeMillis()
                 world.tell(SilicaWorld.Command.Tick(tick.delta, context.messageAdapter { Command.Tock(it.done) }))
-                vanillaNetwork.tell(
+                networkAdapter.tell(
                     NetworkAdapter.Command.Tick(
                         tick.delta,
                         context.messageAdapter { Command.Tock(it.done) })
