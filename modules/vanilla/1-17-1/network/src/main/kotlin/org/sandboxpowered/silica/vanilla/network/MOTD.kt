@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.server
+package org.sandboxpowered.silica.vanilla.network
 
 import com.google.gson.*
 import com.mojang.authlib.GameProfile

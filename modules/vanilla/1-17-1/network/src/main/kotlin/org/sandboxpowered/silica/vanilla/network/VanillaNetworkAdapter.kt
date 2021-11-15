@@ -7,6 +7,7 @@ import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import com.artemis.Entity
+import com.google.gson.GsonBuilder
 import com.mojang.authlib.GameProfile
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelInitializer
@@ -22,6 +23,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.handler.timeout.ReadTimeoutHandler
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.sandboxpowered.silica.api.ecs.component.EntityIdentity
 import org.sandboxpowered.silica.api.ecs.component.PositionComponent
 import org.sandboxpowered.silica.api.ecs.component.RotationComponent
@@ -53,20 +55,23 @@ object VanillaNetworkAdapter : NetworkAdapter {
         VanillaNetworkBehavior(server, it)
     }
 
-    object VanillaCommand {
+    sealed interface VanillaCommand : NetworkAdapter.Command {
         class CreateConnection(
             val profile: GameProfile,
             val handler: PacketHandler,
             val replyTo: ActorRef<in Boolean>
-        ) : NetworkAdapter.Command
+        ) : VanillaCommand
 
-        class Disconnected(val user: GameProfile) : NetworkAdapter.Command
+        class QueryMotd(val replyTo: ActorRef<in String>) : VanillaCommand
+        class UpdateMotd(val mutation: (MOTD) -> Unit) : VanillaCommand
 
-        class SendTo(val target: UUID, val packet: Packet) : NetworkAdapter.Command
-        class SendToAll(val packet: Packet) : NetworkAdapter.Command
-        class SendToAllExcept(val except: UUID, val packet: Packet) : NetworkAdapter.Command
-        class SendToNearby(val position: Position, val distance: Int, val packet: Packet) : NetworkAdapter.Command
-        class SendToWatching(val position: Position, val packet: Packet) : NetworkAdapter.Command
+        class Disconnected(val user: GameProfile) : VanillaCommand
+
+        class SendTo(val target: UUID, val packet: Packet) : VanillaCommand
+        class SendToAll(val packet: Packet) : VanillaCommand
+        class SendToAllExcept(val except: UUID, val packet: Packet) : VanillaCommand
+        class SendToNearby(val position: Position, val distance: Int, val packet: Packet) : VanillaCommand
+        class SendToWatching(val position: Position, val packet: Packet) : VanillaCommand
     }
 }
 
@@ -75,6 +80,18 @@ private class VanillaNetworkBehavior(
     context: ActorContext<NetworkAdapter.Command>
 ) : AbstractBehavior<NetworkAdapter.Command>(context) {
     private val connections: Object2ObjectMap<UUID, ActorRef<PlayConnection>> = Object2ObjectOpenHashMap()
+
+    private lateinit var motd: MOTD
+
+    private lateinit var motdCache: String
+
+    private val gson = GsonBuilder()
+        .registerTypeAdapter(MOTDSerializer())
+        .create()
+
+    private fun updateMotdCache() {
+        motdCache = gson.toJson(motd)
+    }
 
     override fun createReceive(): Receive<NetworkAdapter.Command> = newReceiveBuilder()
         .onMessage(this::handleTick)
@@ -86,8 +103,8 @@ private class VanillaNetworkBehavior(
         .onMessage(this::handleSendToNearby)
         .onMessage(this::handleSendToWatching)
         .onMessage(this::handleSendToAllExcept)
-//        .onMessage(this::handleUpdateMotd)
-//        .onMessage(this::handleQueryMotd)
+        .onMessage(this::handleUpdateMotd)
+        .onMessage(this::handleQueryMotd)
         .build()
 
     private val vanillaWorld = context.spawn(
@@ -166,6 +183,14 @@ private class VanillaNetworkBehavior(
     }
 
     private fun handleStart(start: NetworkAdapter.Command.Start): Behavior<NetworkAdapter.Command> {
+        this.motd = MOTD(
+            Version("1.17.1 - Vanilla", 756),
+            players = Players(server.properties.maxPlayers, 0, mutableListOf()),
+            description = MiniMessage.markdown().parse(server.properties.motd),
+            favicon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACxklEQVR4nO2av24TQRDGv7NP8Z8oSiQcR5cGB11JQ0EKKHgARKQg0SAeAQlegJI+Lc8QCaQg6CidmhpFSkhnJ0hRXES2Yplqw3nji+92Zm4Oeb/uzr692d/N7cy3dhBF0QQLrIp2ANryALQD0JYHoB2AtjwA7QC05QFoB6AtD0A7AG2FRd6sG8dO1z09OmKO5J8CSTPUDkN86XTYx+UEIgLgoNPBvVA+uThAsK8B3TguZPIA8H5lhTwGK4APa2ucwxUi1kc1GI+x3+vdHL/a2OAcXkSiuZqEAfACscd2VaFlkBvI3mBAuh4QqAJPajVsLy3lvu7F+jrqlWxLkgHJAYCcAaa5MSXpcDjE4XB483nWlfrr2dnU8bzs+HV9nSfMVJEzIK27S6vRrqUrCWS/12N5+gARwF4U4fHy8tzv/R6N8Pr09Nb5EMBbRyClAPBpcxMPm83c11Gzg2vyAHEN+HFx4QTAfm0MEHtiHJ3ePBVaBtOUBwjn0wdKAsBWEsjO8TH+jMcAeFPfiASAqxTdpYOtralj7r0Bkhn6ORqxtaRZ1Y1j542VWWJxg0VDANx3l2yRG6FZK/XzVgvNapUybGZRXwnyIng1maARBFPnvp2fTx2X2RazmKG89ZobCCUL2NxgAOCdQ+Nyv17H9uoq6d6lAGCLw/RkVSkAmJ1gSReYplIA0LDF8+6RReIAkto9OUF/Rve402jggcNWuoGhDoD7J6+82UHxCKpmqAy2WGxLjKrvl5f42O/fOt+qVPDG2oWiZEBpAdi663VZCAC2uGwxyQ1qTZ7TfZIAaNhg7nuSq4AJ6GW7jarlCjklBZutDH62VmwOx1dEhon1AZLBc26OkqvAs1oNjxx+DHWRxK4wqx2W6tgkJm4k+i8xChDJSSclCuB/0ML/U9QD0A5AWx6AdgDa8gC0A9CWB6AdgLY8AO0AtPUXrV7219gkQOMAAAAASUVORK5CYII="
+        )
+        updateMotdCache()
+
         val properties = server.properties
         val group: EventLoopGroup
         val kclass: Class<out ServerChannel>
@@ -213,6 +238,7 @@ private class VanillaNetworkBehavior(
         } catch (e: InterruptedException) {
             e.printStackTrace()
             group.shutdownGracefully()
+            return Behaviors.stopped()
         }
 
         return Behaviors.same()
@@ -230,7 +256,7 @@ private class VanillaNetworkBehavior(
 
         connections[createConnection.profile.id] = ref
         createConnection.replyTo.tell(true)
-//        context.self.tell(NetworkAdapter.Command.UpdateMotd { it.addPlayer(createConnection.profile) })
+        context.self.tell(VanillaNetworkAdapter.VanillaCommand.UpdateMotd { it.addPlayer(createConnection.profile) })
 
         return Behaviors.same()
     }
@@ -238,22 +264,22 @@ private class VanillaNetworkBehavior(
     private fun handleDisconnected(disconnected: VanillaNetworkAdapter.VanillaCommand.Disconnected): Behavior<NetworkAdapter.Command> {
         context.log.info("Removing connection for ${disconnected.user.id}")
         connections.remove(disconnected.user.id)
-//        context.self.tell(NetworkAdapter.Command.UpdateMotd { it.removePlayer(disconnected.user) })
+        context.self.tell(VanillaNetworkAdapter.VanillaCommand.UpdateMotd { it.removePlayer(disconnected.user) })
         context.self.tell(VanillaNetworkAdapter.VanillaCommand.SendToAll(S2CPlayerInfo.removePlayer(arrayOf(disconnected.user.id))))
         return Behaviors.same()
     }
 
-//    private fun handleUpdateMotd(updateMotd: NetworkAdapter.Command.UpdateMotd): Behavior<NetworkAdapter.Command> {
-//        updateMotd.mutation(this.motd)
-//        this.updateMotdCache()
-//
-//        return Behaviors.same()
-//    }
+    private fun handleUpdateMotd(updateMotd: VanillaNetworkAdapter.VanillaCommand.UpdateMotd): Behavior<NetworkAdapter.Command> {
+        updateMotd.mutation(this.motd)
+        this.updateMotdCache()
 
-//    private fun handleQueryMotd(queryMotd: VanillaNetwork.QueryMotd): Behavior<VanillaNetwork> {
-//        queryMotd.replyTo.tell(motdCache)
-//        return Behaviors.same()
-//    }
+        return Behaviors.same()
+    }
+
+    private fun handleQueryMotd(queryMotd: VanillaNetworkAdapter.VanillaCommand.QueryMotd): Behavior<NetworkAdapter.Command> {
+        queryMotd.replyTo.tell(motdCache)
+        return Behaviors.same()
+    }
 
     private val entityRegistry by lazy { VanillaProtocolMapping.INSTANCE["minecraft:entity_type"] }
     private val noRotation = RotationComponent().apply {

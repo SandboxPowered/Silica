@@ -108,8 +108,8 @@ class Connection(
         ping = (System.currentTimeMillis() - id).toInt()
     }
 
-    fun getMotd(andRun: (String) -> Unit) = Unit
-//        vanillaNetwork.ask { ref: ActorRef<in String> -> NetworkAdapter.Command.QueryMotd(ref) }
-//            .thenAccept(andRun)
-//            .onException { logger.warn("Couldn't get MOTD", it) }
+    fun getMotd(andRun: (String) -> Unit) =
+        vanillaNetwork.ask { ref: ActorRef<in String> -> VanillaNetworkAdapter.VanillaCommand.QueryMotd(ref) }
+            .thenAccept(andRun)
+            .onException { logger.warn("Couldn't get MOTD", it) }
 }
