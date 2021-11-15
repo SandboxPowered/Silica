@@ -1,5 +1,7 @@
 package org.sandboxpowered.silica.api.event
 
+import java.util.*
+
 class SimpleEvent<T>(private val type: Class<T>, private val dispatchFactory: (List<T>) -> T) : Event<T> {
     @Volatile
     private var _dispatcher: T? = null
@@ -7,7 +9,7 @@ class SimpleEvent<T>(private val type: Class<T>, private val dispatchFactory: (L
     override val dispatcher: T?
         get() = if (handlers.isNotEmpty()) _dispatcher ?: reconstructDispatcher() else null
 
-    private val handlers: MutableList<T> = ArrayList()
+    private val handlers: MutableList<T> = LinkedList()
 
     init {
         reconstructDispatcher()

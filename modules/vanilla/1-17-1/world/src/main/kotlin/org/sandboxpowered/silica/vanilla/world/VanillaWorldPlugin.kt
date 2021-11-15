@@ -16,7 +16,7 @@ import org.sandboxpowered.silica.api.util.getLogger
 class VanillaWorldPlugin : BasePlugin {
     private val logger = getLogger()
     override fun onEnable() {
-        logger.info("Minecraft world adapter v1.17.1 enabled!")
+        logger.info("Minecraft world adapter v1.17.1 enabled")
         SilicaAPI.registerWorldGenerator(VanillaWorldGenerator)
     }
 

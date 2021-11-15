@@ -33,8 +33,7 @@ class Connection(
 
     private val logger = getLogger()
 
-
-    fun digestData(string: String, publicKey: PublicKey, secretKey: SecretKey): ByteArray {
+    private fun digestData(string: String, publicKey: PublicKey, secretKey: SecretKey): ByteArray {
         return try {
             digestData(string.toByteArray(charset("ISO_8859_1")), secretKey.encoded, publicKey.encoded)
         } catch (var4: Exception) {
@@ -48,45 +47,61 @@ class Connection(
         return messageDigest.digest()
     }
 
-    fun handleEncryptionResponse(encryptionResponse: C2SEncryptionResponse) {
-        val privateKey = Encryption.KEY_PAIR.private
-        check(Encryption.VERIFICATION_ARRAY.contentEquals(encryptionResponse.getVerificationToken(privateKey))) { "Protocol error" }
-        secretKey = encryptionResponse.getSecretKey(privateKey)
-        val cipher = encryptionResponse.getCipher(2, secretKey!!)
-        val cipher2 = encryptionResponse.getCipher(1, secretKey!!)
-        packetHandler.setEncryptionKey(cipher, cipher2)
+    fun handleEncryptionResponse(encryptionResponse: C2SEncryptionResponse?) {
+        if (encryptionResponse != null) {
+            val privateKey = Encryption.KEY_PAIR.private
+            check(Encryption.VERIFICATION_ARRAY.contentEquals(encryptionResponse.getVerificationToken(privateKey))) { "Protocol error" }
+            secretKey = encryptionResponse.getSecretKey(privateKey)
+            val cipher = encryptionResponse.getCipher(2, secretKey!!)
+            val cipher2 = encryptionResponse.getCipher(1, secretKey!!)
+            packetHandler.setEncryptionKey(cipher, cipher2)
 
-        val string = BigInteger(digestData("", Encryption.KEY_PAIR.public, secretKey!!)).toString(16)
-
-        profile = if (server.properties.onlineMode) server.sessionService.hasJoinedServer(
-            profile,
-            string,
-            packetHandler.address
-        ) else GameProfile(UUID.nameUUIDFromBytes("OfflinePlayer:$string".toByteArray(UTF_8)), profile.name)
+            val string = BigInteger(digestData("", Encryption.KEY_PAIR.public, secretKey!!)).toString(16)
+            val newProfile = server.sessionService.hasJoinedServer(
+                profile,
+                string,
+                packetHandler.address
+            )
+            if (newProfile == null) disconnect()
+            else {
+                this.profile = newProfile
+            }
+        } else {
+            if (server.properties.onlineMode) disconnect()
+            else {
+                profile = GameProfile(
+                    UUID.nameUUIDFromBytes("OfflinePlayer:${profile.name}".toByteArray(UTF_8)),
+                    profile.name
+                )
+            }
+        }
 
         packetHandler.sendPacket(S2CLoginSuccess(profile.id, profile.name))
         packetHandler.setProtocol(Protocol.PLAY)
 
         vanillaNetwork.ask { ref: ActorRef<in Boolean> ->
-            VanillaNetworkBehavior.VanillaCommand.CreateConnection(
+            VanillaNetworkAdapter.VanillaCommand.CreateConnection(
                 profile,
                 packetHandler,
                 ref
             )
-        }
-            .thenAccept { logger.debug("Created connection: $it") }
+        }.thenAccept { logger.debug("Created connection: $it") }
             .onException { logger.warn("Couldn't create connection", it) }
     }
 
     fun handleLoginStart(username: String) {
         profile = GameProfile(null, username)
-        packetHandler.sendPacket(
+        if (server.properties.onlineMode) packetHandler.sendPacket(
             S2CEncryptionRequest(
                 "",
                 Encryption.KEY_PAIR.public.encoded,
                 Encryption.VERIFICATION_ARRAY
             )
-        )
+        ) else handleEncryptionResponse(null)
+    }
+
+    private fun disconnect() {
+        vanillaNetwork.tell(VanillaNetworkAdapter.VanillaCommand.Disconnected(profile))
     }
 
     fun calculatePing(id: Long) {

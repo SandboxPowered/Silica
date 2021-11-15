@@ -10,10 +10,10 @@ import org.sandboxpowered.silica.api.plugin.Plugin
 import org.sandboxpowered.silica.api.util.extensions.add
 import org.sandboxpowered.silica.api.util.extensions.getComponent
 import org.sandboxpowered.silica.api.util.getLogger
-import org.sandboxpowered.silica.vanilla.network.util.mapping.BlockStateProtocolMapping.ErrorType
-import org.sandboxpowered.silica.vanilla.network.ecs.system.VanillaInputSystem
 import org.sandboxpowered.silica.vanilla.network.ecs.component.VanillaPlayerInputComponent
+import org.sandboxpowered.silica.vanilla.network.ecs.system.VanillaInputSystem
 import org.sandboxpowered.silica.vanilla.network.util.mapping.BlockStateProtocolMapping
+import org.sandboxpowered.silica.vanilla.network.util.mapping.BlockStateProtocolMapping.ErrorType
 import org.sandboxpowered.silica.vanilla.network.util.mapping.VanillaProtocolMapping
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -28,7 +28,7 @@ import java.nio.charset.StandardCharsets
 class VanillaNetworkPlugin : BasePlugin {
     private val logger = getLogger()
     override fun onEnable() {
-        logger.info("Minecraft network adapter v1.17.1 enabled!")
+        logger.info("Minecraft network adapter v1.17.1 enabled")
 
         val stateMappingErrors = BlockStateProtocolMapping.INSTANCE.load()
         VanillaProtocolMapping.INSTANCE.load()

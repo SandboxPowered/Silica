@@ -19,10 +19,10 @@ import org.sandboxpowered.silica.api.util.extensions.component2
 import org.sandboxpowered.silica.api.util.extensions.component3
 import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.api.world.World
-import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
-import org.sandboxpowered.silica.vanilla.network.VanillaNetworkBehavior
+import org.sandboxpowered.silica.vanilla.network.VanillaNetworkAdapter
 import org.sandboxpowered.silica.vanilla.network.ecs.VanillaEntityContext
 import org.sandboxpowered.silica.vanilla.network.ecs.component.VanillaPlayerInputComponent
+import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.S2CUpdateEntityHeadRotation
 import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.S2CUpdateEntityPosition
 import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.S2CUpdateEntityPositionRotation
@@ -102,7 +102,7 @@ class VanillaInputSystem(val server: Server) : IteratingSystem() {
 
         if (yaw != previousYaw) {
             server.network.tell(
-                VanillaNetworkBehavior.VanillaCommand.SendToAllExcept(
+                VanillaNetworkAdapter.VanillaCommand.SendToAllExcept(
                     input.gameProfile.id,
                     S2CUpdateEntityHeadRotation(entityId, yaw)
                 )
@@ -111,7 +111,7 @@ class VanillaInputSystem(val server: Server) : IteratingSystem() {
 
         if (packet != null) {
             server.network.tell(
-                VanillaNetworkBehavior.VanillaCommand.SendToAllExcept(
+                VanillaNetworkAdapter.VanillaCommand.SendToAllExcept(
                     input.gameProfile.id,
                     packet
                 )

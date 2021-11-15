@@ -16,7 +16,7 @@ import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.api.world.World
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PlayContext
-import org.sandboxpowered.silica.vanilla.network.VanillaNetworkBehavior
+import org.sandboxpowered.silica.vanilla.network.VanillaNetworkAdapter
 import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.S2CChatMessage
 
@@ -55,7 +55,7 @@ data class C2SChatMessage(private val message: String) : PacketPlay {
             val result = ServerEvents.CHAT_EVENT.dispatcher?.invoke(profile, Identifier("minecraft", "chat"), message) ?: TypedEventResult(EventResult.DEFAULT, message)
             if (!result.isCancelled) {
                 context.network.tell(
-                    VanillaNetworkBehavior.VanillaCommand.SendToAll(
+                    VanillaNetworkAdapter.VanillaCommand.SendToAll(
                         S2CChatMessage(
                             result.value,
                             0,

@@ -52,9 +52,25 @@ object VanillaNetworkAdapter : NetworkAdapter {
     override fun createBehavior(server: Server): Behavior<NetworkAdapter.Command> = Behaviors.setup {
         VanillaNetworkBehavior(server, it)
     }
+
+    object VanillaCommand {
+        class CreateConnection(
+            val profile: GameProfile,
+            val handler: PacketHandler,
+            val replyTo: ActorRef<in Boolean>
+        ) : NetworkAdapter.Command
+
+        class Disconnected(val user: GameProfile) : NetworkAdapter.Command
+
+        class SendTo(val target: UUID, val packet: Packet) : NetworkAdapter.Command
+        class SendToAll(val packet: Packet) : NetworkAdapter.Command
+        class SendToAllExcept(val except: UUID, val packet: Packet) : NetworkAdapter.Command
+        class SendToNearby(val position: Position, val distance: Int, val packet: Packet) : NetworkAdapter.Command
+        class SendToWatching(val position: Position, val packet: Packet) : NetworkAdapter.Command
+    }
 }
 
-class VanillaNetworkBehavior(
+private class VanillaNetworkBehavior(
     val server: Server,
     context: ActorContext<NetworkAdapter.Command>
 ) : AbstractBehavior<NetworkAdapter.Command>(context) {
@@ -108,13 +124,13 @@ class VanillaNetworkBehavior(
         return Behaviors.same()
     }
 
-    private fun handleSendTo(send: VanillaCommand.SendTo): Behavior<NetworkAdapter.Command> {
+    private fun handleSendTo(send: VanillaNetworkAdapter.VanillaCommand.SendTo): Behavior<NetworkAdapter.Command> {
         connections[send.target]?.tell(PlayConnection.SendPacket(send.packet))
 
         return Behaviors.same()
     }
 
-    private fun handleSendToAll(send: VanillaCommand.SendToAll): Behavior<NetworkAdapter.Command> {
+    private fun handleSendToAll(send: VanillaNetworkAdapter.VanillaCommand.SendToAll): Behavior<NetworkAdapter.Command> {
         connections.values.forEach {
             it.tell(PlayConnection.SendPacket(send.packet))
         }
@@ -122,7 +138,7 @@ class VanillaNetworkBehavior(
         return Behaviors.same()
     }
 
-    private fun handleSendToAllExcept(send: VanillaCommand.SendToAllExcept): Behavior<NetworkAdapter.Command> {
+    private fun handleSendToAllExcept(send: VanillaNetworkAdapter.VanillaCommand.SendToAllExcept): Behavior<NetworkAdapter.Command> {
         connections.forEach { (k, v) ->
             if (k != send.except)
                 v.tell(PlayConnection.SendPacket(send.packet))
@@ -131,7 +147,7 @@ class VanillaNetworkBehavior(
         return Behaviors.same()
     }
 
-    private fun handleSendToNearby(send: VanillaCommand.SendToNearby): Behavior<NetworkAdapter.Command> {
+    private fun handleSendToNearby(send: VanillaNetworkAdapter.VanillaCommand.SendToNearby): Behavior<NetworkAdapter.Command> {
         //TODO only send to connections within distance.
         connections.values.forEach {
             it.tell(PlayConnection.SendPacket(send.packet))
@@ -140,7 +156,7 @@ class VanillaNetworkBehavior(
         return Behaviors.same()
     }
 
-    private fun handleSendToWatching(send: VanillaCommand.SendToWatching): Behavior<NetworkAdapter.Command> {
+    private fun handleSendToWatching(send: VanillaNetworkAdapter.VanillaCommand.SendToWatching): Behavior<NetworkAdapter.Command> {
         //TODO only send to connections with a registered interest in the position.
         connections.values.forEach {
             it.tell(PlayConnection.SendPacket(send.packet))
@@ -202,7 +218,7 @@ class VanillaNetworkBehavior(
         return Behaviors.same()
     }
 
-    private fun handleCreateConnection(createConnection: VanillaCommand.CreateConnection): Behavior<NetworkAdapter.Command> {
+    private fun handleCreateConnection(createConnection: VanillaNetworkAdapter.VanillaCommand.CreateConnection): Behavior<NetworkAdapter.Command> {
         // TODO: store ref & dispose of the actor
         context.log.info("Creating connection for ${createConnection.profile.id}")
 
@@ -219,11 +235,11 @@ class VanillaNetworkBehavior(
         return Behaviors.same()
     }
 
-    private fun handleDisconnected(disconnected: VanillaCommand.Disconnected): Behavior<NetworkAdapter.Command> {
+    private fun handleDisconnected(disconnected: VanillaNetworkAdapter.VanillaCommand.Disconnected): Behavior<NetworkAdapter.Command> {
         context.log.info("Removing connection for ${disconnected.user.id}")
         connections.remove(disconnected.user.id)
 //        context.self.tell(NetworkAdapter.Command.UpdateMotd { it.removePlayer(disconnected.user) })
-        context.self.tell(VanillaCommand.SendToAll(S2CPlayerInfo.removePlayer(arrayOf(disconnected.user.id))))
+        context.self.tell(VanillaNetworkAdapter.VanillaCommand.SendToAll(S2CPlayerInfo.removePlayer(arrayOf(disconnected.user.id))))
         return Behaviors.same()
     }
 
@@ -245,14 +261,14 @@ class VanillaNetworkBehavior(
         pitch = 0f
     }
 
-    fun spawnEntity(e: Entity) {
+    private fun spawnEntity(e: Entity) {
         val (x, y, z) = e.getComponent<PositionComponent>()?.pos ?: return
         val identity = e.getComponent<EntityIdentity>() ?: return
         val rot = e.getComponent() ?: noRotation
         val type = entityRegistry[identity.entityDefinition!!.identifier]
 
         context.self.tell(
-            VanillaCommand.SendToAll(
+            VanillaNetworkAdapter.VanillaCommand.SendToAll(
                 S2CSpawnLivingEntity(
                     e.id, identity.uuid!!, type, x, y, z, rot.yaw, rot.pitch, 0, 0, 0, 0
                 )
@@ -260,32 +276,17 @@ class VanillaNetworkBehavior(
         )
     }
 
-    fun removeEntities(entities: IntArray) {
-        context.self.tell(VanillaCommand.SendToAll(S2CDestroyEntities(entities)))
+    private fun removeEntities(entities: IntArray) {
+        context.self.tell(VanillaNetworkAdapter.VanillaCommand.SendToAll(S2CDestroyEntities(entities)))
     }
 
-    fun changeBlock(pos: Position, old: BlockState, new: BlockState, flag: WorldWriter.Flag) {
+    private fun changeBlock(pos: Position, old: BlockState, new: BlockState, flag: WorldWriter.Flag) {
         context.self.tell(
-            VanillaCommand.SendToWatching(
+            VanillaNetworkAdapter.VanillaCommand.SendToWatching(
                 pos,
                 S2CBlockChange(pos, BlockStateProtocolMapping.INSTANCE[new])
             )
         )
     }
 
-    object VanillaCommand {
-        class CreateConnection(
-            val profile: GameProfile,
-            val handler: PacketHandler,
-            val replyTo: ActorRef<in Boolean>
-        ) : NetworkAdapter.Command
-
-        class Disconnected(val user: GameProfile) : NetworkAdapter.Command
-
-        class SendTo(val target: UUID, val packet: Packet) : NetworkAdapter.Command
-        class SendToAll(val packet: Packet) : NetworkAdapter.Command
-        class SendToAllExcept(val except: UUID, val packet: Packet) : NetworkAdapter.Command
-        class SendToNearby(val position: Position, val distance: Int, val packet: Packet) : NetworkAdapter.Command
-        class SendToWatching(val position: Position, val packet: Packet) : NetworkAdapter.Command
-    }
 }

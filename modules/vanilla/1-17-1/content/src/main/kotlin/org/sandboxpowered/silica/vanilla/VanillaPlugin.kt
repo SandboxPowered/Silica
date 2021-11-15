@@ -10,7 +10,7 @@ class VanillaPlugin : BasePlugin {
     private val logger = getLogger()
 
     override fun onEnable() {
-        logger.info("Minecraft content adapter v1.17.1 enabled!")
+        logger.info("Minecraft content adapter v1.17.1 enabled")
         SilicaInit.init()
         WorldEvents.REPLACE_BLOCKS_EVENT.subscribe { pos, old, new, _ ->
             if (old.block != new.block) logger.info("Replaced block at $pos from ${old.block} to ${new.block}")

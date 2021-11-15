@@ -237,14 +237,14 @@ private class PlayConnectionActor(
             pings[index] = 1
         }
         server.network.tell(
-            VanillaNetworkBehavior.VanillaCommand.SendToAll(
+            VanillaNetworkAdapter.VanillaCommand.SendToAll(
                 S2CPlayerInfo.addPlayer(
                     receive.gameProfiles, gamemodes, pings
                 )
             )
         )
         server.network.tell(
-            VanillaNetworkBehavior.VanillaCommand.SendToAllExcept(
+            VanillaNetworkAdapter.VanillaCommand.SendToAllExcept(
                 receive.input.gameProfile.id,
                 S2CSpawnPlayer(
                     receive.input.playerId,
@@ -263,7 +263,7 @@ private class PlayConnectionActor(
                     val input = system.getEntity(system.getPlayerId(t))?.getComponent<VanillaPlayerInputComponent>()
                         ?: error("Couldn't get input component for player $t")
                     server.network.tell(
-                        VanillaNetworkBehavior.VanillaCommand.SendToAllExcept(
+                        VanillaNetworkAdapter.VanillaCommand.SendToAllExcept(
                             input.gameProfile.id,
                             S2CSpawnPlayer(
                                 input.playerId,
@@ -298,7 +298,7 @@ private class PlayConnectionActor(
     }
 
     private fun handleDisconnected(disconnected: PlayConnection.Disconnected): Behavior<PlayConnection> {
-        server.network.tell(VanillaNetworkBehavior.VanillaCommand.Disconnected(disconnected.profile))
+        server.network.tell(VanillaNetworkAdapter.VanillaCommand.Disconnected(disconnected.profile))
         server.world.tell(World.Command.DelayedCommand.Perform {
             it.playerManager.disconnect(disconnected.profile)
         })
