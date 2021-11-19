@@ -4,6 +4,8 @@ import net.mostlyoriginal.api.utils.pooling.ObjectPool
 import net.mostlyoriginal.api.utils.pooling.Poolable
 import org.sandboxpowered.silica.api.util.extensions.getPool
 import org.sandboxpowered.silica.api.util.extensions.pow
+import org.sandboxpowered.silica.api.util.getLogger
+import org.sandboxpowered.silica.api.world.WorldSection
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 
 /**
@@ -26,14 +28,13 @@ import org.sandboxpowered.silica.api.world.state.block.BlockState
 class BlocTree private constructor(
     x: Int, y: Int, z: Int,
     size: Int
-) : Poolable {
+) : Poolable, WorldSection {
     private var bounds = Bounds().set(x, y, z, size)
     private var nodes = arrayOfNulls<BlocTree>(8)
     private var containers = arrayOfNulls<BlockState>(8)
     private lateinit var default: BlockState
     var treeDepth = 0
         private set
-    private var parent: BlocTree? = null
     private var nonAirBlockStates = 0
 
     /**
@@ -41,16 +42,16 @@ class BlocTree private constructor(
      */
     internal constructor() : this(0, 0, 0, 0)
 
-    private fun init(
+    override val selection: WorldSelection get() = bounds
+
+    internal fun init(
         treeDepth: Int,
         x: Int, y: Int, z: Int,
         size: Int,
-        parent: BlocTree,
         default: BlockState
     ): BlocTree {
         this.treeDepth = treeDepth
         this.bounds.set(x, y, z, size)
-        this.parent = parent
         this.default = default
         this.nonAirBlockStates = if (default.isAir) 0 else size.pow(3)
 
@@ -60,9 +61,9 @@ class BlocTree private constructor(
     private fun indexOf(
         x: Int, y: Int, z: Int
     ): Int {
-        val midX = bounds.x + bounds.size / 2
-        val midY = bounds.y + bounds.size / 2
-        val midZ = bounds.z + bounds.size / 2
+        val midX = bounds.x + bounds.width / 2
+        val midY = bounds.y + bounds.height / 2
+        val midZ = bounds.z + bounds.length / 2
 
         var res = 0
         res = res or when {
@@ -87,9 +88,9 @@ class BlocTree private constructor(
         x: Int, y: Int, z: Int,
         width: Int, height: Int, depth: Int
     ): Int {
-        val midX = bounds.x + bounds.size / 2
-        val midY = bounds.y + bounds.size / 2
-        val midZ = bounds.z + bounds.size / 2
+        val midX = bounds.x + bounds.width / 2
+        val midY = bounds.y + bounds.height / 2
+        val midZ = bounds.z + bounds.length / 2
 
         var res = 0
         res = res or when {
@@ -117,7 +118,7 @@ class BlocTree private constructor(
      * Sets the target position to [state].
      * Throws an [IllegalArgumentException] if the given position is out of bounds.
      */
-    operator fun set(
+    override operator fun set(
         x: Int, y: Int, z: Int,
         state: BlockState
     ) {
@@ -143,7 +144,7 @@ class BlocTree private constructor(
             }
             old
         } else {
-            if (bounds.size > 2) {
+            if (bounds.width > 2) {
                 if ((containers[index] ?: default) != state) {
                     this.split(index)
                     nodes[index]!!.internalSet(x, y, z, state)
@@ -172,56 +173,56 @@ class BlocTree private constructor(
     }
 
     private fun split(index: Int) {
-        val halfSize = bounds.size / 2
+        val halfSize = bounds.length / 2
 
         when (index) {
-            DNW -> nodes[DNW] = otPool.obtain().init(
+            DNW -> nodes[DNW] = pooled(
                 treeDepth + 1,
                 bounds.x, bounds.y, bounds.z,
                 halfSize,
-                this, this.containers[DNW] ?: this.default
+                containers[DNW] ?: default
             )
-            DNE -> nodes[DNE] = otPool.obtain().init(
+            DNE -> nodes[DNE] = pooled(
                 treeDepth + 1,
                 bounds.x + halfSize, bounds.y, bounds.z,
                 halfSize,
-                this, this.containers[DNE] ?: this.default
+                containers[DNE] ?: default
             )
-            DSW -> nodes[DSW] = otPool.obtain().init(
+            DSW -> nodes[DSW] = pooled(
                 treeDepth + 1,
                 bounds.x, bounds.y, bounds.z + halfSize,
                 halfSize,
-                this, this.containers[DSW] ?: this.default
+                containers[DSW] ?: default
             )
-            DSE -> nodes[DSE] = otPool.obtain().init(
+            DSE -> nodes[DSE] = pooled(
                 treeDepth + 1,
                 bounds.x + halfSize, bounds.y, bounds.z + halfSize,
                 halfSize,
-                this, this.containers[DSE] ?: this.default
+                containers[DSE] ?: default
             )
-            UNW -> nodes[UNW] = otPool.obtain().init(
+            UNW -> nodes[UNW] = pooled(
                 treeDepth + 1,
                 bounds.x, bounds.y + halfSize, bounds.z,
                 halfSize,
-                this, this.containers[UNW] ?: this.default
+                containers[UNW] ?: default
             )
-            UNE -> nodes[UNE] = otPool.obtain().init(
+            UNE -> nodes[UNE] = pooled(
                 treeDepth + 1,
                 bounds.x + halfSize, bounds.y + halfSize, bounds.z,
                 halfSize,
-                this, this.containers[UNE] ?: this.default
+                containers[UNE] ?: default
             )
-            USW -> nodes[USW] = otPool.obtain().init(
+            USW -> nodes[USW] = pooled(
                 treeDepth + 1,
                 bounds.x, bounds.y + halfSize, bounds.z + halfSize,
                 halfSize,
-                this, this.containers[USW] ?: this.default
+                containers[USW] ?: default
             )
-            USE -> nodes[USE] = otPool.obtain().init(
+            USE -> nodes[USE] = pooled(
                 treeDepth + 1,
                 bounds.x + halfSize, bounds.y + halfSize, bounds.z + halfSize,
                 halfSize,
-                this, this.containers[USE] ?: this.default
+                containers[USE] ?: default
             )
         }
     }
@@ -229,7 +230,7 @@ class BlocTree private constructor(
     /**
      * Returns the state at given position
      */
-    operator fun get(x: Int, y: Int, z: Int): BlockState =
+    override operator fun get(x: Int, y: Int, z: Int): BlockState =
         if (bounds.contains(x, y, z)) {
             val index = indexOf(x, y, z)
             nodes[index]?.get(x, y, z) ?: containers[index] ?: default
@@ -238,7 +239,7 @@ class BlocTree private constructor(
     /**
      * Returns the smallest [BlocTree] containing the selected region
      */
-    operator fun get(
+    override operator fun get(
         x: Int, y: Int, z: Int,
         width: Int, height: Int, depth: Int
     ): BlocTree {
@@ -247,14 +248,14 @@ class BlocTree private constructor(
         else this.nodes[index]!![x, y, z, width, height, depth]
     }
 
-    fun nonAirInChunk(x: Int, y: Int, z: Int): Int {
+    override fun nonAirInSection(x: Int, y: Int, z: Int): Int {
         require(bounds.contains(x, y, z)) { "Position $x, $y, $z outside of $bounds" }
         require((bounds.x - x) % 16 == 0 && (bounds.z - z) % 16 == 0 && (bounds.z - z) % 16 == 0) { "Position $x, $y, $z is not a chunk origin" }
-        return if (bounds.size <= 16) this.nonAirBlockStates
+        return if (bounds.width <= 16) this.nonAirBlockStates
         else {
             val index = indexOf(x, y, z, 16, 16, 16)
             val n = nodes[index]
-            n?.nonAirInChunk(x, y, z) ?: if ((containers[index] ?: default).isAir) 0 else 4096
+            n?.nonAirInSection(x, y, z) ?: if ((containers[index] ?: default).isAir) 0 else 4096
         }
     }
 
@@ -263,9 +264,13 @@ class BlocTree private constructor(
      */
     override fun reset() {
         containers.fill(null)
-        for (i in nodes.indices) if (nodes[i] != null) {
-            otPool.free(nodes[i])
-            nodes[i] = null
+        for (i in nodes.indices) {
+            val n = nodes[i]
+            if (n != null) {
+                n.reset()
+                otPool.free(n)
+                nodes[i] = null
+            }
         }
     }
 
@@ -275,38 +280,6 @@ class BlocTree private constructor(
     fun dispose() = reset()
 
     override fun toString() = "BlocTree(depth=$treeDepth, $bounds)"
-
-    /**
-     * Simple square AABB
-     */
-    private class Bounds {
-        var x = 0
-            private set
-        var y = 0
-            private set
-        var z = 0
-            private set
-        var size = 0
-            private set
-
-        fun set(
-            x: Int, y: Int, z: Int,
-            size: Int
-        ): Bounds {
-            this.x = x
-            this.y = y
-            this.z = z
-            this.size = size
-            return this
-        }
-
-        fun contains(x: Int, y: Int, z: Int): Boolean =
-            this.x <= x && this.x + this.size > x
-                    && this.y <= y && this.y + this.size > y
-                    && this.z <= z && this.z + this.size > z
-
-        override fun toString() = "Bounds(x=$x, y=$y, z=$z, size=$size)"
-    }
 
     companion object {
         private const val OUTSIDE = -1
@@ -325,7 +298,23 @@ class BlocTree private constructor(
         private const val UNW = U or N or W
         private const val UNE = U or N or E
 
-        private val otPool: ObjectPool<BlocTree> = getPool()
+        private val otPoolDelegate = ThreadLocal.withInitial<ObjectPool<BlocTree>>(::getPool)
+        val otPool: ObjectPool<BlocTree> get() = otPoolDelegate.get()
+
+        private val logger = getLogger<BlocTree>()
+
+        private fun pooled(
+            depth: Int,
+            x: Int, y: Int, z: Int,
+            size: Int, default: BlockState
+        ): BlocTree = otPool.obtain().init(depth, x, y, z, size, default)
+
+        internal fun pooled(
+            x: Int, y: Int, z: Int,
+            size: Int, default: BlockState
+        ): BlocTree = otPool.obtain().init(0, x, y, z, size, default)
+
+        internal fun BlocTree.free() = otPool.free(this)
 
         operator fun invoke(
             x: Int, y: Int, z: Int,

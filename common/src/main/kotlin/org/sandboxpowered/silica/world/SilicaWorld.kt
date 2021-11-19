@@ -15,7 +15,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import net.mostlyoriginal.api.event.common.EventSystem
 import org.joml.Vector2i
 import org.joml.Vector2ic
-import org.sandboxpowered.silica.SilicaInternalAPI
 import org.sandboxpowered.silica.api.block.Block
 import org.sandboxpowered.silica.api.block.BlockEntityProvider
 import org.sandboxpowered.silica.api.block.BlockEvents
@@ -23,7 +22,6 @@ import org.sandboxpowered.silica.api.ecs.component.BlockPositionComponent
 import org.sandboxpowered.silica.api.ecs.component.EntityIdentity
 import org.sandboxpowered.silica.api.entity.EntityDefinition
 import org.sandboxpowered.silica.api.entity.EntityEvents
-import org.sandboxpowered.silica.api.internal.InternalAPI
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.server.PlayerManager
 import org.sandboxpowered.silica.api.util.Direction
@@ -64,7 +62,8 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         WORLD_SIZE,
         Registries.BLOCKS[Identifier("air")].get().defaultState
     )
-    val artemisWorld: ArtemisWorld
+//    private lateinit var data: WorldData
+val artemisWorld: ArtemisWorld
     private var worldTicks = 0L
 
     private val eventSystem = EventSystem()
@@ -115,7 +114,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         return this
     }
 
-    override fun nonAirInChunk(x: Int, y: Int, z: Int): Int = blocks.nonAirInChunk(x, y, z)
+    override fun nonAirInChunk(x: Int, y: Int, z: Int): Int = blocks.nonAirInSection(x, y, z)
 
     override fun getBlockState(x: Int, y: Int, z: Int): BlockState = blocks[x, y, z]
     override fun getBlockState(pos: Position): BlockState = blocks[pos.x, pos.y, pos.z]
@@ -205,9 +204,6 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
             class Tock(val done: ActorRef<World.Command>)
         }
 
-        @Deprecated("Use new event system instead")
-        class RegisterEventSubscriber(val sub: Any) : World.Command
-
         /**
          * To be avoided when possible
          */
@@ -240,24 +236,30 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
     }
 
     private class Actor(private val world: SilicaWorld, context: ActorContext<World.Command>) :
-        AbstractBehavior<World.Command>(context) {
+        AbstractBehavior<World.Command>(context), WithContext {
 
         private val commandQueue: Deque<World.Command.DelayedCommand<*, *>> = LinkedList()
         private val generator: ActorRef<TerrainGenerator> =
             context.spawn(TerrainGenerator.actor(), "terrain_generator")
         private var generated = false
 
-        init {
-            (InternalAPI.instance as SilicaInternalAPI).registerListenerDelegate = {
-                context.self.tell(Command.RegisterEventSubscriber(it))
+        /*init {
+            world.data = WorldData(
+                Bounds().set(
+                    worldGenerator.minWorldWidth, worldGenerator.minWorldHeight, worldGenerator.minWorldWidth,
+                    worldGenerator.width, worldGenerator.height, worldGenerator.width
+                ), Registries.BLOCKS[Identifier("air")].get().defaultState
+            ) { x, y, z, chunk ->
+                generator.ask<TerrainGenerator.Generate, TerrainGenerator.Generate>(Duration.ofSeconds(5)) {
+                    TerrainGenerator.Generate(x, y, z, chunk, it)
+                }.thenApply(TerrainGenerator.Generate::chunk)
             }
-        }
+        }*/
 
         override fun createReceive(): Receive<World.Command> = newReceiveBuilder()
             .onMessage(this::handleTick)
             .onMessage(this::handleAsk)
             .onMessage(this::handleDelayedCommand)
-            .onMessage(this::handleSubscribe)
             .build()
 
         private fun handleTick(tick: Command.Tick): Behavior<World.Command> {
@@ -312,11 +314,6 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
             return Behaviors.same()
         }
 
-        private fun handleSubscribe(message: Command.RegisterEventSubscriber): Behavior<World.Command> {
-            world.registerEventSubscriber(message.sub)
-            return Behaviors.same()
-        }
-
         // TODO: TMP !!
         private fun enqueueGeneration(to: ActorRef<in CommandGenerate>) {
             iterateCube(-10, 0, -10, w = 20, h = 1) { dx, dy, dz ->
@@ -324,10 +321,9 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
                 val z = dz * 16
                 to.tell(CommandGenerate(x, dy, z, world.blocks[x, dy, z, 16, 16, 16], context.system.ignoreRef()))
             }
+//            world.data.load(Bounds().set(-99, 0, -99, 1000, 300, 1000))
         }
     }
-
-
 }
 
 private fun ImmutableIntBag<Any>.forEach(block: (Int) -> Unit) {

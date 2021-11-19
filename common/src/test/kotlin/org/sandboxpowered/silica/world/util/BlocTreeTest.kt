@@ -37,7 +37,7 @@ internal class BlocTreeTest {
             Assertions.assertEquals(state, tree[x, y, z])
         }
 
-        Assertions.assertEquals(count, tree.nonAirInChunk(-8, 0, -8))
+        Assertions.assertEquals(count, tree.nonAirInSection(-8, 0, -8))
     }
 
     private fun `world layers`(): Stream<Sequence<Pair<Position, BlockState>>> = Stream.of(sequence {
@@ -87,7 +87,7 @@ internal class BlocTreeTest {
         val subsection = tree[0, 0, 0, 1, 1, 1]
         Assertions.assertEquals(0, subsection.treeDepth)
         Assertions.assertEquals(tree, subsection)
-        Assertions.assertEquals(16 * 16 * 16, tree.nonAirInChunk(-8, 0, -8))
+        Assertions.assertEquals(16 * 16 * 16, tree.nonAirInSection(-8, 0, -8))
     }
 
     @MethodSource("illegal pos")

@@ -57,8 +57,6 @@ class SilicaInternalAPI : InternalAPI {
         builder(commandDispatcher)
     }
 
-    lateinit var registerListenerDelegate: (Any) -> Unit
-
     override fun registerListener(listener: Any) {
         this.registerListener(listener)
     }

@@ -5,11 +5,12 @@ import com.artemis.utils.Bag
 import com.artemis.utils.IntBag
 import net.mostlyoriginal.api.utils.pooling.ObjectPool
 import net.mostlyoriginal.api.utils.pooling.Poolable
-import net.mostlyoriginal.api.utils.pooling.Pools
+import net.mostlyoriginal.api.utils.pooling.ReflectionPool
 
 inline fun <reified T : Component> World.getMapper(): ComponentMapper<T> = this.getMapper(T::class.java)
 
-inline fun <reified T : Poolable> getPool(): ObjectPool<T> = Pools.getPool(T::class.java)
+inline fun <reified T : Poolable> getPool(): ObjectPool<T> =
+    ReflectionPool(T::class.java) //Pools.getPool(T::class.java)
 
 inline fun <reified T> bag(capacity: Int): Bag<T> = Bag(T::class.java, capacity)
 inline fun <reified T> bag(): Bag<T> = Bag(T::class.java)

@@ -9,4 +9,7 @@ interface WorldGenerator {
     val maxWorldWidth: Int
     val minWorldHeight: Int
     val maxWorldHeight: Int
+
+    val width: Int get() = -minWorldWidth + maxWorldWidth + 1
+    val height: Int get() = -minWorldHeight + maxWorldHeight + 1
 }
