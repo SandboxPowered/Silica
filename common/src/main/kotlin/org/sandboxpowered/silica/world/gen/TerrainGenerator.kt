@@ -10,6 +10,8 @@ import org.sandboxpowered.silica.api.util.extensions.onMessage
 import org.sandboxpowered.silica.content.block.Blocks
 import org.sandboxpowered.silica.world.util.BlocTree
 import org.sandboxpowered.silica.world.util.iterateCube
+import kotlin.math.absoluteValue
+import kotlin.math.floor
 import kotlin.system.measureTimeMillis
 
 sealed class TerrainGenerator {
@@ -47,15 +49,18 @@ interface ChunkFiller {
 }
 
 private class SimpleFiller : ChunkFiller {
+    private fun Int.toChunk() = floor(this / 16f).toInt()
+
     override fun fill(sx: Int, sy: Int, sz: Int, chunk: BlocTree) {
         if (sy > 0) return
 
+        val pair = sx.toChunk().absoluteValue % 2 == sz.toChunk().absoluteValue % 2
         iterateCube(sx, sy, sz, w = 16, h = 7) { x, y, z ->
             chunk[x, y, z] = when (y) {
                 0 -> Blocks.BEDROCK.defaultState
                 1, 2, 3 -> Blocks.STONE.defaultState
                 4, 5 -> Blocks.DIRT.defaultState
-                6 -> Blocks.GRASS_BLOCK.defaultState
+                6 -> (if (pair) Blocks.GRASS_BLOCK else Blocks.DIRT).defaultState
                 else -> Blocks.AIR.defaultState
             }
         }

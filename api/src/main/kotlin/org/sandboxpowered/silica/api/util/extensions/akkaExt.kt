@@ -10,6 +10,7 @@ import akka.actor.typed.javadsl.BehaviorBuilder
 import akka.actor.typed.javadsl.Behaviors
 import akka.japi.pf.FI
 import akka.japi.pf.ReceiveBuilder
+import org.slf4j.Logger
 import java.time.Duration
 import java.util.concurrent.CompletionStage
 import akka.actor.typed.javadsl.ReceiveBuilder as TypedReceiveBuilder
@@ -43,4 +44,6 @@ interface WithContext : WithScheduler {
     fun getContext(): ActorContext<*>
 
     override val scheduler: Scheduler get() = getContext().system.scheduler()
+
+    val logger: Logger get() = getContext().log
 }

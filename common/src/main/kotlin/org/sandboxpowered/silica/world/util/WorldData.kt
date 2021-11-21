@@ -2,12 +2,15 @@ package org.sandboxpowered.silica.world.util
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
+import net.mostlyoriginal.api.utils.pooling.ObjectPool
+import org.sandboxpowered.silica.api.util.extensions.getPool
 import org.sandboxpowered.silica.api.util.extensions.onException
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.api.world.WorldSection
 import org.sandboxpowered.silica.api.world.state.block.BlockState
-import org.sandboxpowered.silica.world.util.BlocTree.Companion.free
 import java.util.concurrent.CompletionStage
+import java.util.concurrent.TimeoutException
+import kotlin.math.floor
 
 fun interface GenerateChunk {
     operator fun invoke(x: Int, y: Int, z: Int, chunk: BlocTree): CompletionStage<BlocTree>
@@ -23,18 +26,27 @@ class WorldData(
     private val placeHolder = BlocTree()
     private val storage: Object2ObjectMap<Key, BlocTree> = Object2ObjectOpenHashMap()
 
+    private fun Int.alignToChunk() = floor(this / 16f).toInt() * 16
+
     // TODO: ideally this would be in an actor for proper concurrency handling
     fun load(selection: WorldSelection) {
         selection.walk(16) { x, y, z ->
             if (this.contains(x, y, z)) {
-                val key = Key(x, y, z)
+                val ax = x.alignToChunk()
+                val ay = y.alignToChunk()
+                val az = z.alignToChunk()
+                val key = Key(ax, ay, az)
                 if (key !in storage) {
                     // Serves both as a "generating chunks" marker and to make sure storage is grown in the correct thread
                     storage[key] = placeHolder
-                    generate(x, y, z, BlocTree.pooled(x, y, z, 16, default)).thenAccept {
-                        logger.info("Received $x $y $z")
+                    generate(ax, ay, az, pooled(ax, ay, az, 16, default)).thenAccept {
                         storage[key] = it
-                    }.onException { logger.warn("Unable to generate chunk at $x, $y, $z"/*, it*/) }
+                    }.onException {
+                        when (it.cause) {
+                            is TimeoutException -> logger.warn("Unable to generate chunk at $ax, $ay, $az in time")
+                            else -> logger.warn("Unable to generate chunk at $ax, $ay, $az", it)
+                        }
+                    }
                 }
             }
         }
@@ -82,6 +94,15 @@ class WorldData(
             return ((coarseX * 73856093u) xor (coarseY * 19349663u) xor (coarseZ * 83492791u)).toInt()
         }
     }
+
+    private fun pooled(
+        x: Int, y: Int, z: Int,
+        size: Int, default: BlockState
+    ): BlocTree = otPool.obtain().init(0, x, y, z, size, default)
+
+    private val otPool: ObjectPool<BlocTree> get() = getPool()
+
+    private fun BlocTree.free() = otPool.free(this)
 
     private companion object {
         private const val TREES_DEPTH = 4

@@ -298,8 +298,7 @@ class BlocTree private constructor(
         private const val UNW = U or N or W
         private const val UNE = U or N or E
 
-        private val otPoolDelegate = ThreadLocal.withInitial<ObjectPool<BlocTree>>(::getPool)
-        val otPool: ObjectPool<BlocTree> get() = otPoolDelegate.get()
+        private val otPool: ObjectPool<BlocTree> get() = getPool()
 
         private val logger = getLogger<BlocTree>()
 
@@ -308,13 +307,6 @@ class BlocTree private constructor(
             x: Int, y: Int, z: Int,
             size: Int, default: BlockState
         ): BlocTree = otPool.obtain().init(depth, x, y, z, size, default)
-
-        internal fun pooled(
-            x: Int, y: Int, z: Int,
-            size: Int, default: BlockState
-        ): BlocTree = otPool.obtain().init(0, x, y, z, size, default)
-
-        internal fun BlocTree.free() = otPool.free(this)
 
         operator fun invoke(
             x: Int, y: Int, z: Int,

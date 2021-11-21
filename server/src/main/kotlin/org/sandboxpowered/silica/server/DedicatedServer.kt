@@ -102,7 +102,6 @@ class DedicatedServer(args: Args) : SilicaServer() {
             }
         }
 
-        private val logger = getLogger()
         private var skippedTicks = 0
         private var lastTickTime: Long = -1
         private val world: ActorRef<in World.Command> =

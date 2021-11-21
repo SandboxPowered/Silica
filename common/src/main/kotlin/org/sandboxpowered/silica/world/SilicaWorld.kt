@@ -29,10 +29,7 @@ import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.Side
 import org.sandboxpowered.silica.api.util.extensions.*
 import org.sandboxpowered.silica.api.util.math.Position
-import org.sandboxpowered.silica.api.world.World
-import org.sandboxpowered.silica.api.world.WorldEvents
-import org.sandboxpowered.silica.api.world.WorldReader
-import org.sandboxpowered.silica.api.world.WorldWriter
+import org.sandboxpowered.silica.api.world.*
 import org.sandboxpowered.silica.api.world.generation.WorldGenerator
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 import org.sandboxpowered.silica.api.world.state.fluid.FluidState
@@ -46,24 +43,17 @@ import org.sandboxpowered.silica.ecs.system.SilicaPlayerManager
 import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.world.gen.TerrainGenerator
-import org.sandboxpowered.silica.world.util.BlocTree
+import org.sandboxpowered.silica.world.util.Bounds
 import org.sandboxpowered.silica.world.util.IntTree
 import org.sandboxpowered.silica.world.util.OcTree
-import org.sandboxpowered.silica.world.util.iterateCube
+import org.sandboxpowered.silica.world.util.WorldData
+import java.time.Duration
 import java.util.*
 import com.artemis.World as ArtemisWorld
-import org.sandboxpowered.silica.world.gen.TerrainGenerator.Generate as CommandGenerate
 
 class SilicaWorld private constructor(val side: Side, val server: SilicaServer) : World {
-    private val blocks: BlocTree = BlocTree(
-        WORLD_MIN,
-        WORLD_MIN,
-        WORLD_MIN,
-        WORLD_SIZE,
-        Registries.BLOCKS[Identifier("air")].get().defaultState
-    )
-//    private lateinit var data: WorldData
-val artemisWorld: ArtemisWorld
+    private lateinit var data: WorldData
+    val artemisWorld: ArtemisWorld
     private var worldTicks = 0L
 
     private val eventSystem = EventSystem()
@@ -114,10 +104,10 @@ val artemisWorld: ArtemisWorld
         return this
     }
 
-    override fun nonAirInChunk(x: Int, y: Int, z: Int): Int = blocks.nonAirInSection(x, y, z)
+    override fun nonAirInChunk(x: Int, y: Int, z: Int): Int = data.nonAirInSection(x, y, z)
 
-    override fun getBlockState(x: Int, y: Int, z: Int): BlockState = blocks[x, y, z]
-    override fun getBlockState(pos: Position): BlockState = blocks[pos.x, pos.y, pos.z]
+    override fun getBlockState(x: Int, y: Int, z: Int): BlockState = data[x, y, z]
+    override fun getBlockState(pos: Position): BlockState = data[pos.x, pos.y, pos.z]
 
     private val blockArchetypesCache: Object2ObjectMap<Block, Archetype> = Object2ObjectOpenHashMap()
     private val entitiesArchetypesCache: Object2ObjectMap<EntityDefinition, Archetype> = Object2ObjectOpenHashMap()
@@ -140,8 +130,8 @@ val artemisWorld: ArtemisWorld
                 builder.build(artemisWorld, "block:${block.identifier}")
             })
         }
-        val oldState = blocks[pos.x, pos.y, pos.z]
-        blocks[pos.x, pos.y, pos.z] = state
+        val oldState = data[pos.x, pos.y, pos.z]
+        data[pos.x, pos.y, pos.z] = state
 
         if (WorldWriter.Flag.NOTIFY_NEIGHBORS in flag) {
             Direction.ALL.forEach { updateNeighbor(pos, state, it.opposite, pos.shift(it)) }
@@ -182,8 +172,6 @@ val artemisWorld: ArtemisWorld
     override fun getFluidState(pos: Position): FluidState {
         TODO("Not yet implemented")
     }
-
-    fun getTerrain(): BlocTree = this.blocks
 
     companion object {
         lateinit var worldGenerator: WorldGenerator
@@ -243,7 +231,7 @@ val artemisWorld: ArtemisWorld
             context.spawn(TerrainGenerator.actor(), "terrain_generator")
         private var generated = false
 
-        /*init {
+        init {
             world.data = WorldData(
                 Bounds().set(
                     worldGenerator.minWorldWidth, worldGenerator.minWorldHeight, worldGenerator.minWorldWidth,
@@ -254,7 +242,7 @@ val artemisWorld: ArtemisWorld
                     TerrainGenerator.Generate(x, y, z, chunk, it)
                 }.thenApply(TerrainGenerator.Generate::chunk)
             }
-        }*/
+        }
 
         override fun createReceive(): Receive<World.Command> = newReceiveBuilder()
             .onMessage(this::handleTick)
@@ -264,7 +252,7 @@ val artemisWorld: ArtemisWorld
 
         private fun handleTick(tick: Command.Tick): Behavior<World.Command> {
             if (!generated) {
-                enqueueGeneration(generator)
+                enqueueGeneration()
                 generated = true
             }
             this.processCommandQueue()
@@ -315,13 +303,8 @@ val artemisWorld: ArtemisWorld
         }
 
         // TODO: TMP !!
-        private fun enqueueGeneration(to: ActorRef<in CommandGenerate>) {
-            iterateCube(-10, 0, -10, w = 20, h = 1) { dx, dy, dz ->
-                val x = dx * 16
-                val z = dz * 16
-                to.tell(CommandGenerate(x, dy, z, world.blocks[x, dy, z, 16, 16, 16], context.system.ignoreRef()))
-            }
-//            world.data.load(Bounds().set(-99, 0, -99, 1000, 300, 1000))
+        private fun enqueueGeneration() {
+            world.data.load(Bounds().set(-99, 0, -99, 200, 200, 200))
         }
     }
 }
