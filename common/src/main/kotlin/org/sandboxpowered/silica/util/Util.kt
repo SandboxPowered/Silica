@@ -14,7 +14,7 @@ import java.nio.file.Paths
 
 object Util {
 
-    const val MINECRAFT_VERSION = "1.17.1"
+    const val MINECRAFT_VERSION = "1.18-rc1"
 
     private const val LAUNCHMETA_JSON = "https://launchermeta.mojang.com/mc/game/version_manifest.json"
 

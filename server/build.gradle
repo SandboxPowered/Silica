@@ -3,9 +3,9 @@ apply plugin: 'org.jetbrains.kotlin.jvm'
 dependencies {
     implementation project(":common")
 
-    implementation project(":modules:vanilla:1-17-1:network")
-    implementation project(":modules:vanilla:1-17-1:content")
-    implementation project(":modules:vanilla:1-17-1:world")
+    implementation project(":modules:vanilla:1-18:network")
+    implementation project(":modules:vanilla:1-18:content")
+    implementation project(":modules:vanilla:1-18:world")
     implementation project(":modules:plugin:test")
 
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.4")

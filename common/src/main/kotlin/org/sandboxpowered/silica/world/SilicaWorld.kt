@@ -99,9 +99,8 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
 
     override fun registerEventSubscriber(sub: Any) = eventSystem.registerEvents(sub)
 
-    override fun subsection(x: Int, y: Int, z: Int, w: Int, h: Int, d: Int): WorldReader {
-        // TODO: Support subsection for worldreader bloctree
-        return this
+    override fun subsection(x: Int, y: Int, z: Int, w: Int, h: Int, d: Int): WorldSectionReader {
+        return data[x, y, z, w, h, d]
     }
 
     override fun nonAirInChunk(x: Int, y: Int, z: Int): Int = data.nonAirInSection(x, y, z)

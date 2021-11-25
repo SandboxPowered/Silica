@@ -29,18 +29,18 @@ subprojects {
 
     java {
         toolchain {
-            languageVersion.set(JavaLanguageVersion.of(16))
+            languageVersion.set(JavaLanguageVersion.of(17))
         }
     }
 
     compileKotlin {
         kotlinOptions {
-            jvmTarget = "16"
+            jvmTarget = "17"
         }
     }
     compileTestKotlin {
         kotlinOptions {
-            jvmTarget = "16"
+            jvmTarget = "17"
         }
     }
 
@@ -81,6 +81,6 @@ if (hasProperty('buildScan')) {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(16))
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
 }

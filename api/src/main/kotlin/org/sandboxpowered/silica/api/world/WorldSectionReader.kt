@@ -19,8 +19,8 @@ interface WorldSectionReader {
      * Returns the smallest [WorldSectionReader] containing the selected region
      */
     operator fun get(
-        x: Int, y: Int, z: Int,
-        width: Int, height: Int, depth: Int
+            x: Int, y: Int, z: Int,
+            width: Int, height: Int, depth: Int
     ): WorldSectionReader
 
     /**
