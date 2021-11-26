@@ -15,18 +15,16 @@ object Registries {
     private val itemDelegates = HashMap<String, RegistryDelegate<Item>>()
 
     @Deprecated("Use BLOCKS instead.", ReplaceWith("BLOCKS.delegate(domain)"))
-    fun blocks(domain: String = "minecraft"): RegistryDelegate<Block> =
-        blockDelegates.computeIfAbsent(domain) { RegistryDelegate(BLOCKS, it) }
+    fun blocks(domain: String = "minecraft"): RegistryDelegate<Block> = BLOCKS.delegate(domain)
 
     @Deprecated("Use BLOCKS instead.", ReplaceWith("BLOCKS.delegate(domain, optional)"))
     fun blocks(domain: String = "minecraft", optional: Boolean): RegistryDelegate.NullableRegistryDelegate<Block> =
-        blockDelegates.computeIfAbsent(domain) { RegistryDelegate(BLOCKS, it) }.optional
+        BLOCKS.delegate(domain, optional)
 
     @Deprecated("Use ITEMS instead.", ReplaceWith("ITEMS.delegate(domain)"))
-    fun items(domain: String = "minecraft"): RegistryDelegate<Item> =
-        itemDelegates.computeIfAbsent(domain) { RegistryDelegate(ITEMS, it) }
+    fun items(domain: String = "minecraft"): RegistryDelegate<Item> = ITEMS.delegate(domain)
 
     @Deprecated("Use ITEMS instead.", ReplaceWith("ITEMS.delegate(domain, optional)"))
     fun items(domain: String = "minecraft", optional: Boolean): RegistryDelegate.NullableRegistryDelegate<Item> =
-        itemDelegates.computeIfAbsent(domain) { RegistryDelegate(ITEMS, it) }.optional
+        ITEMS.delegate(domain, optional)
 }
