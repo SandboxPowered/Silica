@@ -13,7 +13,7 @@ import org.sandboxpowered.silica.api.event.TypedEventResult
 import org.sandboxpowered.silica.api.item.ItemStack
 import org.sandboxpowered.silica.api.plugin.BasePlugin
 import org.sandboxpowered.silica.api.plugin.Plugin
-import org.sandboxpowered.silica.api.registry.Registries
+import org.sandboxpowered.silica.api.registry.Registries.BLOCKS
 import org.sandboxpowered.silica.api.server.ServerEvents
 import org.sandboxpowered.silica.api.util.extensions.create
 import org.sandboxpowered.silica.api.util.extensions.getArgument
@@ -27,8 +27,8 @@ import org.sandboxpowered.silica.api.world.World
 object TestPlugin : BasePlugin {
     private val logger = getLogger()
 
-    private val OAK_FENCE_GATE by Registries.blocks()
-    private val SPRUCE_FENCE_GATE by Registries.blocks()
+    private val OAK_FENCE_GATE by BLOCKS.delegate()
+    private val SPRUCE_FENCE_GATE by BLOCKS.delegate()
 
     override fun onEnable() {
         logger.info("Test Plugin enabled!")

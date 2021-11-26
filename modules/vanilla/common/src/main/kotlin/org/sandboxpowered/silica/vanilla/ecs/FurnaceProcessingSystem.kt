@@ -7,7 +7,7 @@ import com.artemis.systems.IteratingSystem
 import org.sandboxpowered.silica.api.ecs.component.BlockPositionComponent
 import org.sandboxpowered.silica.api.item.ItemStack
 import org.sandboxpowered.silica.api.item.inventory.BaseInventory
-import org.sandboxpowered.silica.api.registry.Registries.items
+import org.sandboxpowered.silica.api.registry.Registries.ITEMS
 
 
 @All(BlockPositionComponent::class, FurnaceLogicComponent::class, ResizableInventoryComponent::class)
@@ -28,8 +28,8 @@ class FurnaceProcessingSystem : IteratingSystem() {
 
     // TODO replace with actual recipes
     val smeltTime = 200
-    private val iron_ore by items()
-    private val iron_ingot by items()
+    private val iron_ore by ITEMS.delegate()
+    private val iron_ingot by ITEMS.delegate()
     private val outputStack: ItemStack by lazy {
         ItemStack(iron_ingot, 1)
     }

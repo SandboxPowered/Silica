@@ -4,8 +4,8 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
-import it.unimi.dsi.fastutil.objects.Object2IntMap
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
+import it.unimi.dsi.fastutil.objects.*
+import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.extensions.fromJson
 import org.sandboxpowered.silica.api.util.extensions.getResourceAsString
@@ -25,23 +25,60 @@ class VanillaProtocolMapping private constructor() {
     fun load(): Map<String, Map<MappingErrorType, Set<String>>> {
         val string = javaClass.getResourceAsString("/data/minecraft/registries.json")
         val json = gson.fromJson<JsonObject>(string)
+        val map: Object2ObjectMap<String, ObjectList<String>> = Object2ObjectOpenHashMap()
         json.entrySet().forEach { (registryKey, registryObject) ->
             if (registryObject is JsonObject) {
                 val default = registryObject.getAsString("default")
                 val registryProtocolId = registryObject.getAsInt("protocol_id")
                 val registryReference = RegistryReference(registryKey, default, registryProtocolId)
                 val entries = registryObject.getAsJsonObject("entries")
+                val list = map.computeIfAbsent(registryKey) {
+                    ObjectArrayList()
+                }
                 entries.keySet().forEach { registryEntryKey ->
                     val entry = entries.getAsJsonObject(registryEntryKey)
                     val protocolId = entry.getAsInt("protocol_id")
                     registryReference[registryEntryKey] = protocolId
+                    list.add(registryEntryKey)
                 }
                 registryMap[registryKey] = registryReference
             }
         }
 
-        //TODO: Scan and check for missing or unknown entries from the registries
-        return emptyMap()
+        map["minecraft:block"]?.apply {
+            removeIf {
+                Registries.BLOCKS[Identifier(it)].isPresent
+            }
+        }
+        map["minecraft:item"]?.apply {
+            removeIf {
+                Registries.ITEMS[Identifier(it)].isPresent
+            }
+        }
+
+        val retMap = HashMap<String, HashMap<MappingErrorType, HashSet<String>>>()
+
+        map.forEach { (t, u) ->
+            val errorMap = HashMap<MappingErrorType, HashSet<String>>()
+
+            u.forEach {
+                val registry = registryMap[t]
+                val entry = registry?.get(Identifier(it))
+                if (entry == null) {
+                    errorMap.computeIfAbsent(MappingErrorType.UNKNOWN) {
+                        HashSet()
+                    }.add(it)
+                } else {
+                    errorMap.computeIfAbsent(MappingErrorType.MISSING) {
+                        HashSet()
+                    }.add(it)
+                }
+            }
+
+            retMap[t] = errorMap
+        }
+
+        return retMap
     }
 
     class RegistryReference(val registryKey: String, val default: String?, val protocol: Int) {

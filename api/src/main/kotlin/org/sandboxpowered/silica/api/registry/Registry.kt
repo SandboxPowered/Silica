@@ -18,6 +18,9 @@ interface Registry<T : RegistryEntry<T>> : Iterable<T> {
 
     val values: Map<Identifier, T>
     val type: Class<T>
+
+    fun delegate(domain: String = "minecraft"): RegistryDelegate<T>
+    fun delegate(domain: String = "minecraft", optional: Boolean): RegistryDelegate.NullableRegistryDelegate<T>
 }
 
 class RegistryDelegate<T : RegistryEntry<T>>(private val registry: Registry<T>, private val domain: String) {

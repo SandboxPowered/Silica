@@ -27,31 +27,51 @@ import java.nio.charset.StandardCharsets
 )
 class VanillaNetworkPlugin : BasePlugin {
     private val logger = getLogger()
+
     override fun onEnable() {
         logger.info("Minecraft network adapter v1.18 enabled")
 
-        val stateMappingErrors = BlockStateProtocolMapping.INSTANCE.load()
-        val protocolErrors = VanillaProtocolMapping.INSTANCE.load()
-        if (stateMappingErrors.isNotEmpty()) {
-            val unknown = stateMappingErrors[MappingErrorType.UNKNOWN]
-            if (unknown != null && unknown.isNotEmpty()) {
-                logger.error("Found ${unknown.size} unknown BlockStates. Exported to unknown.txt")
-                val builder = StringBuilder()
-                unknown.sorted().forEach {
-                    builder.append(it).append("\n")
+        val protocolErrors =
+            VanillaProtocolMapping.INSTANCE.load() + mapOf("minecraft:blockstate" to BlockStateProtocolMapping.INSTANCE.load())
+        if (protocolErrors.isNotEmpty()) {
+            var totalMissing = 0
+            var totalUnknown = 0
+            protocolErrors.forEach { (registry, values) ->
+                val fileSafeName = registry.replace('/', '_').replace(':', '-')
+                val unknown = values[MappingErrorType.UNKNOWN]
+                if (unknown != null && unknown.isNotEmpty()) {
+                    totalUnknown += unknown.size
+                    logger.trace("Found ${unknown.size} unknown elements in ${registry}. Exported to unknown/${fileSafeName}.txt")
+                    val builder = StringBuilder()
+                    unknown.sorted().forEach {
+                        builder.append(it).append("\n")
+                    }
+                    FileUtils.writeStringToFile(
+                        File("unknown/${fileSafeName}.txt"),
+                        builder.toString(),
+                        StandardCharsets.UTF_8
+                    )
                 }
-                FileUtils.writeStringToFile(File("unknown.txt"), builder.toString(), StandardCharsets.UTF_8)
-            }
-            val missing = stateMappingErrors[MappingErrorType.MISSING]
-            if (missing != null && missing.isNotEmpty()) {
-                logger.error("Missing ${missing.size} vanilla BlockStates. Exported to missing.txt")
-                val builder = StringBuilder()
-                missing.sorted().forEach {
-                    builder.append(it).append("\n")
+                val missing = values[MappingErrorType.MISSING]
+                if (missing != null && missing.isNotEmpty()) {
+                    totalMissing += missing.size
+                    logger.trace("Missing ${missing.size} vanilla elements in ${registry}. Exported to missing/${fileSafeName}.txt")
+                    val builder = StringBuilder()
+                    missing.sorted().forEach {
+                        builder.append(it).append("\n")
+                    }
+                    FileUtils.writeStringToFile(
+                        File("missing/${fileSafeName}.txt"),
+                        builder.toString(),
+                        StandardCharsets.UTF_8
+                    )
                 }
-                FileUtils.writeStringToFile(File("missing.txt"), builder.toString(), StandardCharsets.UTF_8)
             }
-            logger.error("State errors occurred, in the future Vanilla Network will be disabled in this situation.")
+            when {
+                totalMissing > 0 && totalUnknown > 0 -> logger.error("$totalMissing Missing and $totalUnknown Unknown errors occurred, in the future Vanilla Network will be disabled in this situation.")
+                totalMissing > 0 -> logger.error("$totalMissing Missing errors occurred, in the future Vanilla Network will be disabled in this situation.")
+                totalUnknown > 0 -> logger.error("$totalUnknown Unknown errors occurred, in the future Vanilla Network will be disabled in this situation.")
+            }
             //TODO: Disable Vanilla Network
         } else {
             logger.info("Accepting vanilla connections")

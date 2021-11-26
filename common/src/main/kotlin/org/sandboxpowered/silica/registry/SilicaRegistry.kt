@@ -2,6 +2,7 @@ package org.sandboxpowered.silica.registry
 
 import com.google.common.collect.ImmutableMap
 import org.sandboxpowered.silica.api.registry.Registry
+import org.sandboxpowered.silica.api.registry.RegistryDelegate
 import org.sandboxpowered.silica.api.registry.RegistryEntry
 import org.sandboxpowered.silica.api.registry.RegistryObject
 import org.sandboxpowered.silica.api.util.Identifier
@@ -46,6 +47,14 @@ class SilicaRegistry<T : RegistryEntry<T>>(private val id: Identifier, override 
     fun clearCache() {
         registryEntries.forEach { (_, entry: SilicaRegistryEntry<T>) -> entry.clearCache() }
     }
+
+    private val delegates = HashMap<String, RegistryDelegate<T>>()
+
+    override fun delegate(domain: String): RegistryDelegate<T> =
+        delegates.computeIfAbsent(domain) { RegistryDelegate(this, it) }
+
+    override fun delegate(domain: String, optional: Boolean): RegistryDelegate.NullableRegistryDelegate<T> =
+        delegate(domain).optional
 
     class SilicaRegistryEntry<T : RegistryEntry<T>>(
         override val registry: SilicaRegistry<T>,
