@@ -11,9 +11,6 @@ object Registries {
     val ITEMS: Registry<Item> = SilicaAPI.getRegistry()
     val ENTITY_DEFINITIONS: Registry<EntityDefinition> = SilicaAPI.getRegistry()
 
-    private val blockDelegates = HashMap<String, RegistryDelegate<Block>>()
-    private val itemDelegates = HashMap<String, RegistryDelegate<Item>>()
-
     @Deprecated("Use BLOCKS instead.", ReplaceWith("BLOCKS.delegate(domain)"))
     fun blocks(domain: String = "minecraft"): RegistryDelegate<Block> = BLOCKS.delegate(domain)
 

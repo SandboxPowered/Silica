@@ -2,8 +2,8 @@ package org.sandboxpowered.silica.api.command.sync
 
 import com.google.gson.JsonObject
 import com.mojang.brigadier.arguments.FloatArgumentType
-import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.api.command.sync.ArgumentTypes.createNumberFlags
+import org.sandboxpowered.silica.api.network.PacketBuffer
 
 class FloatArgumentSerializer : ArgumentTypes.ArgumentSerializer<FloatArgumentType> {
     override fun serializeToNetwork(argumentType: FloatArgumentType, buffer: PacketBuffer) {
