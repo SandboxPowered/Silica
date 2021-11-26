@@ -205,6 +205,7 @@ private class PlayConnectionActor(
                 seed = 0,
                 maxPlayers = 20,
                 viewDistance = 4,
+                simulationDistance = 4,
                 reducedDebug = false,
                 respawnScreen = true,
                 debug = false,
