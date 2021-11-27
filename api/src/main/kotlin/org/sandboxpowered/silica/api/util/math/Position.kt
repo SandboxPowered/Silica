@@ -16,6 +16,8 @@ open class Position(
 
     open fun toImmutable(): Position = this
 
+    fun toChunkPosition(): ChunkPosition = ChunkPosition(x shr 4, y shr 4, z shr 4)
+
     open fun shift(direction: Direction, amount: Int): Position =
         add(amount * direction.offsetX, amount * direction.offsetY, amount * direction.offsetZ)
 

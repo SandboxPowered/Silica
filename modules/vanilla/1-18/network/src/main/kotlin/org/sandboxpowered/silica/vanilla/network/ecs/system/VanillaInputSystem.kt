@@ -9,6 +9,7 @@ import org.sandboxpowered.silica.api.block.Block
 import org.sandboxpowered.silica.api.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.api.ecs.component.PositionComponent
 import org.sandboxpowered.silica.api.ecs.component.RotationComponent
+import org.sandboxpowered.silica.api.entity.EntityEvents
 import org.sandboxpowered.silica.api.entity.InteractionContext
 import org.sandboxpowered.silica.api.item.BlockItem
 import org.sandboxpowered.silica.api.item.ItemStack
@@ -17,6 +18,7 @@ import org.sandboxpowered.silica.api.util.ActionResult
 import org.sandboxpowered.silica.api.util.extensions.component1
 import org.sandboxpowered.silica.api.util.extensions.component2
 import org.sandboxpowered.silica.api.util.extensions.component3
+import org.sandboxpowered.silica.api.util.math.ChunkPosition
 import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.api.world.World
 import org.sandboxpowered.silica.vanilla.network.VanillaNetworkAdapter
@@ -117,6 +119,14 @@ class VanillaInputSystem(val server: Server) : IteratingSystem() {
                 )
             )
         }
+        if (hasMoved) {
+            val previousChunk = ChunkPosition(previousLocation)
+            val currentChunk = ChunkPosition(location)
+            if (previousChunk != currentChunk) {
+                EntityEvents.CHANGE_CHUNK_EVENT.dispatcher?.invoke(entityId, previousChunk, currentChunk)
+            }
+        }
+
         previousLocation.set(location)
 
         this.handleTerrainInteraction(entityId, input, previousLocation, rot)
