@@ -1,6 +1,7 @@
 package org.sandboxpowered.silica.api.registry
 
-import org.jetbrains.annotations.ApiStatus
+import org.jetbrains.annotations.ApiStatus.Experimental
+import org.jetbrains.annotations.ApiStatus.Internal
 import org.sandboxpowered.silica.api.util.Identifier
 import java.util.stream.Stream
 import kotlin.reflect.KProperty
@@ -11,9 +12,10 @@ interface Registry<T : RegistryEntry<T>> : Iterable<T> {
     operator fun get(id: Identifier): RegistryObject<T>
     fun getId(element: T): Identifier
 
-    @ApiStatus.Experimental
+    @Experimental
     fun getUnsafe(id: Identifier): T?
 
+    @Internal
     fun register(value: T): T
 
     val values: Map<Identifier, T>

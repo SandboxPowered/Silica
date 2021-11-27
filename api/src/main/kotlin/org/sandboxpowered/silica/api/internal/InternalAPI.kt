@@ -2,6 +2,7 @@ package org.sandboxpowered.silica.api.internal
 
 import com.artemis.BaseEntitySystem
 import com.mojang.brigadier.CommandDispatcher
+import org.jetbrains.annotations.ApiStatus.Internal
 import org.sandboxpowered.silica.api.command.CommandSource
 import org.sandboxpowered.silica.api.network.NetworkAdapter
 import org.sandboxpowered.silica.api.plugin.PluginManager
@@ -12,7 +13,7 @@ import org.sandboxpowered.silica.api.world.generation.WorldGenerator
 import java.util.*
 import kotlin.reflect.KClass
 
-
+@Internal
 interface InternalAPI {
     val pluginManager: PluginManager
     val commandDispatcher: CommandDispatcher<CommandSource>
