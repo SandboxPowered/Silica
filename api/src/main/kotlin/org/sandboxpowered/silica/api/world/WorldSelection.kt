@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.world.util
+package org.sandboxpowered.silica.api.world
 
 interface WorldSelection {
     val x: Int

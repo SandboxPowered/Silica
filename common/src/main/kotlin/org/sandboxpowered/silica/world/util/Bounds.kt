@@ -1,5 +1,7 @@
 package org.sandboxpowered.silica.world.util
 
+import org.sandboxpowered.silica.api.world.WorldSelection
+
 /**
  * Simple square AABB
  */

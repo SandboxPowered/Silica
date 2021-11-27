@@ -7,7 +7,7 @@ import kotlin.math.min
 
 class ItemStack private constructor(private var _item: Item, private var _count: Int) {
     companion object {
-        private val AIR by Registries.items()
+        private val AIR by Registries.ITEMS.delegate()
         val EMPTY by lazy { ItemStack(AIR, 0) }
 
         operator fun invoke(block: Block): ItemStack = invoke(block.item, 1)

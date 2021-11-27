@@ -7,7 +7,9 @@ import org.sandboxpowered.silica.api.util.extensions.getPool
 import org.sandboxpowered.silica.api.util.extensions.onException
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.api.world.WorldSection
+import org.sandboxpowered.silica.api.world.WorldSelection
 import org.sandboxpowered.silica.api.world.state.block.BlockState
+import org.sandboxpowered.silica.api.world.walk
 import java.util.concurrent.CompletionStage
 import java.util.concurrent.TimeoutException
 import kotlin.math.floor

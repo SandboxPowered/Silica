@@ -1,7 +1,6 @@
 package org.sandboxpowered.silica.api.world
 
 import org.sandboxpowered.silica.api.world.state.block.BlockState
-import org.sandboxpowered.silica.world.util.WorldSelection
 
 /**
  * Represents a read-only section of the world.

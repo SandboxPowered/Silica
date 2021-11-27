@@ -6,6 +6,7 @@ import org.sandboxpowered.silica.api.util.extensions.getPool
 import org.sandboxpowered.silica.api.util.extensions.pow
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.api.world.WorldSection
+import org.sandboxpowered.silica.api.world.WorldSelection
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 
 /**

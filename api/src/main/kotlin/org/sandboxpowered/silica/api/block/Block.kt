@@ -20,7 +20,7 @@ import org.sandboxpowered.silica.api.world.state.block.BlockState
 
 sealed interface Block : RegistryEntry<Block>, Translatable {
     companion object {
-        val AIR by Registries.blocks()
+        val AIR by Registries.BLOCKS.delegate()
     }
 
     val item: Item?
