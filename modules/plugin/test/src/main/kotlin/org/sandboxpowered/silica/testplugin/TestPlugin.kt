@@ -27,8 +27,8 @@ import org.sandboxpowered.silica.api.world.World
 object TestPlugin : BasePlugin {
     private val logger = getLogger()
 
-    private val OAK_FENCE_GATE by BLOCKS.delegate()
-    private val SPRUCE_FENCE_GATE by BLOCKS.delegate()
+    private val OAK_FENCE_GATE by BLOCKS
+    private val SPRUCE_FENCE_GATE by BLOCKS
 
     override fun onEnable() {
         logger.info("Test Plugin enabled!")

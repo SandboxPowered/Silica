@@ -50,11 +50,11 @@ class SilicaRegistry<T : RegistryEntry<T>>(private val id: Identifier, override 
 
     private val delegates = HashMap<String, RegistryDelegate<T>>()
 
-    override fun delegate(domain: String): RegistryDelegate<T> =
+    override fun invoke(domain: String): RegistryDelegate<T> =
         delegates.computeIfAbsent(domain) { RegistryDelegate(this, it) }
 
-    override fun delegate(domain: String, optional: Boolean): RegistryDelegate.NullableRegistryDelegate<T> =
-        delegate(domain).optional
+    override fun invoke(domain: String, optional: Boolean): RegistryDelegate.NullableRegistryDelegate<T> =
+        invoke(domain).optional
 
     class SilicaRegistryEntry<T : RegistryEntry<T>>(
         override val registry: SilicaRegistry<T>,

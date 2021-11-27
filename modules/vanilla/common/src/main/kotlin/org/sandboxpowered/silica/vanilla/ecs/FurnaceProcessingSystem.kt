@@ -28,8 +28,8 @@ class FurnaceProcessingSystem : IteratingSystem() {
 
     // TODO replace with actual recipes
     val smeltTime = 200
-    private val iron_ore by ITEMS.delegate()
-    private val iron_ingot by ITEMS.delegate()
+    private val iron_ore by ITEMS
+    private val iron_ingot by ITEMS
     private val outputStack: ItemStack by lazy {
         ItemStack(iron_ingot, 1)
     }
