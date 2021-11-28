@@ -45,6 +45,7 @@ import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.*
 import org.sandboxpowered.silica.vanilla.network.util.NetworkFlow
 import org.sandboxpowered.silica.vanilla.network.util.mapping.BlockStateProtocolMapping
 import org.sandboxpowered.silica.vanilla.network.util.mapping.VanillaProtocolMapping
+import org.sandboxpowered.silica.world.persistence.BlockStateMapping
 import java.util.*
 
 const val PROTOCOL_VERSION = 56 + 0x40000000
@@ -53,6 +54,8 @@ object VanillaNetworkAdapter : NetworkAdapter {
     override val id: Identifier = Identifier("minecraft", "1.18")
 
     override val protocol: Identifier = Identifier("minecraft", PROTOCOL_VERSION.toString())
+
+    override val mapper: BlockStateMapping get() = BlockStateProtocolMapping.INSTANCE
 
     override fun createBehavior(server: Server): Behavior<NetworkAdapter.Command> = Behaviors.setup {
         VanillaNetworkBehavior(server, it)

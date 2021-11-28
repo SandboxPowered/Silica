@@ -15,6 +15,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import net.mostlyoriginal.api.event.common.EventSystem
 import org.joml.Vector2i
 import org.joml.Vector2ic
+import org.sandboxpowered.silica.SilicaInternalAPI
 import org.sandboxpowered.silica.api.block.Block
 import org.sandboxpowered.silica.api.block.BlockEntityProvider
 import org.sandboxpowered.silica.api.block.BlockEvents
@@ -22,6 +23,7 @@ import org.sandboxpowered.silica.api.ecs.component.BlockPositionComponent
 import org.sandboxpowered.silica.api.ecs.component.EntityIdentity
 import org.sandboxpowered.silica.api.entity.EntityDefinition
 import org.sandboxpowered.silica.api.entity.EntityEvents
+import org.sandboxpowered.silica.api.internal.InternalAPI
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.server.PlayerManager
 import org.sandboxpowered.silica.api.util.Direction
@@ -33,9 +35,7 @@ import org.sandboxpowered.silica.api.world.*
 import org.sandboxpowered.silica.api.world.generation.WorldGenerator
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 import org.sandboxpowered.silica.api.world.state.fluid.FluidState
-import org.sandboxpowered.silica.ecs.events.InitializeArchetypeEvent
 import org.sandboxpowered.silica.ecs.events.ReplaceBlockEvent
-import org.sandboxpowered.silica.ecs.events.SpawnEntityEvent
 import org.sandboxpowered.silica.ecs.system.Entity3dMap
 import org.sandboxpowered.silica.ecs.system.Entity3dMapSystem
 import org.sandboxpowered.silica.ecs.system.EntityRemovalSystem
@@ -43,11 +43,11 @@ import org.sandboxpowered.silica.ecs.system.SilicaPlayerManager
 import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.world.gen.TerrainGenerator
+import org.sandboxpowered.silica.world.persistence.WorldStorage
 import org.sandboxpowered.silica.world.util.Bounds
 import org.sandboxpowered.silica.world.util.IntTree
 import org.sandboxpowered.silica.world.util.OcTree
 import org.sandboxpowered.silica.world.util.WorldData
-import java.time.Duration
 import java.util.*
 import com.artemis.World as ArtemisWorld
 
@@ -147,7 +147,6 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         val id = artemisWorld.create(entitiesArchetypesCache.computeIfAbsent(entity) {
             val archetype = it.createArchetype()
             EntityEvents.INITIALIZE_ARCHETYPE_EVENT.dispatcher?.invoke(it, archetype)
-            eventSystem.dispatch(InitializeArchetypeEvent(it, archetype))
             archetype.add<EntityIdentity>()
                 .build(artemisWorld, "entity:${entity.identifier}")
         })
@@ -157,9 +156,12 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
             identity.uuid = UUID.randomUUID()
             identity.entityDefinition = entity
             editor(it)
-            eventSystem.dispatch(SpawnEntityEvent(it.entity))
             EntityEvents.SPAWN_ENTITY_EVENT.dispatcher?.invoke(it.entity)
         }
+    }
+
+    override fun saveWorld() {
+        data.persist()
     }
 
     private fun updateNeighbor(pos: Position, state: BlockState, opposite: Direction, neighbor: Position) {
@@ -223,11 +225,15 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
     }
 
     private class Actor(private val world: SilicaWorld, context: ActorContext<World.Command>) :
-        AbstractBehavior<World.Command>(context), WithContext {
+        AbstractBehavior<World.Command>(context), WithContext<World.Command> {
 
         private val commandQueue: Deque<World.Command.DelayedCommand<*, *>> = LinkedList()
         private val generator: ActorRef<TerrainGenerator> =
             context.spawn(TerrainGenerator.actor(), "terrain_generator")
+        private val persistence: ActorRef<WorldStorage> = context.spawn(
+            WorldStorage.actor((InternalAPI.instance as SilicaInternalAPI).networkAdapter!!.mapper),
+            "world_persistence"
+        )
         private var generated = false
 
         init {
@@ -235,12 +241,10 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
                 Bounds().set(
                     worldGenerator.minWorldWidth, worldGenerator.minWorldHeight, worldGenerator.minWorldWidth,
                     worldGenerator.width, worldGenerator.height, worldGenerator.width
-                ), Registries.BLOCKS[Identifier("air")].get().defaultState
-            ) { x, y, z, chunk ->
-                generator.ask<TerrainGenerator.Generate, TerrainGenerator.Generate>(Duration.ofSeconds(5)) {
-                    TerrainGenerator.Generate(x, y, z, chunk, it)
-                }.thenApply(TerrainGenerator.Generate::chunk)
-            }
+                ), Registries.BLOCKS[Identifier("air")].get().defaultState,
+                context.system.scheduler(),
+                persistence, generator
+            )
         }
 
         override fun createReceive(): Receive<World.Command> = newReceiveBuilder()

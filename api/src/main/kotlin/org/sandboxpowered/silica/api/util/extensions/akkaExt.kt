@@ -40,10 +40,14 @@ interface WithScheduler {
     ): CompletionStage<U> = AskPattern.ask(this, messageFactory, timeout, scheduler)
 }
 
-interface WithContext : WithScheduler {
-    fun getContext(): ActorContext<*>
+interface WithContext<T> : WithScheduler {
+    fun getContext(): ActorContext<T>
 
     override val scheduler: Scheduler get() = getContext().system.scheduler()
+
+    fun <U> CompletionStage<U>.pipeToSelf(block: (U?, Throwable?) -> T) {
+        getContext().pipeToSelf(this, block)
+    }
 
     val logger: Logger get() = getContext().log
 }

@@ -10,6 +10,7 @@ import org.sandboxpowered.silica.api.util.Side
 import org.sandboxpowered.silica.api.util.extensions.messageAdapter
 import org.sandboxpowered.silica.api.util.extensions.onMessage
 import org.sandboxpowered.silica.api.util.extensions.onSignal
+import org.sandboxpowered.silica.api.util.extensions.set
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.api.world.World
 import org.sandboxpowered.silica.client.SilicaClient.Command
@@ -86,7 +87,7 @@ class SilicaClientGuardian private constructor(
                 skippedTicks = 0
             }
             lastTickTime = System.currentTimeMillis()
-            currentlyTicking.put(world, System.nanoTime())
+            currentlyTicking[world] = System.nanoTime()
             world.tell(SilicaWorld.Command.Tick(tick.delta, context.messageAdapter { Command.Tock(it.done) }))
         }
         return Behaviors.same()

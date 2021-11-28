@@ -14,9 +14,9 @@ import kotlin.math.absoluteValue
 import kotlin.math.floor
 import kotlin.system.measureTimeMillis
 
-sealed class TerrainGenerator {
-    data class Generate(val x: Int, val y: Int, val z: Int, val chunk: BlocTree, val replyTo: ActorRef<Generate>) :
-        TerrainGenerator()
+sealed interface TerrainGenerator {
+    data class Generate(val x: Int, val y: Int, val z: Int, val chunk: BlocTree, val replyTo: ActorRef<in Generate>) :
+        TerrainGenerator
 
     companion object {
         fun actor(): Behavior<TerrainGenerator> = Behaviors.setup {

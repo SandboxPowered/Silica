@@ -78,9 +78,10 @@ class DedicatedServer(args: Args) : SilicaServer() {
         )
     }
 
-    sealed class Command {
-        class Tick(val delta: Float) : Command()
-        class Tock(val done: ActorRef<*>) : Command()
+    sealed interface Command {
+        class Tick(val delta: Float) : Command
+        class Tock(val done: ActorRef<*>) : Command
+        class Failed(val failed: ActorRef<*>, val throwable: Throwable?) : Command
     }
 
     private class DedicatedServerGuardian private constructor(
@@ -89,7 +90,7 @@ class DedicatedServer(args: Args) : SilicaServer() {
         timerScheduler: TimerScheduler<Command>,
         worldInit: (ActorRef<World.Command>) -> Unit,
         networkInit: (ActorRef<NetworkAdapter.Command>) -> Unit
-    ) : AbstractBehavior<Command>(context), WithContext {
+    ) : AbstractBehavior<Command>(context), WithContext<Command> {
         companion object {
             fun create(
                 server: SilicaServer,
@@ -151,17 +152,22 @@ class DedicatedServer(args: Args) : SilicaServer() {
                     skippedTicks = 0
                 }
 
-                @Suppress("ReplacePutWithAssignment") // boxing
-                currentlyTicking.put(world, System.nanoTime())
-                @Suppress("ReplacePutWithAssignment") // boxing
-                currentlyTicking.put(networkAdapter, System.nanoTime())
+                currentlyTicking[world] = System.nanoTime()
+                currentlyTicking[networkAdapter] = System.nanoTime()
                 lastTickTime = System.currentTimeMillis()
-                world.tell(SilicaWorld.Command.Tick(tick.delta, context.messageAdapter { Command.Tock(it.done) }))
-                networkAdapter.tell(
-                    NetworkAdapter.Command.Tick(
-                        tick.delta,
-                        context.messageAdapter { Command.Tock(it.done) })
-                )
+                world.ask { it: ActorRef<SilicaWorld.Command.Tick.Tock> ->
+                    SilicaWorld.Command.Tick(tick.delta, it)
+                }.pipeToSelf { tock, throwable ->
+                    if (tock != null) Command.Tock(tock.done)
+                    else Command.Failed(world, throwable)
+                }
+
+                networkAdapter.ask { it: ActorRef<NetworkAdapter.Command.Tick.Tock> ->
+                    NetworkAdapter.Command.Tick(tick.delta, it)
+                }.pipeToSelf { tock, throwable ->
+                    if (tock != null) Command.Tock(tock.done)
+                    else Command.Failed(world, throwable)
+                }
             }
 
             return Behaviors.same()

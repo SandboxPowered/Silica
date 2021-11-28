@@ -2,6 +2,7 @@ package org.sandboxpowered.silica.api.util.extensions
 
 import it.unimi.dsi.fastutil.ints.*
 import it.unimi.dsi.fastutil.objects.Object2IntFunction
+import it.unimi.dsi.fastutil.objects.Object2LongFunction
 
 operator fun Int2BooleanFunction.set(index: Int, value: Boolean) {
     this.put(index, value)
@@ -36,6 +37,10 @@ operator fun <V> Int2ObjectFunction<V>.set(index: Int, value: V) {
 }
 
 operator fun <V> Object2IntFunction<V>.set(key: V, value: Int) {
+    this.put(key, value)
+}
+
+operator fun <V> Object2LongFunction<V>.set(key: V, value: Long) {
     this.put(key, value)
 }
 

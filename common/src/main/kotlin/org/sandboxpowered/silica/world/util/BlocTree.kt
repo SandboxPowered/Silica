@@ -8,6 +8,10 @@ import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.api.world.WorldSection
 import org.sandboxpowered.silica.api.world.WorldSelection
 import org.sandboxpowered.silica.api.world.state.block.BlockState
+import scala.util.Either
+import scala.util.Left
+import scala.util.Right
+import java.util.*
 
 /**
  * Octree for optimized queries in 3d space, but for BlockStates
@@ -33,7 +37,8 @@ class BlocTree private constructor(
     private var bounds = Bounds().set(x, y, z, size)
     private var nodes = arrayOfNulls<BlocTree>(8)
     private var containers = arrayOfNulls<BlockState>(8)
-    private lateinit var default: BlockState
+    lateinit var default: BlockState
+        private set
     var treeDepth = 0
         private set
     private var nonAirBlockStates = 0
@@ -255,8 +260,10 @@ class BlocTree private constructor(
         return if (bounds.width <= 16) this.nonAirBlockStates
         else {
             val index = indexOf(x, y, z, 16, 16, 16)
-            val n = nodes[index]
-            n?.nonAirInSection(x, y, z) ?: if ((containers[index] ?: default).isAir) 0 else 4096
+            val n = if (index in 0 until 8) nodes[index] else null
+            n?.nonAirInSection(x, y, z) ?: if (
+                (if (index in 0 until 8) containers[index] ?: default else default).isAir
+            ) 0 else 4096
         }
     }
 
@@ -279,6 +286,36 @@ class BlocTree private constructor(
      * Dispose of the [BlocTree] by removing all nodes and stored ids
      */
     fun dispose() = reset()
+
+    internal fun read(from: Queue<Either<BlockState, Unit>>) {
+        var data = from.poll()
+        var index = 0
+        while (data != null && index < 8) {
+            when (data) {
+                is Left -> containers[index++] = data.value()
+                else -> {
+                    split(index)
+                    nodes[index++]?.read(from)
+                }
+            }
+            if (index < 8) data = from.poll()
+        }
+    }
+
+    internal fun serialize(): Sequence<Either<BlockState, Unit>> = sequence {
+        repeat(8) {
+            when (val n = nodes[it]) {
+                null -> {
+                    @Suppress("RemoveExplicitTypeArguments") // it's a lie
+                    yield(Left<BlockState, Unit>(containers[it] ?: default))
+                }
+                else -> {
+                    yield(Right(Unit))
+                    yieldAll(n.serialize())
+                }
+            }
+        }
+    }
 
     override fun toString() = "BlocTree(depth=$treeDepth, $bounds)"
 

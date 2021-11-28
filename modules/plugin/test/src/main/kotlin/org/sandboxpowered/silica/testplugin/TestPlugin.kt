@@ -63,6 +63,12 @@ object TestPlugin : BasePlugin {
                     }
                 }
             }
+            literal("save") {
+                executes {
+                    world.tell(World.Command.DelayedCommand.Perform(World::saveWorld))
+                    1
+                }
+            }
         }
     }
 

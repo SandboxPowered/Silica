@@ -40,7 +40,7 @@ private class VanillaWorldAdapterActor(
     private val world: ActorRef<in World.Command>,
     private val mapper: BlockStateProtocolMapping,
     context: ActorContext<VanillaWorldAdapter>
-) : AbstractBehavior<VanillaWorldAdapter>(context), WithContext {
+) : AbstractBehavior<VanillaWorldAdapter>(context), WithContext<VanillaWorldAdapter> {
 
     init {
         WorldEvents.REPLACE_BLOCKS_EVENT.subscribe(this::onUpdate)

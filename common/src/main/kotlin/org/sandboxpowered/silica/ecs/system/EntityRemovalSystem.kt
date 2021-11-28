@@ -6,7 +6,6 @@ import com.artemis.annotations.Wire
 import net.mostlyoriginal.api.event.common.EventSystem
 import org.sandboxpowered.silica.api.ecs.component.MarkForRemovalComponent
 import org.sandboxpowered.silica.api.entity.EntityEvents
-import org.sandboxpowered.silica.ecs.events.RemoveEntitiesEvent
 
 @All(MarkForRemovalComponent::class)
 class EntityRemovalSystem : BaseEntitySystem() {
@@ -19,7 +18,6 @@ class EntityRemovalSystem : BaseEntitySystem() {
             val ids = entityIds.data.copyOfRange(0, entityIds.size())
 
             ids.forEach(world::delete)
-            eventSystem.dispatch(RemoveEntitiesEvent(ids))
             EntityEvents.REMOVE_ENTITIES_EVENT.dispatcher?.invoke(ids)
         }
     }

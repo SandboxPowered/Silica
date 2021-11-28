@@ -14,9 +14,10 @@ import org.sandboxpowered.silica.api.util.extensions.getResourceAsString
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 import org.sandboxpowered.silica.api.world.state.property.Property
+import org.sandboxpowered.silica.world.persistence.BlockStateMapping
 import kotlin.system.measureTimeMillis
 
-class BlockStateProtocolMapping private constructor() {
+class BlockStateProtocolMapping private constructor() : BlockStateMapping {
     companion object {
         val INSTANCE by lazy { BlockStateProtocolMapping() }
     }
@@ -110,7 +111,7 @@ class BlockStateProtocolMapping private constructor() {
         return errorMap
     }
 
-    operator fun get(state: BlockState): Int = stateMap.getInt(state)
-    operator fun get(id: Int): BlockState = idMap.getOrElse(id) { idMap.get(0) }
+    override operator fun get(state: BlockState): Int = stateMap.getInt(state)
+    override operator fun get(id: Int): BlockState = idMap.getOrElse(id) { idMap.get(0) }
 
 }

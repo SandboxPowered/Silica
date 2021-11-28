@@ -13,6 +13,8 @@ interface WorldWriter {
 
     fun spawnEntity(entity: EntityDefinition, editor: (EntityEdit) -> Unit)
 
+    fun saveWorld()
+
     @JvmInline
     value class Flag(val flag: Int) {
         companion object {

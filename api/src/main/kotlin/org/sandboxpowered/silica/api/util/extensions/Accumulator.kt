@@ -1,5 +1,6 @@
 package org.sandboxpowered.silica.api.util.extensions
 
+import akka.actor.DeadLetterSuppression
 import akka.actor.typed.ActorRef
 import akka.actor.typed.Behavior
 import akka.actor.typed.javadsl.AbstractBehavior
@@ -9,7 +10,7 @@ import akka.actor.typed.javadsl.Receive
 
 sealed class Accumulator<out T : Any> {
     class Start<T : Any>(val replyTo: ActorRef<in Array<out T>>) : Accumulator<T>()
-    class ReceiveValue<out T : Any>(val index: Int, val value: T) : Accumulator<T>()
+    class ReceiveValue<out T : Any>(val index: Int, val value: T) : Accumulator<T>(), DeadLetterSuppression
     class Failure<out T : Any>(val index: Int, val ex: Throwable) : Accumulator<T>()
 
     companion object {
@@ -31,7 +32,7 @@ sealed class Accumulator<out T : Any> {
         private val target: ActorRef<in M>,
         private val ask: (Int, ActorRef<in T>) -> M,
         context: ActorContext<Accumulator<T>>
-    ) : AbstractBehavior<Accumulator<T>>(context), WithContext {
+    ) : AbstractBehavior<Accumulator<T>>(context), WithContext<Accumulator<T>> {
         private var replyTo: ActorRef<in Array<T>>? = null
 
         override fun createReceive(): Receive<Accumulator<T>> = newReceiveBuilder()

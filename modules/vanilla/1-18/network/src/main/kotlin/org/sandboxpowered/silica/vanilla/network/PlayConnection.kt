@@ -26,24 +26,24 @@ import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.world.
 import org.sandboxpowered.silica.vanilla.network.util.mapping.VanillaProtocolMapping
 import java.time.Duration
 
-sealed class PlayConnection {
-    class ReceivePacket(val packet: Packet) : PlayConnection()
-    class SendPacket(val packet: Packet) : PlayConnection()
-    object ReceiveWorld : PlayConnection()
+sealed interface PlayConnection {
+    class ReceivePacket(val packet: Packet) : PlayConnection
+    class SendPacket(val packet: Packet) : PlayConnection
+    object ReceiveWorld : PlayConnection
     class ReceiveChunkSections(val x: Int, val z: Int, val chunkSections: Array<out VanillaChunkSection>) :
-        PlayConnection()
+        PlayConnection
 
     class ReceivePlayer(
         val gameProfiles: Array<GameProfile>,
         val input: VanillaPlayerInputComponent,
         val inventoryComponent: PlayerInventoryComponent
-    ) : PlayConnection()
+    ) : PlayConnection
 
-    class Disconnected(val profile: GameProfile) : PlayConnection()
+    class Disconnected(val profile: GameProfile) : PlayConnection
 
-    class FailedPlayerCreation(val reason: String) : PlayConnection()
+    class FailedPlayerCreation(val reason: String) : PlayConnection
 
-    object Login : PlayConnection()
+    object Login : PlayConnection
 
     companion object {
         fun actor(
@@ -61,7 +61,7 @@ private class PlayConnectionActor(
     private val packetHandler: PacketHandler,
     private val vanillaWorldAdapter: ActorRef<in VanillaWorldAdapter>,
     context: ActorContext<PlayConnection>
-) : AbstractBehavior<PlayConnection>(context), WithContext {
+) : AbstractBehavior<PlayConnection>(context), WithContext<PlayConnection> {
 
     override fun createReceive(): Receive<PlayConnection> = newReceiveBuilder()
         .onMessage(this::handleLoginStart)

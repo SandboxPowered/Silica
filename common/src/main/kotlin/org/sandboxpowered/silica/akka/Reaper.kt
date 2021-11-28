@@ -15,10 +15,12 @@ import org.sandboxpowered.silica.server.SilicaServer
 /**
  * The Reaper is an Actor that is in charge of collecting dead souls.
  * He has been told to watch over a number of Actors, waiting for them die.
- * When he sees the last one give up its ghost he performs some action, and that action will be, in this case, to shut down the [SilicaServer].
+ * When he sees the last one give up its ghost he performs some action, and
+ * that action will be, in this case, to shut down the [SilicaServer].
  * Never fear the reaper.
  */
-class Reaper(val server: SilicaServer, context: ActorContext<Command>) : AbstractBehavior<Reaper.Command>(context) {
+class Reaper private constructor(val server: SilicaServer, context: ActorContext<Command>) :
+    AbstractBehavior<Reaper.Command>(context) {
     private val logger = getLogger()
     override fun createReceive(): Receive<Command> = newReceiveBuilder()
         .onSignal(this::terminated)

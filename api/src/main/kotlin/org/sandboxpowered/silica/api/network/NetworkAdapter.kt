@@ -4,10 +4,12 @@ import akka.actor.typed.ActorRef
 import akka.actor.typed.Behavior
 import org.sandboxpowered.silica.api.server.Server
 import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.silica.world.persistence.BlockStateMapping
 
 interface NetworkAdapter {
     val id: Identifier
     val protocol: Identifier
+    val mapper: BlockStateMapping
 
     fun createBehavior(server: Server): Behavior<Command>
 
