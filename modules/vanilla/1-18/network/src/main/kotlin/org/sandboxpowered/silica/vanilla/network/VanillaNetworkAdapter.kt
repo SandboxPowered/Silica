@@ -31,7 +31,7 @@ import org.sandboxpowered.silica.api.entity.EntityEvents
 import org.sandboxpowered.silica.api.network.NetworkAdapter
 import org.sandboxpowered.silica.api.network.Packet
 import org.sandboxpowered.silica.api.server.Server
-import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.api.util.extensions.*
 import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.api.world.WorldEvents
@@ -45,7 +45,7 @@ import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.*
 import org.sandboxpowered.silica.vanilla.network.util.NetworkFlow
 import org.sandboxpowered.silica.vanilla.network.util.mapping.BlockStateProtocolMapping
 import org.sandboxpowered.silica.vanilla.network.util.mapping.VanillaProtocolMapping
-import org.sandboxpowered.silica.world.persistence.BlockStateMapping
+import org.sandboxpowered.silica.api.world.persistence.BlockStateMapping
 import java.util.*
 
 const val PROTOCOL_VERSION = 56 + 0x40000000

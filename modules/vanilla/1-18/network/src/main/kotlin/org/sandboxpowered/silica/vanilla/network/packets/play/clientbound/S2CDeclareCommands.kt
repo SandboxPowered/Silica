@@ -12,7 +12,7 @@ import org.sandboxpowered.silica.api.command.CommandSource
 import org.sandboxpowered.silica.api.command.sync.ArgumentTypes
 import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.api.network.writeCollection
-import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay

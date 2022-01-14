@@ -11,11 +11,10 @@ import org.sandboxpowered.silica.api.util.extensions.join
 import org.sandboxpowered.silica.api.util.extensions.listFiles
 import org.sandboxpowered.silica.api.util.extensions.notExists
 import org.sandboxpowered.silica.api.util.getLogger
-import org.sandboxpowered.silica.api.world.World
 import org.sandboxpowered.silica.client.input.Keyboard
-import org.sandboxpowered.silica.client.mesh.ChunkPos
 import org.sandboxpowered.silica.client.mesh.MeshRouter
 import org.sandboxpowered.silica.client.model.ModelLoader
+import org.sandboxpowered.silica.plugin.PluginManager
 import org.sandboxpowered.silica.resources.ClasspathResourceLoader
 import org.sandboxpowered.silica.resources.ResourceManager
 import org.sandboxpowered.silica.resources.ResourceType
@@ -23,7 +22,6 @@ import org.sandboxpowered.silica.resources.ZIPResourceLoader
 import org.sandboxpowered.silica.util.FileFilters
 import org.sandboxpowered.silica.util.Util
 import org.sandboxpowered.silica.util.Util.MINECRAFT_VERSION
-import org.sandboxpowered.silica.world.util.iterateCube
 import java.io.File
 import java.util.*
 
@@ -38,6 +36,7 @@ class SilicaClient(private val args: Args) : Runnable {
     lateinit var world: ActorRef<org.sandboxpowered.silica.api.world.World.Command>
     lateinit var meshRouter: ActorRef<MeshRouter.Command>
     lateinit var modelLoader: ModelLoader
+    lateinit var pluginManager: PluginManager
 
     private fun close() {
         window.cleanup()
@@ -119,6 +118,9 @@ class SilicaClient(private val args: Args) : Runnable {
             }
         }.listFiles(FileFilters.ZIP) { assetManager.add(ZIPResourceLoader(it.name, it)) }
 
+        pluginManager = PluginManager()
+        pluginManager.load()
+
         logger.debug("Loaded namespaces: [${assetManager.getNamespaces().join(",")}]")
         window = Window("Sandbox Silica", args.width, args.height, renderer)
         keyboard = Keyboard(window)
@@ -137,10 +139,10 @@ class SilicaClient(private val args: Args) : Runnable {
     }
 
     fun guardianStarted() {
-        iterateCube(-8, 0, -8, 8, 16, 8) { x, y, z ->
-            world.tell(World.Command.Ask(meshRouter) {
-                MeshRouter.Command.RequestConstruction(ChunkPos(x, y, z), it)
-            })
-        }
+//        iterateCube(-8, 0, -8, 8, 16, 8) { x, y, z ->
+//            world.tell(World.Command.Ask(meshRouter) {
+//                MeshRouter.Command.RequestConstruction(ChunkPos(x, y, z), it)
+//            })
+//        }
     }
 }

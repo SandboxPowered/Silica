@@ -15,7 +15,7 @@ import org.sandboxpowered.silica.api.nbt.setTag
 import org.sandboxpowered.silica.api.network.Packet
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.server.Server
-import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.api.util.extensions.*
 import org.sandboxpowered.silica.api.world.World
 import org.sandboxpowered.silica.vanilla.network.ecs.component.VanillaPlayerInputComponent

@@ -3,7 +3,7 @@ package org.sandboxpowered.silica.vanilla.data
 import org.sandboxpowered.silica.api.item.BaseItem
 import org.sandboxpowered.silica.api.item.Item
 import org.sandboxpowered.silica.api.registry.Registries
-import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.utilities.Identifier
 
 object Items {
 

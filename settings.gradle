@@ -9,13 +9,31 @@ rootProject.name = 'Silica'
 include 'client'
 include 'client:opengl'
 include 'client:vulkan'
+
 include 'common'
 include 'server'
 
-include 'api'
+
+// Modules, Eventually move these to separate repositories
 
 include 'modules:vanilla:common'
 include 'modules:vanilla:1-18:content'
 include 'modules:vanilla:1-18:network'
 include 'modules:vanilla:1-18:world'
 include 'modules:plugin:test'
+
+// V2 Client
+
+include 'v2:client'
+
+project(":v2:client").projectDir = file("client/v2")
+
+
+// Things that will eventually be moved to external libs
+
+include 'api'
+include 'quartz'
+include 'utilities'
+project(":api").projectDir = file("external/api")
+project(":quartz").projectDir = file("external/quartz")
+project(":utilities").projectDir = file("external/utilities")

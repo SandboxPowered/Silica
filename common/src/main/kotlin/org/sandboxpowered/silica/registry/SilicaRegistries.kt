@@ -8,7 +8,7 @@ import org.sandboxpowered.silica.api.fluid.Fluid
 import org.sandboxpowered.silica.api.item.Item
 import org.sandboxpowered.silica.api.registry.RegistryDelegate
 import org.sandboxpowered.silica.api.server.Server
-import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.utilities.Identifier
 
 object SilicaRegistries {
     val BLOCK_REGISTRY = SilicaRegistry(Identifier("minecraft", "block"), Block::class.java).apply {

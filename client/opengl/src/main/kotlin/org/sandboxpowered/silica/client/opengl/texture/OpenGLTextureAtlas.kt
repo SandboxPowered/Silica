@@ -4,7 +4,7 @@ import org.joml.Vector2f
 import org.joml.Vector2fc
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL30
-import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.client.texture.TextureAtlas
 import org.sandboxpowered.silica.client.texture.TextureAtlas.Sprite
 import org.sandboxpowered.silica.client.texture.TextureStitcher

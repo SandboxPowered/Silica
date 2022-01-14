@@ -50,10 +50,7 @@ object Util {
 
     private fun findMinecraft(version: String): File? = when {
         SystemUtils.IS_OS_WINDOWS || SystemUtils.IS_OS_LINUX -> {
-            val homeDir = when {
-                SystemUtils.IS_OS_LINUX -> System.getenv("HOME")
-                else -> System.getenv("APPDATA")
-            }
+            val homeDir = System.getenv(if (SystemUtils.IS_OS_LINUX) "HOME" else "APPDATA")
             val asPath = Paths.get(homeDir, ".minecraft", "versions", version, "$version.jar")
             if (Files.exists(asPath)) asPath.toFile() else null
         }

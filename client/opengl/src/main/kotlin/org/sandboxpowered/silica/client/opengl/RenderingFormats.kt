@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.client.opengl
 
-import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.client.opengl.RenderingFormat.Attribute
 
 object RenderingFormats {

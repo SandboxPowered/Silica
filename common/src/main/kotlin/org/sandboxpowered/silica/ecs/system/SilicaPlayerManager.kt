@@ -15,7 +15,7 @@ import org.sandboxpowered.silica.api.entity.BaseEntityDefinition
 import org.sandboxpowered.silica.api.entity.EntityDefinition
 import org.sandboxpowered.silica.api.entity.EntityEvents
 import org.sandboxpowered.silica.api.server.PlayerManager
-import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.api.util.extensions.add
 import org.sandboxpowered.silica.api.util.extensions.set
 import java.util.*

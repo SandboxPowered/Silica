@@ -4,7 +4,7 @@ import com.google.common.collect.Lists
 import com.google.gson.*
 import org.joml.Vector3f
 import org.sandboxpowered.silica.api.util.Direction
-import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.api.util.extensions.*
 import org.sandboxpowered.silica.client.texture.TextureAtlas
 import org.sandboxpowered.silica.resources.ResourceManager

@@ -14,7 +14,7 @@ import org.sandboxpowered.silica.api.util.extensions.getResourceAsString
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 import org.sandboxpowered.silica.api.world.state.property.Property
-import org.sandboxpowered.silica.world.persistence.BlockStateMapping
+import org.sandboxpowered.silica.api.world.persistence.BlockStateMapping
 import kotlin.system.measureTimeMillis
 
 class BlockStateProtocolMapping private constructor() : BlockStateMapping {

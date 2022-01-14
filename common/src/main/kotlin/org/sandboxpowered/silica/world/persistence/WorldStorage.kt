@@ -12,6 +12,7 @@ import akka.util.ByteStringBuilder
 import org.sandboxpowered.silica.api.util.extensions.WithContext
 import org.sandboxpowered.silica.api.util.extensions.onException
 import org.sandboxpowered.silica.api.util.extensions.onMessage
+import org.sandboxpowered.silica.api.world.persistence.BlockStateMapping
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 import org.sandboxpowered.silica.world.util.BlocTree
 import scala.util.Either

@@ -90,6 +90,11 @@ class VanillaNetworkPlugin : BasePlugin {
                 component.wantedPosition.set(position.pos)
             }
         }
+        EntityEvents.CHANGE_CHUNK_EVENT.subscribe { ent, old, new ->
+            if (old.xz == new.xz) return@subscribe
+            //TODO: Sync new chunks
+            logger.info("Moved to $new")
+        }
         SilicaAPI.registerSystem(::VanillaInputSystem)
         SilicaAPI.registerNetworkAdapter(VanillaNetworkAdapter)
     }

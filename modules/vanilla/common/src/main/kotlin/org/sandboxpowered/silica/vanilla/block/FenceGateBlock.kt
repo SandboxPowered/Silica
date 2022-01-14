@@ -8,7 +8,7 @@ import org.sandboxpowered.silica.api.entity.InteractionContext
 import org.sandboxpowered.silica.api.util.ActionResult
 import org.sandboxpowered.silica.api.util.Direction
 import org.sandboxpowered.silica.api.util.Hand
-import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.api.world.World
 import org.sandboxpowered.silica.api.world.WorldReader

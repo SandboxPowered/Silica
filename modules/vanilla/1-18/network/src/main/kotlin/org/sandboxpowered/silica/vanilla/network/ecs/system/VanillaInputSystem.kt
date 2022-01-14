@@ -72,17 +72,16 @@ class VanillaInputSystem(val server: Server) : IteratingSystem() {
         dy *= 128
         dz *= 128
 
-        val teleport =
-            dx > Short.MAX_VALUE || dy > Short.MAX_VALUE || dz > Short.MAX_VALUE || dx < Short.MIN_VALUE || dy < Short.MIN_VALUE || dz < Short.MIN_VALUE
+        val isTeleport = areValid(dx, dy, dz)
 
-        if (hasMoved && teleport) {
-
+        if (hasMoved && isTeleport) {
+            //TODO: Send teleport packet
         }
 
         var packet: PacketPlay? = null
 
         if (hasRotated) {
-            packet = if (hasMoved && !teleport) {
+            packet = if (hasMoved && !isTeleport) {
                 S2CUpdateEntityPositionRotation(
                     entityId,
                     dx.toInt().toShort(), dy.toInt().toShort(), dz.toInt().toShort(), yaw, pitch, false
@@ -92,7 +91,7 @@ class VanillaInputSystem(val server: Server) : IteratingSystem() {
             }
             rot.yaw = yaw
             rot.pitch = pitch
-        } else if (hasMoved) {
+        } else if (hasMoved && !isTeleport) {
             packet = S2CUpdateEntityPosition(
                 entityId,
                 dx.toInt().toShort(),
@@ -132,6 +131,8 @@ class VanillaInputSystem(val server: Server) : IteratingSystem() {
         this.handleTerrainInteraction(entityId, input, previousLocation, rot)
     }
 
+    private fun areValid(vararg values: Double): Boolean = values.none { it < Short.MIN_VALUE || it > Short.MAX_VALUE }
+
     private fun handleTerrainInteraction(
         entityId: Int,
         input: VanillaPlayerInputComponent,
@@ -148,12 +149,8 @@ class VanillaInputSystem(val server: Server) : IteratingSystem() {
                 val newLoc = it.location.shift(it.face)
                 if (heldItem.isNotEmpty) {
                     val item = heldItem.item
-                    if (item is BlockItem) {
-                        terrain.setBlockState(
-                            newLoc,
-                            item.block.getStateForPlacement(terrain, newLoc, it, ctx)
-                        )
-                    }
+                    if (item is BlockItem)
+                        terrain.setBlockState(newLoc, item.block.getStateForPlacement(terrain, newLoc, it, ctx))
                 }
             }
         }

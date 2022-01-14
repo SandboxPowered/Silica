@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.client.texture
 
-import org.sandboxpowered.silica.api.util.extensions.toPowerOfTwo
+import org.sandboxpowered.utilities.extensions.toPowerOfTwo
 import org.sandboxpowered.silica.api.util.getLogger
 import kotlin.math.max
 

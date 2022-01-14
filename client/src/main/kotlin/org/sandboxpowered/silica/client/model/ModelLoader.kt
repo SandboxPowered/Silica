@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.client.model
 
-import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 import org.sandboxpowered.silica.client.SilicaClient
 import org.sandboxpowered.silica.client.texture.TextureAtlas

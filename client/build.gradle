@@ -30,6 +30,11 @@ subprojects {
 dependencies {
     api project(":common")
 
+    implementation project(":modules:vanilla:1-18:network")
+    implementation project(":modules:vanilla:1-18:content")
+    implementation project(":modules:vanilla:1-18:world")
+    implementation project(":modules:plugin:test")
+
     api platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
 
     api 'org.l33tlabs.twl:pngdecoder:1.0'
