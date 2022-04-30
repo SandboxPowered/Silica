@@ -1,0 +1,9 @@
+[versions]
+junit = "5.8.2"
+mockk = "1.12.3"
+
+[libraries]
+jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
+jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }

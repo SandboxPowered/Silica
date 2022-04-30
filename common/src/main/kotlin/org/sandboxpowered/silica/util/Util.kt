@@ -1,9 +1,12 @@
 package org.sandboxpowered.silica.util
 
 import com.google.gson.JsonObject
-import io.ktor.client.*
-import io.ktor.client.features.json.*
-import io.ktor.client.request.*
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.get
+import io.ktor.http.ContentType
+import io.ktor.serialization.gson.GsonConverter
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.SystemUtils
 import org.sandboxpowered.silica.api.util.Side
@@ -19,8 +22,8 @@ object Util {
     private const val LAUNCHMETA_JSON = "https://launchermeta.mojang.com/mc/game/version_manifest.json"
 
     private val ktorClient = HttpClient {
-        install(JsonFeature) {
-            serializer = GsonSerializer()
+        install(ContentNegotiation) {
+            register(ContentType.Application.Json, GsonConverter())
         }
     }
 
@@ -32,13 +35,13 @@ object Util {
         }
         if (!file.exists()) {
             runBlocking {
-                val response: JsonObject = ktorClient.get(LAUNCHMETA_JSON)
+                val response: JsonObject = ktorClient.get(LAUNCHMETA_JSON).body()
                 val versions = response.getAsJsonArray("versions")
                 val v = versions.asSequence().map { it.asJsonObject }.firstOrNull {
                     it.getAsJsonPrimitive("id").asString == version
                 }
                 if (v != null) {
-                    val res: JsonObject = ktorClient.get(v.get("url").asString)
+                    val res: JsonObject = ktorClient.get(v.get("url").asString).body()
                     val download = res.getAsJsonObject("downloads").getAsJsonObject(side.str)
 
                     ktorClient.downloadFile(file, download.get("url").asString)

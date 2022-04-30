@@ -1,4 +1,0 @@
-dependencies {
-    api "org.lwjgl:lwjgl-opengl"
-    runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
-}

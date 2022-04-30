@@ -27,7 +27,6 @@ import org.sandboxpowered.silica.api.internal.InternalAPI
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.server.PlayerManager
 import org.sandboxpowered.silica.api.util.Direction
-import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.api.util.Side
 import org.sandboxpowered.silica.api.util.extensions.*
 import org.sandboxpowered.silica.api.util.math.Position
@@ -48,7 +47,9 @@ import org.sandboxpowered.silica.world.util.Bounds
 import org.sandboxpowered.silica.world.util.IntTree
 import org.sandboxpowered.silica.world.util.OcTree
 import org.sandboxpowered.silica.world.util.WorldData
+import org.sandboxpowered.utilities.Identifier
 import java.util.*
+import java.util.function.Function
 import com.artemis.World as ArtemisWorld
 
 class SilicaWorld private constructor(val side: Side, val server: SilicaServer) : World {
@@ -122,12 +123,12 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         }
         val block = state.block
         if (block is BlockEntityProvider) {
-            artemisWorld.create(blockArchetypesCache.computeIfAbsent(block) {
+            artemisWorld.create(blockArchetypesCache.computeIfAbsent(block, Function {
                 val builder = block.createArchetype()
                 builder.add<BlockPositionComponent>()
                 BlockEvents.INITIALIZE_ARCHETYPE_EVENT.dispatcher?.invoke(block, builder)
                 builder.build(artemisWorld, "block:${block.identifier}")
-            })
+            }))
         }
         val oldState = data[pos.x, pos.y, pos.z]
         data[pos.x, pos.y, pos.z] = state
@@ -144,12 +145,12 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
     }
 
     override fun spawnEntity(entity: EntityDefinition, editor: (EntityEdit) -> Unit) {
-        val id = artemisWorld.create(entitiesArchetypesCache.computeIfAbsent(entity) {
+        val id = artemisWorld.create(entitiesArchetypesCache.computeIfAbsent(entity, Function {
             val archetype = it.createArchetype()
             EntityEvents.INITIALIZE_ARCHETYPE_EVENT.dispatcher?.invoke(it, archetype)
             archetype.add<EntityIdentity>()
                 .build(artemisWorld, "entity:${entity.identifier}")
-        })
+        }))
 
         artemisWorld.edit(id).also {
             val identity = it.create<EntityIdentity>()

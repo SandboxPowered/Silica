@@ -12,9 +12,10 @@ import org.sandboxpowered.silica.api.util.extensions.fromJson
 import org.sandboxpowered.silica.api.util.extensions.getNullable
 import org.sandboxpowered.silica.api.util.extensions.getResourceAsString
 import org.sandboxpowered.silica.api.util.getLogger
+import org.sandboxpowered.silica.api.world.persistence.BlockStateMapping
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 import org.sandboxpowered.silica.api.world.state.property.Property
-import org.sandboxpowered.silica.api.world.persistence.BlockStateMapping
+import java.util.function.Function
 import kotlin.system.measureTimeMillis
 
 class BlockStateProtocolMapping private constructor() : BlockStateMapping {
@@ -37,9 +38,9 @@ class BlockStateProtocolMapping private constructor() : BlockStateMapping {
             json.keySet().forEach { key ->
                 val obj = json[key].asJsonObject
                 val statesArray = obj.getAsJsonArray("states")
-                val m = rawMap.computeIfAbsent(key) {
+                val m = rawMap.computeIfAbsent(key, Function {
                     Object2IntOpenHashMap<String>().apply { defaultReturnValue(-1) }
-                }
+                })
                 statesArray.map { it.asJsonObject }.forEach {
                     val id = it.get("id").asInt
                     val properties = it.getNullable("properties")?.asJsonObject
