@@ -9,7 +9,7 @@ dependencies {
     api(project(":utilities"))
 
     Lwjgl {
-        version = "3.3.1"
+        version = frontendLibs.versions.lwjgl.asProvider().get()
         implementation(core, glfw, nfd, openal, opengl, stb, vulkan, shaderc)
     }
 
