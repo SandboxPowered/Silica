@@ -5,6 +5,7 @@ import com.artemis.utils.IntBag
 import net.mostlyoriginal.api.utils.QuadTree
 import net.mostlyoriginal.api.utils.pooling.ObjectPool
 import net.mostlyoriginal.api.utils.pooling.Poolable
+import org.joml.Vector3f
 import org.sandboxpowered.silica.api.util.extensions.bag
 import org.sandboxpowered.silica.api.util.extensions.getPool
 import org.sandboxpowered.silica.api.util.extensions.plusAssign
@@ -450,6 +451,11 @@ class OcTree @JvmOverloads constructor(
         if (c.parent != null) c.parent!!.containers.remove(c)
         idToContainer[id] = null
         cPool.free(c)
+    }
+
+    fun getPos(id: Int): Vector3f? {
+        val c = idToContainer[id] ?: return null
+        return Vector3f(c.x, c.y, c.z)
     }
 
     /**

@@ -24,9 +24,11 @@ import io.netty.handler.timeout.ReadTimeoutHandler
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import net.kyori.adventure.text.minimessage.MiniMessage
+import org.joml.Vector3d
 import org.sandboxpowered.silica.api.ecs.component.EntityIdentity
 import org.sandboxpowered.silica.api.ecs.component.PositionComponent
 import org.sandboxpowered.silica.api.ecs.component.RotationComponent
+import org.sandboxpowered.silica.api.ecs.component.VelocityComponent
 import org.sandboxpowered.silica.api.entity.EntityEvents
 import org.sandboxpowered.silica.api.network.NetworkAdapter
 import org.sandboxpowered.silica.api.network.Packet
@@ -120,6 +122,8 @@ private class VanillaNetworkBehavior(
 
     init {
         EntityEvents.SPAWN_ENTITY_EVENT.subscribe(this::spawnEntity)
+        EntityEvents.ENTITY_POSITION_EVENT.subscribe(this::updateEntityPosition)
+        EntityEvents.ENTITY_VELOCITY_EVENT.subscribe(this::updateEntityVelocity)
         EntityEvents.REMOVE_ENTITIES_EVENT.subscribe(this::removeEntities)
         WorldEvents.REPLACE_BLOCKS_EVENT.subscribe(this::changeBlock)
     }
@@ -294,15 +298,54 @@ private class VanillaNetworkBehavior(
     }
 
     private fun spawnEntity(e: Entity) {
-        val (x, y, z) = e.getComponent<PositionComponent>()?.pos ?: return
         val identity = e.getComponent<EntityIdentity>() ?: return
+        val (x, y, z) = e.getComponent<PositionComponent>()?.pos ?: return
+        val (vx, vy, vz) = e.getComponent<VelocityComponent>()?.velocity ?: Vector3d(0.0)
         val rot = e.getComponent() ?: noRotation
         val type = entityRegistry[identity.entityDefinition!!.identifier]
 
         context.self.tell(
             VanillaNetworkAdapter.VanillaCommand.SendToAll(
                 S2CSpawnLivingEntity(
-                    e.id, identity.uuid!!, type, x, y, z, rot.yaw, rot.pitch, 0, 0, 0, 0
+                    e.id,
+                    identity.uuid!!,
+                    type,
+                    x, y, z,
+                    rot.yaw,
+                    rot.pitch,
+                    0,
+                    (vx * 8000).toInt().toShort(),
+                    (vy * 8000).toInt().toShort(),
+                    (vz * 8000).toInt().toShort(),
+                )
+            )
+        )
+    }
+
+    private fun updateEntityPosition(id: Int, delta: Vector3d) {
+        val (dx, dy, dz) = delta
+        context.self.tell(
+            VanillaNetworkAdapter.VanillaCommand.SendToAll(
+                S2CUpdateEntityPosition(
+                    id,
+                    (dx * 4096).toInt().toShort(),
+                    (dy * 4096).toInt().toShort(),
+                    (dz * 4096).toInt().toShort(),
+                    false // TODO
+                )
+            )
+        )
+    }
+
+    private fun updateEntityVelocity(id: Int, velo: Vector3d) {
+        val (vx, vy, vz) = velo
+        context.self.tell(
+            VanillaNetworkAdapter.VanillaCommand.SendToAll(
+                S2CUpdateEntityVelocity(
+                    id,
+                    (vx * 8000).toInt().toShort(),
+                    (vy * 8000).toInt().toShort(),
+                    (vz * 8000).toInt().toShort(),
                 )
             )
         )

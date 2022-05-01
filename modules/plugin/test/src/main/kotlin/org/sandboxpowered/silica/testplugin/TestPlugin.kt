@@ -1,11 +1,14 @@
 package org.sandboxpowered.silica.testplugin
 
+import com.mojang.brigadier.arguments.IntegerArgumentType
 import net.kyori.adventure.text.Component
+import org.joml.Vector3d
 import org.sandboxpowered.silica.api.SilicaAPI
 import org.sandboxpowered.silica.api.command.sync.ArgumentTypes
 import org.sandboxpowered.silica.api.command.sync.SingletonArgumentSerializer
 import org.sandboxpowered.silica.api.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.api.ecs.component.PositionComponent
+import org.sandboxpowered.silica.api.ecs.component.VelocityComponent
 import org.sandboxpowered.silica.api.entity.EntityDefinition
 import org.sandboxpowered.silica.api.entity.EntityEvents
 import org.sandboxpowered.silica.api.event.EventResult
@@ -43,10 +46,11 @@ object TestPlugin : BasePlugin {
             TypedEventResult(EventResult.ALLOW, Component.text("[$channel] ").append(message))
         }
         ArgumentTypes.register("block_pos", SingletonArgumentSerializer { PositionArgumentType() })
-        ArgumentTypes.register("entity_summon", SingletonArgumentSerializer { EntityArgumentType() })
+        ArgumentTypes.register("entity_definition", SingletonArgumentSerializer { EntityDefinitionArgumentType() })
+        ArgumentTypes.register("vec3d", SingletonArgumentSerializer { Vec3dArgumentType() })
         SilicaAPI.registerCommands {
             literal("spawn") {
-                argument("entity", EntityArgumentType()) {
+                argument("entity", EntityDefinitionArgumentType()) {
                     argument("pos", PositionArgumentType()) {
                         executes {
                             val entity = it.getArgument<EntityDefinition>("entity")
@@ -55,9 +59,30 @@ object TestPlugin : BasePlugin {
                                 it.spawnEntity(entity) { edit ->
                                     val epos = edit.create<PositionComponent>().pos
                                     epos.set(pos.x + .5, pos.y.toDouble(), pos.z + .5)
+                                    val evelo = edit.create<VelocityComponent>().velocity
+                                    evelo.set(0.0, 0.0, 0.1)
+                                    sendMessage(Component.text("Spawned ${entity.identifier} (id ${edit.entityId})"))
                                 }
                             })
-                            sendMessage(Component.text("Spawned ${entity.identifier}"))
+                            1
+                        }
+                    }
+                }
+            }
+            literal("velo") {
+                argument("entity", IntegerArgumentType.integer(1)) {
+                    argument("velocity", Vec3dArgumentType()) {
+                        executes {
+                            val entityId = it.getArgument<Int>("entity")
+                            val pos = it.getArgument<Vector3d>("velocity")
+                            world.tell(World.Command.DelayedCommand.Perform { world ->
+                                world.updateEntity(entityId) { entity ->
+                                    val velo = entity.getComponent<VelocityComponent>()?.velocity
+                                    velo?.set(pos)
+                                    sendMessage(Component.text("Set entity $entity's velocity"))
+                                }
+                            })
+
                             1
                         }
                     }

@@ -7,8 +7,10 @@ import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import com.artemis.Archetype
+import com.artemis.Entity
 import com.artemis.EntityEdit
 import com.artemis.WorldConfigurationBuilder
+import com.artemis.WorldConfigurationBuilder.Priority
 import com.artemis.utils.ImmutableIntBag
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
@@ -20,6 +22,7 @@ import org.sandboxpowered.silica.api.block.BlockEntityProvider
 import org.sandboxpowered.silica.api.block.BlockEvents
 import org.sandboxpowered.silica.api.ecs.component.BlockPositionComponent
 import org.sandboxpowered.silica.api.ecs.component.EntityIdentity
+import org.sandboxpowered.silica.api.ecs.component.VelocityComponent
 import org.sandboxpowered.silica.api.entity.EntityDefinition
 import org.sandboxpowered.silica.api.entity.EntityEvents
 import org.sandboxpowered.silica.api.internal.InternalAPI
@@ -33,10 +36,7 @@ import org.sandboxpowered.silica.api.world.*
 import org.sandboxpowered.silica.api.world.generation.WorldGenerator
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 import org.sandboxpowered.silica.api.world.state.fluid.FluidState
-import org.sandboxpowered.silica.ecs.system.Entity3dMap
-import org.sandboxpowered.silica.ecs.system.Entity3dMapSystem
-import org.sandboxpowered.silica.ecs.system.EntityRemovalSystem
-import org.sandboxpowered.silica.ecs.system.SilicaPlayerManager
+import org.sandboxpowered.silica.ecs.system.*
 import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.world.gen.TerrainGenerator
@@ -75,6 +75,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
                 WORLD_SIZE, WORLD_SIZE, WORLD_SIZE
             )
         )
+        config.with(VelocitySystem())
         SilicaRegistries.BLOCKS_WITH_ENTITY.forEach {
             it.createProcessingSystem()?.let { system -> config.with(it.processingSystemPriority, system) }
         }
@@ -84,8 +85,8 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         SilicaRegistries.DYNAMIC_SYSTEM_REGISTRY.forEach {
             config.with(0 /* TODO: insert actual prio */, it(server))
         }
-        config.with(Int.MAX_VALUE /* first */, entityMap)
-        config.with(Int.MIN_VALUE /* last */, EntityRemovalSystem())
+        config.with(Priority.HIGHEST, entityMap)
+        config.with(Priority.LOWEST, EntityRemovalSystem())
         artemisWorld = ArtemisWorld(
             config.build()
                 .registerAs<Entity3dMap>(entityMap)
@@ -152,6 +153,13 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
             editor(it)
             EntityEvents.SPAWN_ENTITY_EVENT.dispatcher?.invoke(it.entity)
         }
+    }
+
+    override fun updateEntity(id: Int, update: (Entity) -> Unit) {
+        val entity = artemisWorld.getEntity(id)?.takeIf(Entity::isActive) ?: return
+        update(entity)
+        // TODO: remove this shit
+        EntityEvents.ENTITY_VELOCITY_EVENT.dispatcher?.invoke(id, entity.getComponent<VelocityComponent>()!!.velocity)
     }
 
     override fun saveWorld() {
