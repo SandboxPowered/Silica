@@ -16,6 +16,7 @@ import org.sandboxpowered.silica.api.event.TypedEventResult
 import org.sandboxpowered.silica.api.item.ItemStack
 import org.sandboxpowered.silica.api.plugin.BasePlugin
 import org.sandboxpowered.silica.api.plugin.Plugin
+import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.registry.Registries.BLOCKS
 import org.sandboxpowered.silica.api.server.ServerEvents
 import org.sandboxpowered.silica.api.util.extensions.create
@@ -25,6 +26,8 @@ import org.sandboxpowered.silica.api.util.extensions.literal
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.api.world.World
+import org.sandboxpowered.utilities.Identifier
+import kotlin.random.Random
 
 @Plugin(id = "test", version = "1.0.0", requirements = ["minecraft:content"])
 object TestPlugin : BasePlugin {
@@ -92,6 +95,28 @@ object TestPlugin : BasePlugin {
                 executes {
                     world.tell(World.Command.DelayedCommand.Perform(World::saveWorld))
                     1
+                }
+            }
+            literal("horde") {
+                argument("amount", IntegerArgumentType.integer(1)) {
+                    executes {
+                        val amount = it.getArgument<Int>("amount")
+                        val entityDef = Registries.ENTITY_DEFINITIONS[Identifier("minecraft:zombie")].get()
+                        world.tell(World.Command.DelayedCommand.Perform { world ->
+                            val rng = Random(Random.nextInt())
+                            repeat(amount) {
+                                world.spawnEntity(entityDef) { edit ->
+                                    val epos = edit.create<PositionComponent>().pos
+                                    epos.set(rng.nextInt(-5, 5) + .5, 7.0, rng.nextInt(-5, 5) + .5)
+                                    val evelo = edit.create<VelocityComponent>().velocity
+                                    evelo.set(rng.nextDouble(-.2, .2), 0.0, rng.nextDouble(-.2, .2))
+                                    sendMessage(Component.text("Spawned ${entityDef.identifier} (id ${edit.entityId})"))
+                                }
+                            }
+                        })
+
+                        1
+                    }
                 }
             }
         }

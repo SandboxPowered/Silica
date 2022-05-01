@@ -10,7 +10,7 @@ class EntityTestComponent : PooledComponent() {
     private val logger = getLogger()
 
     override fun reset() {
-        ttl = Random.nextInt(200)
-        logger.info("Setting next ttl to $ttl")
+        ttl = Random.nextInt(100, 200)
+//        logger.info("Setting next ttl to $ttl")
     }
 }
