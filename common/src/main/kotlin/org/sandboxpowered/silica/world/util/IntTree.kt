@@ -446,6 +446,7 @@ class IntTree @JvmOverloads constructor(
      * Remove given id from the tree
      */
     fun remove(id: Int) {
+        if (id >= idToContainer.capacity) return
         val c = idToContainer[id] ?: return
         if (c.parent != null) c.parent!!.containers.remove(c)
         idToContainer[id] = null
