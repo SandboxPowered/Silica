@@ -26,9 +26,6 @@ import org.sandboxpowered.silica.vanilla.network.ecs.VanillaEntityContext
 import org.sandboxpowered.silica.vanilla.network.ecs.component.VanillaPlayerInputComponent
 import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.S2CUpdateEntityHeadRotation
-import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.S2CUpdateEntityPosition
-import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.S2CUpdateEntityPositionRotation
-import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.S2CUpdateEntityRotation
 import org.sandboxpowered.silica.vanilla.network.packets.play.serverbound.C2SPlayerDigging
 
 @All(VanillaPlayerInputComponent::class, PositionComponent::class, RotationComponent::class)
@@ -72,7 +69,8 @@ class VanillaInputSystem(val server: Server) : IteratingSystem() {
         dy *= 128
         dz *= 128
 
-        val isTeleport = areValid(dx, dy, dz)
+        val isTeleport = isTeleport(dx, dy, dz)
+        if (isTeleport) return // tmp workaround
 
         if (hasMoved && isTeleport) {
             //TODO: Send teleport packet
@@ -80,7 +78,7 @@ class VanillaInputSystem(val server: Server) : IteratingSystem() {
 
         var packet: PacketPlay? = null
 
-        if (hasRotated) {
+        /*if (hasRotated) {
             packet = if (hasMoved && !isTeleport) {
                 S2CUpdateEntityPositionRotation(
                     entityId,
@@ -99,7 +97,7 @@ class VanillaInputSystem(val server: Server) : IteratingSystem() {
                 dz.toInt().toShort(),
                 false
             )
-        }
+        }*/
 
         if (yaw != previousYaw) {
             server.network.tell(
@@ -131,7 +129,8 @@ class VanillaInputSystem(val server: Server) : IteratingSystem() {
         this.handleTerrainInteraction(entityId, input, previousLocation, rot)
     }
 
-    private fun areValid(vararg values: Double): Boolean = values.none { it < Short.MIN_VALUE || it > Short.MAX_VALUE }
+    private fun isTeleport(vararg values: Double): Boolean =
+        values.none { it < Short.MIN_VALUE || it > Short.MAX_VALUE }
 
     private fun handleTerrainInteraction(
         entityId: Int,

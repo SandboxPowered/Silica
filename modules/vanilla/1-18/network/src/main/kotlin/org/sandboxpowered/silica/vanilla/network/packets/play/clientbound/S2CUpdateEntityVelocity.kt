@@ -6,10 +6,10 @@ import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
 
 class S2CUpdateEntityVelocity(
-    var entityId: Int = -1,
-    var vX: Short = 0,
-    var vY: Short = 0,
-    var vZ: Short = 0,
+    val entityId: Int = -1,
+    val vX: Short = 0,
+    val vY: Short = 0,
+    val vZ: Short = 0,
 ) : PacketPlay {
 
     constructor(buf: PacketBuffer) : this(

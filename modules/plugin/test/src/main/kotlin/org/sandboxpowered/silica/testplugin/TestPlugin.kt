@@ -35,6 +35,7 @@ object TestPlugin : BasePlugin {
 
     private val OAK_FENCE_GATE by BLOCKS
     private val SPRUCE_FENCE_GATE by BLOCKS
+    private val DIRT by BLOCKS
 
     override fun onEnable() {
         logger.info("Test Plugin enabled!")
@@ -43,6 +44,7 @@ object TestPlugin : BasePlugin {
             if (inv != null) {
                 inv.inventory.hotbar[0] = ItemStack(OAK_FENCE_GATE.item)
                 inv.inventory.hotbar[1] = ItemStack(SPRUCE_FENCE_GATE.item)
+                inv.inventory.hotbar[2] = ItemStack(DIRT.item, 64)
             }
         }
         ServerEvents.CHAT_EVENT.subscribe { _, channel, message, _ ->
@@ -112,6 +114,21 @@ object TestPlugin : BasePlugin {
                                     evelo.set(rng.nextDouble(-.2, .2), 0.0, rng.nextDouble(-.2, .2))
                                     sendMessage(Component.text("Spawned ${entityDef.identifier} (id ${edit.entityId})"))
                                 }
+                            }
+                        })
+
+                        1
+                    }
+                }
+            }
+            literal("tp") {
+                argument("pos", Vec3dArgumentType()) {
+                    executes {
+                        val pos = it.getArgument<Vector3d>("pos")
+                        world.tell(World.Command.DelayedCommand.Perform { world ->
+                            world.updateEntity(1) { e ->
+                                e.getComponent<PositionComponent>()?.pos?.set(pos)
+                                sendMessage(Component.text("Teleported to $pos"))
                             }
                         })
 

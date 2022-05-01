@@ -25,6 +25,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.joml.Vector3d
+import org.joml.Vector3dc
 import org.sandboxpowered.silica.api.ecs.component.EntityIdentity
 import org.sandboxpowered.silica.api.ecs.component.PositionComponent
 import org.sandboxpowered.silica.api.ecs.component.RotationComponent
@@ -32,13 +33,16 @@ import org.sandboxpowered.silica.api.ecs.component.VelocityComponent
 import org.sandboxpowered.silica.api.entity.EntityEvents
 import org.sandboxpowered.silica.api.network.NetworkAdapter
 import org.sandboxpowered.silica.api.network.Packet
+import org.sandboxpowered.silica.api.server.PlayerManager
 import org.sandboxpowered.silica.api.server.Server
 import org.sandboxpowered.silica.api.util.extensions.*
 import org.sandboxpowered.silica.api.util.math.Position
+import org.sandboxpowered.silica.api.world.World
 import org.sandboxpowered.silica.api.world.WorldEvents
 import org.sandboxpowered.silica.api.world.WorldWriter
 import org.sandboxpowered.silica.api.world.persistence.BlockStateMapping
 import org.sandboxpowered.silica.api.world.state.block.BlockState
+import org.sandboxpowered.silica.vanilla.network.ecs.component.VanillaPlayerInputComponent
 import org.sandboxpowered.silica.vanilla.network.netty.LengthPrepender
 import org.sandboxpowered.silica.vanilla.network.netty.LengthSplitter
 import org.sandboxpowered.silica.vanilla.network.netty.PacketDecoder
@@ -49,6 +53,7 @@ import org.sandboxpowered.silica.vanilla.network.util.mapping.BlockStateProtocol
 import org.sandboxpowered.silica.vanilla.network.util.mapping.VanillaProtocolMapping
 import org.sandboxpowered.utilities.Identifier
 import java.util.*
+import kotlin.random.Random
 
 const val PROTOCOL_VERSION = 58 + 0x40000000
 
@@ -89,6 +94,10 @@ private class VanillaNetworkBehavior(
 ) : AbstractBehavior<NetworkAdapter.Command>(context) {
     private val connections: Object2ObjectMap<UUID, ActorRef<PlayConnection>> = Object2ObjectOpenHashMap()
 
+    private class ReceivePlayers(val playerManager: PlayerManager) : VanillaNetworkAdapter.VanillaCommand
+
+    private lateinit var playerManager: PlayerManager
+
     private lateinit var motd: MOTD
 
     private lateinit var motdCache: String
@@ -113,6 +122,7 @@ private class VanillaNetworkBehavior(
         .onMessage(this::handleSendToAllExcept)
         .onMessage(this::handleUpdateMotd)
         .onMessage(this::handleQueryMotd)
+        .onMessage(this::handlePlayerManager)
         .build()
 
     private val vanillaWorld = context.spawn(
@@ -126,6 +136,7 @@ private class VanillaNetworkBehavior(
         EntityEvents.ENTITY_VELOCITY_EVENT.subscribe(this::updateEntityVelocity)
         EntityEvents.REMOVE_ENTITIES_EVENT.subscribe(this::removeEntities)
         WorldEvents.REPLACE_BLOCKS_EVENT.subscribe(this::changeBlock)
+        server.world.tell(World.Command.DelayedCommand.Ask(context.self) { ReceivePlayers(it.playerManager) })
     }
 
     private var ticks: Int = 0
@@ -322,22 +333,46 @@ private class VanillaNetworkBehavior(
         )
     }
 
-    private fun updateEntityPosition(id: Int, delta: Vector3d) {
-        val (dx, dy, dz) = delta
-        context.self.tell(
+    private fun updateEntityPosition(id: Int, prevPos: Vector3dc, newPos: Vector3dc) {
+        val delta = newPos - prevPos
+        if (delta.lengthSquared() > 64) {
+            val entity = playerManager.getEntity(id)
+            val rotation = entity?.getComponent<RotationComponent>()
+            context.self.tell(
+                VanillaNetworkAdapter.VanillaCommand.SendToAll(
+                    S2CTeleportEntity(
+                        id,
+                        newPos.x(), newPos.y(), newPos.z(),
+                        rotation?.yaw ?: 0f, rotation?.pitch ?: 0f,
+                        false
+                    )
+                )
+            )
+            entity?.getComponent<VanillaPlayerInputComponent>()?.let { player ->
+                context.self.tell(
+                    VanillaNetworkAdapter.VanillaCommand.SendTo(
+                        player.gameProfile.id, S2CSetPlayerPositionAndLook(
+                            newPos.x(), newPos.y(), newPos.z(),
+                            rotation?.yaw ?: 0f, rotation?.pitch ?: 0f,
+                            0, Random.nextInt()
+                        )
+                    )
+                )
+            }
+        } else context.self.tell(
             VanillaNetworkAdapter.VanillaCommand.SendToAll(
                 S2CUpdateEntityPosition(
                     id,
-                    (dx * 4096).toInt().toShort(),
-                    (dy * 4096).toInt().toShort(),
-                    (dz * 4096).toInt().toShort(),
+                    (delta.x() * 4096).toInt().toShort(),
+                    (delta.y() * 4096).toInt().toShort(),
+                    (delta.z() * 4096).toInt().toShort(),
                     false // TODO
                 )
             )
         )
     }
 
-    private fun updateEntityVelocity(id: Int, velo: Vector3d) {
+    private fun updateEntityVelocity(id: Int, velo: Vector3dc) {
         val (vx, vy, vz) = velo
         context.self.tell(
             VanillaNetworkAdapter.VanillaCommand.SendToAll(
@@ -362,6 +397,13 @@ private class VanillaNetworkBehavior(
                 S2CBlockChange(pos, BlockStateProtocolMapping.INSTANCE[new])
             )
         )
+    }
+
+    // TODO: maybe this should change the behaviour to enter ready state
+    private fun handlePlayerManager(pm: ReceivePlayers): Behavior<NetworkAdapter.Command> {
+        this.playerManager = pm.playerManager
+
+        return Behaviors.same()
     }
 
 }

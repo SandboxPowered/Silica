@@ -292,13 +292,13 @@ class BlocTree private constructor(
         var index = 0
         while (data != null && index < 8) {
             when (data) {
-                is Left -> containers[index++] = data.value()
+                is Left -> containers[index] = data.value()
                 else -> {
                     split(index)
-                    nodes[index++]?.read(from)
+                    nodes[index]?.read(from)
                 }
             }
-            if (index < 8) data = from.poll()
+            if (++index < 8) data = from.poll()
         }
     }
 
@@ -306,8 +306,7 @@ class BlocTree private constructor(
         repeat(8) {
             when (val n = nodes[it]) {
                 null -> {
-                    @Suppress("RemoveExplicitTypeArguments") // it's a lie
-                    yield(Left<BlockState, Unit>(containers[it] ?: default))
+                    yield(Left(containers[it] ?: default))
                 }
                 else -> {
                     yield(Right(Unit))

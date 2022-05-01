@@ -17,6 +17,7 @@ import org.sandboxpowered.silica.api.entity.EntityEvents
 import org.sandboxpowered.silica.api.util.extensions.component1
 import org.sandboxpowered.silica.api.util.extensions.component2
 import org.sandboxpowered.silica.api.util.extensions.component3
+import org.sandboxpowered.silica.api.util.extensions.minus
 import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.world.util.IntTree
 import org.sandboxpowered.silica.world.util.OcTree
@@ -89,17 +90,21 @@ class Entity3dMapSystem(
     override fun process(entityId: Int) {
         val isBE = bePositionMapper.has(entityId)
         if (!isBE) {
-            val (ox, oy, oz) = tree.getPos(entityId)!!
-            val (x, y, z) = positionMapper[entityId].pos
-            val (w, h, d) = hitboxMapper[entityId].hitbox
+            val oldPos = Vector3d(tree.getPos(entityId)!!)
+            val newPos = positionMapper[entityId].pos
+            val (x, y, z) = newPos
 
-            tree.update(
-                entityId,
-                x.toFloat(), y.toFloat(), z.toFloat(),
-                w, h, d
-            )
+            if ((newPos - oldPos).lengthSquared() > 0.000025) {
+                val (w, h, d) = hitboxMapper[entityId].hitbox
 
-            EntityEvents.ENTITY_POSITION_EVENT.dispatcher?.invoke(entityId, Vector3d(x - ox, y - oy, z - oz))
+                tree.update(
+                    entityId,
+                    x.toFloat(), y.toFloat(), z.toFloat(),
+                    w, h, d
+                )
+
+                EntityEvents.ENTITY_POSITION_EVENT.dispatcher?.invoke(entityId, oldPos, newPos)
+            }
         } else {
             val (x, y, z) = bePositionMapper[entityId].pos
 

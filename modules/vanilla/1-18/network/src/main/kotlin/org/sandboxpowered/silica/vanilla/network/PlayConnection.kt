@@ -7,6 +7,7 @@ import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import com.mojang.authlib.GameProfile
+import org.joml.Vector3d
 import org.sandboxpowered.silica.api.SilicaAPI
 import org.sandboxpowered.silica.api.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.api.nbt.NBTCompound
@@ -222,17 +223,8 @@ private class PlayConnectionActor(
         packetHandler.sendPacket(S2CDeclareCommands(SilicaAPI.commandDispatcher.root))
         packetHandler.sendPacket(S2CUnlockRecipes())
         val currentPos = receive.input.wantedPosition
-        packetHandler.sendPacket(
-            S2CSetPlayerPositionAndLook(
-                currentPos.x,
-                currentPos.y,
-                currentPos.z,
-                0f,
-                0f,
-                0.toByte(),
-                0
-            )
-        )
+        wantedPos = currentPos
+
         val gamemodes = IntArray(receive.gameProfiles.size)
         val pings = IntArray(receive.gameProfiles.size)
         receive.gameProfiles.forEachIndexed { index, uuid ->
@@ -314,9 +306,20 @@ private class PlayConnectionActor(
         return Behaviors.stopped()
     }
 
+    private var wantedPos = Vector3d()
+    private var sectionsCount = 0
+
     private fun handleReceiveChunkSection(sections: PlayConnection.ReceiveChunkSections): Behavior<PlayConnection> {
         packetHandler.sendPacket(S2CChunkData(sections.x, sections.z, sections.chunkSections))
         packetHandler.sendPacket(S2CUpdateLight(sections.x, sections.z, true))
+
+        logger.info("Sending chunk data #$sectionsCount")
+        if (sectionsCount < 81 && ++sectionsCount == 81) {
+            logger.info("Sending S2CSetPlayerPositionAndLook")
+            packetHandler.sendPacket(
+                S2CSetPlayerPositionAndLook(wantedPos.x, wantedPos.y, wantedPos.z, 0f, 0f, 0.toByte(), 0)
+            )
+        }
         return Behaviors.same()
     }
 

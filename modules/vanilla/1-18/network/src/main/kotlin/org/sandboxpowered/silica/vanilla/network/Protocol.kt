@@ -84,7 +84,7 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             0x22 packet ::S2CChunkData
             0x25 packetDeprecated ::S2CUpdateLight
             0x26 packet ::S2CJoinGame
-            0x29 packetDeprecated ::S2CUpdateEntityPosition
+            0x29 packet ::S2CUpdateEntityPosition
             0x2A packetDeprecated ::S2CUpdateEntityPositionRotation
             0x2B packetDeprecated ::S2CUpdateEntityRotation
             0x36 packetDeprecated ::S2CPlayerInfo
@@ -95,6 +95,7 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             0x48 packet ::S2CHeldItemChange
             0x49 packetDeprecated ::S2CUpdateChunkPosition
             0x4f packet ::S2CUpdateEntityVelocity
+            0x62 packet ::S2CTeleportEntity
             0x66 packetDeprecated ::S2CDeclareRecipes
             0x67 packetDeprecated ::S2CDeclareTags
         }

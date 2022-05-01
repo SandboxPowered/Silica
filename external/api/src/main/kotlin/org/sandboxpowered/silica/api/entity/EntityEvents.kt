@@ -2,7 +2,7 @@ package org.sandboxpowered.silica.api.entity
 
 import com.artemis.ArchetypeBuilder
 import com.artemis.Entity
-import org.joml.Vector3d
+import org.joml.Vector3dc
 import org.sandboxpowered.silica.api.entity.EntityEvents.ChangeChunkEvent
 import org.sandboxpowered.silica.api.entity.EntityEvents.EntityPositionEvent
 import org.sandboxpowered.silica.api.entity.EntityEvents.EntityVelocityEvent
@@ -27,7 +27,7 @@ object EntityEvents {
         ChangeChunkEvent { ent, old, new -> handlers.forEach { it(ent, old, new) } }
     }
     val ENTITY_POSITION_EVENT: Event<EntityPositionEvent> = EventFactory.createEvent { handlers ->
-        EntityPositionEvent { entId, delta -> handlers.forEach { it(entId, delta) } }
+        EntityPositionEvent { entId, prevPos, newPos -> handlers.forEach { it(entId, prevPos, newPos) } }
     }
     val ENTITY_VELOCITY_EVENT: Event<EntityVelocityEvent> = EventFactory.createEvent { handlers ->
         EntityVelocityEvent { entId, newV -> handlers.forEach { it(entId, newV) } }
@@ -42,11 +42,11 @@ object EntityEvents {
     }
 
     fun interface EntityPositionEvent {
-        operator fun invoke(entityId: Int, positionDelta: Vector3d)
+        operator fun invoke(entityId: Int, previousPos: Vector3dc, newPos: Vector3dc)
     }
 
     fun interface EntityVelocityEvent {
-        operator fun invoke(entityId: Int, newVelocity: Vector3d)
+        operator fun invoke(entityId: Int, newVelocity: Vector3dc)
     }
 
     fun interface RemoveEntitiesEvent {

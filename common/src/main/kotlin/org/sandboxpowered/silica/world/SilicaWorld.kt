@@ -22,7 +22,6 @@ import org.sandboxpowered.silica.api.block.BlockEntityProvider
 import org.sandboxpowered.silica.api.block.BlockEvents
 import org.sandboxpowered.silica.api.ecs.component.BlockPositionComponent
 import org.sandboxpowered.silica.api.ecs.component.EntityIdentity
-import org.sandboxpowered.silica.api.ecs.component.VelocityComponent
 import org.sandboxpowered.silica.api.entity.EntityDefinition
 import org.sandboxpowered.silica.api.entity.EntityEvents
 import org.sandboxpowered.silica.api.internal.InternalAPI
@@ -61,6 +60,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
     override val worldHeight: Vector2ic = Vector2i(worldGenerator.minWorldHeight, worldGenerator.maxWorldHeight)
     override val isClient: Boolean = side == Side.CLIENT
     override val isServer: Boolean = side == Side.SERVER
+
 
     init {
         val config = WorldConfigurationBuilder()
@@ -158,8 +158,6 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
     override fun updateEntity(id: Int, update: (Entity) -> Unit) {
         val entity = artemisWorld.getEntity(id)?.takeIf(Entity::isActive) ?: return
         update(entity)
-        // TODO: remove this shit
-        EntityEvents.ENTITY_VELOCITY_EVENT.dispatcher?.invoke(id, entity.getComponent<VelocityComponent>()!!.velocity)
     }
 
     override fun saveWorld() {
