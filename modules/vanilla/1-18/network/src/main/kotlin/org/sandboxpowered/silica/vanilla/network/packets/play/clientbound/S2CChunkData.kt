@@ -64,17 +64,26 @@ class S2CChunkData(
     override fun write(buf: PacketBuffer) {
         buf.writeInt(cX)
         buf.writeInt(cZ)
-        buf.writeLongArray(bitMask)
+//        buf.writeLongArray(bitMask)
+        // ChunkData
         val heightmap = CompoundTag()
         val heightmapData = BitPackedLongArray(256, 9)
         for (i in 0..255) heightmapData[i] = 7
         heightmap.setLongArray("MOTION_BLOCKING", heightmapData.data)
         //        heightmap.setLongArray("WORLD_SURFACE", heightmapData.getData());
         buf.writeNBT(heightmap)
-        buf.writeVarIntArray(biomes)
+//        buf.writeVarIntArray(biomes)
         buf.writeVarInt(buffer.size)
         buf.writeBytes(buffer)
-        buf.writeVarInt(0)
+        buf.writeLongArray(longArrayOf())
+        // LightData
+        buf.writeBoolean(true)
+        buf.writeLongArray(BitSet(18).toLongArray())
+        buf.writeLongArray(BitSet(18).toLongArray())
+        buf.writeLongArray(BitSet(18).toLongArray())
+        buf.writeLongArray(BitSet(18).toLongArray())
+        buf.writeVarIntArray(intArrayOf())
+        buf.writeVarIntArray(intArrayOf())
     }
 
     override fun handle(packetHandler: PacketHandler, context: PlayContext) {}

@@ -22,7 +22,6 @@ interface WorldReader {
     fun isOutOfHeightLimit(pos: Position): Boolean = isOutOfHeightLimit(pos.y)
     fun isOutOfHeightLimit(height: Int): Boolean = !isWithinHeightLimit(height)
 
-    fun registerEventSubscriber(sub: Any)
     fun subsection(x: Int, y: Int, z: Int, w: Int, h: Int, d: Int): WorldSectionReader
     fun nonAirInChunk(x: Int, y: Int, z: Int): Int
 }

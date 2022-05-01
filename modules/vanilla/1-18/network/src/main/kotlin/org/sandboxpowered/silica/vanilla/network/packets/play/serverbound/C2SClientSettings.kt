@@ -13,6 +13,7 @@ class C2SClientSettings(
     private val displayedSkin: UByte,
     private val hand: Int,
     private val textFiltering: Boolean,
+    private val showInPlayerList: Boolean,
 ) : PacketPlay {
     constructor(buf: PacketBuffer) : this(
         buf.readString(16),
@@ -21,7 +22,8 @@ class C2SClientSettings(
         buf.readBoolean(),
         buf.readUByte(),
         buf.readVarInt(),
-        buf.readBoolean()
+        buf.readBoolean(),
+        buf.readBoolean(),
     )
 
     override fun write(buf: PacketBuffer) {}
