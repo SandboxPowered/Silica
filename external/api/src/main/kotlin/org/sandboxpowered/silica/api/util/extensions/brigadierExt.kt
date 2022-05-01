@@ -18,7 +18,7 @@ import kotlin.reflect.KClass
 
 interface DSLCommandNode<T> {
     /**
-     * returns the brigardier node (only works after setup f.e on command execute)
+     * returns the brigadier node (only works after setup f.e on command execute)
      * @throws UninitializedPropertyAccessException if you run before or at setup
      */
     val node: CommandNode<T>
@@ -36,17 +36,17 @@ interface DSLCommandNode<T> {
     fun alias(alias: String)
 
     /**
-     * This will be called to check is there sommething required
+     * This will be called to check is there something required
      * runs on each request
      * false -> command will be hidden
-     * true(default) -> command will show normaly
+     * true(default) -> command will show normally
      * @return is the command usable in this conditions
      * @see Predicate
      */
     fun require(onCheck: T.() -> Boolean)
 
     /**
-     * this will be executed if the currend command is called
+     * this will be executed if the current command is called
      * @return the result as int
      */
     fun executes(executed: T.(context: CommandContext<T>) -> Int)
