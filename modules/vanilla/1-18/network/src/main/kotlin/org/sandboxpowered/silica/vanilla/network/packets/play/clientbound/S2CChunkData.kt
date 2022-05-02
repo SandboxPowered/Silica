@@ -52,7 +52,7 @@ class S2CChunkData(
     private fun calculateSize(cX: Int, cZ: Int): Int {
         var r = 0
         for (i in 0..15) {
-            r += sections[i]!!.serializedSize
+            r += sections[i].serializedSize
         }
         return r
     }

@@ -1,8 +1,8 @@
 package org.sandboxpowered.silica.world.util
 
 import com.artemis.utils.IntBag
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 
 internal class OcTreeTest {
     @Test
@@ -11,52 +11,52 @@ internal class OcTreeTest {
         val tree = OcTree(-8f, -8f, -8f, 8f, 8f, 8f, 1, 8)
         fill.clear()
         tree[fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f]
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
         tree.insert(1, -6f, -6f, -6f, 2f, 2f, 2f) // fully outside test region
         fill.clear()
         tree[fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f]
-        Assertions.assertEquals(fill.size(), 1)
+        assertEquals(1, fill.size())
         tree.insert(2, 6f, -6f, 6f, 2f, 2f, 2f) // fully outside test region
         tree.insert(3, -2f, 2f, 2f, 2f, 2f, 2f) // fully inside test region
         tree.insert(4, 2f, 2f, 2f, 2f, 2f, 2f) // overlaps test region
         tree[fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f]
         fill.clear()
         tree[fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f]
-        Assertions.assertEquals(fill.size(), 4)
+        assertEquals(4, fill.size())
 
         // move inside test region
         tree.update(1, -2f, -2f, -2f, 2f, 2f, 2f)
         fill.clear()
         tree[fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f]
-        Assertions.assertEquals(fill.size(), 4)
+        assertEquals(4, fill.size())
 
         // move outside test region
         tree.update(1, -6f, -6f, -6f, 2f, 2f, 2f)
         fill.clear()
         tree[fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f]
-        Assertions.assertEquals(fill.size(), 4)
+        assertEquals(4, fill.size())
 
         // remove from outside
         tree.remove(1)
         fill.clear()
         tree[fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f]
-        Assertions.assertEquals(fill.size(), 3)
+        assertEquals(3, fill.size())
 
         // remove overlapping
         tree.remove(3)
         fill.clear()
         tree[fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f]
-        Assertions.assertEquals(fill.size(), 2)
+        assertEquals(2, fill.size())
 
         // remove inside
         tree.remove(4)
         fill.clear()
         tree[fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f]
-        Assertions.assertEquals(fill.size(), 1)
+        assertEquals(1, fill.size())
         tree.remove(2)
         fill.clear()
         tree[fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f]
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
     }
 
     @Test
@@ -65,52 +65,52 @@ internal class OcTreeTest {
         val tree = OcTree(-8f, -8f, -8f, 8f, 8f, 8f, 1, 8)
         fill.clear()
         tree.getExact(fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f)
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
         tree.insert(1, -6f, -6f, -6f, 2f, 2f, 2f) // fully outside test region
         fill.clear()
         tree.getExact(fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f)
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
         tree.insert(2, 6f, -6f, 6f, 2f, 2f, 2f) // fully outside test region
         tree.insert(3, -2f, 2f, 2f, 2f, 2f, 2f) // fully inside test region
         tree.insert(4, 2f, 2f, 2f, 2f, 2f, 2f) // overlaps test region
         tree[fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f]
         fill.clear()
         tree.getExact(fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f)
-        Assertions.assertEquals(fill.size(), 2)
+        assertEquals(2, fill.size())
 
         // move inside test region
         tree.update(1, -2f, -2f, -2f, 2f, 2f, 2f)
         fill.clear()
         tree.getExact(fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f)
-        Assertions.assertEquals(fill.size(), 3)
+        assertEquals(3, fill.size())
 
         // move outside test region
         tree.update(1, -6f, -6f, -6f, 2f, 2f, 2f)
         fill.clear()
         tree.getExact(fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f)
-        Assertions.assertEquals(fill.size(), 2)
+        assertEquals(2, fill.size())
 
         // remove from outside
         tree.remove(1)
         fill.clear()
         tree.getExact(fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f)
-        Assertions.assertEquals(fill.size(), 2)
+        assertEquals(2, fill.size())
 
         // remove overlapping
         tree.remove(3)
         fill.clear()
         tree.getExact(fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f)
-        Assertions.assertEquals(fill.size(), 1)
+        assertEquals(1, fill.size())
 
         // remove inside
         tree.remove(4)
         fill.clear()
         tree.getExact(fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f)
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
         tree.remove(2)
         fill.clear()
         tree.getExact(fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f)
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
     }
 
     @Test
@@ -119,7 +119,7 @@ internal class OcTreeTest {
         val tree = OcTree(-8f, -8f, -8f, 8f, 8f, 8f, 1, 8)
         fill.clear()
         tree[fill, -3f, -3f, -3f, 6f, 6f, 6f]
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
 
         // all outside
         tree.insert(1, -6f, -6f, -6f, 2f, 2f, 2f)
@@ -133,7 +133,7 @@ internal class OcTreeTest {
 
         fill.clear()
         tree[fill, -3f, -3f, -3f, 6f, 6f, 6f]
-        Assertions.assertEquals(8, fill.size())
+        assertEquals(8, fill.size())
     }
 
     @Test
@@ -142,11 +142,11 @@ internal class OcTreeTest {
         val tree = OcTree(-8f, -8f, -8f, 8f, 8f, 8f, 1, 8)
         fill.clear()
         tree[fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f]
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
         tree.insert(1, -1f, -1f, -1f, 2f, 2f, 2f)
         fill.clear()
         tree[fill, 0f, 0f, 0f]
-        Assertions.assertEquals(fill.size(), 1)
+        assertEquals(1, fill.size())
     }
 
     @Test
@@ -155,12 +155,12 @@ internal class OcTreeTest {
         val tree = OcTree(-8f, -8f, -8f, 8f, 8f, 8f, 1, 8)
         fill.clear()
         tree[fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f]
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
         tree.insert(1, -1f, -1f, -1f, 2f, 2f, 2f)
         tree.insert(2, -1f, -1f, -1f, 2f, 2f, 2f)
         fill.clear()
         tree[fill, 0f, 0f, 0f]
-        Assertions.assertEquals(fill.size(), 2)
+        assertEquals(2, fill.size())
     }
 
     @Test
@@ -169,11 +169,11 @@ internal class OcTreeTest {
         val tree = OcTree(-8f, -8f, -8f, 8f, 8f, 8f, 1, 8)
         fill.clear()
         tree[fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f]
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
         tree.insert(1, -1f, -1f, -1f, 2f, 2f, 2f)
         fill.clear()
         tree.getExact(fill, 0f, 0f, 0f)
-        Assertions.assertEquals(fill.size(), 1)
+        assertEquals(1, fill.size())
     }
 
     @Test
@@ -182,21 +182,21 @@ internal class OcTreeTest {
         val tree = OcTree(-8f, -8f, -8f, 8f, 8f, 8f, 1, 8)
         fill.clear()
         tree[fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f]
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
         tree.insert(1, -1f, -1f, -1f, 2f, 2f, 2f)
         tree.insert(2, -1f, -1f, -1f, 2f, 2f, 2f)
         fill.clear()
         tree.getExact(fill, 0f, 0f, 0f)
-        Assertions.assertEquals(fill.size(), 2)
+        assertEquals(2, fill.size())
     }
 
     @Test
     fun `next flag`() {
         val tree = OcTree(-8f, -8f, -8f, 8f, 8f, 8f, 1, 8)
-        Assertions.assertEquals(1L, tree.nextFlag())
-        Assertions.assertEquals(2L, tree.nextFlag())
-        Assertions.assertEquals(4L, tree.nextFlag())
-        Assertions.assertEquals(8L, tree.nextFlag())
+        assertEquals(1L, tree.nextFlag())
+        assertEquals(2L, tree.nextFlag())
+        assertEquals(4L, tree.nextFlag())
+        assertEquals(8L, tree.nextFlag())
     }
 
     @Test
@@ -205,7 +205,7 @@ internal class OcTreeTest {
         val tree = OcTree(-8f, -8f, -8f, 8f, 8f, 8f, 1, 8)
         fill.clear()
         tree[fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f]
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
         tree.insert(1, 0L, -1f, -1f, -1f, 2f, 2f, 2f)
         tree.insert(2, 1L, -1f, -1f, -1f, 2f, 2f, 2f)
         tree.insert(3, 2L, -1f, -1f, -1f, 2f, 2f, 2f)
@@ -215,17 +215,17 @@ internal class OcTreeTest {
         // 0 flag
         fill.clear()
         tree[fill, -2f, -2f, -2f, 2f, 2f, 2f, 0L]
-        Assertions.assertEquals(fill.size(), 5)
+        assertEquals(5, fill.size())
 
         // 1 flag
         fill.clear()
         tree[fill, -2f, -2f, -2f, 2f, 2f, 2f, 1L]
-        Assertions.assertEquals(fill.size(), 2)
+        assertEquals(2, fill.size())
 
         // 2 flag
         fill.clear()
         tree[fill, -2f, -2f, -2f, 2f, 2f, 2f, 2L]
-        Assertions.assertEquals(fill.size(), 3)
+        assertEquals(3, fill.size())
     }
 
     @Test
@@ -234,7 +234,7 @@ internal class OcTreeTest {
         val tree = OcTree(-8f, -8f, -8f, 8f, 8f, 8f, 1, 8)
         fill.clear()
         tree.getExact(fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f)
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
         tree.insert(1, 0L, -1f, -1f, -1f, 2f, 2f, 2f)
         tree.insert(2, 1L, -1f, -1f, -1f, 2f, 2f, 2f)
         tree.insert(3, 2L, -1f, -1f, -1f, 2f, 2f, 2f)
@@ -244,17 +244,17 @@ internal class OcTreeTest {
         // 0 flag
         fill.clear()
         tree.getExact(fill, -2f, -2f, -2f, 2f, 2f, 2f, 0L)
-        Assertions.assertEquals(fill.size(), 5)
+        assertEquals(5, fill.size())
 
         // 1 flag
         fill.clear()
         tree.getExact(fill, -2f, -2f, -2f, 2f, 2f, 2f, 1L)
-        Assertions.assertEquals(fill.size(), 2)
+        assertEquals(2, fill.size())
 
         // 2 flag
         fill.clear()
         tree.getExact(fill, -2f, -2f, -2f, 2f, 2f, 2f, 2L)
-        Assertions.assertEquals(fill.size(), 3)
+        assertEquals(3, fill.size())
     }
 
     @Test
@@ -263,7 +263,7 @@ internal class OcTreeTest {
         val tree = OcTree(-8f, -8f, -8f, 8f, 8f, 8f, 1, 8)
         fill.clear()
         tree[fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f]
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
         tree.insert(1, 0L, -1f, -1f, -1f, 2f, 2f, 2f)
         tree.insert(2, 1L, -1f, -1f, -1f, 2f, 2f, 2f)
         tree.insert(3, 2L, -1f, -1f, -1f, 2f, 2f, 2f)
@@ -273,17 +273,17 @@ internal class OcTreeTest {
         // 0 flag
         fill.clear()
         tree[fill, 0f, 0f, 0f, 0L]
-        Assertions.assertEquals(fill.size(), 5)
+        assertEquals(5, fill.size())
 
         // 1 flag
         fill.clear()
         tree[fill, 0f, 0f, 0f, 1L]
-        Assertions.assertEquals(fill.size(), 2)
+        assertEquals(2, fill.size())
 
         // 2 flag
         fill.clear()
         tree[fill, 0f, 0f, 0f, 2L]
-        Assertions.assertEquals(fill.size(), 3)
+        assertEquals(3, fill.size())
     }
 
     @Test
@@ -292,7 +292,7 @@ internal class OcTreeTest {
         val tree = OcTree(-8f, -8f, -8f, 8f, 8f, 8f, 1, 8)
         fill.clear()
         tree.getExact(fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f)
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
         tree.insert(1, 0L, -1f, -1f, -1f, 2f, 2f, 2f)
         tree.insert(2, 1L, -1f, -1f, -1f, 2f, 2f, 2f)
         tree.insert(3, 2L, -1f, -1f, -1f, 2f, 2f, 2f)
@@ -302,17 +302,17 @@ internal class OcTreeTest {
         // 0 flag
         fill.clear()
         tree.getExact(fill, 0f, 0f, 0f, 0L)
-        Assertions.assertEquals(fill.size(), 5)
+        assertEquals(5, fill.size())
 
         // 1 flag
         fill.clear()
         tree.getExact(fill, 0f, 0f, 0f, 1L)
-        Assertions.assertEquals(fill.size(), 2)
+        assertEquals(2, fill.size())
 
         // 2 flag
         fill.clear()
         tree.getExact(fill, 0f, 0f, 0f, 2L)
-        Assertions.assertEquals(fill.size(), 3)
+        assertEquals(3, fill.size())
     }
 
     @Test
@@ -321,19 +321,19 @@ internal class OcTreeTest {
         val tree = OcTree(-8f, -8f, -8f, 8f, 8f, 8f, 1, 8)
         fill.clear()
         tree.getExact(fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f)
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
 
         // matching
         tree.upsert(1, -1f, -1f, -1f, 2f, 2f, 2f)
         fill.clear()
         tree.getExact(fill, 0f, 0f, 0f)
-        Assertions.assertEquals(fill.size(), 1)
+        assertEquals(1, fill.size())
 
         // not matching
         tree.upsert(1, 1f, 1f, 1f, 2f, 2f, 2f)
         fill.clear()
         tree.getExact(fill, 0f, 0f, 0f)
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
     }
 
     @Test
@@ -342,43 +342,43 @@ internal class OcTreeTest {
         val tree = OcTree(-8f, -8f, -8f, 8f, 8f, 8f, 1, 8)
         fill.clear()
         tree.getExact(fill, -2.5f, -2.5f, -2.5f, 5f, 5f, 5f)
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
 
         // flag 1
         tree.upsert(1, 1L, -1f, -1f, -1f, 2f, 2f, 2f)
         fill.clear()
         tree.getExact(fill, 0f, 0f, 0f, 1L)
-        Assertions.assertEquals(fill.size(), 1)
+        assertEquals(1, fill.size())
         fill.clear()
         tree.getExact(fill, 0f, 0f, 0f, 2L)
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
         fill.clear()
         tree.getExact(fill, 0f, 0f, 0f, 4L)
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
 
         // flag 1 + 2
         tree.upsert(1, 2L, -1f, -1f, -1f, 2f, 2f, 2f)
         fill.clear()
         tree.getExact(fill, 0f, 0f, 0f, 1L)
-        Assertions.assertEquals(fill.size(), 1)
+        assertEquals(1, fill.size())
         fill.clear()
         tree.getExact(fill, 0f, 0f, 0f, 2L)
-        Assertions.assertEquals(fill.size(), 1)
+        assertEquals(1, fill.size())
         fill.clear()
         tree.getExact(fill, 0f, 0f, 0f, 4L)
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
 
         // flag 1 + 2 (upserting flags 3L changes nothing)
         tree.upsert(1, 3L, -1f, -1f, -1f, 2f, 2f, 2f)
         fill.clear()
         tree.getExact(fill, 0f, 0f, 0f, 1L)
-        Assertions.assertEquals(fill.size(), 1)
+        assertEquals(1, fill.size())
         fill.clear()
         tree.getExact(fill, 0f, 0f, 0f, 2L)
-        Assertions.assertEquals(fill.size(), 1)
+        assertEquals(1, fill.size())
         fill.clear()
         tree.getExact(fill, 0f, 0f, 0f, 4L)
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
     }
 
     @Test
@@ -398,8 +398,8 @@ internal class OcTreeTest {
         tree.remove(0)
         tree.upsert(0, 2L, 0f, 0f, 0f, 1f, 1f, 1f)
         tree.getExact(fill, 0f, 0f, 0f, 1L)
-        Assertions.assertEquals(fill.size(), 0)
+        assertEquals(0, fill.size())
         tree.getExact(fill, 0f, 0f, 0f, 2L)
-        Assertions.assertEquals(fill.size(), 1)
+        assertEquals(1, fill.size())
     }
 }

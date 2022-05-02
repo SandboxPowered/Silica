@@ -1,12 +1,12 @@
 package org.sandboxpowered.silica.math
 
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.sandboxpowered.silica.api.util.math.Position.PositionRange
 import java.util.stream.Stream
+import kotlin.test.assertEquals
 import org.sandboxpowered.silica.api.util.math.Position as Pos
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -14,7 +14,7 @@ class PositionTest {
     @ParameterizedTest
     @MethodSource("ranges")
     fun `is position within range`(range: PositionRange, position: Pos, expected: Boolean) {
-        Assertions.assertEquals(expected, position in range)
+        assertEquals(expected, position in range)
     }
 
     private fun ranges(): Stream<Arguments> = Stream.of(

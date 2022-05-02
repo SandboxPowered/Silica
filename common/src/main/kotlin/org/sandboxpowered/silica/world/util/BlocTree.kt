@@ -288,14 +288,24 @@ class BlocTree private constructor(
     fun dispose() = reset()
 
     internal fun read(from: Queue<Either<BlockState, Unit>>) {
+        reset()
+        nonAirBlockStates = if (default.isAir) 0 else bounds.width.pow(3)
+        val containerSize = (bounds.width / 2).pow(3)
         var data = from.poll()
         var index = 0
         while (data != null && index < 8) {
             when (data) {
-                is Left -> containers[index] = data.value()
+                is Left -> {
+                    containers[index] = data.value()
+
+                    if (default.isAir && !data.value().isAir) nonAirBlockStates += containerSize
+                    else if (!default.isAir && data.value().isAir) nonAirBlockStates -= containerSize
+                }
                 else -> {
                     split(index)
+                    this.nonAirBlockStates -= nodes[index]!!.nonAirBlockStates
                     nodes[index]?.read(from)
+                    this.nonAirBlockStates += nodes[index]!!.nonAirBlockStates
                 }
             }
             if (++index < 8) data = from.poll()

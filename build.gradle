@@ -45,7 +45,7 @@ subprojects {
     }
 
     dependencies {
-        testImplementation testLibs.jupiter.api
+        testImplementation testLibs.kotlin.test
         testImplementation testLibs.jupiter.params
         testRuntimeOnly testLibs.jupiter.engine
         testImplementation testLibs.mockk
