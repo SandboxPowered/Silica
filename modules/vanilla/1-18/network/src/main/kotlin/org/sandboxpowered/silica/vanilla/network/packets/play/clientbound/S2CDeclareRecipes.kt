@@ -5,8 +5,9 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
 
-class S2CDeclareRecipes : PacketPlay {
-    override fun read(buf: PacketBuffer) {}
+class S2CDeclareRecipes() : PacketPlay {
+    constructor(buf: PacketBuffer) : this()
+
     override fun write(buf: PacketBuffer) {
         buf.writeVarInt(0)
     }

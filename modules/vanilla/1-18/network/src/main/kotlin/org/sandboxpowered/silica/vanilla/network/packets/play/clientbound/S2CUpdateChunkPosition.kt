@@ -5,9 +5,13 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
 
-class S2CUpdateChunkPosition(private var x: Int = 0, private var y: Int = 0) : PacketPlay {
+class S2CUpdateChunkPosition(
+    private val x: Int,
+    private val y: Int
+) : PacketPlay {
 
-    override fun read(buf: PacketBuffer) {}
+    constructor(buf: PacketBuffer) : this(buf.readVarInt(), buf.readVarInt())
+
     override fun write(buf: PacketBuffer) {
         buf.writeVarInt(x)
         buf.writeVarInt(y)

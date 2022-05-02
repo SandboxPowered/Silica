@@ -10,16 +10,17 @@ import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
 import java.util.*
 
 class S2CPlayerInfo(
-    private var action: Int = -1,
-    private var uuids: Array<UUID> = emptyArray(),
-    private var names: Array<String> = emptyArray(),// Action 0
-    private var propertyMaps: Array<PropertyMap> = emptyArray(),// Action 0
-    private var gamemodes: IntArray = intArrayOf(),// Action 0,1
-    private var pings: IntArray = intArrayOf(),// Action 0,2
+    private val action: Int,
+    private val uuids: Array<UUID>,
+    private val names: Array<String>, // Action 0
+    private val propertyMaps: Array<PropertyMap>, // Action 0
+    private val gamemodes: IntArray, // Action 0,1
+    private val pings: IntArray, // Action 0,2
 ) : PacketPlay {
-    override fun read(buf: PacketBuffer) {
-        action = buf.readVarInt()
-    }
+    constructor(buf: PacketBuffer) : this(
+        buf.readVarInt(),
+        TODO(), TODO(), TODO(), TODO(), TODO(),
+    )
 
     override fun write(buf: PacketBuffer) {
         buf.writeVarInt(action)
