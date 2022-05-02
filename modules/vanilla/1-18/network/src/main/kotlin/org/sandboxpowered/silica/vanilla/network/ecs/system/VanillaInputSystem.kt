@@ -26,6 +26,7 @@ import org.sandboxpowered.silica.vanilla.network.ecs.VanillaEntityContext
 import org.sandboxpowered.silica.vanilla.network.ecs.component.VanillaPlayerInputComponent
 import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.S2CUpdateEntityHeadRotation
+import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.S2CUpdateEntityRotation
 import org.sandboxpowered.silica.vanilla.network.packets.play.serverbound.C2SPlayerDigging
 
 @All(VanillaPlayerInputComponent::class, PositionComponent::class, RotationComponent::class)
@@ -69,35 +70,14 @@ class VanillaInputSystem(val server: Server) : IteratingSystem() {
         dy *= 128
         dz *= 128
 
-        val isTeleport = isTeleport(dx, dy, dz)
-        if (isTeleport) return // tmp workaround
-
-        if (hasMoved && isTeleport) {
-            //TODO: Send teleport packet
-        }
-
         var packet: PacketPlay? = null
 
-        /*if (hasRotated) {
-            packet = if (hasMoved && !isTeleport) {
-                S2CUpdateEntityPositionRotation(
-                    entityId,
-                    dx.toInt().toShort(), dy.toInt().toShort(), dz.toInt().toShort(), yaw, pitch, false
-                )
-            } else {
-                S2CUpdateEntityRotation(entityId, yaw, pitch, false)
-            }
+        if (hasRotated) {
+            // move packet handled via events fired from Entity3dMap
+            packet = S2CUpdateEntityRotation(entityId, yaw, pitch, false)
             rot.yaw = yaw
             rot.pitch = pitch
-        } else if (hasMoved && !isTeleport) {
-            packet = S2CUpdateEntityPosition(
-                entityId,
-                dx.toInt().toShort(),
-                dy.toInt().toShort(),
-                dz.toInt().toShort(),
-                false
-            )
-        }*/
+        }
 
         if (yaw != previousYaw) {
             server.network.tell(
@@ -128,9 +108,6 @@ class VanillaInputSystem(val server: Server) : IteratingSystem() {
 
         this.handleTerrainInteraction(entityId, input, previousLocation, rot)
     }
-
-    private fun isTeleport(vararg values: Double): Boolean =
-        values.none { it < Short.MIN_VALUE || it > Short.MAX_VALUE }
 
     private fun handleTerrainInteraction(
         entityId: Int,
