@@ -25,6 +25,7 @@ sealed interface Block : RegistryEntry<Block>, Translatable {
 
     val item: Item?
     val isAir: Boolean
+    fun isAir(state: BlockState): Boolean = isAir
 
     val hasItem: Boolean get() = !isAir
 

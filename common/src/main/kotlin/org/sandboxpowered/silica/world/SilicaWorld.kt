@@ -16,6 +16,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import org.joml.Vector2i
 import org.joml.Vector2ic
+import org.joml.Vector3f
 import org.sandboxpowered.silica.SilicaInternalAPI
 import org.sandboxpowered.silica.api.block.Block
 import org.sandboxpowered.silica.api.block.BlockEntityProvider
@@ -31,6 +32,7 @@ import org.sandboxpowered.silica.api.util.Direction
 import org.sandboxpowered.silica.api.util.Side
 import org.sandboxpowered.silica.api.util.extensions.*
 import org.sandboxpowered.silica.api.util.math.Position
+import org.sandboxpowered.silica.api.util.math.toVec3f
 import org.sandboxpowered.silica.api.world.*
 import org.sandboxpowered.silica.api.world.generation.WorldGenerator
 import org.sandboxpowered.silica.api.world.state.block.BlockState
@@ -75,7 +77,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
                 WORLD_SIZE, WORLD_SIZE, WORLD_SIZE
             )
         )
-        config.with(VelocitySystem())
+        config.with(PhysicsSystem())
         SilicaRegistries.BLOCKS_WITH_ENTITY.forEach {
             it.createProcessingSystem()?.let { system -> config.with(it.processingSystemPriority, system) }
         }
@@ -110,6 +112,8 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
     override fun setBlockState(pos: Position, state: BlockState, flag: WorldWriter.Flag): Boolean {
         if (isOutOfHeightLimit(pos)) return false
         val system = artemisWorld.getSystem<Entity3dMapSystem>()
+        if (!system.getLiving(pos.toVec3f(), Vector3f(1f)).isEmpty) return false
+
         val existingBEs = system.getBlockEntities(pos)
         if (!existingBEs.isEmpty) {
             existingBEs.forEach {

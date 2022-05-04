@@ -64,30 +64,13 @@ object TestPlugin : BasePlugin {
                                 it.spawnEntity(entity) { edit ->
                                     val epos = edit.create<PositionComponent>().pos
                                     epos.set(pos.x + .5, pos.y.toDouble(), pos.z + .5)
-                                    val evelo = edit.create<VelocityComponent>().velocity
-                                    evelo.set(0.0, 0.0, 0.1)
+                                    val velocityComponent = edit.create<VelocityComponent>()
+                                    val direction = velocityComponent.direction
+                                    direction.set(0.0, 0.0, 0.1)
+                                    velocityComponent.velocity = .3f
                                     sendMessage(Component.text("Spawned ${entity.identifier} (id ${edit.entityId})"))
                                 }
                             })
-                            1
-                        }
-                    }
-                }
-            }
-            literal("velo") {
-                argument("entity", IntegerArgumentType.integer(1)) {
-                    argument("velocity", Vec3dArgumentType()) {
-                        executes {
-                            val entityId = it.getArgument<Int>("entity")
-                            val pos = it.getArgument<Vector3d>("velocity")
-                            world.tell(World.Command.DelayedCommand.Perform { world ->
-                                world.updateEntity(entityId) { entity ->
-                                    val velo = entity.getComponent<VelocityComponent>()?.velocity
-                                    velo?.set(pos)
-                                    sendMessage(Component.text("Set entity $entity's velocity"))
-                                }
-                            })
-
                             1
                         }
                     }
@@ -109,9 +92,11 @@ object TestPlugin : BasePlugin {
                             repeat(amount) {
                                 world.spawnEntity(entityDef) { edit ->
                                     val epos = edit.create<PositionComponent>().pos
-                                    epos.set(rng.nextInt(-5, 5) + .5, 7.0, rng.nextInt(-5, 5) + .5)
-                                    val evelo = edit.create<VelocityComponent>().velocity
-                                    evelo.set(rng.nextDouble(-.2, .2), 0.0, rng.nextDouble(-.2, .2))
+                                    epos.set(rng.nextInt(-5, 5) + .5, 7.1, rng.nextInt(-5, 5) + .5)
+                                    val velocityComponent = edit.create<VelocityComponent>()
+                                    val direction = velocityComponent.direction
+                                    direction.set(rng.nextDouble(-.2, .2), 0.0, rng.nextDouble(-.2, .2))
+                                    velocityComponent.velocity = rng.nextDouble(.01, .5).toFloat()
                                     sendMessage(Component.text("Spawned ${entityDef.identifier} (id ${edit.entityId})"))
                                 }
                             }

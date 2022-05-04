@@ -24,8 +24,8 @@ import io.netty.handler.timeout.ReadTimeoutHandler
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import net.kyori.adventure.text.minimessage.MiniMessage
-import org.joml.Vector3d
 import org.joml.Vector3dc
+import org.joml.Vector3f
 import org.sandboxpowered.silica.api.ecs.component.EntityIdentity
 import org.sandboxpowered.silica.api.ecs.component.PositionComponent
 import org.sandboxpowered.silica.api.ecs.component.RotationComponent
@@ -52,6 +52,7 @@ import org.sandboxpowered.silica.vanilla.network.util.NetworkFlow
 import org.sandboxpowered.silica.vanilla.network.util.mapping.BlockStateProtocolMapping
 import org.sandboxpowered.silica.vanilla.network.util.mapping.VanillaProtocolMapping
 import org.sandboxpowered.utilities.Identifier
+import org.sandboxpowered.utilities.math.times
 import java.util.*
 import kotlin.random.Random
 
@@ -311,7 +312,8 @@ private class VanillaNetworkBehavior(
     private fun spawnEntity(e: Entity) {
         val identity = e.getComponent<EntityIdentity>() ?: return
         val (x, y, z) = e.getComponent<PositionComponent>()?.pos ?: return
-        val (vx, vy, vz) = e.getComponent<VelocityComponent>()?.velocity ?: Vector3d(0.0)
+        val velocityComponent = e.getComponent<VelocityComponent>()
+        val (vx, vy, vz) = velocityComponent?.let { it.direction * it.velocity } ?: Vector3f(0f)
         val rot = e.getComponent() ?: noRotation
         val type = entityRegistry[identity.entityDefinition!!.identifier]
 

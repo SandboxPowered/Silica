@@ -2,15 +2,14 @@ package org.sandboxpowered.silica.api.block
 
 import org.sandboxpowered.silica.api.item.Item
 import org.sandboxpowered.silica.api.registry.Registries
-import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.api.world.state.SilicaStateBuilder
 import org.sandboxpowered.silica.api.world.state.SilicaStateFactory
 import org.sandboxpowered.silica.api.world.state.StateProvider
 import org.sandboxpowered.silica.api.world.state.block.BlockState
+import org.sandboxpowered.utilities.Identifier
 
 open class BaseBlock(final override val identifier: Identifier) : Block {
-    override val isAir: Boolean
-        get() = identifier.path == "air"
+    override val isAir: Boolean = identifier.path == "air"
 
     override val item: Item? by Registries.ITEMS[identifier].optional
 

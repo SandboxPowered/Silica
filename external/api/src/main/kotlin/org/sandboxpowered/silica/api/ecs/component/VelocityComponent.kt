@@ -1,12 +1,14 @@
 package org.sandboxpowered.silica.api.ecs.component
 
 import com.artemis.PooledComponent
-import org.joml.Vector3d
+import org.joml.Vector3f
 
 class VelocityComponent : PooledComponent() {
-    val velocity: Vector3d = Vector3d()
+    val direction: Vector3f = Vector3f()
+    var velocity: Float = 0f
 
     override fun reset() {
-        velocity.set(0.0, 0.0, 0.0)
+        direction.set(0.0, 0.0, 0.0)
+        velocity = 0f
     }
 }

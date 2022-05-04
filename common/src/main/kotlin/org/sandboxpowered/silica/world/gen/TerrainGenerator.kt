@@ -7,11 +7,11 @@ import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import org.sandboxpowered.silica.api.util.extensions.onMessage
+import org.sandboxpowered.silica.api.util.math.ChunkPosition
 import org.sandboxpowered.silica.content.block.Blocks
 import org.sandboxpowered.silica.world.util.BlocTree
 import org.sandboxpowered.silica.world.util.iterateCube
 import kotlin.math.absoluteValue
-import kotlin.math.floor
 import kotlin.system.measureTimeMillis
 
 sealed interface TerrainGenerator {
@@ -49,7 +49,7 @@ interface ChunkFiller {
 }
 
 private class SimpleFiller : ChunkFiller {
-    private fun Int.toChunk() = floor(this / 16f).toInt()
+    private fun Int.toChunk() = this shr ChunkPosition.TREES_DEPTH
 
     override fun fill(sx: Int, sy: Int, sz: Int, chunk: BlocTree) {
         if (sy > 0) return

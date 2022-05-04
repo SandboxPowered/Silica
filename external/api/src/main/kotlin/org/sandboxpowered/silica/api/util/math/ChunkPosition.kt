@@ -16,5 +16,15 @@ data class ChunkPosition(
 
         operator fun invoke(vector: Vector3dc): ChunkPosition =
             ChunkPosition(vector.x().toInt() shr 4, vector.y().toInt() shr 4, vector.z().toInt() shr 4)
+
+        const val TREES_DEPTH = 4
+        const val CHUNK_SIZE = 1 shl TREES_DEPTH
+        const val CHUNK_SIZE_F = CHUNK_SIZE.toFloat()
+        const val CHUNK_CUBE = CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE
     }
 }
+
+/**
+ * World coordinate to Chunk-aligned world coordinate
+ */
+val Int.chunkAligned get() = this shr ChunkPosition.TREES_DEPTH shl ChunkPosition.TREES_DEPTH

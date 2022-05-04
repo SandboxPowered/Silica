@@ -311,11 +311,9 @@ private class PlayConnectionActor(
 
     private fun handleReceiveChunkSection(sections: PlayConnection.ReceiveChunkSections): Behavior<PlayConnection> {
         packetHandler.sendPacket(S2CChunkData(sections.x, sections.z, sections.chunkSections))
-        packetHandler.sendPacket(S2CUpdateLight(sections.x, sections.z, true))
+        packetHandler.sendPacket(S2CUpdateLight(sections.x, sections.z, true, emptyList(), emptyList()))
 
-        logger.info("Sending chunk data #$sectionsCount")
         if (sectionsCount < 81 && ++sectionsCount == 81) {
-            logger.info("Sending S2CSetPlayerPositionAndLook")
             packetHandler.sendPacket(
                 S2CSetPlayerPositionAndLook(wantedPos.x, wantedPos.y, wantedPos.z, 0f, 0f, 0.toByte(), 0)
             )

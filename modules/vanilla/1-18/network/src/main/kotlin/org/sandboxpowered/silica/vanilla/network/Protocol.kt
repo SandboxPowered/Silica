@@ -69,6 +69,7 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             0x2F packet ::C2SUseItem
         }
         client {
+            0x01 packet ::S2CSpawnExperience
             0x02 packet ::S2CSpawnLivingEntity
             0x04 packet ::S2CSpawnPlayer
             0x08 packet ::S2CAcknowledgePlayerDigging

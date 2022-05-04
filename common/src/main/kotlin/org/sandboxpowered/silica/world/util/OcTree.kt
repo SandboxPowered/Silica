@@ -231,7 +231,6 @@ class OcTree @JvmOverloads constructor(
         }
     }
 
-
     /**
      * Returns entity ids of entities that are inside [OcTree]s that contain given point
      *
