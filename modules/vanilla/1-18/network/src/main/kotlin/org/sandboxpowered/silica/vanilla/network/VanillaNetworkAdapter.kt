@@ -333,6 +333,17 @@ private class VanillaNetworkBehavior(
                 )
             )
         )
+
+        context.self.tell(
+            VanillaNetworkAdapter.VanillaCommand.SendToAll(
+                S2CEntityMetadata(
+                    e.id, listOf(
+                        S2CEntityMetadata.Entry.customName(e.id.toString()),
+                        S2CEntityMetadata.Entry.customNameVisible(true)
+                    )
+                )
+            )
+        )
     }
 
     private fun updateEntityPosition(id: Int, prevPos: Vector3dc, newPos: Vector3dc) {

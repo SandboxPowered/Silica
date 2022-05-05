@@ -94,6 +94,7 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             0x3E packet ::S2CUpdateEntityHeadRotation
             0x48 packet ::S2CHeldItemChange
             0x49 packet ::S2CUpdateChunkPosition
+            0x4d packet ::S2CEntityMetadata
             0x4f packet ::S2CUpdateEntityVelocity
             0x62 packet ::S2CTeleportEntity
             0x66 packet ::S2CDeclareRecipes
