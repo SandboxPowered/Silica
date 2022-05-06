@@ -1,8 +1,10 @@
 package org.sandboxpowered.silica.testplugin
 
+import com.mojang.brigadier.arguments.FloatArgumentType
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import net.kyori.adventure.text.Component
 import org.joml.Vector3d
+import org.joml.Vector3f
 import org.sandboxpowered.silica.api.SilicaAPI
 import org.sandboxpowered.silica.api.command.sync.ArgumentTypes
 import org.sandboxpowered.silica.api.command.sync.SingletonArgumentSerializer
@@ -53,6 +55,7 @@ object TestPlugin : BasePlugin {
         ArgumentTypes.register("block_pos", SingletonArgumentSerializer { PositionArgumentType() })
         ArgumentTypes.register("entity_definition", SingletonArgumentSerializer { EntityDefinitionArgumentType() })
         ArgumentTypes.register("vec3d", SingletonArgumentSerializer { Vec3dArgumentType() })
+        ArgumentTypes.register("vec3f", SingletonArgumentSerializer { Vec3fArgumentType() })
         SilicaAPI.registerCommands {
             literal("spawn") {
                 argument("entity", EntityDefinitionArgumentType()) {
@@ -115,6 +118,43 @@ object TestPlugin : BasePlugin {
                                 e.getComponent<PositionComponent>()?.pos?.set(pos)
                                 sendMessage(Component.text("Teleported to $pos"))
                             }
+                        })
+
+                        1
+                    }
+                }
+            }
+            literal("velocity") {
+                argument("entity", IntegerArgumentType.integer(0)) {
+                    argument("direction", Vec3fArgumentType()) {
+                        argument("speed", FloatArgumentType.floatArg()) {
+                            executes {
+                                val entity = it.getArgument<Int>("entity")
+                                val direction = it.getArgument<Vector3f>("direction")
+                                val speed = it.getArgument<Float>("speed")
+                                world.tell(World.Command.DelayedCommand.Perform { world ->
+                                    world.updateEntity(entity) { e ->
+                                        e.getComponent<VelocityComponent>()?.apply {
+                                            direction.set(direction.normalize())
+                                            velocity = speed
+                                        }
+                                        sendMessage(Component.text("Updated entity $entity's velocity ($direction @$speed)"))
+                                    }
+                                })
+
+                                1
+                            }
+                        }
+                    }
+                }
+            }
+            literal("kill") {
+                argument("entity", IntegerArgumentType.integer(0)) {
+                    executes {
+                        val entity = it.getArgument<Int>("entity")
+                        world.tell(World.Command.DelayedCommand.Perform { world ->
+                            world.killEntity(entity)
+                            sendMessage(Component.text("Killed $entity"))
                         })
 
                         1

@@ -45,7 +45,7 @@ class PhysicsSystem : IteratingSystem() {
             val (w, h, d) = hitboxMapper[entityId].hitbox
 
             val bounds = AxisAlignedBox(
-                (x - w / 2).toFloat(), y.toFloat() + .1f, (z - d / 2).toFloat(), w, h, d
+                (x - w / 2).toFloat(), y.toFloat(), (z - d / 2).toFloat(), w, h, d
             )
 
             val worldSection = worldReader.subsection(
@@ -54,6 +54,8 @@ class PhysicsSystem : IteratingSystem() {
             )
 
             var min = -1f
+
+            // TODO: Replace this shit with Swept AABB
             bounds.walkCorners { cx, cy, cz ->
                 val hit = worldSection.rayCast(Vector3f(cx, cy, cz), nDirection, velocityComponent.velocity)
                 if (hit == 0f) return // TODO: try to unstuck the poor thing (as this means one or more of it's corners are inside a non air block)
@@ -61,6 +63,8 @@ class PhysicsSystem : IteratingSystem() {
             }
 
             position.add(nDirection * if (min < 0) velocityComponent.velocity else min)
+
+            velocityComponent.velocity = 0f // tmp so I can debug shit
 
         } else position.add(nDirection * velocityComponent.velocity)
 

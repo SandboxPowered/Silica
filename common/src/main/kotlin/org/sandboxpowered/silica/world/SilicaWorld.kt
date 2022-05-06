@@ -6,10 +6,7 @@ import akka.actor.typed.javadsl.AbstractBehavior
 import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
-import com.artemis.Archetype
-import com.artemis.Entity
-import com.artemis.EntityEdit
-import com.artemis.WorldConfigurationBuilder
+import com.artemis.*
 import com.artemis.WorldConfigurationBuilder.Priority
 import com.artemis.utils.ImmutableIntBag
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
@@ -23,6 +20,7 @@ import org.sandboxpowered.silica.api.block.BlockEntityProvider
 import org.sandboxpowered.silica.api.block.BlockEvents
 import org.sandboxpowered.silica.api.ecs.component.BlockPositionComponent
 import org.sandboxpowered.silica.api.ecs.component.EntityIdentity
+import org.sandboxpowered.silica.api.ecs.component.MarkForRemovalComponent
 import org.sandboxpowered.silica.api.entity.EntityDefinition
 import org.sandboxpowered.silica.api.entity.EntityEvents
 import org.sandboxpowered.silica.api.internal.InternalAPI
@@ -63,6 +61,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
     override val isClient: Boolean = side == Side.CLIENT
     override val isServer: Boolean = side == Side.SERVER
 
+    private val entityRemovalMapper: BaseComponentMapper<MarkForRemovalComponent>
 
     init {
         val config = WorldConfigurationBuilder()
@@ -94,7 +93,9 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
                 .registerAs<Entity3dMap>(entityMap)
                 .registerAs<World>(this)
         )
+        // vanilla doesn't like receiving a 0 id so we waste it
         artemisWorld.create()
+        entityRemovalMapper = artemisWorld.getMapper()
     }
 
     override fun subsection(x: Int, y: Int, z: Int, w: Int, h: Int, d: Int): WorldSectionReader {
@@ -162,6 +163,10 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
     override fun updateEntity(id: Int, update: (Entity) -> Unit) {
         val entity = artemisWorld.getEntity(id)?.takeIf(Entity::isActive) ?: return
         update(entity)
+    }
+
+    override fun killEntity(id: Int) {
+        entityRemovalMapper.set(id, true)
     }
 
     override fun saveWorld() {
