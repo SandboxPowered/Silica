@@ -10,14 +10,19 @@ import io.ktor.serialization.gson.GsonConverter
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.SystemUtils
 import org.sandboxpowered.silica.api.util.Side
+import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.util.extensions.downloadFile
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.util.zip.ZipFile
+import kotlin.io.path.createTempFile
 
-object Util {
+object VanillaLocator {
 
-    const val MINECRAFT_VERSION = "1.18-rc1"
+    private val logger = getLogger()
+
+    const val MINECRAFT_VERSION = "1.18.2"
 
     private const val LAUNCHMETA_JSON = "https://launchermeta.mojang.com/mc/game/version_manifest.json"
 
@@ -28,13 +33,13 @@ object Util {
     }
 
     fun ensureMinecraftVersion(version: String, side: Side): File {
+        val loggerReference = "MC $version $side"
         val file = File("versions/$version-${side.str}.jar")
         file.parentFile.mkdirs()
-        if (!file.exists() && side == Side.CLIENT) {
-            findMinecraft(version)?.copyTo(file, true)
-        }
         if (!file.exists()) {
-            runBlocking {
+            if (side == Side.CLIENT) findMinecraft(version)?.copyTo(file, true)
+            else runBlocking {
+                logger.info("Downloading $loggerReference...")
                 val response: JsonObject = ktorClient.get(LAUNCHMETA_JSON).body()
                 val versions = response.getAsJsonArray("versions")
                 val v = versions.asSequence().map { it.asJsonObject }.firstOrNull {
@@ -44,9 +49,18 @@ object Util {
                     val res: JsonObject = ktorClient.get(v.get("url").asString).body()
                     val download = res.getAsJsonObject("downloads").getAsJsonObject(side.str)
 
-                    ktorClient.downloadFile(file, download.get("url").asString)
-                }
-            }
+                    val downloadFile = createTempFile("mc-${side.str}-$version", ".jar").toFile()
+                    if (ktorClient.downloadFile(downloadFile, download.get("url").asString)) downloadFile else null
+                } else null
+            }?.also {
+                val zip = ZipFile(it)
+                if (
+                    zip.getEntry("META-INF/versions/$version/${side.str}-$version.jar")
+                        ?.let(zip::getInputStream)
+                        ?.use { input -> file.outputStream().use { output -> input.copyTo(output) > 0 } } == true
+                ) logger.info("Downloaded and extracted $loggerReference")
+                else logger.warn("Could not extract $loggerReference")
+            } ?: run { logger.warn("Could not download $loggerReference") }
         }
         return file
     }

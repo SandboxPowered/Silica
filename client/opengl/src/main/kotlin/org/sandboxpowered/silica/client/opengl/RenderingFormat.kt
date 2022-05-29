@@ -4,13 +4,11 @@ import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL15
 import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30
-import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.client.opengl.shader.OpenGLShader
 import org.sandboxpowered.silica.resources.ResourceManager
+import org.sandboxpowered.utilities.Identifier
 
-class RenderingFormat(identity: Identifier, vararg attributes: Attribute) {
-    private val identity: Identifier
-    val attributes: Array<Attribute>
+class RenderingFormat(private val identity: Identifier, vararg val attributes: Attribute) {
 
     var shader: OpenGLShader? = null
         private set
@@ -86,10 +84,5 @@ class RenderingFormat(identity: Identifier, vararg attributes: Attribute) {
         }
 
         val dataSize: Int = type.size * vertexSize
-    }
-
-    init {
-        this.identity = identity
-        this.attributes = arrayOf(*attributes)
     }
 }

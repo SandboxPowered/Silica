@@ -17,10 +17,10 @@ interface ResourceLoader {
 
     fun findResources(
         type: ResourceType,
-        namespace: String,
-        path: String,
-        depth: Int,
-        filter: Predicate<String>
+        namespace: String? = null,
+        category: String? = null,
+        depth: Int = DEPTH_NO_LIMIT,
+        filter: Predicate<String> = Predicate { true }
     ): Set<Identifier>
 
     fun getNamespaces(type: ResourceType): Set<String>
@@ -37,5 +37,7 @@ interface ResourceLoader {
             }
             return string.endsWith(filename)
         }
+
+        const val DEPTH_NO_LIMIT = -1
     }
 }

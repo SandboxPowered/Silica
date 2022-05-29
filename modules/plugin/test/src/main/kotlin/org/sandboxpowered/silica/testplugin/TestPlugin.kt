@@ -38,6 +38,7 @@ object TestPlugin : BasePlugin {
     private val OAK_FENCE_GATE by BLOCKS
     private val SPRUCE_FENCE_GATE by BLOCKS
     private val DIRT by BLOCKS
+    private val OAK_PLANKS by BLOCKS
 
     override fun onEnable() {
         logger.info("Test Plugin enabled!")
@@ -47,6 +48,7 @@ object TestPlugin : BasePlugin {
                 inv.inventory.hotbar[0] = ItemStack(OAK_FENCE_GATE.item)
                 inv.inventory.hotbar[1] = ItemStack(SPRUCE_FENCE_GATE.item)
                 inv.inventory.hotbar[2] = ItemStack(DIRT.item, 64)
+                inv.inventory.hotbar[3] = ItemStack(OAK_PLANKS.item, 64)
             }
         }
         ServerEvents.CHAT_EVENT.subscribe { _, channel, message, _ ->

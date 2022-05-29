@@ -22,7 +22,7 @@ class FurnaceProcessingSystem : IteratingSystem() {
     @Wire
     private lateinit var inventoryMapper: ComponentMapper<ResizableInventoryComponent>
 
-    fun resetIfApplicable(inventory: BaseInventory) {
+    private fun resetIfApplicable(inventory: BaseInventory) {
         if (inventory.size != 3) inventory.clear()
     }
 

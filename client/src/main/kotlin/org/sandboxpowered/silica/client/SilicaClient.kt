@@ -7,7 +7,6 @@ import com.google.common.base.Joiner
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.system.Configuration
 import org.sandboxpowered.silica.api.util.Side
-import org.sandboxpowered.silica.api.util.extensions.join
 import org.sandboxpowered.silica.api.util.extensions.listFiles
 import org.sandboxpowered.silica.api.util.extensions.notExists
 import org.sandboxpowered.silica.api.util.getLogger
@@ -20,8 +19,8 @@ import org.sandboxpowered.silica.resources.ResourceManager
 import org.sandboxpowered.silica.resources.ResourceType
 import org.sandboxpowered.silica.resources.ZIPResourceLoader
 import org.sandboxpowered.silica.util.FileFilters
-import org.sandboxpowered.silica.util.Util
-import org.sandboxpowered.silica.util.Util.MINECRAFT_VERSION
+import org.sandboxpowered.silica.util.VanillaLocator
+import org.sandboxpowered.silica.util.VanillaLocator.MINECRAFT_VERSION
 import java.io.File
 import java.util.*
 
@@ -107,7 +106,7 @@ class SilicaClient(private val args: Args) : Runnable {
         assetManager = ResourceManager(ResourceType.ASSETS)
         assetManager.add(ClasspathResourceLoader("Silica", arrayOf("silica", "minecraft")))
 
-        val mcArchive = Util.ensureMinecraftVersion(MINECRAFT_VERSION, Side.CLIENT)
+        val mcArchive = VanillaLocator.ensureMinecraftVersion(MINECRAFT_VERSION, Side.CLIENT)
         assetManager.add(ZIPResourceLoader("Minecraft $MINECRAFT_VERSION", mcArchive))
 
         File("resourcepacks").apply {
@@ -121,7 +120,7 @@ class SilicaClient(private val args: Args) : Runnable {
         pluginManager = PluginManager()
         pluginManager.load()
 
-        logger.debug("Loaded namespaces: [${assetManager.getNamespaces().join(",")}]")
+        logger.debug("Loaded namespaces: [${assetManager.getNamespaces().joinToString()}]")
         window = Window("Sandbox Silica", args.width, args.height, renderer)
         keyboard = Keyboard(window)
         val stitcher = renderer.createTextureStitcher()

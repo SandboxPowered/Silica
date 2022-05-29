@@ -19,13 +19,21 @@ import org.sandboxpowered.silica.api.util.extensions.*
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.api.world.World
 import org.sandboxpowered.silica.resources.ZIPResourceLoader
-import org.sandboxpowered.silica.util.Util
-import org.sandboxpowered.silica.util.Util.MINECRAFT_VERSION
+import org.sandboxpowered.silica.util.VanillaLocator
+import org.sandboxpowered.silica.util.VanillaLocator.MINECRAFT_VERSION
 import org.sandboxpowered.silica.util.extensions.getAnnotation
 import org.sandboxpowered.silica.util.extensions.getTypesAnnotatedWith
 import org.sandboxpowered.silica.world.SilicaWorld
 import java.nio.file.Paths
 import java.time.Duration
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.contains
+import kotlin.collections.forEach
+import kotlin.collections.isNotEmpty
+import kotlin.collections.joinToString
+import kotlin.collections.set
+import kotlin.collections.sortedMapOf
 import kotlin.system.exitProcess
 
 class DedicatedServer(args: Args) : SilicaServer() {
@@ -38,7 +46,7 @@ class DedicatedServer(args: Args) : SilicaServer() {
     class Args
 
     init {
-        val mcArchive = Util.ensureMinecraftVersion(MINECRAFT_VERSION, Side.SERVER)
+        val mcArchive = VanillaLocator.ensureMinecraftVersion(MINECRAFT_VERSION, Side.SERVER)
         dataManager.add(ZIPResourceLoader("Minecraft $MINECRAFT_VERSION", mcArchive))
     }
 
@@ -49,7 +57,7 @@ class DedicatedServer(args: Args) : SilicaServer() {
 
     fun run() {
         if (!properties.onlineMode) logger.warn("Server running in Offline Mode! This will be unsupported in Silica 1.0")
-        logger.info("Loaded namespaces: [${dataManager.getNamespaces().join(",")}]")
+        logger.info("Loaded namespaces: [${dataManager.getNamespaces().joinToString()}]")
         //TODO: make this use an plugin classloader rather than package search
         val classes = Reflections("org.sandboxpowered").getTypesAnnotatedWith<Plugin>()
         val log = getLogger()
