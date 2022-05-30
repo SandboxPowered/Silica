@@ -1,45 +1,30 @@
 package org.sandboxpowered.silica.api.recipe.ingredient
 
-import kotlinx.serialization.json.*
 import org.sandboxpowered.silica.api.item.ItemStack
+import org.sandboxpowered.utilities.Identifier
 import java.util.*
-import java.util.function.Predicate
 
-class Ingredient(val values: Array<Value>) : Predicate<ItemStack> {
-    private var internalStacks: Array<ItemStack>? = null
-    val stacks: Array<ItemStack>
-        get() {
-            reify()
-            return internalStacks ?: emptyArray()
-        }
+sealed class Ingredient(@Transient private val identifier: Identifier) {
+    abstract fun matches(stack: ItemStack): Boolean
 
-    override fun test(t: ItemStack): Boolean = if (stacks.isEmpty()) t.isEmpty else stacks.any { it == t }
+    override fun equals(other: Any?): Boolean {
+        other ?: return false
+        if (this === other) return true
+        if (other.javaClass != this.javaClass) return false
 
-    private fun reify() {
-        if (internalStacks == null) {
-            internalStacks = values.flatMap(Value::items).distinct().toTypedArray()
-        }
+        if (identifier != (other as Ingredient).identifier) return false
+
+        return true
     }
 
-    fun toJson(): JsonElement = if (values.size == 1) values[0].serialize() else buildJsonArray {
-        values.forEach {
-            add(it.serialize())
-        }
+    // TODO: sort this out
+    override fun hashCode(): Int = Objects.hash(javaClass.name, identifier)
+
+    class Item(val item: Identifier) : Ingredient(item) {
+        override fun matches(stack: ItemStack) = stack.item.identifier == item
     }
 
-    sealed interface Value {
-        val items: Collection<ItemStack>
-
-        fun serialize(): JsonObject
-    }
-
-    data class ItemValue(val item: ItemStack) : Value {
-        override val items: Collection<ItemStack> = Collections.singleton(item)
-
-        override fun serialize(): JsonObject {
-            return buildJsonObject {
-                put("item", item.item.identifier.toString())
-            }
-        }
+    class Tag(val tag: Identifier) : Ingredient(tag) {
+        override fun matches(stack: ItemStack) = TODO("Not implemented")
     }
 }

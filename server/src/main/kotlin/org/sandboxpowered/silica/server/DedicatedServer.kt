@@ -15,9 +15,12 @@ import org.sandboxpowered.silica.api.network.NetworkAdapter
 import org.sandboxpowered.silica.api.plugin.BasePlugin
 import org.sandboxpowered.silica.api.plugin.Plugin
 import org.sandboxpowered.silica.api.util.Side
-import org.sandboxpowered.silica.api.util.extensions.*
+import org.sandboxpowered.silica.api.util.extensions.WithContext
+import org.sandboxpowered.silica.api.util.extensions.onMessage
+import org.sandboxpowered.silica.api.util.extensions.onSignal
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.api.world.World
+import org.sandboxpowered.silica.data.recipe.RecipeManager
 import org.sandboxpowered.silica.resources.ZIPResourceLoader
 import org.sandboxpowered.silica.util.VanillaLocator
 import org.sandboxpowered.silica.util.VanillaLocator.MINECRAFT_VERSION
@@ -28,12 +31,7 @@ import java.nio.file.Paths
 import java.time.Duration
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.collections.contains
-import kotlin.collections.forEach
-import kotlin.collections.isNotEmpty
-import kotlin.collections.joinToString
 import kotlin.collections.set
-import kotlin.collections.sortedMapOf
 import kotlin.system.exitProcess
 
 class DedicatedServer(args: Args) : SilicaServer() {
@@ -79,6 +77,8 @@ class DedicatedServer(args: Args) : SilicaServer() {
             log.debug("Loading ${plugin.id}@${plugin.version}")
             instance.onEnable()
         }
+
+        RecipeManager().load(dataManager)
 
         system = ActorSystem.create(
             DedicatedServerGuardian.create(this, this::world::set, this::network::set),

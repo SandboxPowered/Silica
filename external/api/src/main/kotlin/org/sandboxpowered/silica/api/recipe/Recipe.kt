@@ -1,5 +1,10 @@
 package org.sandboxpowered.silica.api.recipe
 
-import org.sandboxpowered.silica.api.item.inventory.Inventory
+import org.sandboxpowered.utilities.Identifier
 
-interface Recipe<INV : Inventory>
+abstract class Recipe(
+    val identifier: Identifier,
+    val type: Identifier
+) {
+    abstract val ingredientsHash: Int
+}

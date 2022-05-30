@@ -7,10 +7,8 @@ import org.sandboxpowered.silica.resources.ClasspathResourceLoader
 import org.sandboxpowered.silica.resources.ResourceManager
 import org.sandboxpowered.silica.resources.ResourceType
 import java.net.Proxy
-import java.util.*
 
 abstract class SilicaServer : Server {
-    private val serverRandom = Random()
     val dataManager: ResourceManager = ResourceManager(ResourceType.DATA)
     override val sessionService: MinecraftSessionService =
         YggdrasilAuthenticationService(Proxy.NO_PROXY).createMinecraftSessionService()

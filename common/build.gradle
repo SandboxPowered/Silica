@@ -36,5 +36,7 @@ dependencies {
     api libs.bundles.adventure.base
     api libs.adventure.minimessage
     api libs.bundles.adventure.serializers
+
+    implementation libs.bundles.jackson
 }
 
