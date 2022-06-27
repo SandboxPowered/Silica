@@ -7,6 +7,7 @@ import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import com.mojang.authlib.GameProfile
+import org.joml.Vector3d
 import org.sandboxpowered.silica.api.SilicaAPI
 import org.sandboxpowered.silica.api.ecs.component.PlayerInventoryComponent
 import org.sandboxpowered.silica.api.nbt.NBTCompound
@@ -15,7 +16,6 @@ import org.sandboxpowered.silica.api.nbt.setTag
 import org.sandboxpowered.silica.api.network.Packet
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.server.Server
-import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.api.util.extensions.*
 import org.sandboxpowered.silica.api.world.World
 import org.sandboxpowered.silica.vanilla.network.ecs.component.VanillaPlayerInputComponent
@@ -24,6 +24,7 @@ import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.*
 import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.world.VanillaChunkSection
 import org.sandboxpowered.silica.vanilla.network.util.mapping.VanillaProtocolMapping
+import org.sandboxpowered.utilities.Identifier
 import java.time.Duration
 
 sealed interface PlayConnection {
@@ -138,58 +139,58 @@ private class PlayConnectionActor(
         val overworld = Identifier("minecraft", "overworld")
         val overworldType: NBTCompound
         val codec = nbt {
-            setTag("minecraft:dimension_type") {
-                setString("type", "minecraft:dimension_type")
+            "minecraft:dimension_type" to nbt {
+                "type" to "minecraft:dimension_type"
 
                 val overworldTypeEntry = nbt {
-                    setString("name", overworld.toString())
-                    setInt("id", 0)
+                    "name" to overworld.toString()
+                    "id" to 0
                     overworldType = nbt {
-                        setBoolean("piglin_safe", false)
-                        setBoolean("natural", true)
-                        setFloat("ambient_light", 1f)
-                        setString("infiniburn", "")
-                        setBoolean("respawn_anchor_works", false)
-                        setBoolean("has_skylight", true)
-                        setBoolean("bed_works", true)
-                        setString("effects", "minecraft:overworld")
-                        setBoolean("has_raids", true)
-                        setInt("min_y", 0)
-                        setInt("height", 512)
-                        setInt("logical_height", 256)
-                        setFloat("coordinate_scale", 1f)
-                        setBoolean("ultrawarm", false)
-                        setBoolean("has_ceiling", false)
+                        "piglin_safe" to false
+                        "natural" to true
+                        "ambient_light" to 1f
+                        "infiniburn" to "#minecraft:infiniburn_overworld"
+                        "respawn_anchor_works" to false
+                        "has_skylight" to true
+                        "bed_works" to true
+                        "effects" to "minecraft:overworld"
+                        "has_raids" to true
+                        "min_y" to 0
+                        "height" to 512
+                        "logical_height" to 256
+                        "coordinate_scale" to 1.0
+                        "ultrawarm" to false
+                        "has_ceiling" to false
                     }
-                    setTag("element", overworldType)
+                    "element" to overworldType
                 }
 
-                setList("value", listOf(overworldTypeEntry))
+                "value" to listOf(overworldTypeEntry)
             }
 
             setTag("minecraft:worldgen/biome") {
-                setString("type", "minecraft:worldgen/biome")
+                "type" to "minecraft:worldgen/biome"
 
                 val plainsBiomeEntry = nbt {
-                    setString("name", "minecraft:plains")
-                    setInt("id", 0)
+                    "name" to "minecraft:plains"
+                    "id" to 0
                     setTag("element") {
-                        setString("precipitation", "rain")
-                        setFloat("depth", 0f)
-                        setFloat("temperature", 0f)
-                        setFloat("scale", 1f)
-                        setFloat("downfall", 1f)
-                        setString("category", "plains")
+                        "precipitation" to "rain"
+                        "depth" to 0f
+                        "temperature" to 0f
+                        "scale" to 1f
+                        "downfall" to 1f
+                        "category" to "plains"
                         setTag("effects") {
-                            setInt("sky_color", 8364543)
-                            setInt("water_fog_color", 8364543)
-                            setInt("fog_color", 8364543)
-                            setInt("water_color", 8364543)
+                            "sky_color" to 8364543
+                            "water_fog_color" to 8364543
+                            "fog_color" to 8364543
+                            "water_color" to 8364543
                         }
                     }
                 }
 
-                setList("value", listOf(plainsBiomeEntry))
+                "value" to listOf(plainsBiomeEntry)
             }
         }
         packetHandler.sendPacket(
@@ -222,17 +223,8 @@ private class PlayConnectionActor(
         packetHandler.sendPacket(S2CDeclareCommands(SilicaAPI.commandDispatcher.root))
         packetHandler.sendPacket(S2CUnlockRecipes())
         val currentPos = receive.input.wantedPosition
-        packetHandler.sendPacket(
-            S2CSetPlayerPositionAndLook(
-                currentPos.x,
-                currentPos.y,
-                currentPos.z,
-                0f,
-                0f,
-                0.toByte(),
-                0
-            )
-        )
+        wantedPos = currentPos
+
         val gamemodes = IntArray(receive.gameProfiles.size)
         val pings = IntArray(receive.gameProfiles.size)
         receive.gameProfiles.forEachIndexed { index, uuid ->
@@ -314,9 +306,18 @@ private class PlayConnectionActor(
         return Behaviors.stopped()
     }
 
+    private var wantedPos = Vector3d()
+    private var sectionsCount = 0
+
     private fun handleReceiveChunkSection(sections: PlayConnection.ReceiveChunkSections): Behavior<PlayConnection> {
         packetHandler.sendPacket(S2CChunkData(sections.x, sections.z, sections.chunkSections))
-        packetHandler.sendPacket(S2CUpdateLight(sections.x, sections.z, true))
+        packetHandler.sendPacket(S2CUpdateLight(sections.x, sections.z, true, emptyList(), emptyList()))
+
+        if (sectionsCount < 81 && ++sectionsCount == 81) {
+            packetHandler.sendPacket(
+                S2CSetPlayerPositionAndLook(wantedPos.x, wantedPos.y, wantedPos.z, 0f, 0f, 0.toByte(), 0)
+            )
+        }
         return Behaviors.same()
     }
 

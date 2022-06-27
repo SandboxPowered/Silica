@@ -11,7 +11,7 @@ import java.util.*
 
 abstract class SilicaServer : Server {
     private val serverRandom = Random()
-    var dataManager: ResourceManager = ResourceManager(ResourceType.DATA)
+    val dataManager: ResourceManager = ResourceManager(ResourceType.DATA)
     override val sessionService: MinecraftSessionService =
         YggdrasilAuthenticationService(Proxy.NO_PROXY).createMinecraftSessionService()
 

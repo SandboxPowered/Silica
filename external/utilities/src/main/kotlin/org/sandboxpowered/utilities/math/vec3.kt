@@ -60,6 +60,7 @@ operator fun Vector3ic.times(o: Float): Vector3f = toFloat().mul(o)
 operator fun Vector3fc.plus(o: Vector3fc): Vector3f = add(o, Vector3f())
 operator fun Vector3fc.minus(o: Vector3fc): Vector3f = sub(o, Vector3f())
 operator fun Vector3fc.times(o: Vector3fc): Vector3f = mul(o, Vector3f())
+operator fun Vector3fc.times(o: Float): Vector3f = mul(o, Vector3f())
 operator fun Vector3f.plusAssign(o: Vector3fc) {
     add(o)
 }

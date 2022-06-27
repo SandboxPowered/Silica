@@ -1,5 +1,6 @@
 package org.sandboxpowered.silica.api.world
 
+import com.artemis.Entity
 import com.artemis.EntityEdit
 import org.sandboxpowered.silica.api.entity.EntityDefinition
 import org.sandboxpowered.silica.api.util.math.Position
@@ -12,6 +13,8 @@ interface WorldWriter {
     fun setBlockState(pos: Position, state: BlockState, flag: Flag): Boolean
 
     fun spawnEntity(entity: EntityDefinition, editor: (EntityEdit) -> Unit)
+    fun updateEntity(id: Int, update: (Entity) -> Unit)
+    fun killEntity(id: Int)
 
     fun saveWorld()
 

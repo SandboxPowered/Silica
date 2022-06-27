@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.resources
 
-import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.resources.ResourceLoader.Companion.isValidPath
+import org.sandboxpowered.utilities.Identifier
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.InputStream
@@ -53,13 +53,11 @@ class ClasspathResourceLoader(override val name: String, var namespaces: Array<S
 
     override fun findResources(
         type: ResourceType,
-        namespace: String,
-        path: String,
+        namespace: String?,
+        category: String?,
         depth: Int,
         filter: Predicate<String>
-    ): Set<Identifier> {
-        TODO("Not yet implemented")
-    }
+    ): Set<Identifier> = emptySet() // TODO
 
     override fun getNamespaces(type: ResourceType): Set<String> {
         return setOf(*namespaces)

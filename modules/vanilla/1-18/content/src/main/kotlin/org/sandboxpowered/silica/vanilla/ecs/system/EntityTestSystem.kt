@@ -21,7 +21,7 @@ class EntityTestSystem : IteratingSystem() {
 
     override fun process(entityId: Int) {
         if (--testMapper[entityId].ttl <= 0) {
-            logger.info("Killing entity $entityId")
+//            logger.info("Killing entity $entityId")
             removalMapper.create(entityId)
         }
     }

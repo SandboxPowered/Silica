@@ -5,7 +5,7 @@ import org.sandboxpowered.silica.api.world.WorldSelection
 /**
  * Simple square AABB
  */
-class Bounds : WorldSelection {
+class Bounds : WorldSelection() {
     override var x = 0
         private set
     override var y = 0
@@ -16,7 +16,7 @@ class Bounds : WorldSelection {
         private set
     override var height = 0
         private set
-    override var length = 0
+    override var depth = 0
         private set
 
     fun set(
@@ -28,7 +28,7 @@ class Bounds : WorldSelection {
         this.z = z
         this.width = size
         this.height = size
-        this.length = size
+        this.depth = size
         return this
     }
 
@@ -41,11 +41,11 @@ class Bounds : WorldSelection {
         this.z = z
         this.width = width
         this.height = height
-        this.length = length
+        this.depth = length
         return this
     }
 
     override fun toString(): String {
-        return "Bounds(x=$x, y=$y, z=$z, width=$width, height=$height, length=$length)"
+        return "Bounds(x=$x, y=$y, z=$z, width=$width, height=$height, length=$depth)"
     }
 }

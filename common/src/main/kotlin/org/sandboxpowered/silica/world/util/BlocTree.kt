@@ -2,16 +2,20 @@ package org.sandboxpowered.silica.world.util
 
 import net.mostlyoriginal.api.utils.pooling.ObjectPool
 import net.mostlyoriginal.api.utils.pooling.Poolable
+import org.joml.Vector3fc
 import org.sandboxpowered.silica.api.util.extensions.getPool
 import org.sandboxpowered.silica.api.util.extensions.pow
 import org.sandboxpowered.silica.api.util.getLogger
+import org.sandboxpowered.silica.api.util.math.ChunkPosition
 import org.sandboxpowered.silica.api.world.WorldSection
 import org.sandboxpowered.silica.api.world.WorldSelection
+import org.sandboxpowered.silica.api.world.rayCast
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 import scala.util.Either
 import scala.util.Left
 import scala.util.Right
 import java.util.*
+import kotlin.math.min
 
 /**
  * Octree for optimized queries in 3d space, but for BlockStates
@@ -64,12 +68,25 @@ class BlocTree private constructor(
         return this
     }
 
+    internal fun init(
+        treeDepth: Int,
+        bounds: Bounds,
+        default: BlockState
+    ): BlocTree {
+        this.treeDepth = treeDepth
+        this.bounds = bounds
+        this.default = default
+        this.nonAirBlockStates = if (default.isAir) 0 else bounds.width.pow(3)
+
+        return this
+    }
+
     private fun indexOf(
         x: Int, y: Int, z: Int
     ): Int {
         val midX = bounds.x + bounds.width / 2
         val midY = bounds.y + bounds.height / 2
-        val midZ = bounds.z + bounds.length / 2
+        val midZ = bounds.z + bounds.depth / 2
 
         var res = 0
         res = res or when {
@@ -96,24 +113,24 @@ class BlocTree private constructor(
     ): Int {
         val midX = bounds.x + bounds.width / 2
         val midY = bounds.y + bounds.height / 2
-        val midZ = bounds.z + bounds.length / 2
+        val midZ = bounds.z + bounds.depth / 2
 
         var res = 0
         res = res or when {
             x >= midX -> E
-            x < midX && x + width <= midX -> W
+            x + width <= midX -> W
             else -> return OUTSIDE
         }
 
         res = res or when {
             y >= midY -> U
-            y < midY && y + height <= midY -> D
+            y + height <= midY -> D
             else -> return OUTSIDE
         }
 
         res = res or when {
             z >= midZ -> S
-            z < midZ && z + depth <= midZ -> N
+            z + depth <= midZ -> N
             else -> return OUTSIDE
         }
 
@@ -151,7 +168,7 @@ class BlocTree private constructor(
             old
         } else {
             if (bounds.width > 2) {
-                if ((containers[index] ?: default) != state) {
+                if (blockStateAtIndex(index) != state) {
                     this.split(index)
                     nodes[index]!!.internalSet(x, y, z, state)
                 } else state
@@ -179,56 +196,48 @@ class BlocTree private constructor(
     }
 
     private fun split(index: Int) {
-        val halfSize = bounds.length / 2
+        nodes[index] = pooled(
+            treeDepth + 1,
+            splitBounds(index),
+            blockStateAtIndex(index)
+        )
+    }
+
+    private fun splitBounds(index: Int): Bounds = Bounds().apply {
+        val halfSize = bounds.depth / 2
 
         when (index) {
-            DNW -> nodes[DNW] = pooled(
-                treeDepth + 1,
+            DNW -> set(
                 bounds.x, bounds.y, bounds.z,
                 halfSize,
-                containers[DNW] ?: default
             )
-            DNE -> nodes[DNE] = pooled(
-                treeDepth + 1,
+            DNE -> set(
                 bounds.x + halfSize, bounds.y, bounds.z,
                 halfSize,
-                containers[DNE] ?: default
             )
-            DSW -> nodes[DSW] = pooled(
-                treeDepth + 1,
+            DSW -> set(
                 bounds.x, bounds.y, bounds.z + halfSize,
                 halfSize,
-                containers[DSW] ?: default
             )
-            DSE -> nodes[DSE] = pooled(
-                treeDepth + 1,
+            DSE -> set(
                 bounds.x + halfSize, bounds.y, bounds.z + halfSize,
                 halfSize,
-                containers[DSE] ?: default
             )
-            UNW -> nodes[UNW] = pooled(
-                treeDepth + 1,
+            UNW -> set(
                 bounds.x, bounds.y + halfSize, bounds.z,
                 halfSize,
-                containers[UNW] ?: default
             )
-            UNE -> nodes[UNE] = pooled(
-                treeDepth + 1,
+            UNE -> set(
                 bounds.x + halfSize, bounds.y + halfSize, bounds.z,
                 halfSize,
-                containers[UNE] ?: default
             )
-            USW -> nodes[USW] = pooled(
-                treeDepth + 1,
+            USW -> set(
                 bounds.x, bounds.y + halfSize, bounds.z + halfSize,
                 halfSize,
-                containers[USW] ?: default
             )
-            USE -> nodes[USE] = pooled(
-                treeDepth + 1,
+            USE -> set(
                 bounds.x + halfSize, bounds.y + halfSize, bounds.z + halfSize,
                 halfSize,
-                containers[USE] ?: default
             )
         }
     }
@@ -239,7 +248,7 @@ class BlocTree private constructor(
     override operator fun get(x: Int, y: Int, z: Int): BlockState =
         if (bounds.contains(x, y, z)) {
             val index = indexOf(x, y, z)
-            nodes[index]?.get(x, y, z) ?: containers[index] ?: default
+            nodes[index]?.get(x, y, z) ?: blockStateAtIndex(index)
         } else default
 
     /**
@@ -256,14 +265,14 @@ class BlocTree private constructor(
 
     override fun nonAirInSection(x: Int, y: Int, z: Int): Int {
         require(bounds.contains(x, y, z)) { "Position $x, $y, $z outside of $bounds" }
-        require((bounds.x - x) % 16 == 0 && (bounds.z - z) % 16 == 0 && (bounds.z - z) % 16 == 0) { "Position $x, $y, $z is not a chunk origin" }
-        return if (bounds.width <= 16) this.nonAirBlockStates
+        require((bounds.x - x) % ChunkPosition.CHUNK_SIZE == 0 && (bounds.y - y) % ChunkPosition.CHUNK_SIZE == 0 && (bounds.z - z) % ChunkPosition.CHUNK_SIZE == 0) { "Position $x, $y, $z is not a chunk origin" }
+        return if (bounds.width <= ChunkPosition.CHUNK_SIZE) this.nonAirBlockStates
         else {
-            val index = indexOf(x, y, z, 16, 16, 16)
+            val index = indexOf(x, y, z, ChunkPosition.CHUNK_SIZE, ChunkPosition.CHUNK_SIZE, ChunkPosition.CHUNK_SIZE)
             val n = if (index in 0 until 8) nodes[index] else null
             n?.nonAirInSection(x, y, z) ?: if (
-                (if (index in 0 until 8) containers[index] ?: default else default).isAir
-            ) 0 else 4096
+                (if (index in 0 until 8) blockStateAtIndex(index) else default).isAir
+            ) 0 else ChunkPosition.CHUNK_CUBE
         }
     }
 
@@ -282,23 +291,56 @@ class BlocTree private constructor(
         }
     }
 
+    override fun rayCast(from: Vector3fc, ray: Vector3fc, max: Float): Float {
+        val self = bounds.rayCast(from, ray)
+        if (self < 0f || self > max) return -1f
+
+        // This whole thing would've been so fancy in functional style
+        // But that would have introduced boxing. Thanks, JVM !
+        var min = -1f
+        for (i in nodes.indices) {
+            val node = nodes[i]
+            val hit = node
+                ?.rayCast(from, ray, max)
+                ?: if (blockStateAtIndex(i).isAir) -1f
+                else splitBounds(i).rayCast(from, ray) // TODO: handle non-full & passthrough blocks
+            when {
+                hit == 0f -> return 0f
+                hit > 0f && hit <= max -> min = if (min < 0f) hit else min(min, hit)
+            }
+        }
+        return min
+    }
+
+    private fun blockStateAtIndex(index: Int) = containers[index] ?: default
+
     /**
      * Dispose of the [BlocTree] by removing all nodes and stored ids
      */
     fun dispose() = reset()
 
     internal fun read(from: Queue<Either<BlockState, Unit>>) {
+        reset()
+        nonAirBlockStates = if (default.isAir) 0 else bounds.width.pow(3)
+        val containerSize = (bounds.width / 2).pow(3)
         var data = from.poll()
         var index = 0
         while (data != null && index < 8) {
             when (data) {
-                is Left -> containers[index++] = data.value()
+                is Left -> {
+                    containers[index] = data.value()
+
+                    if (default.isAir && !data.value().isAir) nonAirBlockStates += containerSize
+                    else if (!default.isAir && data.value().isAir) nonAirBlockStates -= containerSize
+                }
                 else -> {
                     split(index)
-                    nodes[index++]?.read(from)
+                    this.nonAirBlockStates -= nodes[index]!!.nonAirBlockStates
+                    nodes[index]?.read(from)
+                    this.nonAirBlockStates += nodes[index]!!.nonAirBlockStates
                 }
             }
-            if (index < 8) data = from.poll()
+            if (++index < 8) data = from.poll()
         }
     }
 
@@ -306,8 +348,7 @@ class BlocTree private constructor(
         repeat(8) {
             when (val n = nodes[it]) {
                 null -> {
-                    @Suppress("RemoveExplicitTypeArguments") // it's a lie
-                    yield(Left<BlockState, Unit>(containers[it] ?: default))
+                    yield(Left(blockStateAtIndex(it)))
                 }
                 else -> {
                     yield(Right(Unit))
@@ -345,6 +386,12 @@ class BlocTree private constructor(
             x: Int, y: Int, z: Int,
             size: Int, default: BlockState
         ): BlocTree = otPool.obtain().init(depth, x, y, z, size, default)
+
+        private fun pooled(
+            depth: Int,
+            bounds: Bounds,
+            default: BlockState
+        ): BlocTree = otPool.obtain().init(depth, bounds, default)
 
         operator fun invoke(
             x: Int, y: Int, z: Int,

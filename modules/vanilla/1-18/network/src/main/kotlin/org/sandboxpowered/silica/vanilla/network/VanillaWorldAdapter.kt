@@ -91,7 +91,7 @@ private class VanillaWorldAdapterActor(
         return Behaviors.same()
     }
 
-    fun onUpdate(pos: Position, old: BlockState, new: BlockState, flag: WorldWriter.Flag) =
+    private fun onUpdate(pos: Position, old: BlockState, new: BlockState, flag: WorldWriter.Flag) =
         context.self.tell(VanillaWorldAdapter.Update(pos, old, new, flag))
 }
 

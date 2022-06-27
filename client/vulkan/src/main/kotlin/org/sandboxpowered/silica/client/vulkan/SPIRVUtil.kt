@@ -32,7 +32,7 @@ class SPIRVUtil {
             }
         }
 
-        fun compileShader(filename: String, source: String?, shaderKind: ShaderKind): SPIRV {
+        fun compileShader(filename: String, source: String, shaderKind: ShaderKind): SPIRV {
             val compiler = shaderc_compiler_initialize()
             if (compiler == NULL) {
                 throw RuntimeException("Failed to create shader compiler")

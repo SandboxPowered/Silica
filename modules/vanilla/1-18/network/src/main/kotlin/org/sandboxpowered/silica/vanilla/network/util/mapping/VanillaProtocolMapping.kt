@@ -6,9 +6,10 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.*
 import org.sandboxpowered.silica.api.registry.Registries
-import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.api.util.extensions.fromJson
 import org.sandboxpowered.silica.api.util.extensions.getResourceAsString
+import org.sandboxpowered.utilities.Identifier
+import java.util.function.Function
 
 class VanillaProtocolMapping private constructor() {
     companion object {
@@ -32,9 +33,9 @@ class VanillaProtocolMapping private constructor() {
                 val registryProtocolId = registryObject.getAsInt("protocol_id")
                 val registryReference = RegistryReference(registryKey, default, registryProtocolId)
                 val entries = registryObject.getAsJsonObject("entries")
-                val list = map.computeIfAbsent(registryKey) {
+                val list = map.computeIfAbsent(registryKey, Function {
                     ObjectArrayList()
-                }
+                })
                 entries.keySet().forEach { registryEntryKey ->
                     val entry = entries.getAsJsonObject(registryEntryKey)
                     val protocolId = entry.getAsInt("protocol_id")

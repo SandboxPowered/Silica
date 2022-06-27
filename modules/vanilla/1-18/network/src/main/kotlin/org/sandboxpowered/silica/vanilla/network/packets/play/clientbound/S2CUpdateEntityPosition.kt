@@ -6,15 +6,20 @@ import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
 
 class S2CUpdateEntityPosition(
-    var entityId: Int = -1,
-    var deltaX: Short = 0,
-    var deltaY: Short = 0,
-    var deltaZ: Short = 0,
-    var onGround: Boolean = false
+    val entityId: Int,
+    val deltaX: Short,
+    val deltaY: Short,
+    val deltaZ: Short,
+    val onGround: Boolean
 ) : PacketPlay {
-    override fun read(buf: PacketBuffer) {
-        TODO("Not yet implemented")
-    }
+
+    constructor(buf: PacketBuffer) : this(
+        buf.readVarInt(),
+        buf.readShort(),
+        buf.readShort(),
+        buf.readShort(),
+        buf.readBoolean()
+    )
 
     override fun write(buf: PacketBuffer) {
         buf.writeVarInt(entityId)

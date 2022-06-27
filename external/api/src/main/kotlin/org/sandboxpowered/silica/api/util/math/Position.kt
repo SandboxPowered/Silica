@@ -1,5 +1,8 @@
 package org.sandboxpowered.silica.api.util.math
 
+import org.joml.Vector3d
+import org.joml.Vector3f
+import org.joml.Vector3i
 import org.sandboxpowered.silica.api.util.Direction
 import kotlin.math.log2
 
@@ -155,3 +158,7 @@ open class Position(
         override fun toString(): String = "$start-$end"
     }
 }
+
+fun Position.toVec3i() = Vector3i(x, y, z)
+fun Position.toVec3f() = Vector3f(x.toFloat(), y.toFloat(), z.toFloat())
+fun Position.toVec3d() = Vector3d(x.toDouble(), y.toDouble(), z.toDouble())

@@ -4,20 +4,28 @@ import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
+import org.sandboxpowered.silica.vanilla.network.util.extensions.readAngle
 import org.sandboxpowered.silica.vanilla.network.util.extensions.writeAngle
 
 class S2CUpdateEntityPositionRotation(
-    var entityId: Int = -1,
-    var deltaX: Short = 0,
-    var deltaY: Short = 0,
-    var deltaZ: Short = 0,
-    var yaw: Float = 0f,
-    var pitch: Float = 0f,
-    var onGround: Boolean = false
+    private val entityId: Int,
+    private val deltaX: Short,
+    private val deltaY: Short,
+    private val deltaZ: Short,
+    private val yaw: Float,
+    private val pitch: Float,
+    private val onGround: Boolean
 ) : PacketPlay {
-    override fun read(buf: PacketBuffer) {
-        TODO("Not yet implemented")
-    }
+
+    constructor(buf: PacketBuffer) : this(
+        buf.readVarInt(),
+        buf.readShort(),
+        buf.readShort(),
+        buf.readShort(),
+        buf.readAngle(),
+        buf.readAngle(),
+        buf.readBoolean()
+    )
 
     override fun write(buf: PacketBuffer) {
         buf.writeVarInt(entityId)

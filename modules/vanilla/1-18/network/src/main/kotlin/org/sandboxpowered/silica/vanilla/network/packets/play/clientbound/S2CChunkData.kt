@@ -12,9 +12,6 @@ import org.sandboxpowered.silica.vanilla.network.util.BitPackedLongArray
 import org.sandboxpowered.silica.vanilla.network.util.PacketByteBuf
 import java.util.*
 
-/**
- * TODO: Implement 1.18-compatible chunk data packet, refer to [Pre-release Protocol Specification](https://wiki.vg/Pre-release_protocol#Chunk_Data_and_Update_Light)
- */
 class S2CChunkData(
     private val cX: Int,
     private val cZ: Int,
@@ -46,7 +43,7 @@ class S2CChunkData(
     val readBuffer: PacketByteBuf
         get() = PacketByteBuf(Unpooled.wrappedBuffer(buffer))
     private val writeBuffer: ByteBuf
-        private get() {
+        get() {
             val byteBuf = Unpooled.wrappedBuffer(buffer)
             byteBuf.writerIndex(0)
             return byteBuf
@@ -55,26 +52,34 @@ class S2CChunkData(
     private fun calculateSize(cX: Int, cZ: Int): Int {
         var r = 0
         for (i in 0..15) {
-            r += sections[i]!!.serializedSize
+            r += sections[i].serializedSize
         }
         return r
     }
 
-    override fun read(buf: PacketBuffer) {}
     override fun write(buf: PacketBuffer) {
         buf.writeInt(cX)
         buf.writeInt(cZ)
-        buf.writeLongArray(bitMask)
+//        buf.writeLongArray(bitMask)
+        // ChunkData
         val heightmap = CompoundTag()
-        val heightmapData = BitPackedLongArray(256, 9)
-        for (i in 0..255) heightmapData[i] = 7
+        val heightmapData = BitPackedLongArray(256, 10)
+        for (i in 0..255) heightmapData[i] = 8
         heightmap.setLongArray("MOTION_BLOCKING", heightmapData.data)
         //        heightmap.setLongArray("WORLD_SURFACE", heightmapData.getData());
         buf.writeNBT(heightmap)
-        buf.writeVarIntArray(biomes)
+//        buf.writeVarIntArray(biomes)
         buf.writeVarInt(buffer.size)
         buf.writeBytes(buffer)
-        buf.writeVarInt(0)
+        buf.writeLongArray(longArrayOf())
+        // LightData
+        buf.writeBoolean(true)
+        buf.writeLongArray(BitSet(18).toLongArray())
+        buf.writeLongArray(BitSet(18).toLongArray())
+        buf.writeLongArray(BitSet(18).toLongArray())
+        buf.writeLongArray(BitSet(18).toLongArray())
+        buf.writeVarIntArray(intArrayOf())
+        buf.writeVarIntArray(intArrayOf())
     }
 
     override fun handle(packetHandler: PacketHandler, context: PlayContext) {}

@@ -12,14 +12,15 @@ import org.sandboxpowered.silica.api.command.CommandSource
 import org.sandboxpowered.silica.api.command.sync.ArgumentTypes
 import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.api.network.writeCollection
-import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
+import org.sandboxpowered.utilities.Identifier
 import kotlin.experimental.or
 
 class S2CDeclareCommands(val root: RootCommandNode<CommandSource>? = null) : PacketPlay {
-    override fun read(buf: PacketBuffer) {}
+    constructor(buf: PacketBuffer) : this(TODO() as RootCommandNode<CommandSource>)
+
     override fun write(buf: PacketBuffer) {
         val root = root!!
         val nodes = enumerateNodes(root)

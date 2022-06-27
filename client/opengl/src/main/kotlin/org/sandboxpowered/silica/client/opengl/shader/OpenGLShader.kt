@@ -4,23 +4,21 @@ import org.joml.Matrix4fc
 import org.joml.Vector2fc
 import org.joml.Vector3fc
 import org.lwjgl.opengl.GL20.*
-import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.client.shader.Shader
 import org.sandboxpowered.silica.client.util.stackPush
 import org.sandboxpowered.silica.resources.ResourceManager
-import org.sandboxpowered.silica.resources.ResourceType.ASSETS
+import org.sandboxpowered.utilities.Identifier
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.util.stream.Collectors
 
-
 class OpenGLShader(vertexFile: String, fragmentFile: String) : Shader {
     companion object {
         operator fun invoke(manager: ResourceManager, id: Identifier): OpenGLShader {
-            val vertexFile = streamToString(manager.open(ASSETS, id.affix("shaders/", ".vert")))
+            val vertexFile = streamToString(manager.open(id.affix("shaders/", ".vert")))
                 ?: error("Failed to find vertex file for shader $id")
-            val fragmentFile = streamToString(manager.open(ASSETS, id.affix("shaders/", ".frag")))
+            val fragmentFile = streamToString(manager.open(id.affix("shaders/", ".frag")))
                 ?: error("Failed to find fragment file for shader $id")
             return OpenGLShader(vertexFile, fragmentFile)
         }

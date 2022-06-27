@@ -13,7 +13,7 @@ import org.sandboxpowered.silica.api.util.extensions.read
 import org.sandboxpowered.utilities.Identifier
 import java.util.concurrent.CompletableFuture
 
-class EntityArgumentType : ArgumentType<EntityDefinition> {
+class EntityDefinitionArgumentType : ArgumentType<EntityDefinition> {
     companion object {
         private val INVALID_ENTITY_TYPE = DynamicCommandExceptionType { input: Any ->
             LiteralMessage("Unknown entity '$input'")

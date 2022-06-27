@@ -1,14 +1,15 @@
 package org.sandboxpowered.silica.vanilla.network.packets.play.clientbound
 
 import org.sandboxpowered.silica.api.network.PacketBuffer
-import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.util.Hardcoding
+import org.sandboxpowered.utilities.Identifier
 
-class S2CDeclareTags : PacketPlay {
-    override fun read(buf: PacketBuffer) {}
+class S2CDeclareTags() : PacketPlay {
+    constructor(buf: PacketBuffer) : this()
+
     override fun write(buf: PacketBuffer) {
         buf.writeVarInt(5)
         writeEmpty(buf, "block", Hardcoding.BLOCK_TAGS)
@@ -18,7 +19,7 @@ class S2CDeclareTags : PacketPlay {
         writeEmpty(buf, "game_event", Hardcoding.GAME_EVENT_TAGS)
     }
 
-    fun writeEmpty(buf: PacketBuffer, type: String, arr: Array<Identifier>) {
+    private fun writeEmpty(buf: PacketBuffer, type: String, arr: Array<Identifier>) {
         buf.writeIdentifier(Identifier(type))
         buf.writeVarInt(arr.size)
         for (identity in arr) {

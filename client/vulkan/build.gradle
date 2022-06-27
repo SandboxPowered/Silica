@@ -1,4 +1,8 @@
 dependencies {
-    implementation "org.lwjgl:lwjgl-vulkan"
-    if (lwjglNatives == "natives-macos") runtimeOnly "org.lwjgl:lwjgl-vulkan::$lwjglNatives"
+    implementation frontendLibs.lwjgl.vulkan
+    if (System.getProperty("lwjglNatives").contains("macos")) runtimeOnly(frontendLibs.lwjgl.vulkan) {
+        artifact {
+            classifier = System.getProperty("lwjglNatives")
+        }
+    }
 }

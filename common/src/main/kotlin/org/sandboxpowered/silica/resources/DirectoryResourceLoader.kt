@@ -2,8 +2,8 @@ package org.sandboxpowered.silica.resources
 
 import com.google.common.collect.Sets
 import org.apache.commons.io.filefilter.DirectoryFileFilter
-import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.resources.ResourceLoader.Companion.isValidPath
+import org.sandboxpowered.utilities.Identifier
 import java.io.File
 import java.io.FileFilter
 import java.io.FileInputStream
@@ -34,8 +34,8 @@ class DirectoryResourceLoader(override val name: String, private val directory: 
 
     override fun findResources(
         type: ResourceType,
-        namespace: String,
-        path: String,
+        namespace: String?,
+        category: String?,
         depth: Int,
         filter: Predicate<String>
     ): Set<Identifier> {

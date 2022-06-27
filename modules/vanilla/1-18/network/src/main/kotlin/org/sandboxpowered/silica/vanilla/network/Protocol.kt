@@ -26,7 +26,6 @@ import org.sandboxpowered.silica.vanilla.network.packets.play.serverbound.*
 import org.sandboxpowered.silica.vanilla.network.util.NetworkFlow
 import org.sandboxpowered.silica.vanilla.network.util.PacketByteBuf
 import java.util.function.Function
-import java.util.function.Supplier
 import kotlin.collections.set
 
 @Suppress("unused")
@@ -70,32 +69,36 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
             0x2F packet ::C2SUseItem
         }
         client {
+            0x01 packet ::S2CSpawnExperience
             0x02 packet ::S2CSpawnLivingEntity
             0x04 packet ::S2CSpawnPlayer
             0x08 packet ::S2CAcknowledgePlayerDigging
             0x0C packet ::S2CBlockChange
             0x0F packet ::S2CChatMessage
-            0x12 packetDeprecated ::S2CDeclareCommands
+            0x12 packet ::S2CDeclareCommands
             0x14 packet ::S2CInitWindowItems
             0x18 packet ::S2CPluginChannel
             0x1B packet ::S2CEntityStatus
-            0x20 packetDeprecated ::S2CWorldBorder
+            0x20 packet ::S2CWorldBorder
             0x21 packet ::S2CKeepAliveClient
             0x22 packet ::S2CChunkData
-            0x25 packetDeprecated ::S2CUpdateLight
+            0x25 packet ::S2CUpdateLight
             0x26 packet ::S2CJoinGame
-            0x29 packetDeprecated ::S2CUpdateEntityPosition
-            0x2A packetDeprecated ::S2CUpdateEntityPositionRotation
-            0x2B packetDeprecated ::S2CUpdateEntityRotation
-            0x36 packetDeprecated ::S2CPlayerInfo
+            0x29 packet ::S2CUpdateEntityPosition
+            0x2A packet ::S2CUpdateEntityPositionRotation
+            0x2B packet ::S2CUpdateEntityRotation
+            0x36 packet ::S2CPlayerInfo
             0x38 packet ::S2CSetPlayerPositionAndLook
-            0x39 packetDeprecated ::S2CUnlockRecipes
+            0x39 packet ::S2CUnlockRecipes
             0x3A packet ::S2CDestroyEntities
             0x3E packet ::S2CUpdateEntityHeadRotation
             0x48 packet ::S2CHeldItemChange
-            0x49 packetDeprecated ::S2CUpdateChunkPosition
-            0x66 packetDeprecated ::S2CDeclareRecipes
-            0x67 packetDeprecated ::S2CDeclareTags
+            0x49 packet ::S2CUpdateChunkPosition
+            0x4d packet ::S2CEntityMetadata
+            0x4f packet ::S2CUpdateEntityVelocity
+            0x62 packet ::S2CTeleportEntity
+            0x66 packet ::S2CDeclareRecipes
+            0x67 packet ::S2CDeclareTags
         }
     }),
     STATUS(1, {
@@ -177,15 +180,6 @@ enum class Protocol(private val id: Int, block: Builder.() -> Unit) {
 
             fun createPacket(packetId: Int, buf: PacketBuffer): PacketBase? =
                 if (!idToConstructor.containsKey(packetId)) null else idToConstructor[packetId].apply(buf)
-
-            @Deprecated("use PacketBuffer constructor instead")
-            inline infix fun <reified P : PacketBase> Int.packetDeprecated(packetSupplier: Supplier<P>) {
-                packet { buf ->
-                    val packet = packetSupplier.get()
-                    packet.read(buf)
-                    packet
-                }
-            }
 
             inline infix fun <reified P : PacketBase> Int.packet(packetSupplier: Function<PacketBuffer, P>) {
                 val id = classToId.put(P::class.java, this)

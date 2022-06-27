@@ -2,11 +2,10 @@ package org.sandboxpowered.silica.client.texture
 
 import org.joml.Vector2fc
 import org.lwjgl.stb.STBImage.*
-import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.client.util.stackPush
 import org.sandboxpowered.silica.client.util.streamToBuffer
 import org.sandboxpowered.silica.resources.ResourceManager
-import org.sandboxpowered.silica.resources.ResourceType
+import org.sandboxpowered.utilities.Identifier
 import java.io.InputStream
 import java.nio.ByteBuffer
 
@@ -42,12 +41,12 @@ interface TextureAtlas : Texture {
         companion object {
             operator fun invoke(id: Identifier, manager: ResourceManager): SpriteReference {
                 val albedo =
-                    SpriteData.streamToImageBuffer(manager.open(ResourceType.ASSETS, id.affix("textures/", ".png")))
-                val normal = manager.tryOpen(ResourceType.ASSETS, id.affix("textures/", "_n.png"))
+                    SpriteData.streamToImageBuffer(manager.open(id.affix("textures/", ".png")))
+                val normal = manager.tryOpen(id.affix("textures/", "_n.png"))
                     ?.let(SpriteData.Companion::streamToImageBuffer)
-                val glow = manager.tryOpen(ResourceType.ASSETS, id.affix("textures/", "_g.png"))
+                val glow = manager.tryOpen(id.affix("textures/", "_g.png"))
                     ?.let(SpriteData.Companion::streamToImageBuffer)
-                val specular = manager.tryOpen(ResourceType.ASSETS, id.affix("textures/", "_s.png"))
+                val specular = manager.tryOpen(id.affix("textures/", "_s.png"))
                     ?.let(SpriteData.Companion::streamToImageBuffer)
 
                 return SpriteReference(id, albedo.width, albedo.height, albedo, normal, glow, specular)

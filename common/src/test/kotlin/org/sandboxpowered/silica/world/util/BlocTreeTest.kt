@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.world.util
 
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.ParameterizedTest.*
@@ -10,7 +10,11 @@ import org.sandboxpowered.silica.api.util.extensions.component2
 import org.sandboxpowered.silica.api.util.extensions.component3
 import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.api.world.state.block.BlockState
+import java.util.*
 import java.util.stream.Stream
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertSame
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BlocTreeTest {
@@ -34,10 +38,33 @@ internal class BlocTreeTest {
 
         for ((pos, state) in blocks) {
             val (x, y, z) = pos
-            Assertions.assertEquals(state, tree[x, y, z])
+            assertEquals(state, tree[x, y, z])
         }
 
-        Assertions.assertEquals(count, tree.nonAirInSection(-8, 0, -8))
+        assertEquals(count, tree.nonAirInSection(-8, 0, -8))
+    }
+
+    @MethodSource("world layers")
+    @ParameterizedTest(name = "[$INDEX_PLACEHOLDER] $DISPLAY_NAME_PLACEHOLDER")
+    fun `A tree filled with layers should serde properly`(blocks: Sequence<Pair<Position, BlockState>>) {
+        val tree = BlocTree(-8, 0, -8, 16, air)
+        var count = 0
+
+        for ((pos, state) in blocks) {
+            val (x, y, z) = pos
+            tree[x, y, z] = state
+            if (!state.isAir) ++count
+        }
+
+        val newTree = BlocTree(-8, 0, -8, 16, air)
+        newTree.read(tree.serialize().toCollection(LinkedList()))
+
+        for ((pos, state) in blocks) {
+            val (x, y, z) = pos
+            assertEquals(state, newTree[x, y, z])
+        }
+
+        assertEquals(count, newTree.nonAirInSection(-8, 0, -8))
     }
 
     private fun `world layers`(): Stream<Sequence<Pair<Position, BlockState>>> = Stream.of(sequence {
@@ -76,18 +103,18 @@ internal class BlocTreeTest {
         }
     })
 
-    //    @Test
+    @Test
     fun `A tree filled with the same BlockState should have no nodes`() {
         val tree = BlocTree(-8, 0, -8, 16, air)
 
         iterateCube(-8, 0, -8, 16) { x, y, z ->
-            tree[x - 8, y, z - 8] = bedrock
+            tree[x, y, z] = bedrock
         }
 
         val subsection = tree[0, 0, 0, 1, 1, 1]
-        Assertions.assertEquals(0, subsection.treeDepth)
-        Assertions.assertEquals(tree, subsection)
-        Assertions.assertEquals(16 * 16 * 16, tree.nonAirInSection(-8, 0, -8))
+        assertEquals(0, subsection.treeDepth)
+        assertSame(tree, subsection)
+        assertEquals(16 * 16 * 16, tree.nonAirInSection(-8, 0, -8))
     }
 
     @MethodSource("illegal pos")
@@ -95,7 +122,7 @@ internal class BlocTreeTest {
     fun `Trying to set a block outside of the tree's bounds should throw an ISE`(pos: Position) {
         val tree = BlocTree(-8, 0, -8, 16, air)
         val (x, y, z) = pos
-        Assertions.assertThrows(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             tree[x, y, z] = air
         }
     }

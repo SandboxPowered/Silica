@@ -15,6 +15,10 @@ class AxisAlignedBox(
         val FULL_BLOCK = AxisAlignedBox(0f, 0f, 0f, 1f, 1f, 1f)
     }
 
+    val maxX get() = x + w
+    val maxY get() = y + h
+    val maxZ get() = z + d
+
     fun contains(x: Float, y: Float, z: Float): Boolean =
         x >= this.x && x <= this.x + this.w && y >= this.y && y <= this.y + this.h && z >= this.z && z <= this.z + this.d
 
@@ -36,4 +40,16 @@ class AxisAlignedBox(
     fun offset(vector: Vector3fc): AxisAlignedBox = offset(vector.x(), vector.y(), vector.z())
 
     fun offset(position: Position): AxisAlignedBox = offset(position.x, position.y, position.z)
+}
+
+@Suppress("DuplicatedCode") // other one is on WorldSelection with Ints
+inline fun AxisAlignedBox.walkCorners(body: (x: Float, y: Float, z: Float) -> Unit) {
+    body(x, y, z)
+    body(maxX, y, z)
+    body(maxX, y, maxZ)
+    body(x, y, maxZ)
+    body(x, maxY, z)
+    body(maxX, maxY, z)
+    body(maxX, maxY, maxZ)
+    body(x, maxY, maxZ)
 }

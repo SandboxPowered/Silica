@@ -4,13 +4,13 @@ plugins {
     id 'application'
     id 'java'
     id 'idea'
-    id 'org.jetbrains.kotlin.jvm' version '1.5.30'
+    alias libs.plugins.kotlin
 }
 
 allprojects {
     repositories {
-        maven { url 'https://maven.modded-mc.com/repository/maven-public/' }
         mavenCentral()
+        maven { url 'https://maven.modded-mc.com/repository/maven-public/' }
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         maven { url 'https://jitpack.io' }
         maven { url 'https://libraries.minecraft.net/' }
@@ -29,27 +29,26 @@ subprojects {
 
     java {
         toolchain {
-            languageVersion.set(JavaLanguageVersion.of(17))
+            languageVersion.set(JavaLanguageVersion.of(java_target_version))
         }
     }
 
     compileKotlin {
         kotlinOptions {
-            jvmTarget = "16"
+            jvmTarget = java_target_version
         }
     }
     compileTestKotlin {
         kotlinOptions {
-            jvmTarget = "16"
+            jvmTarget = java_target_version
         }
     }
 
     dependencies {
-        def junitVersion = '5.5.2'
-        testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
-        testImplementation "org.junit.jupiter:junit-jupiter-params:$junitVersion"
-        testImplementation "io.mockk:mockk:1.10.4"
-        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+        testImplementation testLibs.kotlin.test
+        testImplementation testLibs.jupiter.params
+        testRuntimeOnly testLibs.jupiter.engine
+        testImplementation testLibs.mockk
     }
 
     tasks.test {
@@ -65,9 +64,6 @@ application {
     }
 }
 
-project.ext.lwjglVersion = "3.2.4-SNAPSHOT"
-project.ext.jomlVersion = "1.9.25"
-
 group 'org.sandboxpowered'
 version '1.0-SNAPSHOT'
 
@@ -78,9 +74,8 @@ if (hasProperty('buildScan')) {
     }
 }
 
-
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(java_target_version))
     }
 }

@@ -6,40 +6,36 @@ import akka.actor.typed.javadsl.AbstractBehavior
 import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
-import com.artemis.Archetype
-import com.artemis.EntityEdit
-import com.artemis.WorldConfigurationBuilder
+import com.artemis.*
+import com.artemis.WorldConfigurationBuilder.Priority
 import com.artemis.utils.ImmutableIntBag
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
-import net.mostlyoriginal.api.event.common.EventSystem
 import org.joml.Vector2i
 import org.joml.Vector2ic
+import org.joml.Vector3f
 import org.sandboxpowered.silica.SilicaInternalAPI
 import org.sandboxpowered.silica.api.block.Block
 import org.sandboxpowered.silica.api.block.BlockEntityProvider
 import org.sandboxpowered.silica.api.block.BlockEvents
 import org.sandboxpowered.silica.api.ecs.component.BlockPositionComponent
 import org.sandboxpowered.silica.api.ecs.component.EntityIdentity
+import org.sandboxpowered.silica.api.ecs.component.MarkForRemovalComponent
 import org.sandboxpowered.silica.api.entity.EntityDefinition
 import org.sandboxpowered.silica.api.entity.EntityEvents
 import org.sandboxpowered.silica.api.internal.InternalAPI
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.server.PlayerManager
 import org.sandboxpowered.silica.api.util.Direction
-import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.api.util.Side
 import org.sandboxpowered.silica.api.util.extensions.*
 import org.sandboxpowered.silica.api.util.math.Position
+import org.sandboxpowered.silica.api.util.math.toVec3f
 import org.sandboxpowered.silica.api.world.*
 import org.sandboxpowered.silica.api.world.generation.WorldGenerator
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 import org.sandboxpowered.silica.api.world.state.fluid.FluidState
-import org.sandboxpowered.silica.ecs.events.ReplaceBlockEvent
-import org.sandboxpowered.silica.ecs.system.Entity3dMap
-import org.sandboxpowered.silica.ecs.system.Entity3dMapSystem
-import org.sandboxpowered.silica.ecs.system.EntityRemovalSystem
-import org.sandboxpowered.silica.ecs.system.SilicaPlayerManager
+import org.sandboxpowered.silica.ecs.system.*
 import org.sandboxpowered.silica.registry.SilicaRegistries
 import org.sandboxpowered.silica.server.SilicaServer
 import org.sandboxpowered.silica.world.gen.TerrainGenerator
@@ -48,7 +44,9 @@ import org.sandboxpowered.silica.world.util.Bounds
 import org.sandboxpowered.silica.world.util.IntTree
 import org.sandboxpowered.silica.world.util.OcTree
 import org.sandboxpowered.silica.world.util.WorldData
+import org.sandboxpowered.utilities.Identifier
 import java.util.*
+import java.util.function.Function
 import com.artemis.World as ArtemisWorld
 
 class SilicaWorld private constructor(val side: Side, val server: SilicaServer) : World {
@@ -56,7 +54,6 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
     val artemisWorld: ArtemisWorld
     private var worldTicks = 0L
 
-    private val eventSystem = EventSystem()
     override val playerManager: PlayerManager
         get() = artemisWorld.getSystem<SilicaPlayerManager>()
 
@@ -64,9 +61,10 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
     override val isClient: Boolean = side == Side.CLIENT
     override val isServer: Boolean = side == Side.SERVER
 
+    private val entityRemovalMapper: BaseComponentMapper<MarkForRemovalComponent>
+
     init {
         val config = WorldConfigurationBuilder()
-        config.with(eventSystem)
         config.with(SilicaPlayerManager())
         val entityMap = Entity3dMapSystem(
             OcTree(
@@ -78,6 +76,7 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
                 WORLD_SIZE, WORLD_SIZE, WORLD_SIZE
             )
         )
+        config.with(PhysicsSystem())
         SilicaRegistries.BLOCKS_WITH_ENTITY.forEach {
             it.createProcessingSystem()?.let { system -> config.with(it.processingSystemPriority, system) }
         }
@@ -87,17 +86,17 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         SilicaRegistries.DYNAMIC_SYSTEM_REGISTRY.forEach {
             config.with(0 /* TODO: insert actual prio */, it(server))
         }
-        config.with(Int.MAX_VALUE /* first */, entityMap)
-        config.with(Int.MIN_VALUE /* last */, EntityRemovalSystem())
+        config.with(Priority.HIGHEST, entityMap)
+        config.with(Priority.LOWEST, EntityRemovalSystem())
         artemisWorld = ArtemisWorld(
             config.build()
                 .registerAs<Entity3dMap>(entityMap)
                 .registerAs<World>(this)
         )
+        // vanilla doesn't like receiving a 0 id so we waste it
         artemisWorld.create()
+        entityRemovalMapper = artemisWorld.getMapper()
     }
-
-    override fun registerEventSubscriber(sub: Any) = eventSystem.registerEvents(sub)
 
     override fun subsection(x: Int, y: Int, z: Int, w: Int, h: Int, d: Int): WorldSectionReader {
         return data[x, y, z, w, h, d]
@@ -114,6 +113,8 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
     override fun setBlockState(pos: Position, state: BlockState, flag: WorldWriter.Flag): Boolean {
         if (isOutOfHeightLimit(pos)) return false
         val system = artemisWorld.getSystem<Entity3dMapSystem>()
+        if (!system.getLiving(pos.toVec3f(), Vector3f(1f)).isEmpty) return false
+
         val existingBEs = system.getBlockEntities(pos)
         if (!existingBEs.isEmpty) {
             existingBEs.forEach {
@@ -122,12 +123,12 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         }
         val block = state.block
         if (block is BlockEntityProvider) {
-            artemisWorld.create(blockArchetypesCache.computeIfAbsent(block) {
+            artemisWorld.create(blockArchetypesCache.computeIfAbsent(block, Function {
                 val builder = block.createArchetype()
                 builder.add<BlockPositionComponent>()
                 BlockEvents.INITIALIZE_ARCHETYPE_EVENT.dispatcher?.invoke(block, builder)
                 builder.build(artemisWorld, "block:${block.identifier}")
-            })
+            }))
         }
         val oldState = data[pos.x, pos.y, pos.z]
         data[pos.x, pos.y, pos.z] = state
@@ -137,19 +138,18 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         }
 
         if (WorldWriter.Flag.NOTIFY_LISTENERS in flag) {
-            eventSystem.dispatch(ReplaceBlockEvent(pos, oldState, state))
             WorldEvents.REPLACE_BLOCKS_EVENT.dispatcher?.invoke(pos, oldState, state, flag)
         }
         return true
     }
 
     override fun spawnEntity(entity: EntityDefinition, editor: (EntityEdit) -> Unit) {
-        val id = artemisWorld.create(entitiesArchetypesCache.computeIfAbsent(entity) {
+        val id = artemisWorld.create(entitiesArchetypesCache.computeIfAbsent(entity, Function {
             val archetype = it.createArchetype()
             EntityEvents.INITIALIZE_ARCHETYPE_EVENT.dispatcher?.invoke(it, archetype)
             archetype.add<EntityIdentity>()
                 .build(artemisWorld, "entity:${entity.identifier}")
-        })
+        }))
 
         artemisWorld.edit(id).also {
             val identity = it.create<EntityIdentity>()
@@ -158,6 +158,15 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
             editor(it)
             EntityEvents.SPAWN_ENTITY_EVENT.dispatcher?.invoke(it.entity)
         }
+    }
+
+    override fun updateEntity(id: Int, update: (Entity) -> Unit) {
+        val entity = artemisWorld.getEntity(id)?.takeIf(Entity::isActive) ?: return
+        update(entity)
+    }
+
+    override fun killEntity(id: Int) {
+        entityRemovalMapper.set(id, true)
     }
 
     override fun saveWorld() {
