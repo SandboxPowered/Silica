@@ -13,32 +13,10 @@ interface TextureAtlas : Texture {
         val id: Identifier,
         val width: Int,
         val height: Int,
-        val sprites: Array<SpriteData>
-    ) {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
+        val layers: Map<TextureLayer, SpriteLayerData>
+    )
 
-            other as SpriteReference
-
-            if (id != other.id) return false
-            if (width != other.width) return false
-            if (height != other.height) return false
-            if (!sprites.contentEquals(other.sprites)) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            var result = id.hashCode()
-            result = 31 * result + width
-            result = 31 * result + height
-            result = 31 * result + sprites.contentHashCode()
-            return result
-        }
-    }
-
-    data class SpriteData(
+    data class SpriteLayerData(
         val id: Identifier,
         val width: Int,
         val height: Int,
@@ -48,4 +26,5 @@ interface TextureAtlas : Texture {
     ) {
         val isSquare = width == height
     }
+
 }
