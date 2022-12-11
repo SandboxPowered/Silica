@@ -15,12 +15,18 @@ sealed class Ingredient {
 
         override fun equals(other: Any?): Boolean = TODO("Not yet implemented")
         override fun hashCode(): Int = TODO("Not yet implemented")
+        override fun toString(): String {
+            return "Ingredient.Item(item=$item)"
+        }
     }
 
     class Tag(val tag: Identifier) : Ingredient() {
         override fun matches(stack: ItemStack) = TODO("Not implemented")
         override fun equals(other: Any?): Boolean = TODO("Not yet implemented")
         override fun hashCode(): Int = TODO("Not yet implemented")
+        override fun toString(): String {
+            return "Ingredient.Tag(tag=$tag)"
+        }
     }
 
     // FIXME : can not deserialize this atm
@@ -29,5 +35,8 @@ sealed class Ingredient {
 
         override fun equals(other: Any?): Boolean = TODO("Not yet implemented")
         override fun hashCode(): Int = TODO("Not yet implemented")
+        override fun toString(): String {
+            return "Ingredient.Composite(ingredients=${ingredients.joinToString()})"
+        }
     }
 }

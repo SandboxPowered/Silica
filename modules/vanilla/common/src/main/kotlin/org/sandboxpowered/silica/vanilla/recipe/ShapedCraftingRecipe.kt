@@ -8,11 +8,14 @@ import org.sandboxpowered.utilities.Identifier
 
 class ShapedCraftingRecipe(
     identifier: Identifier,
-    val group: String?,
+    group: String?,
     val pattern: Array<String>,
     val key: Map<Char, Ingredient>,
     val result: ItemStack
-) : Recipe(identifier, Companion.identifier) {
+) : Recipe(identifier, group, Companion.identifier) {
+
+    val width: Int = pattern.maxOf(String::length)
+    val height: Int = pattern.size
 
     override val ingredientsHash: Int
         get() = TODO("Not yet implemented")

@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.vanilla.ecs
 
 import com.artemis.PooledComponent
-import org.sandboxpowered.silica.vanilla.recipe.SmeltingRecipe
+import org.sandboxpowered.silica.vanilla.recipe.SimpleProcessingRecipe
 
 class FurnaceLogicComponent : PooledComponent() {
     var fuelTime: Int = 0
@@ -10,7 +10,7 @@ class FurnaceLogicComponent : PooledComponent() {
     var smeltingTime: Int = 0
     var smeltingTimeTotal: Int = 0
 
-    var cachedRecipe: SmeltingRecipe? = null
+    var cachedRecipe: SimpleProcessingRecipe? = null
 
     var new: Boolean = true
 

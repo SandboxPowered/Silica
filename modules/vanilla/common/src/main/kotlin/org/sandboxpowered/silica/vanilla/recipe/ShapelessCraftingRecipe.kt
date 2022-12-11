@@ -8,10 +8,10 @@ import org.sandboxpowered.utilities.Identifier
 
 class ShapelessCraftingRecipe(
     identifier: Identifier,
-    val group: String?,
-    val ingredients: Array<Ingredient>,
+    group: String?,
+    val ingredients: Collection<Ingredient>,
     val result: ItemStack
-) : Recipe(identifier, Companion.identifier) {
+) : Recipe(identifier, group, Companion.identifier) {
 
     override val ingredientsHash: Int
         get() = TODO("Not yet implemented")

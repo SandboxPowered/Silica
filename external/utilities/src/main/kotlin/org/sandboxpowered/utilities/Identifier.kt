@@ -28,6 +28,9 @@ class Identifier(val namespace: String, val path: String) : Comparable<Identifie
 
     fun prefix(prefix: String) = Identifier(namespace, "$prefix$path")
 
+    fun removePrefix(prefix: String) = Identifier(namespace, path.removePrefix(prefix))
+    fun removeSuffix(prefix: String) = Identifier(namespace, path.removeSuffix(prefix))
+
     fun suffix(suffix: String) = Identifier(namespace, "$path$suffix")
 
     operator fun plus(suffix: String) = this.suffix(suffix)

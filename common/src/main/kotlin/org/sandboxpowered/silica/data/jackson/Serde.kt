@@ -31,6 +31,7 @@ internal object ItemStackDeserializer : StdDeserializer<ItemStack>(ItemStack::cl
     private fun deserializeFromObject(p: JsonParser, ctxt: DeserializationContext): ItemStack {
         val tree = ctxt.readTree(p)
         val item = Registries.ITEMS[ctxt.readTreeAsValue(tree["item"], Identifier::class.java)]
+        if (!item.isPresent) throw UnknownItemException("Unknown item ${item.id} !")
         val count = tree["count"]
         return if (count == null) ItemStack(item)
         else ItemStack(item, count.intValue())
@@ -40,3 +41,5 @@ internal object ItemStackDeserializer : StdDeserializer<ItemStack>(ItemStack::cl
         return ItemStack(Registries.ITEMS[ctxt.readValue(p, Identifier::class.java)])
     }
 }
+
+class UnknownItemException(message: String?) : RuntimeException(message)

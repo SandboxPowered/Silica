@@ -14,8 +14,8 @@ import org.sandboxpowered.silica.api.nbt.NBTCompound
 import org.sandboxpowered.silica.api.nbt.readNbt
 import org.sandboxpowered.silica.api.nbt.write
 import org.sandboxpowered.silica.api.network.PacketBuffer
-import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.api.util.math.Position
+import org.sandboxpowered.utilities.Identifier
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -759,13 +759,10 @@ class PacketByteBuf(private val source: ByteBuf) : ByteBuf(), PacketBuffer {
 
     override fun writeString(value: String, maxLength: Int): PacketByteBuf {
         val bs = value.toByteArray(StandardCharsets.UTF_8)
-        return if (bs.size > maxLength) {
-            throw EncoderException("String too big (was ${bs.size} bytes encoded, max $maxLength)")
-        } else {
-            writeVarInt(bs.size)
-            this.writeBytes(bs)
-            this
-        }
+        if (bs.size > maxLength) throw EncoderException("String too big (was ${bs.size} bytes encoded, max $maxLength)")
+        writeVarInt(bs.size)
+        this.writeBytes(bs)
+        return this
     }
 
     override fun writeOptionalString(value: String?, maxLength: Int): PacketByteBuf {

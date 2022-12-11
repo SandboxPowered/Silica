@@ -20,6 +20,7 @@ import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.data.jackson.IdentifierDeserializer
 import org.sandboxpowered.silica.data.jackson.IdentifierSerializer
 import org.sandboxpowered.silica.data.jackson.ItemStackDeserializer
+import org.sandboxpowered.silica.data.jackson.UnknownItemException
 import org.sandboxpowered.silica.resources.ResourceManager
 import org.sandboxpowered.utilities.Identifier
 
@@ -53,7 +54,7 @@ class RecipeManager {
             .asSequence()
             .map {
 //            resourceManager.open(it).use(om::readValue)
-                it to resourceManager.open(it).use(om::readTree)
+                it.removePrefix("recipes/").removeSuffix(".json") to resourceManager.open(it).use(om::readTree)
             }
             .filter { (_, node) ->
                 val type = Identifier(node["type"].textValue())
@@ -64,13 +65,15 @@ class RecipeManager {
                 }
             }
             .mapNotNull { (id, node) ->
-                (node as ObjectNode).put("identifier", om.writeValueAsString(id))
+                (node as ObjectNode).putPOJO("identifier", id)
                 try {
                     om.treeToValue<Recipe>(node)
                 } catch (e: JacksonException) {
                     if (logRegipeErrors) logger.error("Failed to read $id", e)
                     else ++errors
                     null
+                } catch (_: UnknownItemException) {
+                    null // No need to care about these for now
                 }
             }.toList()
 

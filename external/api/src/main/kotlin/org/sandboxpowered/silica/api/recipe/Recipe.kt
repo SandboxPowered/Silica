@@ -7,6 +7,7 @@ import org.sandboxpowered.utilities.Identifier
 
 abstract class Recipe(
     override val identifier: Identifier,
+    val group: String?,
     val type: Identifier
 ) : RegistryEntry<Recipe> {
     abstract val ingredientsHash: Int

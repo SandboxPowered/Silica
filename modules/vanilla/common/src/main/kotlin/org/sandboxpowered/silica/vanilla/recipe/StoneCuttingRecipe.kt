@@ -9,10 +9,10 @@ import org.sandboxpowered.utilities.Identifier
 
 class StoneCuttingRecipe(
     identifier: Identifier,
-    val group: String?,
+    group: String?,
     val ingredient: Ingredient,
     val result: ItemStack
-) : Recipe(identifier, Companion.identifier) {
+) : Recipe(identifier, group, Companion.identifier) {
 
     constructor(
         identifier: Identifier,
