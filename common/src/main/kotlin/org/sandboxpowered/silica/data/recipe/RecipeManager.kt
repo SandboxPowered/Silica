@@ -48,13 +48,21 @@ class RecipeManager {
 
     fun load(resourceManager: ResourceManager) {
         var errors = 0
+        val unhandledTypes = mutableSetOf<Identifier>()
         val recipes: List<Recipe> = resourceManager.listResources(category = "recipes") { it.endsWith(".json") }
             .asSequence()
             .map {
 //            resourceManager.open(it).use(om::readValue)
                 it to resourceManager.open(it).use(om::readTree)
             }
-            .filter { (_, node) -> Identifier(node["type"].textValue()) in Registries.RECIPE_TYPES }
+            .filter { (_, node) ->
+                val type = Identifier(node["type"].textValue())
+                if (type in Registries.RECIPE_TYPES) true
+                else {
+                    unhandledTypes += type
+                    false
+                }
+            }
             .mapNotNull { (id, node) ->
                 (node as ObjectNode).put("identifier", om.writeValueAsString(id))
                 try {
@@ -66,8 +74,10 @@ class RecipeManager {
                 }
             }.toList()
 
-        logger.info("Loading ${recipes.size} recipes. Types : ${Registries.RECIPE_TYPES.values.keys.joinToString()}")
+        logger.info("Loaded ${recipes.size} recipes. Types : ${Registries.RECIPE_TYPES.values.keys.joinToString()}")
         logger.warn("Suppressed $errors recipe loading errors")
+        if (unhandledTypes.isNotEmpty()) logger.warn("There are ${unhandledTypes.size} unhandled recipe types : ${unhandledTypes.joinToString()}")
+        Registries.RECIPES.registerAll(recipes)
     }
 
     private object RecipeTypeResolverBuilder : ObjectMapper.DefaultTypeResolverBuilder(
