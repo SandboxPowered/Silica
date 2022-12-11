@@ -6,19 +6,18 @@ import org.sandboxpowered.silica.api.recipe.ingredient.Ingredient
 import org.sandboxpowered.silica.api.util.Identifying
 import org.sandboxpowered.utilities.Identifier
 
-class SmeltingRecipe(
+class ShapedCraftingRecipe(
     identifier: Identifier,
     val group: String?,
-    val ingredient: Ingredient,
-    val result: ItemStack,
-    val experience: Float,
-    val cookingTime: Int
+    val pattern: Array<String>,
+    val key: Map<Char, Ingredient>,
+    val result: ItemStack
 ) : Recipe(identifier, Companion.identifier) {
 
     override val ingredientsHash: Int
         get() = TODO("Not yet implemented")
 
-    companion object : Identifying<SmeltingRecipe> {
-        override val identifier = Identifier("minecraft", "smelting")
+    companion object : Identifying<ShapedCraftingRecipe> {
+        override val identifier = Identifier("minecraft", "crafting_shaped")
     }
 }

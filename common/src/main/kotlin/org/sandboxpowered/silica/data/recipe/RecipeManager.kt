@@ -1,27 +1,27 @@
 package org.sandboxpowered.silica.data.recipe
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.*
 import com.fasterxml.jackson.databind.jsontype.*
 import com.fasterxml.jackson.databind.jsontype.impl.TypeIdResolverBase
 import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.type.TypeFactory
 import com.fasterxml.jackson.module.blackbird.BlackbirdModule
-import com.fasterxml.jackson.module.kotlin.KotlinFeature
-import com.fasterxml.jackson.module.kotlin.jsonMapper
-import com.fasterxml.jackson.module.kotlin.kotlinModule
-import com.fasterxml.jackson.module.kotlin.treeToValue
+import com.fasterxml.jackson.module.kotlin.*
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap
+import org.sandboxpowered.silica.api.item.ItemStack
 import org.sandboxpowered.silica.api.recipe.Recipe
 import org.sandboxpowered.silica.api.recipe.ingredient.Ingredient
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.data.jackson.IdentifierDeserializer
 import org.sandboxpowered.silica.data.jackson.IdentifierSerializer
+import org.sandboxpowered.silica.data.jackson.ItemStackDeserializer
 import org.sandboxpowered.silica.resources.ResourceManager
 import org.sandboxpowered.utilities.Identifier
-import java.io.File
 
 class RecipeManager {
 
@@ -32,11 +32,10 @@ class RecipeManager {
                 enable(KotlinFeature.NullToEmptyMap)
             },
             BlackbirdModule(),
-            SimpleModule().apply {
-                addDeserializer(Identifier::class.java, IdentifierDeserializer)
-                addSerializer(Identifier::class.java, IdentifierSerializer)
-
-            }
+            SimpleModule()
+                .addSerializer(Identifier::class.java, IdentifierSerializer)
+                .addDeserializer(Identifier::class, IdentifierDeserializer)
+                .addDeserializer(ItemStack::class, ItemStackDeserializer)
         )
         disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
         defaultPrettyPrinter(DefaultPrettyPrinter())
@@ -45,28 +44,36 @@ class RecipeManager {
     }
 
     private val logger = getLogger()
+    private val logRegipeErrors = false
 
     fun load(resourceManager: ResourceManager) {
+        var errors = 0
         val recipes: List<Recipe> = resourceManager.listResources(category = "recipes") { it.endsWith(".json") }
             .asSequence()
             .map {
 //            resourceManager.open(it).use(om::readValue)
-                resourceManager.open(it).use(om::readTree)
+                it to resourceManager.open(it).use(om::readTree)
             }
-            .filter { it["type"].textValue() == "minecraft:smelting" }.map {
-                om.treeToValue<Recipe>(it)
+            .filter { (_, node) -> Identifier(node["type"].textValue()) in Registries.RECIPE_TYPES }
+            .mapNotNull { (id, node) ->
+                (node as ObjectNode).put("identifier", om.writeValueAsString(id))
+                try {
+                    om.treeToValue<Recipe>(node)
+                } catch (e: JacksonException) {
+                    if (logRegipeErrors) logger.error("Failed to read $id", e)
+                    else ++errors
+                    null
+                }
             }.toList()
 
-        logger.info("Loading ${recipes.size} recipes. Types : ${recipes.groupBy { it.type }.keys.joinToString()}")
-        File("allRecipes.json").outputStream().use {
-            om.writeValue(it, recipes)
-        }
+        logger.info("Loading ${recipes.size} recipes. Types : ${Registries.RECIPE_TYPES.values.keys.joinToString()}")
+        logger.warn("Suppressed $errors recipe loading errors")
     }
 
     private object RecipeTypeResolverBuilder : ObjectMapper.DefaultTypeResolverBuilder(
         ObjectMapper.DefaultTyping.NON_CONCRETE_AND_ARRAYS,
         BasicPolymorphicTypeValidator.builder()
-            .allowIfBaseType("org.sandboxpowered.silica.api.recipe").build()
+            .allowIfBaseType("org.sandboxpowered.silica.api.recipe.").build()
     ) {
 
         private val delegates: MutableMap<Class<*>, TypeResolverBuilder<*>> = Reference2ObjectOpenHashMap()
@@ -75,7 +82,7 @@ class RecipeManager {
             delegates[T::class.java] = ObjectMapper.DefaultTypeResolverBuilder(
                 ObjectMapper.DefaultTyping.NON_CONCRETE_AND_ARRAYS,
                 BasicPolymorphicTypeValidator.builder()
-                    .allowIfBaseType(T::class.java).build()
+                    .allowIfSubType(T::class.java).build()
             ).also(body)
         }
 
