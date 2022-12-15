@@ -1,8 +1,8 @@
 package org.sandboxpowered.silica.api.block
 
-import org.sandboxpowered.silica.api.Identifier
 import org.sandboxpowered.silica.api.item.Item
 import org.sandboxpowered.silica.api.registry.Registries
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.world.state.SilicaStateBuilder
 import org.sandboxpowered.silica.api.world.state.SilicaStateFactory
 import org.sandboxpowered.silica.api.world.state.StateProvider

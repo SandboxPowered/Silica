@@ -18,6 +18,7 @@ import org.sandboxpowered.silica.api.network.Packet
 import org.sandboxpowered.silica.api.recipe.Recipe
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.server.Server
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.extensions.*
 import org.sandboxpowered.silica.api.world.World
 import org.sandboxpowered.silica.vanilla.network.ecs.component.VanillaPlayerInputComponent
@@ -26,7 +27,6 @@ import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.*
 import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.world.VanillaChunkSection
 import org.sandboxpowered.silica.vanilla.network.util.mapping.VanillaProtocolMapping
-import org.sandboxpowered.silica.api.Identifier
 import java.time.Duration
 
 sealed interface PlayConnection {

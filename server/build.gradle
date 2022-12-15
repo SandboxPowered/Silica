@@ -17,6 +17,7 @@ dependencies {
 
     implementation libs.commons.io
     implementation libs.commons.lang
+    implementation libs.bundles.jackson
     implementation libs.gson
     implementation libs.guice
 

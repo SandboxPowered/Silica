@@ -10,13 +10,12 @@ import io.netty.util.ByteProcessor
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import org.joml.Vector3f
-import org.sandboxpowered.silica.api.Identifier
 import org.sandboxpowered.silica.api.nbt.NBTCompound
 import org.sandboxpowered.silica.api.nbt.readNbt
 import org.sandboxpowered.silica.api.nbt.write
 import org.sandboxpowered.silica.api.network.PacketBuffer
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.math.Position
-import org.sandboxpowered.utilities.Identifier
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream

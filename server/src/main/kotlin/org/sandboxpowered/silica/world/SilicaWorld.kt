@@ -27,6 +27,7 @@ import org.sandboxpowered.silica.api.internal.InternalAPI
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.server.PlayerManager
 import org.sandboxpowered.silica.api.util.Direction
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.Side
 import org.sandboxpowered.silica.api.util.extensions.*
 import org.sandboxpowered.silica.api.util.math.Position
@@ -44,7 +45,6 @@ import org.sandboxpowered.silica.world.util.Bounds
 import org.sandboxpowered.silica.world.util.IntTree
 import org.sandboxpowered.silica.world.util.OcTree
 import org.sandboxpowered.silica.world.util.WorldData
-import org.sandboxpowered.silica.api.Identifier
 import java.util.*
 import java.util.function.Function
 import com.artemis.World as ArtemisWorld

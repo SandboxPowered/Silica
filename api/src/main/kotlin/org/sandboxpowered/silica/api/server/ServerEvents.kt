@@ -8,7 +8,7 @@ import org.sandboxpowered.silica.api.event.EventFactory
 import org.sandboxpowered.silica.api.event.EventResult
 import org.sandboxpowered.silica.api.event.TypedEventResult
 import org.sandboxpowered.silica.api.server.ServerEvents.ChatEvent
-import org.sandboxpowered.silica.api.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.world.World
 
 object ServerEvents {

@@ -3,8 +3,8 @@ package org.sandboxpowered.silica.api.command.sync
 import com.google.gson.JsonObject
 import com.mojang.brigadier.arguments.ArgumentType
 import com.mojang.brigadier.arguments.BoolArgumentType
-import org.sandboxpowered.silica.api.Identifier
 import org.sandboxpowered.silica.api.network.PacketBuffer
+import org.sandboxpowered.silica.api.util.Identifier
 import kotlin.experimental.or
 
 object ArgumentTypes {

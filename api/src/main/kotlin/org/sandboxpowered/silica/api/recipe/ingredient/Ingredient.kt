@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.api.recipe.ingredient
 
 import org.sandboxpowered.silica.api.item.ItemStack
-import org.sandboxpowered.utilities.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 
 sealed class Ingredient {
     abstract fun matches(stack: ItemStack): Boolean

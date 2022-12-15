@@ -4,12 +4,12 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
-import org.sandboxpowered.silica.api.Identifier
 import org.sandboxpowered.silica.api.SilicaAPI
 import org.sandboxpowered.silica.api.event.EventResult
 import org.sandboxpowered.silica.api.event.TypedEventResult
 import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.api.server.ServerEvents
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.VanillaNetworkAdapter

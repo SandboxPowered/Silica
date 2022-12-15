@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.api.item
 
-import org.sandboxpowered.silica.api.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 
 open class BaseItem(
     override val identifier: Identifier,

@@ -1,7 +1,7 @@
 package org.sandboxpowered.silica.resources
 
 import org.apache.commons.lang3.SystemUtils
-import org.sandboxpowered.silica.api.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 import java.io.File
 import java.io.InputStream
 import java.util.function.Predicate

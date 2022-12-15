@@ -13,7 +13,7 @@ import org.sandboxpowered.silica.api.registry.Registry
 import org.sandboxpowered.silica.api.registry.RegistryDelegate
 import org.sandboxpowered.silica.api.registry.RegistryEntry
 import org.sandboxpowered.silica.api.server.Server
-import org.sandboxpowered.silica.api.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 import kotlin.reflect.KClass
 
 object SilicaRegistries {

@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap
 import io.mockk.every
 import io.mockk.mockk
 import org.sandboxpowered.silica.api.block.Block
-import org.sandboxpowered.silica.api.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 
 object TestData {

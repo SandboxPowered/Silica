@@ -1,7 +1,6 @@
 package org.sandboxpowered.silica.vanilla.block
 
 import org.joml.Vector3f
-import org.sandboxpowered.silica.api.Identifier
 import org.sandboxpowered.silica.api.block.BaseBlock
 import org.sandboxpowered.silica.api.block.Block
 import org.sandboxpowered.silica.api.entity.EntityContext
@@ -9,6 +8,7 @@ import org.sandboxpowered.silica.api.entity.InteractionContext
 import org.sandboxpowered.silica.api.util.ActionResult
 import org.sandboxpowered.silica.api.util.Direction
 import org.sandboxpowered.silica.api.util.Hand
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.api.world.World
 import org.sandboxpowered.silica.api.world.WorldReader

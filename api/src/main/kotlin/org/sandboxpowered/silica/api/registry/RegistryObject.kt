@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.api.registry
 
-import org.sandboxpowered.silica.api.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 import java.util.*
 import java.util.function.Supplier
 import kotlin.reflect.KProperty

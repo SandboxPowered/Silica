@@ -1,5 +1,5 @@
 dependencies {
-    implementation backendLibs.netty
+    implementation libs.netty
 
     api libs.adventure.minimessage
     api libs.bundles.adventure.serializers

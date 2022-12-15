@@ -1,9 +1,9 @@
 package org.sandboxpowered.silica.vanilla.data
 
-import org.sandboxpowered.silica.api.Identifier
 import org.sandboxpowered.silica.api.item.BaseItem
 import org.sandboxpowered.silica.api.item.Item
 import org.sandboxpowered.silica.api.registry.Registries
+import org.sandboxpowered.silica.api.util.Identifier
 
 object Items {
 

@@ -3,7 +3,7 @@ package org.sandboxpowered.silica.api.recipe
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.registry.Registry
 import org.sandboxpowered.silica.api.registry.RegistryEntry
-import org.sandboxpowered.utilities.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 
 abstract class Recipe(
     override val identifier: Identifier,

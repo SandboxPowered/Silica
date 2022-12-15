@@ -2,8 +2,8 @@ package org.sandboxpowered.silica.api.network
 
 import akka.actor.typed.ActorRef
 import akka.actor.typed.Behavior
-import org.sandboxpowered.silica.api.Identifier
 import org.sandboxpowered.silica.api.server.Server
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.world.persistence.BlockStateMapping
 
 interface NetworkAdapter {

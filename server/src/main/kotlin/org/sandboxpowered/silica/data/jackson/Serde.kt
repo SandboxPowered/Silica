@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
 import org.sandboxpowered.silica.api.item.ItemStack
 import org.sandboxpowered.silica.api.registry.Registries
-import org.sandboxpowered.utilities.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 
 internal object IdentifierDeserializer : FromStringDeserializer<Identifier>(Identifier::class.java) {
     override fun _deserialize(value: String, ctxt: DeserializationContext) = Identifier(value)

@@ -1,8 +1,8 @@
 package org.sandboxpowered.silica.api.util.extensions
 
 import com.mojang.brigadier.StringReader
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.math.Position
-import org.sandboxpowered.silica.api.Identifier
 
 operator fun Position.component1(): Int = x
 operator fun Position.component2(): Int = y

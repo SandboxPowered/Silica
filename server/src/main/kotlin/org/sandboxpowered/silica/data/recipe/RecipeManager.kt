@@ -16,13 +16,13 @@ import org.sandboxpowered.silica.api.item.ItemStack
 import org.sandboxpowered.silica.api.recipe.Recipe
 import org.sandboxpowered.silica.api.recipe.ingredient.Ingredient
 import org.sandboxpowered.silica.api.registry.Registries
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.data.jackson.IdentifierDeserializer
 import org.sandboxpowered.silica.data.jackson.IdentifierSerializer
 import org.sandboxpowered.silica.data.jackson.ItemStackDeserializer
 import org.sandboxpowered.silica.data.jackson.UnknownItemException
 import org.sandboxpowered.silica.resources.ResourceManager
-import org.sandboxpowered.utilities.Identifier
 
 class RecipeManager {
 

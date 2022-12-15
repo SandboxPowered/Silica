@@ -3,8 +3,8 @@ package org.sandboxpowered.silica.vanilla.network.packets.play
 import org.sandboxpowered.silica.api.item.ItemStack
 import org.sandboxpowered.silica.api.nbt.NBTCompound
 import org.sandboxpowered.silica.api.network.PacketBuffer
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.vanilla.network.util.mapping.VanillaProtocolMapping
-import org.sandboxpowered.utilities.Identifier
 
 data class SlotData(
     val present: Boolean,

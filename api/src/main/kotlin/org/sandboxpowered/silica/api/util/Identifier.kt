@@ -1,4 +1,4 @@
-package org.sandboxpowered.silica.api
+package org.sandboxpowered.silica.api.util
 
 class Identifier(val namespace: String, val path: String) : Comparable<Identifier> {
     init {

@@ -4,7 +4,7 @@ import org.sandboxpowered.silica.api.nbt.NBTCompound
 import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.api.network.readCollection
 import org.sandboxpowered.silica.api.network.writeCollection
-import org.sandboxpowered.silica.api.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay

@@ -2,8 +2,8 @@ package org.sandboxpowered.silica.api.network
 
 import net.kyori.adventure.text.Component
 import org.joml.Vector3f
-import org.sandboxpowered.silica.api.Identifier
 import org.sandboxpowered.silica.api.nbt.NBTCompound
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.math.Position
 import java.util.*
 

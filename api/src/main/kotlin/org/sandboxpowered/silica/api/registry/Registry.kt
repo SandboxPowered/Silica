@@ -2,7 +2,7 @@ package org.sandboxpowered.silica.api.registry
 
 import org.jetbrains.annotations.ApiStatus.Experimental
 import org.jetbrains.annotations.ApiStatus.Internal
-import org.sandboxpowered.silica.api.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 import java.util.stream.Stream
 import kotlin.reflect.KProperty
 

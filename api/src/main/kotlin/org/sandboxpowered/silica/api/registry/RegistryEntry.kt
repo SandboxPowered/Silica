@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.api.registry
 
-import org.sandboxpowered.silica.api.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 
 interface RegistryEntry<T : RegistryEntry<T>> : Comparable<T> {
     val identifier: Identifier
