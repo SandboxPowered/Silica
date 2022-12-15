@@ -18,6 +18,9 @@ interface Registry<T : RegistryEntry<T>> : Iterable<T> {
     @Internal
     fun register(value: T): T
 
+    @Internal
+    fun registerAll(values: Collection<T>)
+
     val values: Map<Identifier, T>
     val type: Class<T>
 

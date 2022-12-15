@@ -10,10 +10,12 @@ import com.mojang.authlib.GameProfile
 import org.joml.Vector3d
 import org.sandboxpowered.silica.api.SilicaAPI
 import org.sandboxpowered.silica.api.ecs.component.PlayerInventoryComponent
+import org.sandboxpowered.silica.api.internal.getRegistry
 import org.sandboxpowered.silica.api.nbt.NBTCompound
 import org.sandboxpowered.silica.api.nbt.nbt
 import org.sandboxpowered.silica.api.nbt.setTag
 import org.sandboxpowered.silica.api.network.Packet
+import org.sandboxpowered.silica.api.recipe.Recipe
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.server.Server
 import org.sandboxpowered.silica.api.util.extensions.*
@@ -217,7 +219,7 @@ private class PlayConnectionActor(
             it.writeString("silica")
         })
         packetHandler.sendPacket(S2CHeldItemChange(playerInventoryComponent.inventory.selectedSlot.toByte()))
-        packetHandler.sendPacket(S2CDeclareRecipes())
+        packetHandler.sendPacket(S2CDeclareRecipes(SilicaAPI.getRegistry<Recipe>().values.values))
         packetHandler.sendPacket(S2CDeclareTags())
         packetHandler.sendPacket(S2CEntityStatus(0, 24))
         packetHandler.sendPacket(S2CDeclareCommands(SilicaAPI.commandDispatcher.root))
@@ -323,13 +325,12 @@ private class PlayConnectionActor(
 
     private fun handleReceiveWorld(message: PlayConnection.ReceiveWorld): Behavior<PlayConnection> {
         packetHandler.sendPacket(S2CWorldBorder())
-        val itemMapper = VanillaProtocolMapping.INSTANCE["minecraft:item"]
         packetHandler.sendPacket(
             S2CInitWindowItems(
                 0u,
                 1 and 32767,
                 playerInventoryComponent.inventory
-            ) { itemMapper[it.identifier] }
+            )
         )
 
         return Behaviors.same()

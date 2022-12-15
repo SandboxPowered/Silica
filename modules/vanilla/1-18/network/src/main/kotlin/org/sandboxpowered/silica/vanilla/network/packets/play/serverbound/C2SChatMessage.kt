@@ -4,7 +4,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
-import net.kyori.adventure.text.minimessage.markdown.DiscordFlavor
 import org.sandboxpowered.silica.api.SilicaAPI
 import org.sandboxpowered.silica.api.event.EventResult
 import org.sandboxpowered.silica.api.event.TypedEventResult
@@ -44,9 +43,13 @@ data class C2SChatMessage(private val message: String) : PacketPlay {
                 }
             }
         } else {
-            val format = MiniMessage.withMarkdownFlavor(DiscordFlavor.get())
+            // MiniMessage doesn't support MD anymore
+//            val format = MiniMessage.withMarkdownFlavor(DiscordFlavor.get())
+            val format = MiniMessage.miniMessage()
             val username = Component.text("<${profile.name}>")
-            val text = if (context.properties.supportChatFormatting) format.parse(message) else Component.text(message)
+            // TODO : check if it's safe to use MiniMessage to parse & format the message
+            val text =
+                if (context.properties.supportChatFormatting) format.deserialize(message) else Component.text(message)
             val message = username.append(" ").append(text)
             val result = ServerEvents.CHAT_EVENT.dispatcher?.invoke(
                 profile,

@@ -1,8 +1,7 @@
 [versions]
 kotlin = "1.6.21"
 # can't bump to 4.10.1 because that forces minimessage 4.10.1 which does not support markdown
-adventure = "4.9.2"
-adventure-minimessage = "4.1.0-SNAPSHOT"
+adventure = "4.11.0"
 jb-annotations = "23.0.0"
 commons-io = "2.11.0"
 commons-lang = "3.12.0"
@@ -26,6 +25,7 @@ reflections = "0.10.2"
 authlib = "2.3.31"
 semver = "0.9.0"
 kotlinx_serialization = "1.3.2"
+jackson = "2.14.1"
 
 [libraries]
 commons-io = { module = "commons-io:commons-io", version.ref = "commons-io" }
@@ -52,7 +52,7 @@ akka-stream = { module = "com.typesafe.akka:akka-stream-typed_2.13", version.ref
 alpakka-udp = { module = "com.lightbend.akka:akka-stream-alpakka-udp_2.13", version.ref = "alpakka" }
 adventure-api = { module = "net.kyori:adventure-api", version.ref = "adventure" }
 adventure-nbt = { module = "net.kyori:adventure-nbt", version.ref = "adventure" }
-adventure-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure-minimessage" }
+adventure-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure" }
 adventure-serializer-gson = { module = "net.kyori:adventure-text-serializer-gson", version.ref = "adventure" }
 adventure-serializer-plain = { module = "net.kyori:adventure-text-serializer-plain", version.ref = "adventure" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
@@ -69,6 +69,9 @@ guava = { module = "com.google.guava:guava", version.ref = "guava" }
 reflections = { module = "org.reflections:reflections", version.ref = "reflections" }
 authlib = { module = "com.mojang:authlib", version.ref = "authlib" }
 semver = { module = "com.github.zafarkhaja:java-semver", version.ref = "semver" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+jackson-blackbird = { module = "com.fasterxml.jackson.module:jackson-module-blackbird", version.ref = "jackson" }
 
 [bundles]
 nightconfig = [
@@ -93,6 +96,11 @@ ktor-client = [
     "ktor-client-conneg",
     "ktor-serialization",
     "ktor-gson"
+]
+jackson = [
+    "jackson-databind",
+    "jackson-kotlin",
+    "jackson-blackbird"
 ]
 
 [plugins]

@@ -1,45 +1,42 @@
 package org.sandboxpowered.silica.api.recipe.ingredient
 
-import kotlinx.serialization.json.*
 import org.sandboxpowered.silica.api.item.ItemStack
-import java.util.*
-import java.util.function.Predicate
+import org.sandboxpowered.utilities.Identifier
 
-class Ingredient(val values: Array<Value>) : Predicate<ItemStack> {
-    private var internalStacks: Array<ItemStack>? = null
-    val stacks: Array<ItemStack>
-        get() {
-            reify()
-            return internalStacks ?: emptyArray()
-        }
+sealed class Ingredient {
+    abstract fun matches(stack: ItemStack): Boolean
 
-    override fun test(t: ItemStack): Boolean = if (stacks.isEmpty()) t.isEmpty else stacks.any { it == t }
+    abstract override fun equals(other: Any?): Boolean
 
-    private fun reify() {
-        if (internalStacks == null) {
-            internalStacks = values.flatMap(Value::items).distinct().toTypedArray()
-        }
-    }
+    abstract override fun hashCode(): Int
 
-    fun toJson(): JsonElement = if (values.size == 1) values[0].serialize() else buildJsonArray {
-        values.forEach {
-            add(it.serialize())
+    class Item(val item: Identifier) : Ingredient() {
+        override fun matches(stack: ItemStack) = stack.item.identifier == item
+
+        override fun equals(other: Any?): Boolean = TODO("Not yet implemented")
+        override fun hashCode(): Int = TODO("Not yet implemented")
+        override fun toString(): String {
+            return "Ingredient.Item(item=$item)"
         }
     }
 
-    sealed interface Value {
-        val items: Collection<ItemStack>
-
-        fun serialize(): JsonObject
+    class Tag(val tag: Identifier) : Ingredient() {
+        override fun matches(stack: ItemStack) = TODO("Not implemented")
+        override fun equals(other: Any?): Boolean = TODO("Not yet implemented")
+        override fun hashCode(): Int = TODO("Not yet implemented")
+        override fun toString(): String {
+            return "Ingredient.Tag(tag=$tag)"
+        }
     }
 
-    data class ItemValue(val item: ItemStack) : Value {
-        override val items: Collection<ItemStack> = Collections.singleton(item)
+    // FIXME : can not deserialize this atm
+    class Composite(val ingredients: Collection<Ingredient>) : Ingredient() {
+        override fun matches(stack: ItemStack) = ingredients.any { it.matches(stack) }
 
-        override fun serialize(): JsonObject {
-            return buildJsonObject {
-                put("item", item.item.identifier.toString())
-            }
+        override fun equals(other: Any?): Boolean = TODO("Not yet implemented")
+        override fun hashCode(): Int = TODO("Not yet implemented")
+        override fun toString(): String {
+            return "Ingredient.Composite(ingredients=${ingredients.joinToString()})"
         }
     }
 }

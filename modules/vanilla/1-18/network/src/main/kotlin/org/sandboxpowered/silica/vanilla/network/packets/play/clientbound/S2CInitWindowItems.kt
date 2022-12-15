@@ -1,6 +1,5 @@
 package org.sandboxpowered.silica.vanilla.network.packets.play.clientbound
 
-import org.sandboxpowered.silica.api.item.Item
 import org.sandboxpowered.silica.api.item.inventory.PlayerInventory
 import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.api.network.readCollection
@@ -21,9 +20,8 @@ class S2CInitWindowItems(
     constructor(
         window: UByte,
         state: Int,
-        inventory: PlayerInventory,
-        protocolMapping: (Item) -> Int
-    ) : this(window, state, inventory.map { SlotData.from(it, protocolMapping) }, SlotData.EMPTY)
+        inventory: PlayerInventory
+    ) : this(window, state, inventory.map { SlotData.from(it) }, SlotData.EMPTY)
 
     constructor(buf: PacketBuffer) : this(
         buf.readUByte(),

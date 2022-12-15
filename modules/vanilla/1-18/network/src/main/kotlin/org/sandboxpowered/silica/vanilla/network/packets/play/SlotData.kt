@@ -1,9 +1,10 @@
 package org.sandboxpowered.silica.vanilla.network.packets.play
 
-import org.sandboxpowered.silica.api.item.Item
 import org.sandboxpowered.silica.api.item.ItemStack
 import org.sandboxpowered.silica.api.nbt.NBTCompound
 import org.sandboxpowered.silica.api.network.PacketBuffer
+import org.sandboxpowered.silica.vanilla.network.util.mapping.VanillaProtocolMapping
+import org.sandboxpowered.utilities.Identifier
 
 data class SlotData(
     val present: Boolean,
@@ -14,9 +15,15 @@ data class SlotData(
     companion object {
         val EMPTY = SlotData(false)
 
-        fun from(stack: ItemStack, mapper: (Item) -> Int): SlotData =
+        fun from(stack: ItemStack): SlotData =
             if (stack.isEmpty) EMPTY
-            else SlotData(true, mapper(stack.item), stack.count.toByte())
+            else SlotData(true, itemMapper[stack.item.identifier], stack.count.toByte())
+
+        fun from(identifier: Identifier, count: Int = 1) =
+            if (count == 0) EMPTY
+            else SlotData(true, itemMapper[identifier], count.toByte())
+
+        private val itemMapper by lazy { VanillaProtocolMapping.INSTANCE["minecraft:item"] }
     }
 }
 
