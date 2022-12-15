@@ -24,8 +24,11 @@ dependencies {
     api libs.joml
     api libs.log4j
 
-    api libs.adventure.api
-    api libs.adventure.nbt
+    api libs.bundles.adventure.base
+    api libs.adventure.minimessage
+    api libs.bundles.adventure.serializers
+
+    implementation libs.bundles.jackson
 }
 
 repositories {

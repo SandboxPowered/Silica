@@ -29,6 +29,10 @@ class SilicaRegistry<T : RegistryEntry<T>>(private val id: Identifier, override 
         return value
     }
 
+    override fun registerAll(values: Collection<T>) {
+        internalMap.putAll(values.associateBy(RegistryEntry<*>::identifier))
+    }
+
     override fun iterator() = internalMap.values.iterator()
 
     override fun contains(id: Identifier) = internalMap.containsKey(id)

@@ -43,8 +43,11 @@ data class C2SChatMessage(private val message: String) : PacketPlay {
                 }
             }
         } else {
+            // MiniMessage doesn't support MD anymore
+//            val format = MiniMessage.withMarkdownFlavor(DiscordFlavor.get())
             val format = MiniMessage.miniMessage()
             val username = Component.text("<${profile.name}>")
+            // TODO : check if it's safe to use MiniMessage to parse & format the message
             val text =
                 if (context.properties.supportChatFormatting) format.deserialize(message) else Component.text(message)
             val message = username.append(" ").append(text)

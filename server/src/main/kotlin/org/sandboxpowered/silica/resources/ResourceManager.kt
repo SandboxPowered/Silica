@@ -23,7 +23,7 @@ class ResourceManager(private val resourceType: ResourceType) {
     fun tryOpen(file: Identifier): InputStream? =
         if (contains(file)) open(file) else null
 
-    fun listFiles(
+    fun listResources(
         namespace: String? = null,
         category: String? = null,
         depth: Int = ResourceLoader.DEPTH_NO_LIMIT,

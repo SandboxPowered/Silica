@@ -3,11 +3,8 @@ package org.sandboxpowered.silica
 import com.artemis.BaseEntitySystem
 import com.mojang.brigadier.CommandDispatcher
 import org.apache.logging.log4j.LogManager
-import org.sandboxpowered.silica.api.block.Block
 import org.sandboxpowered.silica.api.command.CommandSource
-import org.sandboxpowered.silica.api.entity.EntityDefinition
 import org.sandboxpowered.silica.api.internal.InternalAPI
-import org.sandboxpowered.silica.api.item.Item
 import org.sandboxpowered.silica.api.network.NetworkAdapter
 import org.sandboxpowered.silica.api.plugin.PluginManager
 import org.sandboxpowered.silica.api.registry.Registry
@@ -37,13 +34,7 @@ class SilicaInternalAPI : InternalAPI {
         // TODO("Not yet implemented")
     }
 
-    override fun <T : RegistryEntry<T>> getRegistry(kclass: KClass<T>): Registry<T> = when (kclass) {
-        // TODO: change this to using a Map<Class, Registry>
-        Block::class -> SilicaRegistries.BLOCK_REGISTRY.cast()
-        Item::class -> SilicaRegistries.ITEM_REGISTRY.cast()
-        EntityDefinition::class -> SilicaRegistries.ENTITY_DEFINITION_REGISTRY.cast()
-        else -> error("Unknown registry type $kclass")
-    }
+    override fun <T : RegistryEntry<T>> getRegistry(kclass: KClass<T>): Registry<T> = SilicaRegistries[kclass]
 
     override fun registerSystem(system: BaseEntitySystem) {
         SilicaRegistries.SYSTEM_REGISTRY += system
