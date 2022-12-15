@@ -1,11 +1,11 @@
 package org.sandboxpowered.silica.vanilla.data
 
+import org.sandboxpowered.silica.api.Identifier
 import org.sandboxpowered.silica.api.block.BaseBlock
 import org.sandboxpowered.silica.api.block.Block
 import org.sandboxpowered.silica.api.item.BlockItem
 import org.sandboxpowered.silica.api.item.Item
 import org.sandboxpowered.silica.api.registry.Registries
-import org.sandboxpowered.utilities.Identifier
 import org.sandboxpowered.silica.vanilla.block.*
 import org.sandboxpowered.silica.vanilla.util.Colour
 

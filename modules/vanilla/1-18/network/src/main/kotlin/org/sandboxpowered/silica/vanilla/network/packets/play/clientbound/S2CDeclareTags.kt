@@ -5,7 +5,7 @@ import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.util.Hardcoding
-import org.sandboxpowered.utilities.Identifier
+import org.sandboxpowered.silica.api.Identifier
 
 class S2CDeclareTags() : PacketPlay {
     constructor(buf: PacketBuffer) : this()

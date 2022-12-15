@@ -4,7 +4,7 @@ import org.sandboxpowered.silica.api.item.ItemStack
 import org.sandboxpowered.silica.api.item.inventory.BaseInventory
 import org.sandboxpowered.silica.api.recipe.Recipe
 import org.sandboxpowered.silica.api.recipe.ingredient.Ingredient
-import org.sandboxpowered.utilities.Identifier
+import org.sandboxpowered.silica.api.Identifier
 
 class SmeltingRecipe(
     val id: Identifier,

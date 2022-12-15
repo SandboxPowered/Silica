@@ -15,7 +15,7 @@ import org.sandboxpowered.silica.api.network.writeCollection
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
-import org.sandboxpowered.utilities.Identifier
+import org.sandboxpowered.silica.api.Identifier
 import kotlin.experimental.or
 
 class S2CDeclareCommands(val root: RootCommandNode<CommandSource>? = null) : PacketPlay {

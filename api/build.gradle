@@ -1,0 +1,33 @@
+dependencies {
+    api libs.kotlinx.serialization
+    api libs.semver
+
+    api libs.jb.annotations
+
+    api libs.commons.io
+    api libs.commons.lang
+    api libs.gson
+    api libs.guice
+    api libs.fastutil
+
+    api libs.brigadier
+    api libs.bundles.artemis
+    api libs.bundles.akka
+
+    api libs.authlib
+
+    api libs.bundles.nightconfig
+
+    api libs.kotlin.stdlib
+    api libs.kotlin.reflect
+
+    api libs.joml
+    api libs.log4j
+
+    api libs.adventure.api
+    api libs.adventure.nbt
+}
+
+repositories {
+    mavenCentral()
+}

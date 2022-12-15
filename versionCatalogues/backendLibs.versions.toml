@@ -1,5 +1,0 @@
-[versions]
-netty = "4.1.76.Final"
-
-[libraries]
-netty = { module = "io.netty:netty-all", version.ref = "netty" }

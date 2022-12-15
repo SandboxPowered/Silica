@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.vanilla.world
 
-import org.sandboxpowered.utilities.Identifier
+import org.sandboxpowered.silica.api.Identifier
 import org.sandboxpowered.silica.api.world.generation.WorldGenerator
 
 object VanillaWorldGenerator : WorldGenerator {

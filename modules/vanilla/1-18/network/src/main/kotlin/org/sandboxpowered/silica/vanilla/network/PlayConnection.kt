@@ -24,7 +24,7 @@ import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.*
 import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.world.VanillaChunkSection
 import org.sandboxpowered.silica.vanilla.network.util.mapping.VanillaProtocolMapping
-import org.sandboxpowered.utilities.Identifier
+import org.sandboxpowered.silica.api.Identifier
 import java.time.Duration
 
 sealed interface PlayConnection {

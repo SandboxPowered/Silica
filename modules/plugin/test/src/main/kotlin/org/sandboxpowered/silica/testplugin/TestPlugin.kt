@@ -28,7 +28,7 @@ import org.sandboxpowered.silica.api.util.extensions.literal
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.api.world.World
-import org.sandboxpowered.utilities.Identifier
+import org.sandboxpowered.silica.api.Identifier
 import kotlin.random.Random
 
 @Plugin(id = "test", version = "1.0.0", requirements = ["minecraft:content"])

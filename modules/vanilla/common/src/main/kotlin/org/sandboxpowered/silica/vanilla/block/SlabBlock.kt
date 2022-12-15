@@ -5,7 +5,7 @@ import org.sandboxpowered.silica.api.block.Block
 import org.sandboxpowered.silica.api.entity.EntityContext
 import org.sandboxpowered.silica.api.entity.InteractionContext
 import org.sandboxpowered.silica.api.util.Direction
-import org.sandboxpowered.utilities.Identifier
+import org.sandboxpowered.silica.api.Identifier
 import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.api.world.WorldReader
 import org.sandboxpowered.silica.api.world.state.StateProvider

@@ -7,10 +7,10 @@ import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType
 import com.mojang.brigadier.suggestion.Suggestions
 import com.mojang.brigadier.suggestion.SuggestionsBuilder
+import org.sandboxpowered.silica.api.Identifier
 import org.sandboxpowered.silica.api.entity.EntityDefinition
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.util.extensions.read
-import org.sandboxpowered.utilities.Identifier
 import java.util.concurrent.CompletableFuture
 
 class EntityDefinitionArgumentType : ArgumentType<EntityDefinition> {
