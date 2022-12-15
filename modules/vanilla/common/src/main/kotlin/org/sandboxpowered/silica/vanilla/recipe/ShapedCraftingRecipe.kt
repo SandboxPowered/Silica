@@ -3,8 +3,8 @@ package org.sandboxpowered.silica.vanilla.recipe
 import org.sandboxpowered.silica.api.item.ItemStack
 import org.sandboxpowered.silica.api.recipe.Recipe
 import org.sandboxpowered.silica.api.recipe.ingredient.Ingredient
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.Identifying
-import org.sandboxpowered.utilities.Identifier
 
 class ShapedCraftingRecipe(
     identifier: Identifier,

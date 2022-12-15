@@ -9,13 +9,13 @@ import org.sandboxpowered.silica.api.event.EventResult
 import org.sandboxpowered.silica.api.event.TypedEventResult
 import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.api.server.ServerEvents
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.VanillaNetworkAdapter
 import org.sandboxpowered.silica.vanilla.network.command.PlayerCommandSource
 import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
 import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.S2CChatMessage
-import org.sandboxpowered.utilities.Identifier
 
 data class C2SChatMessage(private val message: String) : PacketPlay {
 

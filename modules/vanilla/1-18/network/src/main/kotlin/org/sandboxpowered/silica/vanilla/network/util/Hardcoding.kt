@@ -1,6 +1,6 @@
 package org.sandboxpowered.silica.vanilla.network.util
 
-import org.sandboxpowered.utilities.Identifier
+import org.sandboxpowered.silica.api.util.Identifier
 
 object Hardcoding {
     val BLOCK_TAGS = arrayOf(

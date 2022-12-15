@@ -6,9 +6,9 @@ import org.sandboxpowered.silica.api.ecs.component.VelocityComponent
 import org.sandboxpowered.silica.api.entity.BaseEntityDefinition
 import org.sandboxpowered.silica.api.entity.EntityDefinition
 import org.sandboxpowered.silica.api.registry.Registries
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.extensions.add
 import org.sandboxpowered.silica.vanilla.ecs.component.EntityTestComponent
-import org.sandboxpowered.utilities.Identifier
 
 object Entities {
 

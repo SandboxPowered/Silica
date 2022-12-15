@@ -1,8 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'org.jetbrains.kotlin.jvm'
 dependencies {
-    implementation project(":common")
-
+    implementation project(":api")
     implementation project(":modules:vanilla:1-18:network")
     implementation project(":modules:vanilla:1-18:content")
     implementation project(":modules:vanilla:1-18:world")
@@ -10,7 +9,41 @@ dependencies {
 
     implementation libs.kotlin.logging
     implementation libs.kotlin.stdlib
-    api libs.gson
+    implementation libs.gson
+
+    implementation libs.semver
+
+    implementation libs.jb.annotations
+
+    implementation libs.commons.io
+    implementation libs.commons.lang
+    implementation libs.bundles.jackson
+    implementation libs.gson
+    implementation libs.guice
+
+    implementation libs.brigadier
+    implementation libs.bundles.artemis
+    implementation libs.bundles.akka
+
+    implementation libs.jopt
+
+    implementation libs.bundles.nightconfig
+
+    implementation libs.joml
+    implementation libs.log4j
+    runtimeOnly libs.bundles.log4j.runtime
+    implementation libs.guava
+    implementation libs.kotlin.stdlib
+    implementation libs.kotlin.reflect
+    implementation libs.reflections
+    implementation libs.fastutil
+    implementation libs.authlib
+
+    implementation libs.bundles.ktor.client
+
+    implementation libs.bundles.adventure.base
+    implementation libs.adventure.minimessage
+    implementation libs.bundles.adventure.serializers
 }
 repositories {
     mavenCentral()

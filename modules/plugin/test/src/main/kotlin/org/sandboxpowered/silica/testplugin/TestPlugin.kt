@@ -21,6 +21,7 @@ import org.sandboxpowered.silica.api.plugin.Plugin
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.registry.Registries.BLOCKS
 import org.sandboxpowered.silica.api.server.ServerEvents
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.extensions.create
 import org.sandboxpowered.silica.api.util.extensions.getArgument
 import org.sandboxpowered.silica.api.util.extensions.getComponent
@@ -28,7 +29,6 @@ import org.sandboxpowered.silica.api.util.extensions.literal
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.api.world.World
-import org.sandboxpowered.utilities.Identifier
 import kotlin.random.Random
 
 @Plugin(id = "test", version = "1.0.0", requirements = ["minecraft:content"])

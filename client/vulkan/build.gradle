@@ -1,8 +1,0 @@
-dependencies {
-    implementation frontendLibs.lwjgl.vulkan
-    if (System.getProperty("lwjglNatives").contains("macos")) runtimeOnly(frontendLibs.lwjgl.vulkan) {
-        artifact {
-            classifier = System.getProperty("lwjglNatives")
-        }
-    }
-}

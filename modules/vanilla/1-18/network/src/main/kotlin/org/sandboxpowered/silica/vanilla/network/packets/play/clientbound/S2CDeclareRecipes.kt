@@ -4,6 +4,7 @@ import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.api.network.writeCollection
 import org.sandboxpowered.silica.api.recipe.Recipe
 import org.sandboxpowered.silica.api.recipe.ingredient.Ingredient
+import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PlayContext
@@ -14,7 +15,6 @@ import org.sandboxpowered.silica.vanilla.recipe.ShapedCraftingRecipe
 import org.sandboxpowered.silica.vanilla.recipe.ShapelessCraftingRecipe
 import org.sandboxpowered.silica.vanilla.recipe.SimpleProcessingRecipe
 import org.sandboxpowered.silica.vanilla.recipe.StoneCuttingRecipe
-import org.sandboxpowered.utilities.Identifier
 import kotlin.system.measureTimeMillis
 
 class S2CDeclareRecipes(
