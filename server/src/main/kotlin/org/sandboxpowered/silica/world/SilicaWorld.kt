@@ -23,6 +23,7 @@ import org.sandboxpowered.silica.api.ecs.component.EntityIdentity
 import org.sandboxpowered.silica.api.ecs.component.MarkForRemovalComponent
 import org.sandboxpowered.silica.api.entity.EntityDefinition
 import org.sandboxpowered.silica.api.entity.EntityEvents
+import org.sandboxpowered.silica.api.entity.EntityId
 import org.sandboxpowered.silica.api.internal.InternalAPI
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.server.PlayerManager
@@ -46,6 +47,7 @@ import org.sandboxpowered.silica.world.util.IntTree
 import org.sandboxpowered.silica.world.util.OcTree
 import org.sandboxpowered.silica.world.util.WorldData
 import java.util.*
+import java.util.concurrent.CompletableFuture
 import java.util.function.Function
 import com.artemis.World as ArtemisWorld
 
@@ -110,10 +112,10 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
     private val blockArchetypesCache: Object2ObjectMap<Block, Archetype> = Object2ObjectOpenHashMap()
     private val entitiesArchetypesCache: Object2ObjectMap<EntityDefinition, Archetype> = Object2ObjectOpenHashMap()
 
-    override fun setBlockState(pos: Position, state: BlockState, flag: WorldWriter.Flag): Boolean {
-        if (isOutOfHeightLimit(pos)) return false
+    override fun setBlockState(pos: Position, state: BlockState, flag: WorldWriter.Flag): CompletableFuture<Boolean> {
+        if (isOutOfHeightLimit(pos)) return CompletableFuture.completedFuture(false)
         val system = artemisWorld.getSystem<Entity3dMapSystem>()
-        if (!system.getLiving(pos.toVec3f(), Vector3f(1f)).isEmpty) return false
+        if (!system.getLiving(pos.toVec3f(), Vector3f(1f)).isEmpty) return CompletableFuture.completedFuture(false)
 
         val existingBEs = system.getBlockEntities(pos)
         if (!existingBEs.isEmpty) {
@@ -140,10 +142,10 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         if (WorldWriter.Flag.NOTIFY_LISTENERS in flag) {
             WorldEvents.REPLACE_BLOCKS_EVENT.dispatcher?.invoke(pos, oldState, state, flag)
         }
-        return true
+        return CompletableFuture.completedFuture(true)
     }
 
-    override fun spawnEntity(entity: EntityDefinition, editor: (EntityEdit) -> Unit) {
+    override fun spawnEntity(entity: EntityDefinition, editor: (EntityEdit) -> Unit): CompletableFuture<EntityId> {
         val id = artemisWorld.create(entitiesArchetypesCache.computeIfAbsent(entity, Function {
             val archetype = it.createArchetype()
             EntityEvents.INITIALIZE_ARCHETYPE_EVENT.dispatcher?.invoke(it, archetype)
@@ -158,19 +160,24 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
             editor(it)
             EntityEvents.SPAWN_ENTITY_EVENT.dispatcher?.invoke(it.entity)
         }
+        return CompletableFuture.completedFuture(EntityId(id.toUInt()))
     }
 
-    override fun updateEntity(id: Int, update: (Entity) -> Unit) {
-        val entity = artemisWorld.getEntity(id)?.takeIf(Entity::isActive) ?: return
+    override fun updateEntity(id: EntityId, update: (Entity) -> Unit): CompletableFuture<Unit> {
+        val entity = artemisWorld.getEntity(id.toArtemisId())?.takeIf(Entity::isActive)
+            ?: return CompletableFuture.completedFuture(Unit)
         update(entity)
+        return CompletableFuture.completedFuture(Unit)
     }
 
-    override fun killEntity(id: Int) {
-        entityRemovalMapper.set(id, true)
+    override fun killEntity(id: EntityId): CompletableFuture<Unit> {
+        entityRemovalMapper.set(id.toArtemisId(), true)
+        return CompletableFuture.completedFuture(Unit)
     }
 
-    override fun saveWorld() {
+    override fun saveWorld(): CompletableFuture<Unit> {
         data.persist()
+        return CompletableFuture.completedFuture(Unit)
     }
 
     private fun updateNeighbor(pos: Position, state: BlockState, opposite: Direction, neighbor: Position) {
@@ -290,11 +297,13 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
                             val replyTo = next.replyTo as ActorRef<Any>
                             replyTo.tell(next.body(world))
                         }
+
                         is World.Command.DelayedCommand.Ask<*> -> {
                             @Suppress("UNCHECKED_CAST")
                             val replyTo = next.replyTo as ActorRef<Any>
                             replyTo.tell(next.body(world))
                         }
+
                         else -> error("Unhandled command in queue : $next")
                     }
                 } catch (e: Throwable) {
@@ -320,6 +329,8 @@ class SilicaWorld private constructor(val side: Side, val server: SilicaServer) 
         }
     }
 }
+
+private fun EntityId.toArtemisId(): Int = this.id.toInt()
 
 private fun ImmutableIntBag<Any>.forEach(block: (Int) -> Unit) {
     for (i in 0 until this.size()) {

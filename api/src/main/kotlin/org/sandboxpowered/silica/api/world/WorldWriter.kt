@@ -3,20 +3,22 @@ package org.sandboxpowered.silica.api.world
 import com.artemis.Entity
 import com.artemis.EntityEdit
 import org.sandboxpowered.silica.api.entity.EntityDefinition
+import org.sandboxpowered.silica.api.entity.EntityId
 import org.sandboxpowered.silica.api.util.math.Position
 import org.sandboxpowered.silica.api.world.state.block.BlockState
+import java.util.concurrent.CompletableFuture
 
 
 interface WorldWriter {
-    fun setBlockState(pos: Position, state: BlockState): Boolean = setBlockState(pos, state, Flag.DEFAULT)
+    fun setBlockState(pos: Position, state: BlockState): CompletableFuture<Boolean> =
+        setBlockState(pos, state, Flag.DEFAULT)
 
-    fun setBlockState(pos: Position, state: BlockState, flag: Flag): Boolean
+    fun setBlockState(pos: Position, state: BlockState, flag: Flag): CompletableFuture<Boolean>
 
-    fun spawnEntity(entity: EntityDefinition, editor: (EntityEdit) -> Unit)
-    fun updateEntity(id: Int, update: (Entity) -> Unit)
-    fun killEntity(id: Int)
-
-    fun saveWorld()
+    fun spawnEntity(entity: EntityDefinition, editor: (EntityEdit) -> Unit): CompletableFuture<EntityId>
+    fun updateEntity(id: EntityId, update: (Entity) -> Unit): CompletableFuture<Unit>
+    fun killEntity(id: EntityId): CompletableFuture<Unit>
+    fun saveWorld(): CompletableFuture<Unit>
 
     @JvmInline
     value class Flag(val flag: Int) {

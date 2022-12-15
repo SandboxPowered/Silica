@@ -133,8 +133,9 @@ class VanillaInputSystem(val server: Server) : IteratingSystem() {
 
         input.breaking = performWithRangedCheck(input.breaking, position) {
             val newState = Block.AIR.defaultState
-            val success = terrain.setBlockState(it.location, newState)
-            it.acknowldge(success, newState)
+            terrain.setBlockState(it.location, newState).whenComplete { t, _ ->
+                it.acknowldge(t, newState)
+            }
         }
     }
 

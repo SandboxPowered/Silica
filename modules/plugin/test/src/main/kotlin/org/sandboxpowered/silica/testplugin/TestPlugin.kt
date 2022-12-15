@@ -13,6 +13,7 @@ import org.sandboxpowered.silica.api.ecs.component.PositionComponent
 import org.sandboxpowered.silica.api.ecs.component.VelocityComponent
 import org.sandboxpowered.silica.api.entity.EntityDefinition
 import org.sandboxpowered.silica.api.entity.EntityEvents
+import org.sandboxpowered.silica.api.entity.EntityId
 import org.sandboxpowered.silica.api.event.EventResult
 import org.sandboxpowered.silica.api.event.TypedEventResult
 import org.sandboxpowered.silica.api.item.ItemStack
@@ -116,7 +117,7 @@ object TestPlugin : BasePlugin {
                     executes {
                         val pos = it.getArgument<Vector3d>("pos")
                         world.tell(World.Command.DelayedCommand.Perform { world ->
-                            world.updateEntity(1) { e ->
+                            world.updateEntity(EntityId(1U)) { e ->
                                 e.getComponent<PositionComponent>()?.pos?.set(pos)
                                 sendMessage(Component.text("Teleported to $pos"))
                             }
@@ -132,15 +133,24 @@ object TestPlugin : BasePlugin {
                         argument("speed", FloatArgumentType.floatArg()) {
                             executes {
                                 val entity = it.getArgument<Int>("entity")
+                                if (entity <= 0) {
+                                    sendMessage(Component.text("Invalid entity id, must be greater than 0"))
+                                    return@executes 0
+                                }
                                 val direction = it.getArgument<Vector3f>("direction")
                                 val speed = it.getArgument<Float>("speed")
                                 world.tell(World.Command.DelayedCommand.Perform { world ->
-                                    world.updateEntity(entity) { e ->
+                                    world.updateEntity(EntityId(entity.toUInt())) { e ->
                                         e.getComponent<VelocityComponent>()?.apply {
                                             direction.set(direction.normalize())
                                             velocity = speed
                                         }
-                                        sendMessage(Component.text("Updated entity $entity's velocity ($direction @$speed)"))
+                                    }.whenCompleteAsync { _, u ->
+                                        if (u != null) {
+                                            sendMessage(Component.text("Failed to update entity $entity's velocity ($direction @$speed)"))
+                                        } else {
+                                            sendMessage(Component.text("Updated entity $entity's velocity ($direction @$speed)"))
+                                        }
                                     }
                                 })
 
@@ -154,8 +164,12 @@ object TestPlugin : BasePlugin {
                 argument("entity", IntegerArgumentType.integer(0)) {
                     executes {
                         val entity = it.getArgument<Int>("entity")
+                        if (entity <= 0) {
+                            sendMessage(Component.text("Invalid entity id, must be greater than 0"))
+                            return@executes 0
+                        }
                         world.tell(World.Command.DelayedCommand.Perform { world ->
-                            world.killEntity(entity)
+                            world.killEntity(EntityId(entity.toUInt()))
                             sendMessage(Component.text("Killed $entity"))
                         })
 

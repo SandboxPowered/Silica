@@ -1,5 +1,7 @@
 package org.sandboxpowered.silica.api.util
 
+import com.mojang.brigadier.StringReader
+
 class Identifier(val namespace: String, val path: String) : Comparable<Identifier> {
     init {
         require(namespace.isNotEmpty()) { "Identifier can not have an empty namespace. Path: $path" }
@@ -47,7 +49,14 @@ class Identifier(val namespace: String, val path: String) : Comparable<Identifie
             }
         }
 
-        fun isAllowedCharacter(c: Char): Boolean =
+        fun read(reader: StringReader): Identifier {
+            val i = reader.cursor
+            while (reader.canRead() && isAllowedCharacter(reader.peek())) reader.skip()
+            val string = reader.string.substring(i, reader.cursor)
+            return Identifier(string)
+        }
+
+        private fun isAllowedCharacter(c: Char): Boolean =
             c in '0'..'9' || c in 'a'..'z' || c == '_' || c == ':' || c == '/' || c == '.' || c == '-'
     }
 }

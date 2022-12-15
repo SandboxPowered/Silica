@@ -30,6 +30,10 @@ open class Position(
 
     open fun shift(direction: Direction): Position = shift(direction, 1)
 
+    operator fun component1(): Int = x
+    operator fun component2(): Int = y
+    operator fun component3(): Int = z
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Position) return false
