@@ -46,7 +46,10 @@ abstract class DataReaderWithSubCategories<T : Any>(
                     null
                 }
             }
-            .groupBy(Pair<String, *>::first, Pair<*, T>::second)
+            .fold(mutableMapOf<String, MutableList<T>>()) { acc, (key, holder) ->
+                acc.getOrPut(key, ::mutableListOf).add(holder)
+                acc
+            }
 
         logger.info("Loaded ${loaded.values.sumOf(List<*>::size)} $category in ${loaded.size} categories (${loaded.keys.joinToString()})")
         if (errors > 0) logger.warn("Encountered $errors $category loading errors")

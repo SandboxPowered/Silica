@@ -16,11 +16,12 @@ import org.sandboxpowered.silica.api.server.Server
 import org.sandboxpowered.silica.api.util.Identifier
 import kotlin.reflect.KClass
 
+@Suppress("unused")
 object SilicaRegistries {
 
     private val registries: MutableMap<KClass<out RegistryEntry<*>>, Registry<*>> = Reference2ObjectLinkedOpenHashMap()
 
-    val BLOCK_REGISTRY = registry<Block>("minecraft", "block").apply {
+    private val BLOCK_REGISTRY = registry<Block>("minecraft", "block").apply {
         addListener {
             if (it is BlockEntityProvider)
                 BLOCKS_WITH_ENTITY.add(it)
@@ -29,16 +30,15 @@ object SilicaRegistries {
 
     val BLOCKS_WITH_ENTITY = ArrayList<BlockEntityProvider>()
 
-    val ITEM_REGISTRY = registry<Item>(path = "item")
+    private val ITEM_REGISTRY = registry<Item>(path = "item")
 
-    val ENTITY_DEFINITION_REGISTRY =
-        registry<EntityDefinition>(path = "entity_type")
+    private val ENTITY_DEFINITION_REGISTRY = registry<EntityDefinition>(path = "entity_type")
 
-    val FLUID_REGISTRY = registry<Fluid>(path = "fluid")
+    private val FLUID_REGISTRY = registry<Fluid>(path = "fluid")
 
-    val RECIPE_TYPE_REGISTRY = registry<RecipeType>("silica", "recipe_type")
+    private val RECIPE_TYPE_REGISTRY = registry<RecipeType>("silica", "recipe_type")
 
-    val RECIPE_REGISTRY = registry<Recipe>("silica", "recipe")
+    private val RECIPE_REGISTRY = registry<Recipe>("silica", "recipe")
 
     val SYSTEM_REGISTRY = mutableSetOf<BaseEntitySystem>() // TODO : make an actual registry for this
     val DYNAMIC_SYSTEM_REGISTRY =

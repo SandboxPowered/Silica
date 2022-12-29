@@ -1,6 +1,8 @@
 package org.sandboxpowered.silica.registry
 
 import com.google.common.collect.ImmutableMap
+import com.google.common.collect.ImmutableSet
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import org.sandboxpowered.silica.api.registry.Registry
 import org.sandboxpowered.silica.api.registry.RegistryDelegate
 import org.sandboxpowered.silica.api.registry.RegistryEntry
@@ -8,16 +10,15 @@ import org.sandboxpowered.silica.api.registry.RegistryObject
 import org.sandboxpowered.silica.api.util.Identifier
 import java.util.*
 import java.util.function.Supplier
+import java.util.stream.Stream
 
 class SilicaRegistry<T : RegistryEntry<T>>(private val id: Identifier, override val type: Class<T>) : Registry<T> {
-    var internalMap: MutableMap<Identifier, T> = HashMap()
-    var registryEntries: MutableMap<Identifier, SilicaRegistryEntry<T>> = HashMap()
-    var listeners: MutableList<(T) -> Unit> = ArrayList()
+    private val internalMap: MutableMap<Identifier, T> = Object2ObjectOpenHashMap()
+    private val registryEntries: MutableMap<Identifier, SilicaRegistryEntry<T>> = Object2ObjectOpenHashMap()
+    private val tags: MutableMap<Identifier, Set<RegistryObject<T>>> = Object2ObjectOpenHashMap()
+    private val listeners: MutableList<(T) -> Unit> = LinkedList()
     override val values: Map<Identifier, T>
         get() = ImmutableMap.copyOf(internalMap)
-
-    @Suppress("UNCHECKED_CAST")
-    fun <X : RegistryEntry<X>> cast(): Registry<X> = this as Registry<X>
 
     fun addListener(listener: (T) -> Unit) {
         listeners.add(listener)
@@ -41,15 +42,17 @@ class SilicaRegistry<T : RegistryEntry<T>>(private val id: Identifier, override 
 
     override fun getUnsafe(id: Identifier) = internalMap[id]
 
-    override fun get(id: Identifier) =
-        registryEntries.computeIfAbsent(id) { SilicaRegistryEntry(this, it) }
+    override fun get(id: Identifier): RegistryObject<T> = getPrivately(id)
 
-    override fun stream() =
-        registryEntries.values.stream().filter { obj: SilicaRegistryEntry<T> -> obj.isPresent }
-            .map { obj: SilicaRegistryEntry<T> -> obj.get() }
+    private fun getPrivately(id: Identifier) = registryEntries.computeIfAbsent(id) { SilicaRegistryEntry(this, it) }
+
+    override fun stream(): Stream<T> =
+        registryEntries.values.stream()
+            .filter(RegistryObject<T>::isPresent)
+            .map(RegistryObject<T>::get)
 
     fun clearCache() {
-        registryEntries.forEach { (_, entry: SilicaRegistryEntry<T>) -> entry.clearCache() }
+        registryEntries.forEach { (_, entry) -> entry.clearCache() }
     }
 
     private val delegates = HashMap<String, RegistryDelegate<T>>()
@@ -60,12 +63,41 @@ class SilicaRegistry<T : RegistryEntry<T>>(private val id: Identifier, override 
     override fun invoke(domain: String, optional: Boolean): RegistryDelegate.NullableRegistryDelegate<T> =
         invoke(domain).optional
 
-    class SilicaRegistryEntry<T : RegistryEntry<T>>(
+    override fun getByTag(tag: Identifier): Set<RegistryObject<T>>? = tags[tag]
+
+    override fun registerTags(values: Map<Identifier, Iterable<Identifier>>) {
+        values.mapValuesTo(tags) { (tag, ids) ->
+            ids.map {
+                this.getPrivately(it).apply {
+                    addTag(tag) // I know, side effects bad, but this means less iterating
+                }
+            }.toSet()
+        }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is SilicaRegistry<*>) return false
+
+        if (id != other.id) return false
+        if (type != other.type) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = id.hashCode()
+        result = 31 * result + type.hashCode()
+        return result
+    }
+
+    private class SilicaRegistryEntry<T : RegistryEntry<T>>(
         override val registry: SilicaRegistry<T>,
         override val id: Identifier
     ) : RegistryObject<T> {
         private var hasCached = false
         private var cachedValue: T? = null
+        private val _tags = mutableSetOf<Identifier>()
 
         private fun updateCache() {
             if (!hasCached) {
@@ -103,5 +135,29 @@ class SilicaRegistry<T : RegistryEntry<T>>(private val id: Identifier, override 
         override fun orElseGet(supplier: Supplier<T>) = internal ?: supplier.get()
 
         override fun orNull(): T? = internal
+
+        override fun hasTag(tag: Identifier) = tag in _tags
+
+        override val tags: Set<Identifier> = ImmutableSet.copyOf(_tags)
+
+        fun addTag(tag: Identifier) {
+            _tags += tag
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other !is SilicaRegistryEntry<*>) return false
+
+            if (registry != other.registry) return false
+            if (id != other.id) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = registry.hashCode()
+            result = 31 * result + id.hashCode()
+            return result
+        }
     }
 }
