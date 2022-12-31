@@ -1,10 +1,11 @@
 package org.sandboxpowered.silica.vanilla.network.packets.play.clientbound
 
+import org.sandboxpowered.silica.api.item.ItemStack
 import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.api.network.writeCollection
 import org.sandboxpowered.silica.api.recipe.Recipe
 import org.sandboxpowered.silica.api.recipe.ingredient.Ingredient
-import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PlayContext
@@ -52,10 +53,8 @@ private fun PacketBuffer.write(recipe: Recipe): PacketBuffer {
             writeString(recipe.group ?: "unknown")
             // Not writing as collection here because otherwise it would insert size again while it's computed from WxH
             recipe.pattern.asSequence().flatMap { line ->
-                line.map {
-                    recipe.key[it] ?: Ingredient.Tag(Identifier("empty hack"))
-                }
-            }.fold(this, PacketBuffer::write)
+                line.map { recipe.key[it] }
+            }.forEach(this::write)
             writeSlot(SlotData.from(recipe.result))
         }
 
@@ -79,31 +78,32 @@ private fun PacketBuffer.write(recipe: Recipe): PacketBuffer {
     return this
 }
 
-private fun PacketBuffer.write(ingredient: Ingredient): PacketBuffer {
+private fun PacketBuffer.write(ingredient: Ingredient?): PacketBuffer {
     when (ingredient) {
+        null -> writeVarInt(0)
         is Ingredient.Composite -> {
-            writeCollection(ingredient.ingredients, PacketBuffer::writeStrict)
-        }
-
-        else -> {
-            writeVarInt(1)
-            writeStrict(ingredient)
-        }
-    }
-    return this
-}
-
-private fun PacketBuffer.writeStrict(ingredient: Ingredient): PacketBuffer {
-    when (ingredient) {
-        is Ingredient.Item -> {
-            writeSlot(SlotData.from(ingredient.item))
+            TODO("This is probably not how to serialize them properly")
+//            writeCollection(ingredient.ingredients, PacketBuffer::write)
         }
 
         is Ingredient.Tag -> {
-            writeSlot(SlotData.EMPTY) // TODO : handle tags
+            val items = Registries.ITEMS.getByTag(ingredient.tag)
+            if (items == null) {
+//                println("Could not resolve tag ${ingredient.tag}")
+                writeVarInt(0)
+//                writeSlot(SlotData.EMPTY)
+            } else {
+                writeCollection(
+                    items.filter { it.isPresent }.map { SlotData.from(ItemStack(it)) },
+                    PacketBuffer::writeSlot
+                )
+            }
         }
 
-        is Ingredient.Composite -> error("Should not be called for composites")
+        is Ingredient.Item -> {
+            writeVarInt(1)
+            writeSlot(SlotData.from(ingredient.item))
+        }
     }
     return this
 }
