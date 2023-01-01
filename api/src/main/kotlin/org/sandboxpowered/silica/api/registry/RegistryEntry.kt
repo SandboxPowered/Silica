@@ -6,5 +6,7 @@ interface RegistryEntry<T : RegistryEntry<T>> : Comparable<T> {
     val identifier: Identifier
     val registry: Registry<T>
 
+    fun hasTag(tag: Identifier) = registry[identifier].hasTag(tag)
+
     override fun compareTo(other: T): Int = identifier.compareTo(other.identifier)
 }

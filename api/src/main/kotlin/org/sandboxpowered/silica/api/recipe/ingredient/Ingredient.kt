@@ -1,7 +1,6 @@
 package org.sandboxpowered.silica.api.recipe.ingredient
 
 import org.sandboxpowered.silica.api.item.ItemStack
-import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.util.Identifier
 
 sealed class Ingredient {
@@ -22,7 +21,7 @@ sealed class Ingredient {
     }
 
     class Tag(val tag: Identifier) : Ingredient() {
-        override fun matches(stack: ItemStack) = Registries.ITEMS[stack.item.identifier].hasTag(tag)
+        override fun matches(stack: ItemStack) = stack.item.hasTag(tag)
         override fun equals(other: Any?): Boolean = TODO("Not yet implemented")
         override fun hashCode(): Int = TODO("Not yet implemented")
         override fun toString(): String {
