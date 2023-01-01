@@ -1,8 +1,10 @@
 package org.sandboxpowered.silica.vanilla.network.packets.play
 
+import org.sandboxpowered.silica.api.item.Item
 import org.sandboxpowered.silica.api.item.ItemStack
 import org.sandboxpowered.silica.api.nbt.NBTCompound
 import org.sandboxpowered.silica.api.network.PacketBuffer
+import org.sandboxpowered.silica.api.registry.RegistryObject
 import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.vanilla.network.util.mapping.VanillaProtocolMapping
 
@@ -22,6 +24,8 @@ data class SlotData(
         fun from(identifier: Identifier, count: Int = 1) =
             if (count == 0) EMPTY
             else SlotData(true, itemMapper[identifier], count.toByte())
+
+        fun from(item: RegistryObject<Item>) = from(item.id)
 
         private val itemMapper by lazy { VanillaProtocolMapping.INSTANCE["minecraft:item"] }
     }

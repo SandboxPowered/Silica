@@ -1,6 +1,5 @@
 package org.sandboxpowered.silica.vanilla.network.packets.play.clientbound
 
-import org.sandboxpowered.silica.api.item.ItemStack
 import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.api.network.writeCollection
 import org.sandboxpowered.silica.api.recipe.Recipe
@@ -82,23 +81,19 @@ private fun PacketBuffer.write(ingredient: Ingredient?): PacketBuffer {
     when (ingredient) {
         null -> writeVarInt(0)
         is Ingredient.Composite -> {
-            TODO("This is probably not how to serialize them properly")
-//            writeCollection(ingredient.ingredients, PacketBuffer::write)
+            writeCollection(ingredient.ingredients.flatMap { nested ->
+                when (nested) {
+                    is Ingredient.Tag -> Registries.ITEMS.getByTag(nested.tag).orEmpty().map(SlotData::from)
+                    is Ingredient.Item -> listOf(SlotData.from(nested.item))
+                    is Ingredient.Composite -> TODO("Nested ingredient composites are unsupported")
+                }
+            }, PacketBuffer::writeSlot)
         }
 
-        is Ingredient.Tag -> {
-            val items = Registries.ITEMS.getByTag(ingredient.tag)
-            if (items == null) {
-//                println("Could not resolve tag ${ingredient.tag}")
-                writeVarInt(0)
-//                writeSlot(SlotData.EMPTY)
-            } else {
-                writeCollection(
-                    items.filter { it.isPresent }.map { SlotData.from(ItemStack(it)) },
-                    PacketBuffer::writeSlot
-                )
-            }
-        }
+        is Ingredient.Tag -> writeCollection(
+            Registries.ITEMS.getByTag(ingredient.tag).orEmpty().map(SlotData::from),
+            PacketBuffer::writeSlot
+        )
 
         is Ingredient.Item -> {
             writeVarInt(1)
