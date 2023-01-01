@@ -32,6 +32,7 @@ class Identifier(val namespace: String, val path: String) : Comparable<Identifie
 
     fun removePrefix(prefix: String) = Identifier(namespace, path.removePrefix(prefix))
     fun removeSuffix(prefix: String) = Identifier(namespace, path.removeSuffix(prefix))
+    fun removeNamespacePrefix(prefix: String) = Identifier(namespace.removePrefix(prefix), path)
 
     fun suffix(suffix: String) = Identifier(namespace, "$path$suffix")
 

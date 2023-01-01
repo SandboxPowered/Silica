@@ -3,6 +3,8 @@ package org.sandboxpowered.silica.data
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.module.kotlin.addDeserializer
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
+import com.google.common.graph.GraphBuilder
+import com.google.common.graph.Traverser
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.registry.Registry
 import org.sandboxpowered.silica.api.util.Identifier
@@ -31,11 +33,32 @@ data class TagDefinition(
     val values: Collection<Identifier>
 )
 
+@Suppress("UnstableApiUsage") // Guava Graph stuff is declared unstable
 private fun Registry<*>.addToRegistry(definitions: List<TagDefinition>) {
-    // TODO : values can point to other tags
-    registerTags(definitions.fold(mutableMapOf<Identifier, MutableList<Identifier>>()) { acc, definition ->
+    val tags = definitions.fold(mutableMapOf<Identifier, MutableList<Identifier>>()) { acc, definition ->
         if (definition.replace) acc[definition.identifier] = definition.values.toMutableList()
         else acc.getOrPut(definition.identifier, ::mutableListOf) += definition.values
         acc
-    })
+    }
+    val gb = GraphBuilder.directed().allowsSelfLoops(false).immutable<Identifier>()
+    val resolved = mutableSetOf<Identifier>()
+    tags.forEach { (tag, entries) ->
+        var isResolved = true
+        entries.removeIf {
+            if (it.namespace.startsWith('#')) {
+                gb.putEdge(tag, it.removeNamespacePrefix("#"))
+                isResolved = false
+                true
+            } else false
+        }
+        if (isResolved) resolved += tag
+    }
+    val graph = gb.build()
+    val traverser = Traverser.forGraph(graph)
+    traverser.depthFirstPostOrder(graph.nodes().filter { it !in resolved }).forEach { child ->
+        graph.predecessors(child).forEach { parent ->
+            tags[parent]!!.addAll(tags[child]!!)
+        }
+    }
+    registerTags(tags)
 }
