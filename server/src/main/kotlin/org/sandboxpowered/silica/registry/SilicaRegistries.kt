@@ -6,6 +6,7 @@ import org.sandboxpowered.silica.api.block.Block
 import org.sandboxpowered.silica.api.block.BlockEntityProvider
 import org.sandboxpowered.silica.api.entity.EntityDefinition
 import org.sandboxpowered.silica.api.fluid.Fluid
+import org.sandboxpowered.silica.api.gameevent.GameEvent
 import org.sandboxpowered.silica.api.item.Item
 import org.sandboxpowered.silica.api.recipe.Recipe
 import org.sandboxpowered.silica.api.recipe.RecipeType
@@ -39,6 +40,8 @@ object SilicaRegistries {
     private val RECIPE_TYPE_REGISTRY = registry<RecipeType>("silica", "recipe_type")
 
     private val RECIPE_REGISTRY = registry<Recipe>("silica", "recipe")
+
+    private val GAME_EVENT_REGISTRY = registry<GameEvent>("silica", "game_event")
 
     val SYSTEM_REGISTRY = mutableSetOf<BaseEntitySystem>() // TODO : make an actual registry for this
     val DYNAMIC_SYSTEM_REGISTRY =

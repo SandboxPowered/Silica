@@ -37,6 +37,7 @@ interface Registry<T : RegistryEntry<T>> : Iterable<T> {
      * Nullable to separate uninitialized/missing tag from tag with no objects
      */
     fun getByTag(tag: Identifier): Set<RegistryObject<T>>?
+    val tags: Set<Identifier>
 }
 
 class RegistryDelegate<T : RegistryEntry<T>>(private val registry: Registry<T>, private val domain: String) {

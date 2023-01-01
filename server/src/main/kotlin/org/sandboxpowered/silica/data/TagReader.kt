@@ -24,6 +24,10 @@ class TagReader : DataReaderWithSubCategories<TagDefinition>(
     override fun process(data: Map<String, List<TagDefinition>>) {
         data["items"]?.let(Registries.ITEMS::addToRegistry)
         data["blocks"]?.let(Registries.BLOCKS::addToRegistry)
+        data["fluids"]?.let(Registries.FLUIDS::addToRegistry)
+        data["entity_types"]?.let(Registries.ENTITY_DEFINITIONS::addToRegistry)
+        data["game_events"]?.let(Registries.GAME_EVENTS::addToRegistry)
+        // TODO: Tags for worldgen (might need special handling of subfolders !)
     }
 }
 

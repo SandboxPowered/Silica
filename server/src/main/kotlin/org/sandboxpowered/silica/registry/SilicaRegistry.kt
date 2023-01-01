@@ -15,8 +15,9 @@ import java.util.stream.Stream
 class SilicaRegistry<T : RegistryEntry<T>>(private val id: Identifier, override val type: Class<T>) : Registry<T> {
     private val internalMap: MutableMap<Identifier, T> = Object2ObjectOpenHashMap()
     private val registryEntries: MutableMap<Identifier, SilicaRegistryEntry<T>> = Object2ObjectOpenHashMap()
-    private val tags: MutableMap<Identifier, Set<RegistryObject<T>>> = Object2ObjectOpenHashMap()
+    private val internalTags: MutableMap<Identifier, Set<RegistryObject<T>>> = Object2ObjectOpenHashMap()
     private val listeners: MutableList<(T) -> Unit> = LinkedList()
+
     override val values: Map<Identifier, T>
         get() = ImmutableMap.copyOf(internalMap)
 
@@ -63,10 +64,13 @@ class SilicaRegistry<T : RegistryEntry<T>>(private val id: Identifier, override 
     override fun invoke(domain: String, optional: Boolean): RegistryDelegate.NullableRegistryDelegate<T> =
         invoke(domain).optional
 
-    override fun getByTag(tag: Identifier): Set<RegistryObject<T>>? = tags[tag]
+    override fun getByTag(tag: Identifier): Set<RegistryObject<T>>? = internalTags[tag]
+
+    override val tags: Set<Identifier>
+        get() = ImmutableSet.copyOf(internalTags.keys)
 
     override fun registerTags(values: Map<Identifier, Iterable<Identifier>>) {
-        values.mapValuesTo(tags) { (tag, ids) ->
+        values.mapValuesTo(internalTags) { (tag, ids) ->
             ids.map {
                 this.getPrivately(it).apply {
                     addTag(tag) // I know, side effects bad, but this means less iterating
