@@ -3,12 +3,13 @@ package org.sandboxpowered.silica.world.util
 import com.google.common.collect.ImmutableMap
 import io.mockk.every
 import io.mockk.mockk
+import org.sandboxpowered.silica.api.block.BaseBlock
 import org.sandboxpowered.silica.api.block.Block
 import org.sandboxpowered.silica.api.util.Identifier
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 
 object TestData {
-    fun block(name: String, air: Boolean = false): Block = mockk(name, relaxed = true) {
+    fun block(name: String, air: Boolean = false): Block = mockk<BaseBlock>(name, relaxed = true) {
         every { identifier } returns Identifier(name)
         every { isAir } returns air
     }

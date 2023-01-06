@@ -18,7 +18,7 @@ import org.sandboxpowered.silica.api.world.WorldWriter
 import org.sandboxpowered.silica.api.world.state.StateProvider
 import org.sandboxpowered.silica.api.world.state.block.BlockState
 
-interface Block : RegistryEntry<Block>, Translatable {
+sealed interface Block : RegistryEntry<Block>, Translatable {
     companion object {
         val AIR by Registries.BLOCKS
     }
