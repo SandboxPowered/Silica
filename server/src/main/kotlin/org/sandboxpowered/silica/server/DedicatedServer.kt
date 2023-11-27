@@ -24,6 +24,8 @@ import org.sandboxpowered.silica.resources.ZIPResourceLoader
 import org.sandboxpowered.silica.util.VanillaLocator
 import org.sandboxpowered.silica.util.VanillaLocator.MINECRAFT_VERSION
 import org.sandboxpowered.silica.world.SilicaWorld
+import java.io.File
+import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Duration
 import kotlin.collections.set
@@ -33,10 +35,10 @@ class DedicatedServer(args: Args) : SilicaServer() {
     private var logger = getLogger()
     override lateinit var world: ActorRef<World.Command>
     override lateinit var network: ActorRef<NetworkAdapter.Command>
-    override val properties = DedicatedServerProperties.fromFile(Paths.get("server.properties"))
+    override val properties = DedicatedServerProperties.fromFile(Paths.get("server.properties"), args)
     private lateinit var system: ActorSystem<Command>
 
-    class Args
+    data class Args(val universe: File?, val world: File?, val port: Int?)
 
     init {
         val mcArchive = VanillaLocator.ensureMinecraftVersion(MINECRAFT_VERSION, Side.SERVER)
