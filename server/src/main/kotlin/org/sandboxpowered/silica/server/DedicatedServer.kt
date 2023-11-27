@@ -7,30 +7,25 @@ import akka.actor.typed.Terminated
 import akka.actor.typed.javadsl.*
 import it.unimi.dsi.fastutil.objects.Object2LongMap
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap
-import org.reflections.Reflections
 import org.sandboxpowered.silica.SilicaInternalAPI
 import org.sandboxpowered.silica.akka.Reaper
 import org.sandboxpowered.silica.api.internal.InternalAPI
 import org.sandboxpowered.silica.api.network.NetworkAdapter
-import org.sandboxpowered.silica.api.plugin.BasePlugin
-import org.sandboxpowered.silica.api.plugin.Plugin
 import org.sandboxpowered.silica.api.util.Side
 import org.sandboxpowered.silica.api.util.extensions.WithContext
 import org.sandboxpowered.silica.api.util.extensions.onMessage
 import org.sandboxpowered.silica.api.util.extensions.onSignal
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.api.world.World
-import org.sandboxpowered.silica.data.recipe.RecipeManager
+import org.sandboxpowered.silica.data.RecipeReader
+import org.sandboxpowered.silica.data.TagReader
+import org.sandboxpowered.silica.plugin.PluginManager
 import org.sandboxpowered.silica.resources.ZIPResourceLoader
 import org.sandboxpowered.silica.util.VanillaLocator
 import org.sandboxpowered.silica.util.VanillaLocator.MINECRAFT_VERSION
-import org.sandboxpowered.silica.util.extensions.getAnnotation
-import org.sandboxpowered.silica.util.extensions.getTypesAnnotatedWith
 import org.sandboxpowered.silica.world.SilicaWorld
 import java.nio.file.Paths
 import java.time.Duration
-import kotlin.collections.component1
-import kotlin.collections.component2
 import kotlin.collections.set
 import kotlin.system.exitProcess
 
@@ -57,28 +52,10 @@ class DedicatedServer(args: Args) : SilicaServer() {
         if (!properties.onlineMode) logger.warn("Server running in Offline Mode! This will be unsupported in Silica 1.0")
         logger.info("Loaded namespaces: [${dataManager.getNamespaces().joinToString()}]")
         //TODO: make this use an plugin classloader rather than package search
-        val classes = Reflections("org.sandboxpowered").getTypesAnnotatedWith<Plugin>()
-        val log = getLogger()
-        log.info("Loading ${classes.size} plugins")
-        val map = sortedMapOf<Plugin, BasePlugin>(compareBy<Plugin> { !it.native }.thenComparing { o1, o2 ->
-            if (o1.id in o2.before) 1 else if (o2.id in o1.before) -1 else 0
-        }.thenComparing { o1, o2 ->
-            if (o1.id in o2.after) -1 else if (o2.id in o1.after) 1 else 0
-        })
-        //TODO: Make dependencies load in the correct order
-        classes.forEach {
-            val plugin = it.getAnnotation<Plugin>()
-            if (BasePlugin::class.java.isAssignableFrom(it)) {
-                val instance = (it.kotlin.objectInstance ?: it.getConstructor().newInstance()) as BasePlugin
-                map[plugin] = instance
-            }
-        }
-        map.forEach { (plugin, instance) ->
-            log.debug("Loading ${plugin.id}@${plugin.version}")
-            instance.onEnable()
-        }
+        PluginManager().load()
 
-        RecipeManager().load(dataManager)
+        RecipeReader().load(dataManager)
+        TagReader().load(dataManager)
 
         system = ActorSystem.create(
             DedicatedServerGuardian.create(this, this::world::set, this::network::set),

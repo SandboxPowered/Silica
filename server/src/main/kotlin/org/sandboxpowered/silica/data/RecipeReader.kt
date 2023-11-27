@@ -1,61 +1,45 @@
-package org.sandboxpowered.silica.data.recipe
+package org.sandboxpowered.silica.data
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.core.JacksonException
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.*
 import com.fasterxml.jackson.databind.jsontype.*
 import com.fasterxml.jackson.databind.jsontype.impl.TypeIdResolverBase
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.type.TypeFactory
-import com.fasterxml.jackson.module.blackbird.BlackbirdModule
-import com.fasterxml.jackson.module.kotlin.*
+import com.fasterxml.jackson.module.kotlin.addDeserializer
+import com.fasterxml.jackson.module.kotlin.treeToValue
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap
 import org.sandboxpowered.silica.api.item.ItemStack
 import org.sandboxpowered.silica.api.recipe.Recipe
 import org.sandboxpowered.silica.api.recipe.ingredient.Ingredient
 import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.util.Identifier
-import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.data.jackson.IdentifierDeserializer
-import org.sandboxpowered.silica.data.jackson.IdentifierSerializer
 import org.sandboxpowered.silica.data.jackson.ItemStackDeserializer
 import org.sandboxpowered.silica.data.jackson.UnknownItemException
+import org.sandboxpowered.silica.data.jackson.jsonMapperForReading
 import org.sandboxpowered.silica.resources.ResourceManager
 
-class RecipeManager {
+class RecipeReader : DataReader(
+    category = "recipes",
+    logLoadingErrors = false
+) {
 
-    private val om = jsonMapper {
-        addModules(
-            kotlinModule {
-                enable(KotlinFeature.NullToEmptyCollection)
-                enable(KotlinFeature.NullToEmptyMap)
-            },
-            BlackbirdModule(),
-            SimpleModule()
-                .addSerializer(Identifier::class.java, IdentifierSerializer)
-                .addDeserializer(Identifier::class, IdentifierDeserializer)
-                .addDeserializer(ItemStack::class, ItemStackDeserializer)
-        )
-        disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-        defaultPrettyPrinter(DefaultPrettyPrinter())
+    override val om = jsonMapperForReading(
+        SimpleModule()
+            .addDeserializer(Identifier::class, IdentifierDeserializer)
+            .addDeserializer(ItemStack::class, ItemStackDeserializer)
+    ) {
         setDefaultTyping(RecipeTypeResolverBuilder)
         registerSubtypes(Ingredient.Item::class.java, Ingredient.Tag::class.java)
     }
 
-    private val logger = getLogger()
-    private val logRegipeErrors = false
-
-    fun load(resourceManager: ResourceManager) {
+    override fun load(resourceManager: ResourceManager) {
         var errors = 0
         val unhandledTypes = mutableSetOf<Identifier>()
-        val recipes: List<Recipe> = resourceManager.listResources(category = "recipes") { it.endsWith(".json") }
-            .asSequence()
-            .map {
-//            resourceManager.open(it).use(om::readValue)
-                it.removePrefix("recipes/").removeSuffix(".json") to resourceManager.open(it).use(om::readTree)
-            }
+        val recipes: List<Recipe> = resourceManager.listResourcesForReading()
             .filter { (_, node) ->
                 val type = Identifier(node["type"].textValue())
                 if (type in Registries.RECIPE_TYPES) true
@@ -69,16 +53,17 @@ class RecipeManager {
                 try {
                     om.treeToValue<Recipe>(node)
                 } catch (e: JacksonException) {
-                    if (logRegipeErrors) logger.error("Failed to read $id", e)
-                    else ++errors
+                    if (logLoadingErrors) logger.error("Failed to read $id", e)
+                    ++errors
                     null
                 } catch (_: UnknownItemException) {
                     null // No need to care about these for now
                 }
-            }.toList()
+            }
+            .toList()
 
         logger.info("Loaded ${recipes.size} recipes. Types : ${Registries.RECIPE_TYPES.values.keys.joinToString()}")
-        logger.warn("Suppressed $errors recipe loading errors")
+        if (errors > 0) logger.warn("Encountered $errors recipe loading errors")
         if (unhandledTypes.isNotEmpty()) logger.warn("There are ${unhandledTypes.size} unhandled recipe types : ${unhandledTypes.joinToString()}")
         Registries.RECIPES.registerAll(recipes)
     }

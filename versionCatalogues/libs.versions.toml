@@ -1,9 +1,8 @@
 [versions]
-kotlin = "1.6.21"
-# can't bump to 4.10.1 because that forces minimessage 4.10.1 which does not support markdown
+kotlin = "1.8.0"
 netty = "4.1.76.Final"
 adventure = "4.12.0"
-jb-annotations = "23.0.0"
+jb-annotations = "23.1.0"
 commons-io = "2.11.0"
 commons-lang = "3.12.0"
 gson = "2.9.0"

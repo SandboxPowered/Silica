@@ -32,6 +32,10 @@ interface RegistryObject<T : RegistryEntry<T>> : Supplier<T> {
 
     val registry: Registry<T>
 
+    fun hasTag(tag: Identifier): Boolean
+
+    val tags: Set<Identifier>
+
     class NullableObjectDelegate<T : RegistryEntry<T>>(private val obj: RegistryObject<T>) {
         operator fun getValue(thisRef: Any?, property: KProperty<*>): T? = obj.orNull()
     }

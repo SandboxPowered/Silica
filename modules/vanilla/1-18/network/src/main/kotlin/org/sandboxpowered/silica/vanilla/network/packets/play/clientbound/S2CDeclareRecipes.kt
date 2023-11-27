@@ -4,7 +4,7 @@ import org.sandboxpowered.silica.api.network.PacketBuffer
 import org.sandboxpowered.silica.api.network.writeCollection
 import org.sandboxpowered.silica.api.recipe.Recipe
 import org.sandboxpowered.silica.api.recipe.ingredient.Ingredient
-import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.silica.api.registry.Registries
 import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PlayContext
@@ -52,10 +52,8 @@ private fun PacketBuffer.write(recipe: Recipe): PacketBuffer {
             writeString(recipe.group ?: "unknown")
             // Not writing as collection here because otherwise it would insert size again while it's computed from WxH
             recipe.pattern.asSequence().flatMap { line ->
-                line.map {
-                    recipe.key[it] ?: Ingredient.Tag(Identifier("empty hack"))
-                }
-            }.fold(this, PacketBuffer::write)
+                line.map { recipe.key[it] }
+            }.forEach(this::write)
             writeSlot(SlotData.from(recipe.result))
         }
 
@@ -79,31 +77,28 @@ private fun PacketBuffer.write(recipe: Recipe): PacketBuffer {
     return this
 }
 
-private fun PacketBuffer.write(ingredient: Ingredient): PacketBuffer {
+private fun PacketBuffer.write(ingredient: Ingredient?): PacketBuffer {
     when (ingredient) {
+        null -> writeVarInt(0)
         is Ingredient.Composite -> {
-            writeCollection(ingredient.ingredients, PacketBuffer::writeStrict)
+            writeCollection(ingredient.ingredients.flatMap { nested ->
+                when (nested) {
+                    is Ingredient.Tag -> Registries.ITEMS.getByTag(nested.tag).orEmpty().map(SlotData::from)
+                    is Ingredient.Item -> listOf(SlotData.from(nested.item))
+                    is Ingredient.Composite -> TODO("Nested ingredient composites are unsupported")
+                }
+            }, PacketBuffer::writeSlot)
         }
 
-        else -> {
-            writeVarInt(1)
-            writeStrict(ingredient)
-        }
-    }
-    return this
-}
+        is Ingredient.Tag -> writeCollection(
+            Registries.ITEMS.getByTag(ingredient.tag).orEmpty().map(SlotData::from),
+            PacketBuffer::writeSlot
+        )
 
-private fun PacketBuffer.writeStrict(ingredient: Ingredient): PacketBuffer {
-    when (ingredient) {
         is Ingredient.Item -> {
+            writeVarInt(1)
             writeSlot(SlotData.from(ingredient.item))
         }
-
-        is Ingredient.Tag -> {
-            writeSlot(SlotData.EMPTY) // TODO : handle tags
-        }
-
-        is Ingredient.Composite -> error("Should not be called for composites")
     }
     return this
 }

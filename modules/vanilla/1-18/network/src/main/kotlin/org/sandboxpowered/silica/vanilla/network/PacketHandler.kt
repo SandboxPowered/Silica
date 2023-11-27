@@ -36,6 +36,7 @@ class PacketHandler(val connection: Connection) : SimpleChannelInboundHandler<Pa
         this.playConnection = playConnection
     }
 
+    @Suppress("OVERRIDE_DEPRECATION") // un-deprecated in ChannelInboundHandler
     override fun exceptionCaught(ctx: ChannelHandlerContext?, cause: Throwable?) {
         cause?.printStackTrace()
         disconnect()

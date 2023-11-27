@@ -21,6 +21,9 @@ interface Registry<T : RegistryEntry<T>> : Iterable<T> {
     @Internal
     fun registerAll(values: Collection<T>)
 
+    @Internal
+    fun registerTags(values: Map<Identifier, Iterable<Identifier>>)
+
     val values: Map<Identifier, T>
     val type: Class<T>
 
@@ -29,6 +32,12 @@ interface Registry<T : RegistryEntry<T>> : Iterable<T> {
 
     operator fun invoke(domain: String = "minecraft"): RegistryDelegate<T>
     operator fun invoke(domain: String = "minecraft", optional: Boolean): RegistryDelegate.NullableRegistryDelegate<T>
+
+    /**
+     * Nullable to separate uninitialized/missing tag from tag with no objects
+     */
+    fun getByTag(tag: Identifier): Set<RegistryObject<T>>?
+    val tags: Set<Identifier>
 }
 
 class RegistryDelegate<T : RegistryEntry<T>>(private val registry: Registry<T>, private val domain: String) {

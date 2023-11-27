@@ -9,13 +9,14 @@ import org.sandboxpowered.silica.api.network.NetworkAdapter
 import org.sandboxpowered.silica.api.world.World
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PlayContext
-import org.sandboxpowered.silica.vanilla.network.VanillaNetworkAdapter
 import org.sandboxpowered.silica.vanilla.network.packets.play.clientbound.S2CChatMessage
 
 class PlayerCommandSource(val packetHandler: PacketHandler, val context: PlayContext) : Player {
     override val world: ActorRef<World.Command> = context.world
     override val network: ActorRef<NetworkAdapter.Command> = context.network
 
+    @Suppress("UnstableApiUsage")
+    @Deprecated("Deprecated in Java")
     override fun sendMessage(source: Identity, message: Component, type: MessageType) {
         packetHandler.sendPacket(S2CChatMessage(message, 0, packetHandler.connection.profile.id))
     }

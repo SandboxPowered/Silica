@@ -6,8 +6,10 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.deser.std.FromStringDeserializer
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
+import org.sandboxpowered.silica.api.item.Item
 import org.sandboxpowered.silica.api.item.ItemStack
 import org.sandboxpowered.silica.api.registry.Registries
+import org.sandboxpowered.silica.api.registry.RegistryObject
 import org.sandboxpowered.silica.api.util.Identifier
 
 internal object IdentifierDeserializer : FromStringDeserializer<Identifier>(Identifier::class.java) {
@@ -30,15 +32,18 @@ internal object ItemStackDeserializer : StdDeserializer<ItemStack>(ItemStack::cl
 
     private fun deserializeFromObject(p: JsonParser, ctxt: DeserializationContext): ItemStack {
         val tree = ctxt.readTree(p)
-        val item = Registries.ITEMS[ctxt.readTreeAsValue(tree["item"], Identifier::class.java)]
-        if (!item.isPresent) throw UnknownItemException("Unknown item ${item.id} !")
+        val item = Registries.ITEMS[ctxt.readTreeAsValue(tree["item"], Identifier::class.java)].check()
         val count = tree["count"]
         return if (count == null) ItemStack(item)
         else ItemStack(item, count.intValue())
     }
 
     private fun deserializeFromString(p: JsonParser, ctxt: DeserializationContext): ItemStack {
-        return ItemStack(Registries.ITEMS[ctxt.readValue(p, Identifier::class.java)])
+        return ItemStack(Registries.ITEMS[ctxt.readValue(p, Identifier::class.java)].check())
+    }
+
+    private fun RegistryObject<Item>.check(): RegistryObject<Item> = apply {
+        if (!isPresent) throw UnknownItemException("Unknown item $id !")
     }
 }
 

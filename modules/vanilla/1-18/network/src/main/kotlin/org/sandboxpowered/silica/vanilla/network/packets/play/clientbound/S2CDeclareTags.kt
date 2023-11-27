@@ -1,30 +1,43 @@
 package org.sandboxpowered.silica.vanilla.network.packets.play.clientbound
 
 import org.sandboxpowered.silica.api.network.PacketBuffer
+import org.sandboxpowered.silica.api.network.writeCollection
+import org.sandboxpowered.silica.api.registry.Registries
+import org.sandboxpowered.silica.api.registry.Registry
 import org.sandboxpowered.silica.api.util.Identifier
+import org.sandboxpowered.silica.api.util.getLogger
 import org.sandboxpowered.silica.vanilla.network.PacketHandler
 import org.sandboxpowered.silica.vanilla.network.PlayContext
 import org.sandboxpowered.silica.vanilla.network.packets.PacketPlay
-import org.sandboxpowered.silica.vanilla.network.util.Hardcoding
+import org.sandboxpowered.silica.vanilla.network.util.mapping.VanillaProtocolMapping
+import kotlin.system.measureTimeMillis
 
 class S2CDeclareTags() : PacketPlay {
     constructor(buf: PacketBuffer) : this()
 
+    private val logger = getLogger()
+
     override fun write(buf: PacketBuffer) {
-        buf.writeVarInt(5)
-        writeEmpty(buf, "block", Hardcoding.BLOCK_TAGS)
-        writeEmpty(buf, "item", Hardcoding.ITEM_TAGS)
-        writeEmpty(buf, "fluid", Hardcoding.FLUID_TAGS)
-        writeEmpty(buf, "entity_type", Hardcoding.ENTITY_TAGS)
-        writeEmpty(buf, "game_event", Hardcoding.GAME_EVENT_TAGS)
+        val time = measureTimeMillis {
+            buf.writeVarInt(5)
+            write(buf, "block", Registries.BLOCKS)
+            write(buf, "item", Registries.ITEMS)
+            write(buf, "fluid", Registries.FLUIDS)
+            write(buf, "entity_type", Registries.ENTITY_DEFINITIONS)
+            write(buf, "game_event", Registries.GAME_EVENTS)
+        }
+
+        logger.info("Serialized tags in $time millis")
     }
 
-    private fun writeEmpty(buf: PacketBuffer, type: String, arr: Array<Identifier>) {
+    private fun write(buf: PacketBuffer, type: String, registry: Registry<*>) {
+        val mapper = VanillaProtocolMapping.INSTANCE["minecraft:$type"]
         buf.writeIdentifier(Identifier(type))
-        buf.writeVarInt(arr.size)
-        for (identity in arr) {
+        buf.writeCollection(registry.tags) { identity ->
             buf.writeIdentifier(identity)
-            buf.writeVarInt(0)
+            buf.writeCollection(registry.getByTag(identity).orEmpty()) {
+                writeVarInt(mapper[it.id])
+            }
         }
     }
 
