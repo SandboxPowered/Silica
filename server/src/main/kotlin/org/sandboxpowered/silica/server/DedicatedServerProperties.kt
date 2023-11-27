@@ -7,10 +7,10 @@ import java.nio.file.Path
 import java.util.*
 
 //TODO: Move to TOML or YAML based configuration
-class DedicatedServerProperties(private val properties: Properties) : ServerProperties {
+class DedicatedServerProperties(args: DedicatedServer.Args, private val properties: Properties) : ServerProperties {
     override val onlineMode = get("online-mode", true) // TODO: Only allow this in dev envs
     override val motd = get("motd", "<grey>A <red>**Sandbox Silica</red> Server</grey>")
-    override val serverPort = get("server-port", 25565)
+    override val serverPort = args.port ?: get("server-port", 25565)
     override val serverIp = get("server-ip", "")
     override val maxTickTime = get("max-tick-time", 60000)
     override val maxPlayers = get("max-players", 20)
@@ -51,13 +51,13 @@ class DedicatedServerProperties(private val properties: Properties) : ServerProp
 
     companion object {
         @JvmStatic
-        fun fromFile(path: Path): DedicatedServerProperties {
+        fun fromFile(path: Path, args: DedicatedServer.Args): DedicatedServerProperties {
             val properties = Properties()
 
             if (Files.notExists(path)) Files.createFile(path)
 
             Files.newInputStream(path).use<InputStream, Unit>(properties::load)
-            return DedicatedServerProperties(properties).apply { save(path) }
+            return DedicatedServerProperties(args, properties).apply { save(path) }
         }
     }
 }
